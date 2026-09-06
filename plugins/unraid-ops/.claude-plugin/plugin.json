@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "unraid-ops",
   "displayName": "Unraid Ops",
-  "version": "1.1.1",
-  "description": "Unraid server administration: parity array, pools, shares, Docker, VMs, remote access, performance and failure recovery — with a guard against the documented data-loss command patterns and read-only access to the Unraid GraphQL API.",
+  "version": "1.1.2",
+  "description": "Unraid server administration: parity array, pools, shares, Docker, VMs, remote access, performance and failure recovery \u2014 with a guard against the documented data-loss command patterns and read-only access to the Unraid GraphQL API.",
   "author": {
     "name": "Agent Tools",
     "email": "michael@frenchfultonjr.dev"
@@ -22,7 +22,7 @@
     "api_url": {
       "type": "string",
       "title": "Unraid GraphQL endpoint",
-      "description": "Full URL to the API, e.g. http://tower.local/graphql",
+      "description": "Full URL to the API, e.g. http://tower.local/graphql. An http address is fine: Unraid redirects to HTTPS when Use SSL/TLS is on, and the server follows that upgrade on the same host.",
       "default": "http://tower.local/graphql"
     },
     "api_key": {
@@ -40,7 +40,7 @@
     "insecure_tls": {
       "type": "boolean",
       "title": "Skip TLS verification",
-      "description": "Enable only for a server using a self-signed certificate on a trusted LAN.",
+      "description": "Accept the self-signed certificate Unraid generates for local access. Enable only on a trusted LAN; a myunraid.net address validates without it.",
       "default": false
     }
   }
