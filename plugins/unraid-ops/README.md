@@ -10,7 +10,7 @@ Built from the official documentation at [docs.unraid.net](https://docs.unraid.n
 |---|---|---|
 | `skills/managing-unraid-servers` | Skill | Repeated multi-step know-how applied in the main conversation, loaded on demand across seven domain references |
 | `hooks/hooks.json` + `scripts/guard_destructive_storage.py` | Hook | Two of the gates must hold even when an agent is being reasoned at by a user mid-outage. Instructions are advisory; a `PreToolUse` deny is not |
-| `commands/unraid-triage.md` | Command | A named entry point for "something is wrong", enforcing capture-before-reboot ordering |
+| `commands/triage.md` | Command | `/unraid-ops:triage` — a named entry point for "something is wrong", enforcing capture-before-reboot ordering |
 
 ## Install
 
