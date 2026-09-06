@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "unraid": {
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/unraid_mcp_server.py"],
+      "env": {
+        "UNRAID_API_URL": "${user_config.api_url}",
+        "UNRAID_API_KEY": "${user_config.api_key}",
+        "UNRAID_ALLOW_MUTATIONS": "${user_config.allow_mutations}",
+        "UNRAID_INSECURE_TLS": "${user_config.insecure_tls}"
+      }
+    }
+  }
+}
