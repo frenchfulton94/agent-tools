@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "unraid-ops",
   "displayName": "Unraid Ops",
-  "version": "1.0.0",
-  "description": "Unraid server administration: parity array, pools, shares, Docker, VMs, remote access, performance and failure recovery — with a guard against the documented data-loss command patterns.",
+  "version": "1.1.0",
+  "description": "Unraid server administration: parity array, pools, shares, Docker, VMs, remote access, performance and failure recovery — with a guard against the documented data-loss command patterns and read-only access to the Unraid GraphQL API.",
   "author": {
     "name": "Agent Tools",
     "email": "michael@frenchfultonjr.dev"
@@ -17,5 +17,31 @@
     "btrfs",
     "parity",
     "homelab"
-  ]
+  ],
+  "userConfig": {
+    "api_url": {
+      "type": "string",
+      "title": "Unraid GraphQL endpoint",
+      "description": "Full URL to the API, e.g. http://tower.local/graphql",
+      "default": "http://tower.local/graphql"
+    },
+    "api_key": {
+      "type": "string",
+      "title": "Unraid API key",
+      "description": "Create on the server with: unraid-api apikey --create --name claude -r admin",
+      "sensitive": true
+    },
+    "allow_mutations": {
+      "type": "boolean",
+      "title": "Allow GraphQL mutations",
+      "description": "Off by default. Mutations can start and stop the array and control containers and VMs.",
+      "default": false
+    },
+    "insecure_tls": {
+      "type": "boolean",
+      "title": "Skip TLS verification",
+      "description": "Enable only for a server using a self-signed certificate on a trusted LAN.",
+      "default": false
+    }
+  }
 }

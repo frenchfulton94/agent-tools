@@ -1,6 +1,6 @@
 # unraid-ops
 
-Unraid server administration for Claude Code: the know-how as a skill, a guard against the documented data-loss command patterns as a hook, and a triage command that captures evidence before it is lost.
+Unraid server administration for Claude Code: the know-how as a skill, a guard against the documented data-loss command patterns as a hook, a triage command that captures evidence before it is lost, and a read-only MCP server that reads the server's actual state.
 
 Built from the official documentation at [docs.unraid.net](https://docs.unraid.net) (223 pages), current through Unraid 7.3.2 with 7.4.0-beta.1 in the tree.
 
@@ -11,6 +11,7 @@ Built from the official documentation at [docs.unraid.net](https://docs.unraid.n
 | `skills/managing-unraid-servers` | Skill | Repeated multi-step know-how applied in the main conversation, loaded on demand across seven domain references |
 | `hooks/hooks.json` + `scripts/guard_destructive_storage.py` | Hook | Two of the gates must hold even when an agent is being reasoned at by a user mid-outage. Instructions are advisory; a `PreToolUse` deny is not |
 | `commands/triage.md` | Command | `/unraid-ops:triage` — a named entry point for "something is wrong", enforcing capture-before-reboot ordering |
+| `.mcp.json` + `scripts/unraid_mcp_server.py` | MCP server | Access to an external system. Lets the skill read the actual server state instead of asking about it |
 
 ## Install
 
@@ -28,6 +29,34 @@ claude plugin validate plugins/unraid-ops --strict
 ```
 
 Verify components registered with `claude --plugin-dir plugins/unraid-ops --debug`, then `/hooks` for the guard and the skill list for the skill.
+
+## The MCP server
+
+Read-only access to the Unraid GraphQL API (built into Unraid 7.2+; earlier releases get it from the Unraid Connect plugin). Stdlib-only Python over stdio, so there is nothing to install.
+
+| Tool | Returns |
+|---|---|
+| `system_info` | OS platform, distro, release, uptime; CPU make, brand, cores, threads |
+| `array_status` | Array state, per-disk name/size/status/temperature, capacity |
+| `docker_containers` | Containers with id, names, state, status, autostart |
+| `introspect_schema` | The live GraphQL schema, optionally filtered to one type |
+| `query` | An arbitrary GraphQL query |
+
+The three typed queries are taken verbatim from the documented examples. The complete schema is published in Apollo Studio rather than the docs, so `introspect_schema` exists to discover real field names at runtime instead of shipping guesses.
+
+**Mutations are refused by default.** The API can start and stop the array and control containers and VMs — precisely the destructive surface the rest of this plugin guards. Enable `allow_mutations` deliberately, or perform the action in the WebGUI.
+
+### Setup
+
+On the server:
+
+```bash
+unraid-api apikey --create --name claude -r admin
+```
+
+Then configure the plugin's options: `api_url` (e.g. `http://tower.local/graphql`), `api_key` (stored as a sensitive value, not in plain settings), and optionally `insecure_tls` for a self-signed certificate on a trusted LAN.
+
+Tools appear under the scoped name `mcp__plugin_unraid-ops_unraid__<tool>`.
 
 ## The guard
 
@@ -48,7 +77,18 @@ Commands led by a read-only tool (`grep`, `ls`, `cat`, `find`, …) skip the cro
 
 **Known limits.** The guard is a pattern matcher, not a model of your server. It cannot tell an array member from a pool device, cannot see which disk is parity, and will not catch a destructive action taken through the WebGUI or a script it never sees. It reduces one class of mistake; it is not a safety system. Test any change to it against `scripts/` payloads before relying on it.
 
-## Testing the guard
+## Testing the bundled scripts
+
+Both suites run without an Unraid server, from `plugins/unraid-ops`:
+
+```bash
+python3 scripts/test/test_guard.py       # 22 command patterns
+python3 scripts/test/test_mcp_server.py  # 19 protocol and behaviour checks
+```
+
+The MCP suite drives the server over stdio against a fake GraphQL endpoint, so it exercises the transport, the auth header, the mutation gate and the error paths — but not the real Unraid schema.
+
+The guard also takes a payload on stdin directly:
 
 ```bash
 echo '{"tool_name":"Bash","tool_input":{"command":"cp /mnt/disk2/x /mnt/user/x"}}' \

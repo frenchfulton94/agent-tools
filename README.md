@@ -22,7 +22,7 @@ plugins travel with the repo instead of living on one workstation.
 | [docker-workbench](plugins/docker-workbench) | `configuring-dev-containers` `containerizing-apps` `managing-container-runtimes` `securing-container-supply-chain` | Docker and containers, from Dockerfiles to supply chain. Ships a `container-debugger` agent and a volume-loss guard hook |
 | [security](plugins/security) | `reviewing-code-security` | OWASP-grounded review with verifiable citations. Ships `/security:audit`, a `security-auditor` agent, and a credential-format hook |
 | [workflows](plugins/workflows) | `choosing-a-workflow` `configuring-openspec` `setup` | Setting up and routing OpenSpec workflows. Ships `/workflows:setup` and a self-paced learning package |
-| [unraid-ops](plugins/unraid-ops) | `managing-unraid-servers` | Unraid server administration — array, pools, shares, Docker, VMs, remote access, recovery. Ships `/unraid-ops:triage` and a data-loss guard hook |
+| [unraid-ops](plugins/unraid-ops) | `managing-unraid-servers` | Unraid server administration — array, pools, shares, Docker, VMs, remote access, recovery. Ships `/unraid-ops:triage`, a data-loss guard hook, and a read-only MCP server over the Unraid GraphQL API |
 | [zed](plugins/zed) | `configuring-zed` | Configuring the Zed editor |
 
 Each plugin's own README covers its components, its limits, and how to run it locally.

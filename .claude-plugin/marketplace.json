@@ -51,7 +51,7 @@
       "name": "unraid-ops",
       "source": "./plugins/unraid-ops",
       "category": "devops",
-      "description": "Unraid server administration: parity array, pools, shares, Docker, VMs, remote access, performance and failure recovery — with a guard against the documented data-loss command patterns."
+      "description": "Unraid server administration: parity array, pools, shares, Docker, VMs, remote access, performance and failure recovery — with a guard against the documented data-loss command patterns and read-only access to the Unraid GraphQL API."
     },
     {
       "name": "zed",
