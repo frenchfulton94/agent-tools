@@ -58,6 +58,15 @@ Then configure the plugin's options: `api_url` (e.g. `http://tower.local/graphql
 
 Tools appear under the scoped name `mcp__plugin_unraid-ops_unraid__<tool>`.
 
+### When it cannot reach the server
+
+Two failures are common enough that the server answers them with the fix rather than the raw error:
+
+- **The request is redirected.** Unraid's nginx redirects HTTP to HTTPS whenever *Use SSL/TLS* is `Yes` or `Strict`, and the redirect turns the POST into a GET, so the API is never reached. The server refuses to follow the redirect and reports the HTTPS endpoint to put in `api_url` — with `insecure_tls` as well for a self-signed certificate.
+- **`SANDBOX_DISABLED`.** Either the GraphQL sandbox is off on a build that gates the whole `/graphql` route behind it, or the request never authenticated and fell through to the playground route. The two need different fixes, so the error names both and gives a `curl` command that tells them apart. The sandbox is an interactive query console — turn it off again when you are done.
+
+`UNAUTHENTICATED` and `FORBIDDEN` point at the key and its role (`unraid-api apikey --list`).
+
 ## The guard
 
 Fires on every `Bash` call, judges each shell segment independently, and returns a permission decision. `deny` is reserved for patterns that are never correct on an Unraid server; `ask` is used where the same command is legitimate on a pool or unassigned device but catastrophic on an array member — the hook cannot tell which a given `/dev/sdX` is, and pretending otherwise would be worse than asking.
@@ -83,7 +92,7 @@ Both suites run without an Unraid server, from `plugins/unraid-ops`:
 
 ```bash
 python3 scripts/test/test_guard.py       # 22 command patterns
-python3 scripts/test/test_mcp_server.py  # 19 protocol and behaviour checks
+python3 scripts/test/test_mcp_server.py  # 22 protocol and behaviour checks
 ```
 
 The MCP suite drives the server over stdio against a fake GraphQL endpoint, so it exercises the transport, the auth header, the mutation gate and the error paths — but not the real Unraid schema.

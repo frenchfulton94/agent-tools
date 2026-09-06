@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "unraid-ops",
   "displayName": "Unraid Ops",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Unraid server administration: parity array, pools, shares, Docker, VMs, remote access, performance and failure recovery — with a guard against the documented data-loss command patterns and read-only access to the Unraid GraphQL API.",
   "author": {
     "name": "Agent Tools",

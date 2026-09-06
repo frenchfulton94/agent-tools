@@ -176,10 +176,39 @@ def graphql(document, variables=None):
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
 
+    # urllib downgrades POST to GET when it follows a 301/302/303, which turns a
+    # redirect into a confusing parse failure. Refuse to follow and report it.
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, *args, **kwargs):
+            return None
+
+    handlers = [NoRedirect]
+    if context is not None:
+        handlers.append(urllib.request.HTTPSHandler(context=context))
+    opener = urllib.request.build_opener(*handlers)
+
     try:
-        with urllib.request.urlopen(request, timeout=TIMEOUT, context=context) as resp:
+        with opener.open(request, timeout=TIMEOUT) as resp:
             payload = json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
+        if exc.code in (301, 302, 303, 307, 308):
+            location = exc.headers.get("Location", "") if exc.headers else ""
+            target = location or "the HTTPS address"
+            if location and not location.rstrip("/").endswith("/graphql"):
+                target = location.rstrip("/") + "/graphql"
+            return False, (
+                f"The server redirected ({exc.code}) to {location or 'another URL'} "
+                "instead of answering.\n\n"
+                "Unraid's nginx redirects HTTP to HTTPS whenever Use SSL/TLS is "
+                "set to Yes or Strict, and the redirect turns the POST into a GET, "
+                "so the API is never reached.\n\n"
+                f"Set the plugin's api_url option to: {target}\n\n"
+                "With a self-signed certificate, also enable insecure_tls. With a "
+                "myunraid.net certificate the host looks like "
+                "https://<lan-ip-with-dashes>.<hash>.myunraid.net/graphql. To use "
+                "plain HTTP instead, run `use_ssl no` on the server — but that "
+                "disables HTTPS for the whole WebGUI."
+            )
         detail = exc.read().decode("utf-8", "replace")[:800]
         hint = ""
         if exc.code in (401, 403):
@@ -203,10 +232,48 @@ def graphql(document, variables=None):
         return False, f"Request to {API_URL} failed: {exc}"
 
     if isinstance(payload, dict) and payload.get("errors"):
-        messages = "; ".join(
-            e.get("message", str(e)) for e in payload["errors"] if isinstance(e, dict)
-        )
-        return False, f"GraphQL error: {messages or payload['errors']}"
+        errors = [e for e in payload["errors"] if isinstance(e, dict)]
+        messages = "; ".join(e.get("message", str(e)) for e in errors)
+        codes = {
+            (e.get("extensions") or {}).get("code")
+            for e in errors
+            if (e.get("extensions") or {}).get("code")
+        }
+
+        if "SANDBOX_DISABLED" in codes:
+            return False, (
+                "The Unraid API refused the request with SANDBOX_DISABLED.\n\n"
+                "Two things produce this, and they have different fixes:\n\n"
+                "1. The GraphQL sandbox is off on a build that gates the whole "
+                "/graphql route behind it. Enable it with "
+                "`unraid-api developer --sandbox true`, or in the WebGUI at "
+                "Settings -> Management Access -> Developer Options.\n"
+                "2. The request did not authenticate, so it fell through to the "
+                "playground route. Confirm the api_key option is set and the key "
+                "still exists (`unraid-api apikey --list`).\n\n"
+                "To tell them apart, send an authenticated request by hand:\n"
+                "  curl -s -X POST " + (API_URL or "http://tower.local/graphql") +
+                " \\\n"
+                "    -H 'Content-Type: application/json' \\\n"
+                "    -H 'x-api-key: YOUR_KEY' \\\n"
+                "    -d '{\"query\":\"{ info { os { release } } }\"}'\n\n"
+                "If that succeeds, the key is fine and only the browser "
+                "playground was blocked. If it returns SANDBOX_DISABLED too, "
+                "enable the sandbox.\n\n"
+                "The sandbox is an interactive query console on your LAN. Turn it "
+                "off again when you are done, and never leave it on with the "
+                "WebGUI reachable from the internet."
+            )
+
+        if codes & {"UNAUTHENTICATED", "FORBIDDEN"}:
+            return False, (
+                f"GraphQL rejected the credentials ({', '.join(sorted(codes))}): "
+                f"{messages}. Check the api_key option, and that the key's role "
+                "covers this query (`unraid-api apikey --list`)."
+            )
+
+        suffix = f" [{', '.join(sorted(codes))}]" if codes else ""
+        return False, f"GraphQL error: {messages or payload['errors']}{suffix}"
 
     return True, json.dumps(payload.get("data", payload), indent=2)
 

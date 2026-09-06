@@ -9,6 +9,12 @@ class H(BaseHTTPRequestHandler):
         body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         CALLS.append({"query": body["query"], "api_key": self.headers.get("x-api-key")})
         q = body["query"]
+        if "redirectme" in q:
+            self.send_response(301); self.send_header("Location", "https://tower.local/"); self.end_headers(); return
+        if "sandboxprobe" in q or "authprobe" in q:
+            code = "SANDBOX_DISABLED" if "sandboxprobe" in q else "UNAUTHENTICATED"
+            self.send_response(200); self.send_header("Content-Type","application/json"); self.end_headers()
+            self.wfile.write(json.dumps({"errors":[{"message":"refused","extensions":{"code":code}}]}).encode()); return
         if "__schema" in q:
             data = {"__schema": {"queryType": {"name": "Query"}, "mutationType": {"name": "Mutation"},
                     "types": [{"name": "Array", "kind": "OBJECT", "description": "Array", 
@@ -83,6 +89,16 @@ out, _ = run([INIT, call(2,"query",{"query":"query { boom }"})])
 check("graphql errors surface as isError", out[1]["result"].get("isError") is True and "boom" in out[1]["result"]["content"][0]["text"])
 out, _ = run([INIT, call(2,"query",{"query":"   "})])
 check("empty query rejected", out[1]["result"].get("isError") is True)
+
+out, _ = run([INIT, call(2,"query",{"query":"query { sandboxprobe }"})])
+check("SANDBOX_DISABLED explains both causes", out[1]["result"].get("isError") is True
+      and "unraid-api developer --sandbox true" in out[1]["result"]["content"][0]["text"], out[1])
+out, _ = run([INIT, call(2,"query",{"query":"query { authprobe }"})])
+check("UNAUTHENTICATED points at the api key", out[1]["result"].get("isError") is True
+      and "apikey --list" in out[1]["result"]["content"][0]["text"], out[1])
+out, _ = run([INIT, call(2,"query",{"query":"query { redirectme }"})])
+check("redirect reported with the https endpoint, not followed", out[1]["result"].get("isError") is True
+      and "https://tower.local/graphql" in out[1]["result"]["content"][0]["text"], out[1])
 out, _ = run([INIT, {"jsonrpc":"2.0","id":9,"method":"nonsense/method"}])
 check("unknown method returns -32601", out[1]["error"]["code"]==-32601)
 out, _ = run([INIT, {"jsonrpc":"2.0","id":9,"method":"ping"}])
