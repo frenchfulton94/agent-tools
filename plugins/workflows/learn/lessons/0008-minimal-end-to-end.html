@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>08 · Minimal, end to end</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+		<link rel="stylesheet" href="../assets/quiz.css" />
+	</head>
+	<body>
+		<main class="page">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Lesson 08</span><span class="sep">·</span><span>Running them</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1><code>minimal</code>, end to end</h1>
+				<p class="deck">
+					One change, from an idea to an archived spec, using the two schemas the
+					<code>minimal</code> level installs. This is the lesson where the whole thing stops being
+					theory.
+				</p>
+			</header>
+
+			<section class="objective">
+				<h2>By the end</h2>
+				<p>
+					You have driven a real change through <code>mattpocock-bridge</code> — grill to archive —
+					and you know which command to type at each artifact, what to do to your session in the gap
+					between the last planning artifact and the first line of code, and which schema to reopen
+					under when it turns out to be a defect.
+				</p>
+			</section>
+
+			<p class="prereq">
+				<strong>Prerequisites:</strong>
+				<a href="0005-the-five-things-setup-cannot-do.html">Lesson 05</a> (setup finished, including
+				<code>/setup-matt-pocock-skills</code>) and
+				<a href="0006-route-a-task-in-one-pass.html">lesson 06</a>. Pick a small, real piece of work
+				— not a toy.
+			</p>
+
+			<h2>The two chains</h2>
+
+			<h3><code>mattpocock-bridge</code> — the default</h3>
+
+			<ul class="chain">
+				<li data-gate>grill</li>
+				<li class="arrow">→</li>
+				<li>proposal</li>
+				<li class="arrow">→</li>
+				<li data-optional>surface</li>
+				<li class="arrow">→</li>
+				<li>specs</li>
+				<li class="arrow">→</li>
+				<li data-optional>design</li>
+				<li class="arrow">→</li>
+				<li>tasks</li>
+				<li class="arrow">→</li>
+				<li>apply</li>
+			</ul>
+
+			<p>
+				The arrows are not the real graph — the real graph is
+				<code>requires</code>, and it forks. <code>specs</code> needs
+				<em>both</em> <code>proposal</code> and <code>surface</code>; <code>design</code> needs
+				<code>proposal</code> and <code>specs</code>; <code>tasks</code> needs
+				<code>specs</code> and <code>design</code>. So the CLI can offer you more than one
+				next artifact, and declaration order breaks the tie.
+			</p>
+
+			<h3><code>bugfix-flow</code> — the companion</h3>
+
+			<ul class="chain">
+				<li data-gate>diagnose</li>
+				<li class="arrow">→</li>
+				<li>specs</li>
+				<li class="arrow">→</li>
+				<li>tasks</li>
+				<li class="arrow">→</li>
+				<li>apply</li>
+			</ul>
+
+			<p>
+				No interview, no proposal — a defect needs no case made for fixing it. What it adds instead is
+				a gate: nothing can be written until the root cause is.
+			</p>
+
+			<h2>Drive it</h2>
+
+			<ol class="steps">
+				<li>
+					<strong>Create the change — in the assistant's chat, in a sentence.</strong>
+					<pre><code>/opsx:new let advisors export their degree plans as a PDF</code></pre>
+					The argument is <em>the change name in kebab-case, or a description of what you want to
+					build</em> — a sentence is a first-class input here, not a fallback. It derives the slug,
+					scaffolds the change, shows the artifact status, prints the first artifact's template,
+					and then stops without writing anything. Name the other schema in the same sentence when
+					the work is a defect:
+					<pre><code>/opsx:new fix the export timezone offset, using bugfix-flow</code></pre>
+					<p>
+						<strong>The terminal equivalent, when you want it.</strong>
+						<code>openspec new change let-advisors-export-plans</code>, with
+						<code>--schema bugfix-flow</code> to name the other one. Same scaffold — but you supply
+						the slug yourself, and you get no first-artifact template. Reach for it in a script, or
+						when you already know the exact name you want.
+					</p>
+				</li>
+
+				<li>
+					<strong>See what is ready.</strong> <code>/opsx:continue</code> opens by showing you this,
+					so most of the time no separate check is needed. When you want it as data — or when the
+					assistant and the filesystem seem to disagree — go to a terminal:
+					<pre><code>openspec status --change let-advisors-export-plans --json</code></pre>
+					It tells you which artifacts exist, which are ready, and which are blocked on what.
+				</li>
+
+				<li>
+					<strong>Build one artifact at a time, and name the change every time.</strong>
+					<pre><code>/opsx:continue let-advisors-export-plans</code></pre>
+					It shows what is ready, then creates <em>one</em> artifact. Run it again for the next.
+					<p>
+						The name is optional in the command and worth typing anyway: with it omitted,
+						<code>continue</code> infers the change from the conversation and has to ask you when it
+						cannot. That inference is the first thing to break — the moment you clear the window or
+						come back tomorrow, there is no conversation left to infer from. This is also the command
+						that resumes a change in a brand-new session: it reads the filesystem, not your history.
+					</p>
+					<p>
+						On the <code>core</code> profile you do not have <code>continue</code> — see the note
+						below.
+					</p>
+				</li>
+
+				<li>
+					<strong>Expect the grill to interview you.</strong> Rounds of numbered questions, each
+					carrying a recommended answer. Facts are the agent's job; decisions are yours. What gets
+					settled lands in <code>CONTEXT.md</code> and ADRs, not just in the change folder.
+					<p>
+						If it opens by telling you this is a defect and offering
+						<code>--schema bugfix-flow</code>, take the offer.
+					</p>
+				</li>
+
+				<li>
+					<strong>Skip what does not apply, deliberately.</strong> No visible surface? Set
+					<code>skip_surface: true</code> and write the one-line stub —
+					<a href="0007-escape-hatches-and-their-costs.html">lesson 07</a>. One module, no new
+					dependency, no security or migration question? Skip <code>design</code> and say so.
+				</li>
+
+				<li>
+					<strong>Write the delta specs carefully.</strong> Two formatting rules break archiving
+					silently if you get them wrong:
+					<ul>
+						<li>
+							Scenarios need <strong>exactly four hashes</strong> —
+							<code>#### Scenario:</code>. Three hashes, or a bullet, fails quietly.
+						</li>
+						<li>
+							A <code>MODIFIED</code> requirement <strong>replaces the whole block</strong>, so it
+							must carry every surviving scenario, not only the edited ones.
+						</li>
+					</ul>
+				</li>
+
+				<li>
+					<strong>Confirm the seams before implementing.</strong> <code>design</code>'s Seams table
+					is the one thing <code>tdd</code> needs agreed up front, and this level's config carries a
+					rule making that confirmation explicit: "Confirm the Seams table with the user before
+					marking this artifact done."
+				</li>
+
+				<li>
+					<strong>Reset, once the planning artifacts are all created.</strong> Three commands, in this
+					order, before you implement anything:
+					<ol>
+						<li>
+							<code>/clear</code> — the planning window is spent, and apply needs the room for code,
+							test output, and shell noise. OpenSpec's own guidance says the same thing: it works
+							best with high-reasoning models and a clean context window, and you should clear
+							context before implementation.
+						</li>
+						<li>
+							<code>/model</code> — pick the model for implementation, and set its effort with the
+							left and right arrows on the same picker. If the model is already right and only the
+							depth is wrong, <code>/effort</code> on its own does the second half. For this
+							chain that is the step <em>down</em> from planning depth to an implementation tier —
+							<a href="0012-pair-a-model-and-effort.html">lesson 12</a> is the whole argument.
+						</li>
+						<li>
+							<code>/opsx:apply let-advisors-export-plans</code> — with the name, because you just
+							deleted the conversation it would otherwise have inferred it from.
+						</li>
+					</ol>
+					<p>
+						<strong>Do not clear between the planning artifacts on this chain.</strong>
+						<code>mattpocock-bridge</code> asks for <code>grill</code> through <code>tasks</code> in
+						one unbroken window, so the interview, the proposal, and the slices build on the same
+						thinking — this reset belongs at the apply boundary and nowhere earlier. Switching
+						<em>depth</em> between artifacts is still free: <code>/effort</code> changes nothing about
+						the window. And if that planning run gets long, compact at the nearest artifact boundary
+						rather than clearing.
+					</p>
+					<span class="cite">
+						<code>payload/levels/minimal/openspec/CLAUDE.md.fragment.md</code>, "Context hygiene", and
+						<code>mattpocock-bridge/schema.yaml</code> around line 519.
+					</span>
+				</li>
+
+				<li>
+					<strong>Implement one slice per session.</strong> Each slice: failing test at the agreed seam
+					→ smallest code to pass → affected tests as you go, full suite at the end → the two-axis
+					review → tick the boxes and commit. Then <strong>stop</strong>, and start the next slice in a
+					fresh session — <code>/clear</code>, then <code>/opsx:apply let-advisors-export-plans</code>
+					again. Each slice is self-contained by construction, so the finished slice's context is
+					disposable.
+				</li>
+
+				<li>
+					<strong>Finish.</strong> <code>sync</code> is optional and merges this change's deltas into
+					your main specs while the change stays active; <code>archive</code> prompts you to sync if
+					you have not.
+					<pre><code>/opsx:sync let-advisors-export-plans      # optional
+/opsx:archive let-advisors-export-plans</code></pre>
+				</li>
+			</ol>
+
+			<div class="stop" data-background="dark">
+				<span class="label">Clearing is free. Not clearing is not.</span>
+				<p>
+					Nothing about a change lives in your session. Artifact state is
+					<strong>pure filesystem existence</strong> — a file is there or it is not — so
+					<code>/clear</code> destroys nothing a chain depends on, and
+					<code>/opsx:continue &lt;name&gt;</code> picks the work up from disk exactly where it was.
+					Carrying a spent planning window into apply, on the other hand, costs you the room the
+					implementation loop needs and buys you nothing back.
+				</p>
+				<p>
+					The one thing <code>/clear</code> does take is the assistant's ability to guess which change
+					you mean. That is the entire reason every command above carries the change name.
+				</p>
+			</div>
+
+			<span class="cite">
+				The <code>/opsx:new</code> argument contract and the clean-context guidance are both in
+				<code>skills/configuring-openspec/references/using-openspec.md</code> — "The loop" and the
+				command reference.
+			</span>
+
+			<div class="note">
+				<span class="label">On the <code>core</code> profile</span>
+				<p>
+					No <code>continue</code> and no <code>new</code>. Use <code>/opsx:propose</code>, which
+					takes the same sentence and creates the change <em>and</em> every planning artifact in one
+					step, then <code>/opsx:apply &lt;name&gt;</code>. You lose the per-artifact gates, which is
+					the main reason <a href="0005-the-five-things-setup-cannot-do.html">lesson 05</a> pushes you
+					toward the custom selection. The reset before apply is unchanged: everything the propose
+					step filled your window with is exactly what apply does not need.
+				</p>
+			</div>
+
+			<div class="stop" data-background="dark">
+				<span class="label">Archiving in CI or from an agent</span>
+				<p>
+					<code>openspec archive</code> asks up to three confirmations. With stdin closed — CI, a
+					script, a non-interactive agent — pass the change name and <code>--yes</code> or it exits
+					1.
+				</p>
+			</div>
+
+			<h2>What the two-axis review is, and why it is two</h2>
+
+			<p>
+				At the review step of every slice, two subagents run <strong>in parallel</strong>, and they
+				are deliberately kept in separate lanes.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Agent</th>
+							<th>Axis</th>
+							<th>Judges</th>
+							<th>Model tier</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>code-review-spec</code></td>
+							<td>Spec</td>
+							<td>
+								The diff against the proposal and delta specs. Did it do what was asked? Mechanical
+								comparison — it does not judge style
+							</td>
+							<td>Cheap</td>
+						</tr>
+						<tr>
+							<td><code>code-review-standards</code></td>
+							<td>Standards</td>
+							<td>
+								The code as code, against the repo's documented standards and smell baseline. It does
+								not judge whether the code does what was asked
+							</td>
+							<td>Strong</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					<code>payload/levels/minimal/agents/</code>. Each prompt carries the slice's start commit,
+					the change directory, and the tracker reference — subagents inherit nothing from your
+					conversation, so anything unstated is unavailable.
+				</caption>
+			</div>
+
+			<p>
+				If either agent is missing, the schema falls back to invoking <code>code-review</code>
+				directly and letting it run its own parallel subagents. Every skill invocation in every schema
+				carries a fallback like this, and degrades to the template when the skill is absent.
+			</p>
+
+			<h2>Recall check</h2>
+
+			<p data-quiz-tally class="drill-score"></p>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">A <code>#### Scenario:</code> heading written with three hashes. What happens?</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Exactly four hashes, or the scenario is not seen at all."
+						>
+							It fails, and says nothing
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="There is no lenient parse for this; the hash count is exact."
+						>
+							It works, with a warning
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Strict validation is not what catches a mis-levelled heading."
+						>
+							It fails, but only strictly
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					You are modifying a requirement that has four scenarios and changing one. What goes in the
+					<code>MODIFIED</code> block?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="A MODIFIED delta replaces the whole requirement block, so all four."
+						>
+							All four of the scenarios
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Only the edited one silently deletes the other three on archive."
+						>
+							Only the one you edited
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="A diff format is not what delta specs use; blocks are whole."
+						>
+							Only the lines you changed
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					A slice finishes and its tests pass. What does the schema tell you to do next?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="One slice per session; the finished slice's context is disposable."
+						>
+							Stop, start a fresh session
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Carrying on degrades once a session passes roughly 150k tokens."
+						>
+							Carry on, take next slice
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Archiving mid-chain leaves the remaining slices unimplemented."
+						>
+							Archive now, reopen it later
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					During <code>bugfix-flow</code>'s apply, the reproduction still triggers after your fix.
+					Which artifact is wrong?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="The cause was misidentified, so the diagnosis is what to update."
+						>
+							The diagnosis, not the code
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Retrying the fix is what the schema explicitly tells you not to."
+						>
+							The fix, not the diagnosis
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="A spec delta cannot be why a reproduction keeps triggering."
+						>
+							The specs, not the tasks
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					Every planning artifact is written. Why is <code>/clear</code> safe before
+					<code>/opsx:apply</code>?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Artifact status is pure file existence, so the window holds nothing."
+						>
+							Its whole state lives on disk
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="No session is saved; continue reads the filesystem instead."
+						>
+							The session is what gets saved
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Nothing rebuilds a window; the chain simply never needed one."
+						>
+							Its context is rebuilt for you
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					You cleared the window, then typed <code>/opsx:apply</code> with no change name.
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="With no conversation left, it has nothing to infer from and must ask."
+						>
+							It stops and asks you
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Nothing picks a change by recency; the inference source is gone."
+						>
+							It uses the last one
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="It does not fail here — it prompts you to choose one."
+						>
+							It errors out at once
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="appendix">
+				<span class="label">Appendix · the user-invoked skills you are offered, not given</span>
+				<p>
+					<code>mattpocock-bridge</code> carries the discipline of five user-invoked skills in prose
+					because an agent cannot fire them by design: <code>/grill-with-docs</code>,
+					<code>/to-spec</code>, <code>/to-tickets</code>, <code>/implement</code>,
+					<code>/triage</code>, and <code>/wayfinder</code>. Where the schema says "if the user would
+					rather run <code>/to-tickets</code> themselves — it is user-invoked, so only they can fire
+					it — ask them to, then write the mirror from what it published", that is an offer to you,
+					not something the agent will do unprompted.
+				</p>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Read this next</h2>
+				<p>
+					<strong
+						>Primary source:
+						<a href="https://github.com/Fission-AI/OpenSpec/blob/main/docs/opsx.md"
+							>OpenSpec — the <code>/opsx</code> workflow</a
+						></strong
+					>. Read the Commands table and the "When to Update vs. Start Fresh" heuristics. The second
+					one is the judgement call this lesson cannot make for you.
+				</p>
+			</footer>
+
+			<footer class="lesson-foot">
+				<h2>Reference</h2>
+				<p>
+					<a href="../reference/workflow-atlas.html">Workflow atlas</a> for both chains at a glance ·
+					<a href="../reference/command-card.html">Command card</a> for chat versus terminal ·
+					<a href="../reference/glossary.html">Glossary</a> for <em>slice</em>, <em>seam</em>, and
+					<em>delta spec</em>.
+				</p>
+			</footer>
+
+			<div class="ask">
+				<p>
+					<strong>Do this one with your teacher beside you.</strong> Open with
+					<code>/opsx:new let advisors export their degree plans as a PDF</code>, then say: "walk me
+					through one artifact at a time with <code>/opsx:continue</code>, stop for my decisions, and
+					tell me when I should clear and re-pick a model before the next one." That is exactly what
+					the schema is written to support.
+				</p>
+			</div>
+
+			<nav class="nav">
+				<span
+					><a href="0007-escape-hatches-and-their-costs.html">← Lesson 07 · Escape hatches</a></span
+				>
+				<span
+					><a href="0009-standard-end-to-end.html">Lesson 09 · Standard, end to end →</a></span
+				>
+			</nav>
+		</main>
+		<script src="../assets/quiz.js"></script>
+	</body>
+</html>

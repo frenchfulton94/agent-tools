@@ -1,0 +1,528 @@
+name: mattpocock-bridge
+version: 1
+description: >
+  OpenSpec artifact governance driven by mattpocock/skills discipline.
+  grill -> proposal -> specs + design -> tasks -> apply.
+
+  Requires the mattpocock skills to be installed (Claude Code plugin
+  `mattpocock-skills`, or `npx skills@latest add mattpocock/skills`), and
+  `/setup-matt-pocock-skills` to have been run once in this repo so the issue
+  tracker, triage labels, and domain doc layout are configured.
+
+  Only model-invoked skills are invoked from these instructions. The
+  user-invoked skills of that repo (`/grill-with-docs`, `/to-spec`,
+  `/to-tickets`, `/implement`, `/triage`, `/wayfinder`) are unreachable by an
+  agent by design, so their discipline is carried here in prose and the human is
+  offered the command instead.
+
+artifacts:
+  - id: grill
+    generates: grill.md
+    description: Decision log from a grilling session, with the domain model updated inline
+    template: grill.md
+    instruction: |
+      Interview the user, then record what was settled.
+
+      One escape hatch, mirroring how `skip_specs` works for delta specs: when the
+      change's `.openspec.yaml` sets `skip_grill: true`, the user has judged this
+      change too small to interview about. Write grill.md as a single line — the
+      reason, and the date — and move on to the proposal. The CLI does not read
+      this key (only paths under `specs/` get a real skipped status), so the stub
+      file is what unblocks the rest of the graph and what leaves the audit trail.
+
+      Reach for that hatch when the change is genuinely one decision wide. A
+      change with alternatives worth weighing is one to interview about, however
+      small it looks: the interview is cheap next to building the wrong thing.
+
+      A defect fix belongs in `bugfix-flow`, which gates the fix behind a written
+      root cause rather than an interview. Say so and offer the reopen command:
+      `/opsx:new <what the fix really is>, using bugfix-flow` — or, if they would
+      rather use a terminal, `openspec new change <name> --schema bugfix-flow`.
+
+      Otherwise, invoke the `grilling` skill. It works the design tree in rounds: ask the
+      whole frontier — every decision whose prerequisites are already settled —
+      in one numbered round, each question carrying your recommended answer,
+      then wait for the user's answers before the next round. Find facts
+      yourself, by tool or subagent; put decisions to the user.
+
+      Run `domain-modeling` inside each round, not as a closing step. When a round
+      settles a term, write it to CONTEXT.md before asking the next one — a term
+      written in round one is one rounds two and three can use precisely, while the
+      same term written afterwards only transcribes language everyone was already
+      guessing at. Write an ADR in the round that settles it, on the same reasoning.
+
+      Run it even when the vocabulary looks settled: finding nothing to sharpen is
+      a fine outcome and costs one pass. The proposal, the specs, the test names,
+      and the code all name concepts with the vocabulary settled here, so a term
+      pinned down now is one the whole change speaks.
+
+      Batch each round into as few `AskUserQuestion` calls as the tool allows, so a
+      round still arrives as one. Ask open questions in prose instead, where the
+      value is the answer you did not anticipate and a menu would discard it.
+
+      Two detours are worth taking mid-interview. Both leave files, and where
+      those files land decides whether they survive:
+      - A question that needs a runnable answer — does this state model feel
+        right, what should this look like — goes to the `prototype` skill. It
+        keeps the prototype on a `prototype/<name>` branch out of main. Record the
+        verdict, the question it settled, and the branch name here; once the tasks
+        artifact publishes slices, move that pointer onto the slice that builds it.
+      - A question that needs facts from outside the repo goes to the `research`
+        skill. It asks where the repo keeps such notes: answer
+        `openspec/changes/<change-name>/research/<topic>.md`. Research done for one
+        change is history once the change lands, and a file in the change folder
+        archives with it rather than accumulating at the repo root. Cite it here.
+
+      Ask what changes the shape of the problem, and let the downstream artifacts
+      own the rest. In scope here: what the change is for, which forks are worth
+      weighing, which behaviour it must have, what is deliberately excluded, and
+      any constraint a later artifact would be wrong to invent. Out of scope, and
+      each with an artifact waiting for it: where a module lives and how it is
+      typed, tested, or wired belongs to design.md; how the work is sliced,
+      sequenced, and ordered belongs to tasks.md; and which library or version to
+      use belongs to whoever builds the slice.
+
+      A design tree runs to implementation if you follow it, so the frontier this
+      session clears is the top of it. Those questions surface naturally mid-round;
+      record each under Handed downstream with the artifact that owns it and move
+      on. The user's attention is the scarcest thing here, and a round spent on a
+      decision design.md would make better with the specs in hand is spent twice.
+
+      Write grill.md once the user confirms you have reached a shared
+      understanding. The session is done when the frontier is empty at that level:
+      every branch that changes the shape of the problem visited, nothing silently
+      assumed, and everything below it handed on by name.
+
+      Record the decision log — each question, the answer given, and the
+      alternatives ruled out. Keep the interview's own organisation rather than
+      imposing structure on it; proposal, specs, and design all read this as
+      their source, and reshaping it here loses detail they need.
+
+      The human can run `/grill-with-docs` themselves instead, which is the same
+      interview plus the same domain-modeling pass. Offer that if they would
+      rather drive.
+    requires: []
+
+  - id: proposal
+    generates: proposal.md
+    description: Why and what, in the /to-spec shape, kept inside the change
+    template: proposal.md
+    instruction: |
+      Synthesise grill.md into the proposal. The interview already happened, so
+      extract from it rather than re-interviewing.
+
+      Sections:
+      - **Problem** — the problem from the user's perspective.
+      - **Solution** — the solution from the user's perspective.
+      - **User Stories** — a long numbered list, each "As an <actor>, I want
+        <feature>, so that <benefit>", covering the behaviour this change *adds*.
+        The specs artifact turns each story into requirements, so a story missing
+        here is a requirement missing there. Write these at length: this list is
+        the coverage instrument for everything new.
+      - **Capabilities** — which specs this change creates or modifies. This
+        section is the contract between this artifact and the specs artifact, so
+        read `openspec/specs/` before filling it in.
+        - New capabilities: each becomes `specs/<capability-path>/spec.md`.
+          Kebab-case any path segment you introduce, and follow the project's
+          existing spec layout rather than adding a domain level it does not use.
+          Where this change adds a surface onto a capability that already exists,
+          decide which way it goes and say why: requirements added to the existing
+          capability when the surface is how that capability is reached, or a
+          nested capability such as `<existing>/ui` when the surface has a
+          lifecycle of its own — its own states, its own reasons to change. The
+          nested path costs a level of hierarchy, so take it only when the surface
+          would otherwise swamp the capability it hangs off.
+        - Modified capabilities: existing capabilities whose requirements change
+          or are removed. Use the exact existing path under `openspec/specs/`, and
+          name on each line which requirement moves and what about it changes.
+          That line is all the specs artifact needs, because the requirement
+          already exists in `openspec/specs/` and is the source it edits — a user
+          story written to cover behaviour that already exists would be fiction
+          with nothing to check it against. List a capability only when
+          spec-level behaviour changes; an implementation-only change belongs in
+          design.md.
+      - **Out of Scope** — what this change deliberately does not do.
+      - **Impact** — affected code, APIs, dependencies, systems.
+
+      Name domain concepts with the terms CONTEXT.md defines. Where the proposal
+      contradicts an ADR under docs/adr/, say so in Impact and make the case for
+      reopening it, so the decision is revisited in the open.
+
+      Describe modules and behaviour rather than file paths and code, which go
+      stale between writing and reading. One exception earns its place: a snippet
+      from a prototype that encodes a decision more precisely than prose can — a
+      state machine, a schema, a type shape. Inline the decision-rich part and
+      note that it came from a prototype.
+
+      Every change either declares at least one capability or opts out by setting
+      `skip_specs: true` in the change's `.openspec.yaml`; `openspec validate`
+      rejects a change with zero deltas and no marker. Opt out when behaviour
+      genuinely does not change — a refactor, tooling, docs — rather than
+      inventing a requirement to satisfy validation.
+
+      Keep it to one or two pages: why and what. How belongs in design.md.
+
+      This is the `/to-spec` shape, kept in the change folder rather than
+      published to the issue tracker, because OpenSpec archives it with the rest
+      of the change and merges its capabilities into the specs. If the user would
+      rather run `/to-spec` themselves — it is user-invoked, so only they can
+      fire it — ask them to, and save its output here.
+    requires:
+      - grill
+
+  - id: surface
+    generates: surface.md
+    description: Design brief for the change's UI surfaces — mode, states, direction, boundaries
+    template: surface.md
+    instruction: |
+      Produce a design brief for the UI this change touches, before any behaviour
+      is written down as requirements.
+
+      When the change touches no user-facing surface, set `skip_surface: true` in
+      the change's `.openspec.yaml` and write surface.md as a single line giving
+      the reason and the date. The CLI does not read that key, so the stub is what
+      keeps the graph moving and records the judgement. Backend, data, tooling,
+      and infrastructure changes take that path; anything a person looks at does
+      not.
+
+      Otherwise invoke the `impeccable` skill with its `shape` command, naming the
+      surface. It runs a discovery interview, resolves the visual direction against
+      the project's committed world, and returns a brief without writing code.
+
+      Hand it grill.md and proposal.md as prior context. Shape is built to
+      compress when facts are settled — it skips settled ground and asks only what
+      is still open — so a change that has already been grilled should reach a
+      confirmation round rather than a second full interview. Two interviews for
+      one change is the cost to watch for here.
+
+      Where shape puts a closed choice to the user — mode, a direction between
+      named candidates, a state's treatment — offer it through `AskUserQuestion`,
+      with the reasoning in the prose above it.
+
+      Record in surface.md the parts later artifacts read:
+      - **Surface and mode** — what is being designed, and which of Persuade,
+        Operate, Read, or Experience it serves. Mode comes from the surface, not
+        the company: a developer tool's pricing page is still Persuade.
+      - **States and ranges** — first-run, empty, loading, error, success,
+        permissions, overflow, expert use, and the realistic minimum, typical, and
+        maximum content ranges. The specs artifact turns these into scenarios, so
+        a state missing here is a requirement nobody writes.
+      - **Selected direction** — the visual authority and structural thesis in one
+        or two lines, plus where the full brief lives. Impeccable persists its own
+        brief under `.impeccable/surfaces/`; point at it rather than copying it,
+        so the two cannot drift.
+      - **Boundaries** — what stays untouched, and the anti-goals.
+
+      Impeccable is an opinionated design partner rather than a validator. Where
+      its direction conflicts with the brief, argue the case with a reason and let
+      it answer; a reasoned disagreement improves the result, while overriding it
+      silently returns generic output.
+    requires:
+      - proposal
+
+  - id: specs
+    generates: "specs/**/*.md"
+    description: Delta specs — the behaviour contract this change adds, modifies, or removes
+    template: spec.md
+    instruction: |
+      Turn the proposal's user stories into delta specs: what the system must do,
+      observably, once this change lands.
+
+      Write one file per capability listed in the proposal's Capabilities
+      section, at `specs/<capability-path>/spec.md`, preserving the full path the
+      proposal gave.
+
+      The CLI reports this artifact's own output path as the glob
+      `specs/**/*.md`, and reports `specs` to later artifacts the same way; expand
+      it against the change folder to get concrete files rather than reading the
+      pattern as a path.
+
+      Two sources, split by what the delta does:
+      - **ADDED requirements come from the user stories.** Every story maps to at
+        least one requirement, and every ADDED requirement traces back to a story.
+        That mapping is what makes the story list worth writing at length, and it
+        is checkable: walk both directions before finishing.
+      - **MODIFIED and REMOVED requirements come from the existing main spec.**
+        Read `openspec/specs/<capability-path>/spec.md` and edit what is there,
+        guided by the proposal's Changed Behaviour lines. The existing requirement
+        is the source; the proposal only says which one moves and why.
+
+      Once archived, the requirements are what the repo knows about itself — the
+      proposal moves to `changes/archive/` and is read as history. So where a story
+      and a requirement disagree at any point after this artifact exists, fix the
+      requirement and correct the story to match.
+
+      A spec is a behaviour contract. Include observable behaviour, inputs,
+      outputs, error conditions, and external constraints such as security,
+      privacy, reliability, and compatibility. Leave internal names, library
+      choices, and step-by-step plans to design.md and tasks.md. The test: if the
+      implementation can change without changing externally visible behaviour, it
+      belongs in design.md instead.
+
+      Delta operations, as `##` headers:
+      - `## ADDED Requirements` — new behaviour.
+      - `## MODIFIED Requirements` — changed behaviour. Copy the entire existing
+        requirement block from `openspec/specs/<capability-path>/spec.md`, header
+        text included, then edit it. Archive replaces the whole block by matching
+        that header, so a partial copy silently drops the parts left out. Where
+        you are adding a concern rather than changing existing behaviour, use
+        ADDED.
+      - `## REMOVED Requirements` — deprecated behaviour, each with **Reason** and
+        **Migration**. Where the requirements you remove are the last a capability
+        has, archive retires that capability by deleting its main spec — and it
+        does that only when the change's `.openspec.yaml` sets
+        `retire_capabilities: true`. Set it in the same edit, and tell the user:
+        without it archive stops on a spec it cannot write, and with it the
+        deletion is recoverable only from git.
+      - `## RENAMED Requirements` — name changes only, in FROM:/TO: form.
+
+      Format:
+      - Each requirement: `### Requirement: <name>` followed by its description.
+      - Use SHALL or MUST for normative requirements.
+      - Each scenario: `#### Scenario: <name>` with WHEN/THEN bullets.
+      - Scenarios take exactly four hashtags. The parser skips three-hashtag or
+        bulleted scenarios without reporting an error, so a mis-levelled scenario
+        is lost at archive with no warning.
+      - Every requirement carries at least one scenario.
+
+      A brand-new capability opens with `## Purpose` — one or two sentences, at
+      least 50 characters, on what the capability is for. Archive copies it into
+      the main spec it creates; without it that spec is left carrying a TBD
+      placeholder to fill in by hand. A delta for an existing capability omits
+      Purpose, since that spec already has one and the delta's is ignored.
+
+      Write each scenario so it could become a test. The design artifact picks the
+      seams these scenarios are tested at, and `/tdd` writes them there, so a
+      scenario that cannot be observed from outside is one nobody can test.
+
+      When surface.md carries a design brief rather than a skip line, its States
+      and ranges section is a third source: each state that changes what the user
+      observes — empty, error, over-limit, permission-denied — earns a scenario
+      here. Those are the requirements that get skipped when nobody writes them
+      down, and they are most of what the harden and onboard passes later look for.
+
+      When the change's `.openspec.yaml` sets `skip_specs: true`, this artifact is
+      already satisfied and its files must not exist.
+    requires:
+      - proposal
+      - surface
+
+  - id: design
+    generates: design.md
+    description: How — module shape, the seams tests are written at, and the decisions behind both
+    template: design.md
+    instruction: |
+      Decide how to build it, and where it will be tested from.
+
+      Dispatch the bridge-design-gate subagent
+      (.claude/agents/bridge-design-gate.md) - it is pinned to the
+      top-tier model at xhigh effort so this session can stay on the cheap
+      tier. Its prompt must name the change directory path; a subagent
+      inherits nothing else. It returns three things: the design.md draft
+      (Seams table included), ADR candidates, and caller actions. Write
+      the draft here; put each ADR candidate to the user and write the
+      agreed ones to docs/adr/ via domain-modeling; resolve every returned
+      question with the user; then put the Seams table to the user through
+      AskUserQuestion and get their agreement before this artifact is done
+      - /tdd writes tests only at agreed seams, so an unconfirmed seam
+      blocks implementation later. If the subagent is missing or fails to
+      launch, say so and run the flow inline as follows.
+
+      Where surface.md carries a brief, choosing the approach means choosing
+      platform capabilities, and this is the moment to check what the platform now
+      does natively — a library reached for here is one nobody removes later. Run
+      `npx modern-web-guidance search "<what you are building>"` and retrieve what
+      it returns before settling an interaction, layout, or animation decision.
+      Popovers, anchor-positioned tooltips, view transitions, `:user-invalid`
+      validation, container queries, and scheduling all have native answers that
+      models reliably under-reach for.
+
+      The interface work has a second authority too: DESIGN.md holds the project's
+      tokens, and its frontmatter is normative while the prose gives context. Build against those tokens rather than literal
+      values — the detector flags a font, colour, radius, or size that falls
+      outside them, and it flags them because drift is how a design system dies.
+      Where the surface genuinely needs a token the system lacks, add it to
+      DESIGN.md deliberately and say so here.
+
+      Invoke `codebase-design` for the vocabulary and use its terms exactly:
+      module, interface, implementation, depth, seam, adapter, leverage,
+      locality. Consistent language across the design, the tests, and the code is
+      what lets a later session pick this up without re-deriving it.
+
+      Sections:
+      - **Context** — the current state and constraints that shape the approach.
+        Point at proposal.md for motivation rather than restating it.
+      - **Goals / Non-Goals** — design-level boundaries the proposal's scope does
+        not already draw.
+      - **Decisions** — the technical choices, each with its rationale and the
+        alternatives weighed. Where grill.md already settled a decision, carry it
+        forward with the reasoning that settled it.
+      - **Seams** — the public boundaries this change will be tested at, one line
+        each, naming what each seam exposes and which spec scenarios it covers.
+        The delta specs already exist, so cover them by name: every scenario in
+        `specs/` is observable from exactly one seam in this table. A scenario no
+        seam reaches is either a seam you are missing or a requirement written
+        against something unobservable — say which, rather than leaving the row
+        blank. A `## REMOVED Requirements` block carries no scenarios, so removed
+        behaviour is invisible to that pass: add a row, or a line under the table,
+        naming the regression check for each removal and the seam it sits at — the
+        old endpoint now 404s, the old option no longer bypasses the new rule.
+        Removals are where regressions hide precisely because nothing points at
+        them. Prefer seams the codebase already has, put new ones as high as you
+        can, and keep the count low; one is the ideal. Put the table to the user
+        and get their agreement before this artifact is done — `AskUserQuestion`
+        suits the sign-off, since the answer is approve or adjust. `/tdd` writes
+        tests only at agreed seams, so an unconfirmed seam blocks implementation
+        later.
+      - **Risks / Trade-offs** — each as `[Risk] -> Mitigation`.
+      - **Migration Plan** — deployment steps and rollback, where they apply.
+      - **Open Questions** — unknowns that can safely wait, because answering them
+        later would change neither the specs, the approach, nor the task
+        breakdown. A question that would change any of those is one to settle now
+        with the user. Omit the section when there are none.
+
+      Where a decision here contradicts an ADR, name the ADR and make the case for
+      reopening it.
+
+      Decisions recorded here archive with the change and are read afterwards as
+      history, so a decision that should still bind the next change belongs in an
+      ADR instead. Invoke `domain-modeling` to write one when all three hold: the
+      decision is hard to reverse, it would surprise a future reader without the
+      context, and it came from a real trade-off between genuine alternatives.
+      Where any of the three is missing, leave it here — an ADR per decision
+      buries the few that matter.
+
+      This artifact is optional for a change that touches one module, adds no
+      dependency, and raises no security, performance, or migration question. It
+      earns its place when the change is cross-cutting, introduces a pattern or a
+      dependency, or leaves genuine ambiguity about the approach. Skipping it
+      deliberately is fine; say so and move on.
+    requires:
+      - proposal
+      - specs
+
+  - id: tasks
+    generates: tasks.md
+    description: Tracer-bullet slices published to the issue tracker and mirrored as trackable checkboxes
+    template: tasks.md
+    instruction: |
+      Break the work into tracer-bullet slices, agree them with the user, publish
+      them to the issue tracker, and mirror them here as checkboxes.
+
+      Read `docs/agents/issue-tracker.md` for where issues live in this repo and
+      how to create them. If it is missing, ask the user to run
+      `/setup-matt-pocock-skills` first — the tracker is a per-repo choice, not
+      one to guess at.
+
+      **1. Draft the slices.** Each slice cuts a narrow but complete path through
+      every layer the change touches — schema, API, UI, tests — so a finished
+      slice is demoable on its own. Size each to fit one fresh context window, and
+      put any prefactoring first: make the change easy, then make the easy change.
+      Give each slice its blocking edges, the slices that must finish before it
+      can start.
+
+      A wide refactor is the one shape that resists vertical slicing: one
+      mechanical change — renaming a column, retyping a shared symbol — whose
+      blast radius fans across the codebase, so no single slice lands green.
+      Sequence it expand–contract instead. Expand: add the new form beside the old
+      so nothing breaks. Migrate: move call sites in batches sized by blast radius,
+      each batch its own slice blocked by the expand, keeping the suite green batch
+      to batch. Contract: delete the old form in a slice blocked by every migrate
+      batch.
+
+      **2. Agree them.** Present the breakdown as a numbered list — title, blocked
+      by, what it delivers — then put the verdict through `AskUserQuestion`:
+      approve, or name what to merge, split, or resequence. Iterate until the user
+      approves.
+
+      **3. Publish.** Create one issue per approved slice on the configured
+      tracker, in dependency order so blockers exist before the slices that
+      reference them. Use the tracker's native blocking relationship where it has
+      one; otherwise write "Blocked by" into the body. Apply the `ready-for-agent`
+      label — these slices are agent-grabbable by construction, so they need no
+      triage. Leave any parent issue untouched.
+
+      **4. Mirror.** Write tasks.md as an index of the published slices, in the
+      same dependency order:
+
+      ```
+      ## 1. <slice title> (<tracker reference>)
+
+      - [ ] 1.1 <acceptance criterion>
+      - [ ] 1.2 <acceptance criterion>
+      ```
+
+      Checkboxes take the exact `- [ ] X.Y ` form: apply parses them to track
+      progress, and a line in any other shape is invisible to it. Each group
+      carries the tracker reference for its slice and lists that slice's
+      acceptance criteria — the detail lives in the issue, and tasks.md indexes it
+      rather than copying it, so the two cannot drift.
+
+      This artifact is done when every published slice has a group in tasks.md, and
+      every group names a real tracker reference.
+
+      This is the `/to-tickets` discipline. If the user would rather run
+      `/to-tickets` themselves — it is user-invoked, so only they can fire it —
+      ask them to, then write the mirror from what it published.
+    requires:
+      - specs
+      - design
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Build one slice per session, test-first, reviewed before it lands.
+
+    Read the context files the CLI listed, then fetch the tracker issue for the
+    slice you are taking — the issue holds the acceptance criteria that tasks.md
+    only indexes.
+
+    Take the frontier: any slice whose blockers are all complete. For a linear
+    chain that is simply the next group in tasks.md.
+
+    For each slice:
+
+    1. Invoke `tdd`. Write the failing test at a seam design.md agreed, then only
+       enough code to pass it, one vertical slice at a time. Where the seam turns
+       out to be wrong, say so and agree a new one before testing there — an
+       unagreed seam is where test effort goes to waste.
+    2. Typecheck as you go and run the affected test files as you go; run the full
+       suite once the slice is done.
+    3. On a slice that changes a user-facing surface, run the design pass before
+       review. Start with `node <impeccable-scripts>/detect.mjs --json` on the
+       changed files, or let the design hook run it if hooks are on, and fix what
+       it reports — those rules are deterministic and cost nothing to satisfy.
+       Then invoke `impeccable` with the one command the slice earns: `audit` for
+       accessibility, performance, and responsive behaviour; `critique` for a
+       design review against the brief; `clarify` for labels and error copy;
+       `harden` for edge cases, i18n, and overflow; `polish` for the last pass
+       before it ships. Point it at one narrow target — a section reviewed closely
+       beats a page reviewed at a glance. Skip this step entirely on a slice with
+       no visible surface.
+    4. Run the two-axis review through the named agents, in parallel:
+       code-review-standards (.claude/agents/code-review-standards.md, a
+       strong model - Standards against the repo's documented standards
+       plus the smell baseline) and code-review-spec
+       (.claude/agents/code-review-spec.md, a cheap model - Spec against
+       what was asked for, which is mechanical diff-vs-spec work). Each
+       prompt carries the slice's start commit as the fixed point, the
+       change directory path, and the slice's tracker reference; subagents
+       inherit nothing. They report separately; where either agent is
+       missing, invoke `code-review` directly with the slice's start
+       commit as the fixed point and the change's proposal.md and delta
+       specs as the spec source, and let it run its own parallel
+       subagents. The review judges code against the spec while the design
+       pass above judges the surface against the brief, so each owns its
+       own axis. Act on both sets of findings before committing.
+    5. Tick the slice's boxes in tasks.md, update the issue, and commit.
+
+    Then stop and let the user start the next slice in a fresh session. Each
+    slice is self-contained by construction, so the finished slice's context is
+    disposable, and a long session degrades once it passes roughly 150k tokens.
+    Where the user asks to keep going, dispatch each remaining slice to its own
+    subagent rather than working them all in this window.
+
+    Pause and ask when a task is unclear, when the implementation reveals the
+    design was wrong — say which artifact needs updating — or when you hit an
+    error you cannot resolve.

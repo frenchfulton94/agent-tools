@@ -1,0 +1,1005 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>12 · Pair a model and effort with each phase</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+		<link rel="stylesheet" href="../assets/quiz.css" />
+	</head>
+	<body>
+		<main class="page">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Lesson 12</span><span class="sep">·</span><span>Models and proof</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1>Pair a model and effort with each phase</h1>
+				<p class="deck">
+					Leaving one model and one effort level on for a whole change is the most common way to
+					overpay and under-think at the same time. Eight of these decisions are already made for you
+					in files on disk. The rest follow one rule.
+				</p>
+			</header>
+
+			<section class="objective">
+				<h2>By the end</h2>
+				<p>
+					You can say which model and effort each phase of a change wants and why, for all twelve
+					workflows; you know which eight are pinned in files rather than left to you; you know the
+					three commands that make a switch and the order to run them in; you know what your
+					subscription tier does and does not change; and you know the settings that silently defeat
+					every one of those pins.
+				</p>
+			</section>
+
+			<p class="prereq">
+				<strong>Prerequisites:</strong>
+				<a href="0008-minimal-end-to-end.html">Lesson 08</a>, plus
+				<a href="0009-standard-end-to-end.html">09</a> or
+				<a href="0010-advanced-the-everyday-four.html">10</a>. You need to have felt a chain before
+				tuning it.
+			</p>
+
+			<h2>Two knobs</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Knob</th>
+							<th>Values</th>
+							<th>Set it</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><strong>Model</strong></td>
+							<td>
+								<code>haiku</code>, <code>sonnet</code>, <code>opus</code>, <code>fable</code>, a
+								full model id, or <code>inherit</code>
+							</td>
+							<td>
+								In your session, or in a subagent's <code>model:</code> frontmatter
+							</td>
+						</tr>
+						<tr>
+							<td><strong>Effort</strong></td>
+							<td>
+								<code>low</code>, <code>medium</code>, <code>high</code>, <code>xhigh</code>,
+								<code>max</code> — available levels depend on the model
+							</td>
+							<td>
+								In your session, or in a subagent's <code>effort:</code> frontmatter
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					<code>plugins/meta-skills/skills/authoring-subagents/references/frontmatter.md</code>.
+				</caption>
+			</div>
+
+			<h2>The rule: depth follows the artifact</h2>
+
+			<p>
+				All three attached usage guides arrive at the same principle from different directions, so it
+				is worth stating once and reusing:
+			</p>
+
+			<ol>
+				<li>
+					<strong>Planning artifacts that encode durable, multi-step judgement get the strong model.</strong>
+					A wrong spec, a wrong root cause, a wrong refactor strategy, a wrong migration plan is the
+					most expensive error in the whole chain — and planning is where token volume is
+					<em>lowest</em>. Depth is cheap here and mistakes are not.
+				</li>
+				<li>
+					<strong>Implementation loops favour the fast model.</strong> Apply is a long agentic loop of
+					file edits, shell commands, and test runs. That is latency- and output-dominated, so the
+					cheap tier wins — except where the implementation is genuinely hard.
+				</li>
+				<li>
+					<strong>Interactive artifacts want <code>high</code>, not <code>xhigh</code>.</strong> When
+					the reasoning happens between short turns — a grill round, a shape interview, a seam
+					sign-off — <code>xhigh</code> mostly adds latency you sit through. Reserve
+					<code>xhigh</code> for the deep artifacts that run <em>without</em> you in the loop.
+				</li>
+				<li>
+					<strong>Escalate on evidence, not on nerves.</strong> If a strong-model planning artifact
+					still produced a shallow spec, go up. If a cheap implementation pass keeps causing rework,
+					go up. Spraying the top setting across a whole chain multiplies cost without commensurate
+					quality.
+				</li>
+			</ol>
+
+			<h2>Eight decisions already made for you</h2>
+
+			<p>
+				Every subagent this plugin installs pins its own model and effort in frontmatter. These are
+				not recommendations in a document — they are settings in a file, and they execute.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Level</th>
+							<th>Agent</th>
+							<th>Runs at</th>
+							<th>Model</th>
+							<th>Effort</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>minimal</code></td>
+							<td><code>bridge-design-gate</code></td>
+							<td><code>mattpocock-bridge</code> · design</td>
+							<td><code>opus</code></td>
+							<td><code>xhigh</code></td>
+						</tr>
+						<tr>
+							<td><code>minimal</code></td>
+							<td><code>code-review-standards</code></td>
+							<td>apply · review, Standards axis</td>
+							<td><code>opus</code></td>
+							<td><code>high</code></td>
+						</tr>
+						<tr>
+							<td><code>minimal</code></td>
+							<td><code>code-review-spec</code></td>
+							<td>apply · review, Spec axis</td>
+							<td><code>sonnet</code></td>
+							<td><code>medium</code></td>
+						</tr>
+						<tr>
+							<td><code>standard</code></td>
+							<td><code>craft-design-gate</code></td>
+							<td><code>craft-driven</code> · design</td>
+							<td><code>opus</code></td>
+							<td><code>xhigh</code></td>
+						</tr>
+						<tr>
+							<td><code>standard</code></td>
+							<td><code>verification-reviewer</code></td>
+							<td><code>craft-driven</code> · verification, step 3</td>
+							<td><code>opus</code></td>
+							<td><code>xhigh</code></td>
+						</tr>
+						<tr>
+							<td><code>advanced</code></td>
+							<td><code>design-gate</code></td>
+							<td><code>feature</code> · design</td>
+							<td><code>opus</code></td>
+							<td><code>xhigh</code></td>
+						</tr>
+						<tr>
+							<td><code>advanced</code></td>
+							<td><code>review-gate</code></td>
+							<td><code>feature</code> · review</td>
+							<td><code>opus</code></td>
+							<td><code>xhigh</code></td>
+						</tr>
+						<tr>
+							<td><code>advanced</code></td>
+							<td><code>taste-preflight</code></td>
+							<td><code>feature</code> · review, UI pre-flight</td>
+							<td><code>sonnet</code></td>
+							<td><code>medium</code></td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					Read straight out of the <code>model:</code> and <code>effort:</code> lines in
+					<code>plugins/workflows/payload/levels/*/agents/*.md</code>.
+				</caption>
+			</div>
+
+			<p>Three patterns are visible in that table, and all three are deliberate:</p>
+
+			<ul>
+				<li>
+					<strong>Every design gate is <code>opus</code> at <code>xhigh</code>.</strong> Remember from
+					<a href="0007-escape-hatches-and-their-costs.html">lesson 07</a> that the
+					<code>design</code> artifact only exists when the change is cross-cutting, adds a
+					dependency, or carries security or migration complexity. <em>The trigger is the tier
+					signal</em>: when the artifact exists at all, it is by definition the hard case.
+				</li>
+				<li>
+					<strong>Review splits by axis, and the axes get different tiers.</strong> Comparing a diff
+					against a spec is mechanical — <code>sonnet</code> at <code>medium</code>. Judging code as
+					code against a standards baseline is judgement — <code>opus</code> at
+					<code>high</code>. One review, two models, because it is really two jobs.
+				</li>
+				<li>
+					<strong>The expensive work is pushed out of your session, on purpose.</strong> The schemas
+					say so: dispatch the gate "so this session can stay on the cheap tier". You get top-tier
+					reasoning at the two or three moments that need it without paying for it across the whole
+					change.
+				</li>
+			</ul>
+
+			<h2>Two settings that silently defeat all eight</h2>
+
+			<div class="stop" data-background="dark">
+				<span class="label">1 · <code>CLAUDE_CODE_SUBAGENT_MODEL</code></span>
+				<p>
+					It sits at the <strong>top</strong> of the resolution order — above the per-invocation
+					model and above frontmatter <code>model:</code>. Set it, and every pin in the table above
+					collapses to one tier, with no warning and no visible difference in how the schemas read.
+					The per-axis review split stops being a split. Leave it unset (or
+					<code>inherit</code>, which is the same thing).
+				</p>
+			</div>
+
+			<div class="drift">
+				<span class="label">Drift · the one piece of tier advice not to follow here</span>
+				<p>
+					The subscription guide recommends
+					<code>CLAUDE_CODE_SUBAGENT_MODEL=claude-sonnet-5</code> on <em>all three</em> tiers, so
+					that subagent fan-out never bills at Opus rates. That is sound advice for a generic Claude
+					Code setup where nothing is pinned — and it is
+					<strong>actively wrong in a repository this plugin has configured</strong>, because it would
+					collapse both design gates and the review gate to Sonnet while every schema still reads as
+					though a stronger model had judged them.
+				</p>
+				<p>
+					You do not need the variable to get the saving it is after. This plugin already does the
+					same job per agent, which is the precise version of the same idea:
+					<code>code-review-spec</code> and <code>taste-preflight</code> are pinned
+					<code>sonnet</code> because their work is mechanical, while the three gates are pinned
+					<code>opus</code> because theirs is not. Cheap fan-out where it belongs, depth where it
+					belongs, and no single switch that flattens both.
+				</p>
+			</div>
+
+			<div class="stop" data-background="dark">
+				<span class="label">2 · your organisation's model allowlist</span>
+				<p>
+					A <code>model:</code> value is checked against the organisation's
+					<code>availableModels</code> allowlist, and <strong>an excluded value is skipped — the
+					agent runs on the inherited model instead</strong>. So if <code>opus</code> is not
+					available to you, your design gate is quietly running on whatever your session is on. The
+					schema still says the gate ran on a stronger model. It did not.
+				</p>
+			</div>
+			<span class="cite">
+				Both from
+				<code>plugins/meta-skills/skills/authoring-subagents/references/frontmatter.md</code>, the
+				<code>model</code> section.
+			</span>
+
+			<h2>Confirm it, do not assume it</h2>
+
+			<p>
+				<code>/status</code> reports the current <strong>model</strong> and
+				<strong>effort</strong>, alongside the account, workspace, and context usage. It
+				is the cheapest possible check that you are where you think you are.
+			</p>
+
+			<h2>How you actually switch</h2>
+
+			<p>
+				Switch at artifact boundaries, and run <code>/status</code> after each switch. Three commands
+				do the whole job:
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th class="col-label">Command</th>
+							<th>Does</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>/clear</code></td>
+							<td>
+								Empties the context window. Do this <strong>first</strong> — a switch made inside a
+								full window still drags the old window's contents into every turn that follows
+							</td>
+						</tr>
+						<tr>
+							<td><code>/model</code></td>
+							<td>
+								Opens the picker. Choose the model with up and down, and set that model's effort with
+								<strong>left and right</strong> — both knobs, one dialog
+							</td>
+						</tr>
+						<tr>
+							<td><code>/effort</code></td>
+							<td>
+								Effort alone, when the model is already the one you want and only the depth is wrong.
+								The common case mid-chain
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3>The boundary that matters most</h3>
+
+			<p>
+				Every chain in this plugin has one switch that is worth more than all the others: the gap
+				between the last planning artifact and the first line of code. It is the largest single change
+				in depth in the whole chain — rules 1 and 2 above are exactly this gap — and it is also the
+				moment your window is fullest of material apply does not need.
+			</p>
+
+			<ol class="steps">
+				<li>
+					<strong><code>/clear</code>.</strong> The planning artifacts are files now. Apply reads them
+					off disk; it does not need your memory of writing them, and it does need the room. OpenSpec's
+					own guidance says the same: high-reasoning models, and a clean context window before
+					implementation.
+				</li>
+				<li>
+					<strong><code>/model</code>, arrows for effort — or <code>/effort</code> alone.</strong> Down
+					from planning depth to an implementation tier, per the table further down this lesson. Check
+					<code>/status</code> before you type anything else.
+				</li>
+				<li>
+					<strong><code>/opsx:apply &lt;change-name&gt;</code>.</strong> With the name. You just
+					removed the conversation the command would otherwise have inferred it from — which is why
+					the name stops being optional the moment you take clearing seriously.
+				</li>
+			</ol>
+
+			<p>
+				<strong>Between planning artifacts, the middle step travels alone.</strong> Re-pick model and
+				effort at every artifact boundary — that costs the window nothing. Whether to also
+				<code>/clear</code> there is the chain's call, not a general rule:
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th class="col-label">Chain</th>
+							<th>Between planning artifacts</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>mattpocock-bridge</code></td>
+							<td>
+								<strong>Do not clear.</strong> It wants <code>grill</code> through
+								<code>tasks</code> in one unbroken window so they build on the same thinking. If
+								that run gets long, compact at the nearest artifact boundary
+							</td>
+						</tr>
+						<tr>
+							<td><code>feature</code></td>
+							<td>
+								<strong>Clear or compact at the boundaries.</strong> Its own session discipline says
+								so, and at ten artifacts a single window would not survive the chain anyway
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					<code>payload/levels/minimal/openspec/CLAUDE.md.fragment.md</code> and
+					<code>payload/levels/advanced/openspec/schemas/feature/schema.yaml</code>, around line 291.
+				</caption>
+			</div>
+
+			<p>
+				The reset before <code>apply</code> is the one that is universal — every schema here puts
+				implementation in a fresh session — and nothing is lost by it either way: artifact state is pure
+				file existence, so a cleared window costs a chain exactly nothing.
+			</p>
+
+			<p>Three more checks worth knowing, none of which <code>/status</code> covers:</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Command</th>
+							<th>Answers</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>/usage</code></td>
+							<td>How much of the current session window and the weekly bucket is gone</td>
+						</tr>
+						<tr>
+							<td><code>/status</code></td>
+							<td>Which model and which account this session is actually on</td>
+						</tr>
+						<tr>
+							<td><code>/cost</code></td>
+							<td>API spend, when you are on credits rather than a subscription</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="note">
+				<span class="label">Two facts that change how you read your own effort settings</span>
+				<p>
+					<strong>Default effort is <code>high</code></strong> on every current model, and
+					<code>xhigh</code> has to be opted into — it is not any model's default any more. So an
+					artifact you never touched is already at <code>high</code>, which is where rule 3 wants
+					most interactive work anyway. The switches that matter are the deliberate steps
+					<em>down</em> to <code>medium</code> for mechanical loops and <em>up</em> to
+					<code>xhigh</code> at a gate.
+				</p>
+				<p>
+					<strong>Nothing downgrades you automatically.</strong> Hitting a usage limit never triggers
+					a model switch — authentication, billing, rate-limit, request-size and transport errors are
+					all excluded from the fallback machinery. Do not plan a workflow around being rescued;
+					manage it with <code>opusplan</code>, <code>/effort</code>, and <code>/usage</code>.
+				</p>
+			</div>
+
+			<div class="stop" data-background="dark">
+				<span class="label"><code>ANTHROPIC_API_KEY</code> silently changes who pays</span>
+				<p>
+					With that variable in the environment, Claude Code bills the API instead of your
+					subscription — no prompt, no warning. If <code>/cost</code> is showing spend you did not
+					expect, or <code>/usage</code> shows a weekly bucket that never moves, check the
+					environment before anything else.
+				</p>
+			</div>
+
+			<h2>What the guides recommend, per artifact</h2>
+
+			<p>
+				For <code>minimal</code> and <code>standard</code>, the attached
+				<code>mattpocock-superpowers-schema-model-effort</code> guide gives a per-artifact table in
+				Claude model names. It agrees with the pinned frontmatter above almost line for line, which is
+				a good sign for both.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th class="col-label">Artifact</th>
+							<th><code>mattpocock-bridge</code></th>
+							<th><code>bugfix-flow</code></th>
+							<th><code>craft-driven</code></th>
+							<th><code>surface-driven</code></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>opening artifact</td>
+							<td>grill · Opus, high</td>
+							<td><strong>diagnose · Opus, xhigh</strong></td>
+							<td>brainstorm · Opus, high</td>
+							<td>design-brief · Opus high for a new visual world; Sonnet medium for a refinement</td>
+						</tr>
+						<tr>
+							<td>proposal</td>
+							<td>Opus, high</td>
+							<td>—</td>
+							<td>Opus, high</td>
+							<td>Sonnet, medium</td>
+						</tr>
+						<tr>
+							<td>surface / design-brief</td>
+							<td>Sonnet, medium — Opus high for a new visual world</td>
+							<td>—</td>
+							<td>Sonnet, medium — Opus high for a new or replacement world</td>
+							<td>(leads, above)</td>
+						</tr>
+						<tr>
+							<td>specs</td>
+							<td>Opus, high</td>
+							<td>Sonnet, medium</td>
+							<td>Opus, high</td>
+							<td>Sonnet, medium — Opus high if the capability surface is broad</td>
+						</tr>
+						<tr>
+							<td>design</td>
+							<td><strong>top tier, xhigh</strong></td>
+							<td>—</td>
+							<td><strong>top tier, xhigh</strong> (conditional)</td>
+							<td>—</td>
+						</tr>
+						<tr>
+							<td>tasks</td>
+							<td>Opus, high</td>
+							<td>Sonnet, low–medium</td>
+							<td>Opus, high</td>
+							<td>Opus, high</td>
+						</tr>
+						<tr>
+							<td>apply</td>
+							<td>Sonnet, medium</td>
+							<td>Sonnet, medium</td>
+							<td>Sonnet workers, Haiku for mechanical; escalate to Opus on BLOCKED</td>
+							<td>Sonnet, medium — keep surface tasks off Haiku even when they look mechanical</td>
+						</tr>
+						<tr>
+							<td>apply · review</td>
+							<td>split: Spec axis cheap, Standards axis Opus high</td>
+							<td>Sonnet — Opus high when the fix touched shared code</td>
+							<td>(in verification)</td>
+							<td>(in quality)</td>
+						</tr>
+						<tr>
+							<td>closing gate</td>
+							<td>—</td>
+							<td>—</td>
+							<td>verification · Sonnet medium, with an <strong>Opus xhigh reviewer dispatch</strong></td>
+							<td>quality · Sonnet medium — Opus high for the final verdict on a large redesign</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					Condensed from the attached guide. "Top tier" is its Fable-5 row: on a Pro plan that row
+					<em>is</em> Opus 5 at xhigh, which is exactly what the shipped agent files pin.
+				</caption>
+			</div>
+
+			<div class="drift">
+				<span class="label">Drift · the two design gates on a Max plan</span>
+				<p>
+					The guide puts both design artifacts on the very top tier. The shipped agents pin
+					<code>opus</code>. On a Pro plan those are the same thing; on a plan with a higher tier
+					available they are not — the pin will not escalate on its own. Raising it means editing the
+					agent file, and from
+					<a href="0004-check-dry-run-and-the-re-run-contract.html">lesson 04</a> you know exactly
+					what that does: the file becomes yours, and every future re-run reports it as a collision
+					instead of updating it. That is a fair trade, made knowingly.
+				</p>
+			</div>
+
+			<h2>The <code>advanced</code> eight</h2>
+
+			<p>
+				A per-schema, per-phase table for all eight exists, in Claude model names, across the three
+				consumer subscription tiers. Read it alongside the eight pins above: where the two overlap,
+				they agree.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Schema</th>
+							<th>Planning</th>
+							<th>Implementation</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>feature</code></td>
+							<td>Opus 5 · high — <strong>xhigh at the design gate</strong></td>
+							<td>Sonnet 5 · medium — <strong>xhigh at the review gate</strong>; Haiku for mechanical passes</td>
+						</tr>
+						<tr>
+							<td><code>bugfix</code></td>
+							<td><strong>Opus 5 · xhigh</strong> for root cause</td>
+							<td>Sonnet 5 · medium</td>
+						</tr>
+						<tr>
+							<td><code>refactor</code></td>
+							<td>Opus 5 · high</td>
+							<td>Sonnet 5 · medium; Haiku for bulk moves</td>
+						</tr>
+						<tr>
+							<td><code>upgrade</code></td>
+							<td>Opus 5 · high</td>
+							<td>Sonnet 5 · medium; Haiku for bulk codemods</td>
+						</tr>
+						<tr>
+							<td><code>setup</code></td>
+							<td>Opus 5 · high</td>
+							<td>Sonnet 5 · medium; Haiku subagents for file generation</td>
+						</tr>
+						<tr>
+							<td><code>hotfix</code></td>
+							<td>
+								Sonnet 5 · low–medium for triage.<br />
+								<strong>Opus 5 · xhigh for the postmortem</strong>
+							</td>
+							<td>Sonnet 5 · medium</td>
+						</tr>
+						<tr>
+							<td><code>spike</code></td>
+							<td>Sonnet 5 · low–medium</td>
+							<td>Sonnet 5 · medium; Haiku to explore</td>
+						</tr>
+						<tr>
+							<td><code>rapid</code></td>
+							<td>Sonnet 5 · low–medium</td>
+							<td>Sonnet 5 · medium</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					From the attached subscription-tier guide's baseline table. Four cells are where premium
+					reasoning actually pays across every tier: the feature design gate, the feature review
+					gate, bugfix root cause, and the hotfix postmortem. Everything mechanical goes to Sonnet
+					or Haiku.
+				</caption>
+			</div>
+
+			<p>
+				Read that against the shipped pins and one thing falls out:
+				<strong>the plugin already implements the four cells that matter.</strong>
+				<code>design-gate</code> and <code>review-gate</code> are <code>opus</code>/<code>xhigh</code>
+				— the two feature gates. Bugfix root cause and the hotfix postmortem have no subagent, so
+				those two are the switches you make yourself, in your own session, at that artifact.
+			</p>
+
+			<h2>Your tier changes what you can afford, not what you can pick</h2>
+
+			<p>
+				All three consumer tiers can select every model — Opus 5, Sonnet 5, Haiku 4.5, and Fable 5.
+				The old "Pro is Sonnet-only in the terminal" claim is out of date. What differs is the weekly
+				usage bucket and how Fable is billed.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Tier</th>
+							<th class="col-label">Fable 5</th>
+							<th>What to do differently</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="nowrap">Pro</td>
+							<td>Not in-plan — usage credits only</td>
+							<td>
+								Substitute <strong>Opus 5 at xhigh</strong> for Fable at both feature gates — which is
+								exactly what this plugin ships. Use <code>opusplan</code> for planning-heavy schemas.
+								Keep bugfix root cause and the hotfix postmortem at xhigh whatever else you cut; drop
+								marginal <code>refactor</code>/<code>upgrade</code> planning to Sonnet when the bucket
+								is tight
+							</td>
+						</tr>
+						<tr>
+							<td class="nowrap">Max 5x</td>
+							<td>In-plan, up to 50% of weekly limits</td>
+							<td>
+								Opus 5 is the default and Opus-plan plus Sonnet-implement is sustainable across a
+								disciplined workweek. A Fable session weighs roughly twice an Opus one, so the 50% cap
+								arrives in about half the sessions the number suggests — keep Fable to the two feature
+								gates if you use it at all
+							</td>
+						</tr>
+						<tr>
+							<td class="nowrap">Max 20x</td>
+							<td>In-plan, same 50% cap</td>
+							<td>
+								Nothing needs downgrading. Opus planning daily is fine. Fable at the gates stays well
+								inside the cap for gate-only use — but do not make it the default driver
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="note">
+				<span class="label"><code>opusplan</code> is the one alias worth learning</span>
+				<p>
+					Opus in plan mode, Sonnet in execution, switched for you at the boundary. It maps almost
+					exactly onto rules 1 and 2 at the top of this lesson, which is why it is the single most
+					useful burn control on any tier — and why it is the first thing to reach for on Pro.
+				</p>
+			</div>
+
+			<div class="drift">
+				<span class="label">Drift · the Fable question, now settled</span>
+				<p>
+					An earlier version of this lesson flagged that one guide puts both design gates on the very
+					top tier while the shipped agents pin <code>opus</code>, and left the choice open. The
+					subscription guide closes it: Opus 5 wins most published head-to-heads at half the rate, and
+					Fable carries operational strings — mandatory 30-day retention on its traffic class,
+					unavailable under zero-data-retention, and content classifiers that trigger a fallback more
+					often. Treat Fable as a <em>measured exception</em> you benchmark on your own change, not a
+					default upgrade. Until you have that benchmark, <strong>leave the pins as
+					shipped.</strong>
+				</p>
+			</div>
+
+			<h2>Recall check</h2>
+
+			<p data-quiz-tally class="drill-score"></p>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					You set <code>CLAUDE_CODE_SUBAGENT_MODEL</code>. What happens to the eight pinned agents?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="That variable outranks frontmatter, so every pin collapses silently."
+						>
+							Every pin is overridden
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Frontmatter sits below that variable in the resolution order."
+						>
+							Each frontmatter pin holds
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Nothing warns you; the schemas still read as though it ran."
+						>
+							A clear warning appears
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					Why is a review split across two models rather than run on one?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Diff-versus-spec is mechanical; judging code as code is judgement."
+						>
+							The axes need different depth
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="They run in parallel either way; splitting is not about speed."
+						>
+							Two agents finish the fastest
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Redundancy is a different pattern; these two share no lane."
+						>
+							Two opinions catch more bugs
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					An artifact is interactive — rounds of questions with you in the loop. Which effort?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Reasoning happens between short turns, so the top setting adds only latency."
+						>
+							High, not the highest
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="The highest setting mostly buys latency you sit through here."
+						>
+							Highest, always worth it
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Interviews carry real judgement; the lowest is a false economy."
+						>
+							Lowest, since you decide
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					<code>opus</code> is not in your organisation's allowlist. What runs the design gate?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="An excluded value is skipped, so it runs on the inherited model."
+						>
+							Whatever your session uses
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="The agent still launches; the excluded value is merely skipped."
+						>
+							Nothing, the launch fails
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="No fallback ladder exists; it inherits rather than steps down."
+						>
+							The nearest allowed tier
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					The tier guide says to set <code>CLAUDE_CODE_SUBAGENT_MODEL</code> to Sonnet on every
+					tier. In a repository this plugin configured, what would that do?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="It outranks frontmatter, so the gates lose their depth silently."
+						>
+							Collapse the pinned gates
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="The plugin already gets that saving per agent, more precisely."
+						>
+							Save the fan-out billing
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Frontmatter sits below that variable, so the pins lose."
+						>
+							Nothing, since pins outrank
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					On Pro, Fable is not in-plan. What takes its place at the feature design gate?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Exactly what this plugin already pins for that gate."
+						>
+							Opus at the top effort
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="That is the implementation tier, not the gate tier."
+						>
+							Sonnet at the top effort
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="That one is for mechanical passes, never a design gate."
+						>
+							Haiku at the top effort
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					You switch model and effort mid-chain but do not <code>/clear</code> first. What have you
+					kept?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="A switch inside a full window drags every earlier turn along."
+						>
+							The whole previous window
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Frontmatter pins are unrelated to what your own window holds."
+						>
+							Only the pinned settings
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="The knobs changed; the contents of the window did not."
+						>
+							Just the changed knobs
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="appendix">
+				<span class="label">Appendix · why gate agents draft and return instead of asking</span>
+				<p>
+					A subagent cannot use <code>AskUserQuestion</code> — it is removed from every subagent
+					regardless of what <code>tools:</code> says. So a design gate whose sign-off genuinely needs
+					a human answer cannot get one. That is exactly why all four design gates in this plugin
+					draft the artifact and <em>return open questions to the caller</em>: the main session, which
+					can ask. The attached guide arrives at the same conclusion and calls it the
+					draft-and-return pattern. If you ever write a gate agent of your own, this is the constraint
+					that shapes it.
+				</p>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Read this next</h2>
+				<p>
+					<strong>Primary source: the agent files themselves</strong> —
+					<a href="../../payload/levels/advanced/agents/design-gate.md"
+						><code>advanced/agents/design-gate.md</code></a
+					>
+					is the shortest useful one. Read its frontmatter and then its body, and notice how much of
+					the body exists purely because a subagent inherits nothing.
+				</p>
+			</footer>
+
+			<footer class="lesson-foot">
+				<h2>Reference</h2>
+				<p>
+					<a href="../reference/model-effort-card.html">Model &amp; effort card</a> — the same
+					decisions on one page, with a <em>source</em> column so you can always tell a pin from a
+					recommendation from a gap.
+				</p>
+			</footer>
+
+			<div class="ask">
+				<p>
+					<strong>Ask for your own baseline.</strong> "What model and effort is this session on, and
+					is <code>CLAUDE_CODE_SUBAGENT_MODEL</code> set anywhere in my environment or settings?" If
+					the answer to the second half is yes, that is worth knowing before you trust a single gate.
+				</p>
+			</div>
+
+			<nav class="nav">
+				<span
+					><a href="0011-advanced-the-situational-four.html">← Lesson 11 · The situational four</a></span
+				>
+				<span
+					><a href="0013-prove-it-reached-the-model.html">Lesson 13 · Prove it reached the model →</a></span
+				>
+			</nav>
+		</main>
+		<script src="../assets/quiz.js"></script>
+	</body>
+</html>

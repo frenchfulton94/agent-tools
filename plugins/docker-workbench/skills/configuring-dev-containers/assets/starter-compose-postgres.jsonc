@@ -1,0 +1,27 @@
+// Multi-container starter: app + Postgres.
+// Copy this to .devcontainer/devcontainer.json and the companion
+// starter-compose-postgres.yml to .devcontainer/docker-compose.yml.
+{
+  "name": "App with Postgres",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+
+  // Compose defaults workspaceFolder to "/", so set it.
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+  "forwardPorts": [3000, 5432],
+  "portsAttributes": {
+    "5432": { "label": "Postgres", "onAutoForward": "silent" }
+  },
+
+  "postCreateCommand": "npm ci",
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["dbaeumer.vscode-eslint", "ckolkman.vscode-postgres"]
+    }
+  },
+
+  "remoteUser": "node",
+  "shutdownAction": "stopCompose"
+}

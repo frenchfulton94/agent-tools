@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "zed",
+  "displayName": "Zed",
+  "version": "0.1.0",
+  "description": "Configures and customizes the Zed editor — settings.json and keymap.json, themes and fonts, per-language and LSP options, formatters, tasks, snippets, extensions, and AI and agent configuration.",
+  "author": {
+    "name": "Agent Tools",
+    "email": "michael@frenchfultonjr.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "zed",
+    "editor",
+    "settings",
+    "keymap",
+    "lsp",
+    "formatter"
+  ]
+}

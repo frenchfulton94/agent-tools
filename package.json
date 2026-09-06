@@ -1,0 +1,17 @@
+{
+  "name": "agent-tools",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Claude Code plugin marketplace for the agent-tools catalog.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "audit": "bun plugins/meta-skills/skills/maintaining-plugin-marketplaces/scripts/audit_marketplace.ts .",
+    "audit:strict": "bun plugins/meta-skills/skills/maintaining-plugin-marketplaces/scripts/audit_marketplace.ts . --strict",
+    "validate": "claude plugin validate ."
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

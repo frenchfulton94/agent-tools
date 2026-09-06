@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Router card — workflows</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+	</head>
+	<body>
+		<main class="page page--wide">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Reference</span><span class="sep">·</span><span>Print this</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1>Router card</h1>
+				<p class="deck">
+					Which schema, for the thing in front of you. First match wins — the order is triage order,
+					not alphabetical.
+				</p>
+			</header>
+
+			<h2>How a schema is chosen at all</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Precedence</th>
+							<th>Source</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>1 · wins</td>
+							<td><code>--schema &lt;name&gt;</code> on the command</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>the change's <code>.openspec.yaml</code></td>
+						</tr>
+						<tr>
+							<td>3</td>
+							<td><code>openspec/config.yaml</code>'s <code>schema:</code></td>
+						</tr>
+						<tr>
+							<td>4 · fallback</td>
+							<td><code>spec-driven</code></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<pre><code>openspec new change &lt;slug&gt; --schema &lt;schema&gt;</code></pre>
+
+			<h2><code>advanced</code> — the decision tree</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>If…</th>
+							<th>Schema</th>
+							<th>Chain</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>1</td>
+							<td>Production is broken <strong>now</strong> — incident, outage, users blocked</td>
+							<td><code>hotfix</code></td>
+							<td>triage → tasks → postmortem</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>New repository or project bootstrap — init, scaffold, set up the project</td>
+							<td><code>setup</code></td>
+							<td>decisions → conventions → tasks</td>
+						</tr>
+						<tr>
+							<td>3</td>
+							<td>
+								Behaves wrong versus intent — bug, error, crash, regression, "too slow".
+								<strong>Performance is a bugfix</strong>
+							</td>
+							<td><code>bugfix</code></td>
+							<td>reproduction → rootcause → fix → tasks</td>
+						</tr>
+						<tr>
+							<td>4</td>
+							<td>Dependency, framework, platform version change — bump, EOL, CVE, migrate to vN</td>
+							<td><code>upgrade</code></td>
+							<td>inventory → surfaces → migration → tasks → verification</td>
+						</tr>
+						<tr>
+							<td>5</td>
+							<td>
+								Structure changes, behaviour must not — clean up, extract, rename, de-dupe.
+								<strong>Coverage backfill is a refactor</strong>
+							</td>
+							<td><code>refactor</code></td>
+							<td>characterization → strategy → tasks</td>
+						</tr>
+						<tr>
+							<td>6</td>
+							<td>An open question answered by building — try, compare, POC, feasibility</td>
+							<td><code>spike</code></td>
+							<td>question → apply → findings</td>
+						</tr>
+						<tr>
+							<td>7</td>
+							<td>
+								New capability or intentional behaviour change — <strong>including removals and
+								deprecations</strong>
+							</td>
+							<td><code>feature</code></td>
+							<td>
+								brainstorm → constraints → proposal → specs → design → migration → review → tasks →
+								plan → verification
+							</td>
+						</tr>
+						<tr>
+							<td>8</td>
+							<td>Trivial, low-risk, no contract impact — typo, copy, config value, docs</td>
+							<td><code>rapid</code></td>
+							<td>proposal → tasks</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2>Prompt signals</h2>
+
+			<div class="grid">
+				<section class="card">
+					<h3>→ <code>bugfix</code></h3>
+					<p>"X is broken / throws / returns the wrong thing" · "add tests for X"? no — that is refactor</p>
+				</section>
+				<section class="card">
+					<h3>→ <code>hotfix</code></h3>
+					<p>"prod is down" · "urgent" · "do we roll back?"</p>
+				</section>
+				<section class="card">
+					<h3>→ <code>upgrade</code></h3>
+					<p>"upgrade to &lt;framework&gt; vN" · "Node LTS" · "patch the CVE"</p>
+				</section>
+				<section class="card">
+					<h3>→ <code>refactor</code></h3>
+					<p>"no behaviour change" stated or implied · "add tests for X" · "raise coverage"</p>
+				</section>
+				<section class="card">
+					<h3>→ <code>spike</code></h3>
+					<p>"prototype" · "spike" · "see if" · "which of A or B"</p>
+				</section>
+				<section class="card">
+					<h3>→ <code>setup</code></h3>
+					<p>"new repo" · "greenfield project" · "bootstrap"</p>
+				</section>
+				<section class="card">
+					<h3>→ <code>feature</code></h3>
+					<p>
+						"add / build / support / let users…" · "remove feature X" (REMOVED deltas plus a
+						migration and sunset plan)
+					</p>
+				</section>
+				<section class="card">
+					<h3>→ <code>rapid</code></h3>
+					<p>
+						Typo, copy, config value, docs · standing-doc upkeep (memory audit, TOOLS refresh,
+						glossary), invoking the owning skill
+					</p>
+				</section>
+			</div>
+
+			<h2><code>minimal</code> and <code>standard</code> — two-way calls</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Level</th>
+							<th>Default</th>
+							<th>Other</th>
+							<th>The distinguishing question</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>minimal</code></td>
+							<td><code>mattpocock-bridge</code><br />grill → proposal → surface → specs → design → tasks</td>
+							<td><code>bugfix-flow</code><br />diagnose → specs → tasks</td>
+							<td>
+								Is the problem known and the cause unknown? Then it is a defect — no interview, no
+								proposal, fix gated behind a written root cause
+							</td>
+						</tr>
+						<tr>
+							<td><code>standard</code></td>
+							<td>
+								<code>craft-driven</code><br />brainstorm → proposal → specs (+ design-brief, design) →
+								tasks → verification
+							</td>
+							<td>
+								<code>surface-driven</code><br />design-brief → proposal → specs → tasks → quality
+							</td>
+							<td>
+								Is the change <em>primarily</em> a user-facing surface? Then design leads and
+								Superpowers executes
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2>Guardrails — reclassify when these fire</h2>
+
+			<div class="grid">
+				<section class="card">
+					<h3><code>rapid</code> → <code>feature</code></h3>
+					<p>
+						The moment a public API, URL, analytics event, data schema, or config contract is touched
+						— or the change turns out non-trivial. Stop and recreate.
+					</p>
+				</section>
+				<section class="card">
+					<h3><code>refactor</code> → <code>feature</code></h3>
+					<p>Any test assertion has to change. Behaviour is changing; this was never a refactor.</p>
+				</section>
+				<section class="card">
+					<h3><code>bugfix-flow</code> → <code>mattpocock-bridge</code></h3>
+					<p>
+						The fix <em>alters</em> behaviour the product cares about, rather than restoring behaviour
+						it already promised. A fault whose fix is a redesign is a change.
+					</p>
+				</section>
+				<section class="card">
+					<h3><code>spike</code></h3>
+					<p>Code is throwaway and never merges. Learnings graduate through a new <code>feature</code>.</p>
+				</section>
+				<section class="card">
+					<h3><code>hotfix</code></h3>
+					<p>
+						Must spawn a follow-up <code>bugfix</code> or <code>feature</code> for the durable fix.
+						<code>postmortem.md</code> links it. Mandatory.
+					</p>
+				</section>
+				<section class="card">
+					<h3>De-escalate too</h3>
+					<p>
+						A <code>feature</code> brainstorm revealing bounded work → recreate as
+						<code>rapid</code>. Revealing a question in disguise → <code>spike</code>. One command
+						against hours of ceremony.
+					</p>
+				</section>
+			</div>
+
+			<h2>Bigger than one change</h2>
+
+			<p>
+				A change is a single unit of work. For an epic, map it with <code>/wayfinder</code>
+				(user-invoked) as decision tickets, then create one change per resolved chunk. Accepted
+				opportunities from <code>/improve-codebase-architecture</code> each become their own
+				<code>refactor</code>. Ambiguous between two schemas? Ask one multiple-choice question, then
+				route.
+			</p>
+
+			<footer class="lesson-foot">
+				<h2>Source</h2>
+				<p>
+					<code>plugins/workflows/payload/levels/advanced/openspec/ROUTING.md</code> for the tree,
+					signals and guardrails; the four <code>minimal</code>/<code>standard</code> schema
+					<code>description</code> and <code>instruction</code> fields for the two-way calls;
+					<code>skills/configuring-openspec/SKILL.md</code> for the precedence table.
+				</p>
+			</footer>
+
+			<nav class="nav">
+				<span><a href="../lessons/0006-route-a-task-in-one-pass.html">← Lesson 06 · Routing</a></span>
+				<span><a href="workflow-atlas.html">Workflow atlas →</a></span>
+			</nav>
+		</main>
+	</body>
+</html>

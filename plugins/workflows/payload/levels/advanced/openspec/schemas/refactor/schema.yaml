@@ -1,0 +1,61 @@
+name: refactor
+version: 1
+description: >
+  Workflow for structural change with no behavior change, including
+  coverage-only backfill as a degenerate case. Safety net is
+  characterization tests pinned before code moves. Invokes
+  agent-skills:code-simplification for the strategy and superpowers review
+  and verification skills at apply. Skill names written pack:skill -
+  confirm in the agent's skill list.
+
+artifacts:
+  - id: characterization
+    generates: characterization.md
+    description: Current behavior pinned by tests before code moves
+    template: characterization.md
+    instruction: |
+      Pin the observable behavior that must survive. Invoke
+      superpowers:test-driven-development (fallback:
+      agent-skills:test-driven-development) to write characterization tests
+      for coverage gaps - untested behavior cannot be safely refactored, so
+      close gaps before moving code. Record invariants and public contracts
+      (APIs, wire formats, performance ceilings) that must not change.
+    requires: []
+
+  - id: strategy
+    generates: strategy.md
+    description: Target structure and reversible sequencing
+    template: strategy.md
+    instruction: |
+      Invoke mattpocock-skills:codebase-design for the target structure - deep
+      modules with substantial behavior behind small interfaces at clean
+      seams - and agent-skills:code-simplification for the
+      behavior-preserving discipline: why the restructure pays for itself,
+      before/after structure, and small reversible steps with tests green
+      and committable after each. No behavior change at any step: a changed
+      test assertion means stop and reclassify as feature. Coverage-only
+      work is a valid degenerate case: state "no restructure" and let tasks
+      be the test list. Fallback: follow the template.
+    requires: [characterization]
+
+  - id: tasks
+    generates: tasks.md
+    description: Ordered mechanical steps, each independently committable
+    template: tasks.md
+    instruction: |
+      Turn the sequencing into checkboxes. Each task is one mechanical step
+      (extract, rename, move, inline) with the acceptance criterion "suite
+      green, no assertion changed".
+    requires: [strategy]
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Execute step-by-step: run the full suite after every task and commit
+    while green. A changed test assertion means behavior changed - stop,
+    revert the step, reclassify as feature. Invoke
+    superpowers:requesting-code-review on the final diff and
+    superpowers:verification-before-completion before claiming done. Delete
+    any code the refactor orphans; a refactor that leaves both old and new
+    paths is unfinished.

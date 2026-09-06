@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>10 · Advanced, the everyday four</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+		<link rel="stylesheet" href="../assets/quiz.css" />
+	</head>
+	<body>
+		<main class="page">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Lesson 10</span><span class="sep">·</span><span>Running them</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1><code>advanced</code>, the everyday four</h1>
+				<p class="deck">
+					<code>feature</code>, <code>bugfix</code>, <code>refactor</code>, <code>rapid</code> — ten
+					artifacts down to two. Each chain has one gate that is the whole reason it exists, and
+					learning the four gates is faster than learning the nineteen artifacts.
+				</p>
+			</header>
+
+			<section class="objective">
+				<h2>By the end</h2>
+				<p>
+					You can drive all four chains, and for each one you can name the gate, say what it blocks,
+					and say what happens when it fails.
+				</p>
+			</section>
+
+			<p class="prereq">
+				<strong>Prerequisites:</strong>
+				<a href="0008-minimal-end-to-end.html">Lesson 08</a> for the loop,
+				<a href="0006-route-a-task-in-one-pass.html">lesson 06</a> for the router. A repository set up
+				at <code>advanced</code>.
+			</p>
+
+			<h2>The four gates, first</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Schema</th>
+							<th>The gate</th>
+							<th>It blocks</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>feature</code></td>
+							<td><code>review</code> must <strong>PASS</strong></td>
+							<td>
+								<code>tasks</code>. No implementation plan is generated until a stronger model has
+								reviewed the specs, design and migration
+							</td>
+						</tr>
+						<tr>
+							<td><code>bugfix</code></td>
+							<td><code>rootcause</code> before <code>fix</code></td>
+							<td>
+								Any proposed fix. "No fix may be proposed before this completes" — the debugging
+								skill's own rule
+							</td>
+						</tr>
+						<tr>
+							<td><code>refactor</code></td>
+							<td><code>characterization</code> before anything moves</td>
+							<td>
+								Every code move. Behaviour is pinned by tests first, and coverage gaps get closed
+								before the restructure starts
+							</td>
+						</tr>
+						<tr>
+							<td><code>rapid</code></td>
+							<td>The contract check, in the proposal</td>
+							<td>
+								Itself. Touch a public API, URL, analytics event, schema, or config contract and the
+								whole change is recreated as <code>feature</code>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2><code>feature</code> — ten artifacts, one hard gate</h2>
+
+			<ul class="chain">
+				<li>brainstorm</li>
+				<li class="arrow">→</li>
+				<li>constraints</li>
+				<li class="arrow">→</li>
+				<li>proposal</li>
+				<li class="arrow">→</li>
+				<li>specs</li>
+				<li class="arrow">→</li>
+				<li>design</li>
+				<li class="arrow">→</li>
+				<li>migration</li>
+				<li class="arrow">→</li>
+				<li data-gate>review</li>
+				<li class="arrow">→</li>
+				<li>tasks</li>
+				<li class="arrow">→</li>
+				<li>plan</li>
+				<li class="arrow">→</li>
+				<li data-gate>verification</li>
+			</ul>
+
+			<p>
+				Strictly linear, unlike the <code>standard</code> chains. It absorbs what used to be separate
+				greenfield and brownfield schemas: <code>constraints</code> and <code>migration</code> scale
+				from three lines for net-new flag-gated work to full rigour on an existing system.
+			</p>
+
+			<h3>The review gate in detail</h3>
+
+			<ol class="steps">
+				<li>
+					<strong>If the proposal's Surfaces line names any surface</strong>, dispatch
+					<code>taste-preflight</code> first — a mechanical anti-slop UI check on a cheap model. Pass
+					it the change directory path.
+				</li>
+				<li>
+					<strong>Then dispatch <code>review-gate</code></strong>, pinned to the top tier at
+					<code>xhigh</code>. Its prompt carries the change directory path <em>and the
+					taste-preflight findings verbatim</em> when they exist.
+				</li>
+				<li>
+					<strong>Write its returned content here verbatim</strong> as <code>review.md</code>.
+				</li>
+				<li>
+					<strong>On BLOCK:</strong> surface the <code>[Critical]</code> findings, fix the
+					<em>upstream artifacts</em>, and re-dispatch. The gate must PASS before tasks are
+					generated.
+				</li>
+			</ol>
+
+			<div class="stop" data-background="dark">
+				<span class="label">Do not re-adjudicate the gate</span>
+				<p>
+					From the schema, verbatim: "Do not soften or re-adjudicate its findings in this session; the
+					gate runs on a stronger model than this one." That single clause is the reason the gate is
+					worth anything. A gate you can argue with from a weaker model is not a gate.
+				</p>
+			</div>
+
+			<h3>Two file-format traps</h3>
+
+			<ul>
+				<li>
+					<strong>Checkboxes in <code>tasks.md</code> must be exactly <code>- [ ] </code>.</strong>
+					Apply parses that form; any other shape is invisible to progress tracking. Not an error —
+					invisible.
+				</li>
+				<li>
+					<strong>Placeholders in <code>plan.md</code> are plan failures.</strong> Write the real
+					failing-test code in a fenced block above its checkbox, the real error handling, the
+					repeated code. "Write tests for the above" is a defect, because the implementer may see
+					only their own task.
+				</li>
+			</ul>
+
+			<p>
+				<code>tasks</code> is the <em>coarse, tracked</em> list; <code>plan</code> is the micro-step
+				two-to-five-minute decomposition. Two files, two jobs — do not merge them.
+			</p>
+
+			<div class="note">
+				<span class="label">Ten artifacts is ten <code>/opsx:continue</code> calls, not one session</span>
+				<p>
+					Open with <code>/opsx:new &lt;a sentence&gt;, using feature</code>, then
+					<code>/opsx:continue &lt;name&gt;</code> once per artifact, naming the change each time. This
+					is the longest chain in the plugin, and unlike <code>mattpocock-bridge</code> — which wants
+					its planning run in one unbroken window — <code>feature</code>'s own session discipline is to
+					<em>compact at artifact boundaries</em>. So the boundaries are where you clear and re-pick,
+					and the chain does not notice, because its whole state is on disk.
+				</p>
+				<p>
+					<code>plan</code> is the last planning artifact, and the boundary the
+					<a href="0008-minimal-end-to-end.html">lesson 08</a> reset exists for:
+					<code>/clear</code> → <code>/model</code> (arrow for effort) or <code>/effort</code> →
+					<code>/opsx:apply &lt;name&gt;</code>. Everything the planning window held is now written
+					down in ten files that apply reads for itself.
+				</p>
+			</div>
+
+			<h2><code>bugfix</code> — the cause gates the fix</h2>
+
+			<ul class="chain">
+				<li>reproduction</li>
+				<li class="arrow">→</li>
+				<li data-gate>rootcause</li>
+				<li class="arrow">→</li>
+				<li>fix</li>
+				<li class="arrow">→</li>
+				<li>tasks</li>
+			</ul>
+
+			<p>Three things this chain does that a casual bug fix does not:</p>
+
+			<ul>
+				<li>
+					<strong>It traces to the faulty assumption, not the faulty line.</strong> Five whys, and no
+					fix proposed until that completes.
+				</li>
+				<li>
+					<strong>It scans for the same bug class elsewhere</strong> and records hits or "none found".
+					Those hits become tasks — addressed or explicitly ticketed.
+				</li>
+				<li>
+					<strong>It classifies the spec three ways</strong>, and names the common answer:
+					<div class="scroll">
+						<table>
+							<thead>
+								<tr>
+									<th>Finding</th>
+									<th>Spec delta owed</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>The spec covered the case and the code disagreed</td>
+									<td>None — the regression test holds the line</td>
+								</tr>
+								<tr>
+									<td>
+										The spec was silent about the case that broke — <em>expect this to be the common
+										outcome</em>
+									</td>
+									<td>
+										An <code>ADDED</code> requirement whose scenario is the reproduction made
+										permanent. That silence is the bug behind the bug
+									</td>
+								</tr>
+								<tr>
+									<td>The spec said something the fault proves wrong</td>
+									<td>
+										<code>MODIFIED</code>, copying the <strong>entire</strong> requirement block,
+										header included — archive replaces the block by matching that header
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</li>
+			</ul>
+
+			<div class="note">
+				<span class="label">A symptom fix is legitimate — written down</span>
+				<p>
+					"A symptom fix under deadline or behind a migration is a legitimate decision when written
+					down: state what a proper cause fix requires, so the next person inherits the choice rather
+					than the surprise." The artifact's job is to make the decision inheritable, not to forbid
+					it.
+				</p>
+			</div>
+
+			<p>
+				<strong>Performance work comes here too.</strong> Establish the measured baseline and a numeric
+				target in <code>reproduction</code>; that measured target <em>is</em> the regression guard.
+			</p>
+
+			<h2><code>refactor</code> — pin behaviour, then move code</h2>
+
+			<ul class="chain">
+				<li data-gate>characterization</li>
+				<li class="arrow">→</li>
+				<li>strategy</li>
+				<li class="arrow">→</li>
+				<li>tasks</li>
+			</ul>
+
+			<p>
+				Characterization tests come first and coverage gaps get closed <em>before</em> anything moves.
+				Then every task is one mechanical step — extract, rename, move, inline — with a single
+				acceptance criterion: <strong>"suite green, no assertion changed"</strong>.
+			</p>
+
+			<p>
+				Coverage-only work is a valid degenerate case: state "no restructure" and let
+				<code>tasks</code> be the test list.
+			</p>
+
+			<div class="stop" data-background="dark">
+				<span class="label">A changed assertion ends the refactor</span>
+				<p>
+					It means behaviour changed, which means this was never a refactor. Stop and reclassify as
+					<code>feature</code>. This is the same guardrail as
+					<a href="0006-route-a-task-in-one-pass.html">lesson 06</a>, and it fires most often here.
+				</p>
+			</div>
+
+			<h2><code>rapid</code> — two artifacts, and a tripwire</h2>
+
+			<ul class="chain">
+				<li data-gate>proposal</li>
+				<li class="arrow">→</li>
+				<li>tasks</li>
+			</ul>
+
+			<p>
+				One or two paragraphs on what and why. No specs, no design. The discipline rides in the config
+				rules rather than in extra artifacts — which is what makes it cheap.
+			</p>
+
+			<p>
+				The tripwire is in the proposal instruction itself: if the change touches a public API, URL,
+				analytics event, schema, or config contract — <em>or turns out non-trivial</em> — stop and
+				recreate under <code>feature</code>. Apply still runs TDD and an
+				evidence-before-completion pass; cheap is not the same as unverified.
+			</p>
+
+			<h2>Recall check</h2>
+
+			<p data-quiz-tally class="drill-score"></p>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					<code>feature</code>'s review gate returns BLOCK with two Critical findings. What do you do?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Fix the upstream artifacts and re-dispatch; the gate must pass first."
+						>
+							Fix upstream and redispatch
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Re-adjudicating from a weaker model is what the schema forbids."
+						>
+							Weigh them, proceed regardless
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Deferring a Critical past the gate defeats the gate entirely."
+						>
+							Defer both until implementation
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					In <code>bugfix</code>, which spec outcome should you expect most often?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="The silence is the bug behind the bug, so an ADDED requirement is owed."
+						>
+							Silent, so add a requirement
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Sometimes true, and then no delta at all is owed for it."
+						>
+							Correct, so add no delta
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Rarest of the three, and it needs a whole-block MODIFIED copy."
+						>
+							Wrong, so modify the block
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					A task checkbox is written as <code>* [ ]</code> instead of <code>- [ ]</code>. What
+					happens?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Apply parses only that exact form, so the task is simply unseen."
+						>
+							Progress tracking never sees it
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="No error is raised; that is precisely why this one bites."
+						>
+							Validation raises a clear error
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Nothing normalises the marker; the shape must be exact."
+						>
+							The marker gets normalised first
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					Which artifact carries the acceptance criterion "suite green, no assertion changed"?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Every refactor task is one mechanical step held to that criterion."
+						>
+							The refactor task list
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="That one pins current behaviour rather than judging a step."
+						>
+							The pinned behaviour file
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="That one argues the target structure and the sequencing."
+						>
+							The written strategy file
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="appendix">
+				<span class="label">Appendix · the fallback chains</span>
+				<p>
+					Every skill invocation in these schemas carries a named fallback chain, and the last link
+					is always "follow the template manually". <code>bugfix</code>'s investigation, for example,
+					reads: <code>superpowers:systematic-debugging</code> →
+					<code>mattpocock-skills:diagnosing-bugs</code> →
+					<code>agent-skills:debugging-and-error-recovery</code> → the template. Skill names are
+					written <code>pack:skill</code>, and the schemas say to confirm the exact prefix in the
+					agent's skill list, since installation prefixes vary. A schema that names a skill you do not
+					have degrades; it does not fail.
+				</p>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Read this next</h2>
+				<p>
+					<strong
+						>Primary source:
+						<a href="../../payload/levels/advanced/openspec/schemas/feature/schema.yaml"
+							><code>feature/schema.yaml</code></a
+						></strong
+					>. The longest chain in the plugin, and the one worth reading in full once. Pay attention to
+					the difference between <code>tasks</code> and <code>plan</code> — it is the clearest
+					statement anywhere of what a plan an executor can follow actually contains.
+				</p>
+			</footer>
+
+			<footer class="lesson-foot">
+				<h2>Reference</h2>
+				<p>
+					<a href="../reference/workflow-atlas.html">Workflow atlas</a> ·
+					<a href="../reference/router-card.html">Router card</a> ·
+					<a href="../reference/failure-modes.html">Failure modes</a> — the checkbox trap and the
+					four-hash trap live there.
+				</p>
+			</footer>
+
+			<div class="ask">
+				<p>
+					<strong>Run <code>feature</code> once on something real.</strong> It is the most expensive
+					chain here and the one whose value is hardest to see from a summary. Ask: "create a
+					<code>feature</code> change for this, and stop at every artifact for my approval — including
+					the review gate."
+				</p>
+			</div>
+
+			<nav class="nav">
+				<span><a href="0009-standard-end-to-end.html">← Lesson 09 · Standard</a></span>
+				<span
+					><a href="0011-advanced-the-situational-four.html"
+						>Lesson 11 · The situational four →</a
+					></span
+				>
+			</nav>
+		</main>
+		<script src="../assets/quiz.js"></script>
+	</body>
+</html>

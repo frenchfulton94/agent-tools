@@ -1,0 +1,18 @@
+{
+  "description": "Flags high-confidence credential patterns in files Claude writes (advisory, never blocks)",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "^(Write|Edit)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/flag-secrets.sh"],
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

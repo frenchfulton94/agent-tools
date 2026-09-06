@@ -1,0 +1,33 @@
+# G-P1 and G-S1: hedges add words without changing what the reader knows.
+# Tokens are RE2 regular expressions. No lookahead or lookbehind: Vale's engine
+# does not support them. Bare 'rather' is omitted because 'rather than' is fine.
+extends: existence
+message: "G-P1: '%s' hedges; state the fact or delete the sentence."
+level: warning
+ignorecase: true
+tokens:
+  - it should be noted that
+  - it is important to note
+  - it is worth noting
+  - please note that
+  - as a general rule
+  - generally speaking
+  - in some cases
+  - more or less
+  - fairly
+  - quite
+  - somewhat
+  - arguably
+  - basically
+  - essentially
+  - simply
+  - actually
+  - obviously
+  - of course
+  - needless to say
+  - may wish to
+  - might want to
+  - probably
+  - it(?:'|’)?s recommended
+  - it is recommended
+  - should be (?:posted|used|enabled|avoided)

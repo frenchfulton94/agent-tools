@@ -1,0 +1,16 @@
+{
+  "description": "Format edited files",
+  "hooks": {
+    "postToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./scripts/format.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

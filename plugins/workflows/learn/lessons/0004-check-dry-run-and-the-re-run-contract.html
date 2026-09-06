@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>04 · The re-run contract</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+		<link rel="stylesheet" href="../assets/quiz.css" />
+	</head>
+	<body>
+		<main class="page">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Lesson 04</span><span class="sep">·</span><span>Install and set up</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1><code>--check</code>, <code>--dry-run</code>, and the re-run contract</h1>
+				<p class="deck">
+					Re-running setup is not a repair operation. It is the update mechanism, and it works
+					because one file remembers, byte for byte, what setup wrote.
+				</p>
+			</header>
+
+			<section class="objective">
+				<h2>By the end</h2>
+				<p>
+					You can answer "which of our repositories have fallen behind?" with command output rather
+					than a guess, and you can explain exactly what editing a file setup wrote does to your
+					future re-runs.
+				</p>
+			</section>
+
+			<p class="prereq">
+				<strong>Prerequisites:</strong>
+				<a href="0003-read-the-plan-gate.html">Lesson 03</a>, and one repository already set up.
+			</p>
+
+			<h2>Two flags that stop early</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Flag</th>
+							<th>Writes</th>
+							<th>Reach for it when</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>--check</code></td>
+							<td>Nothing at all</td>
+							<td>
+								You want a drift report. Safe on a repository you do not own and have no intention
+								of changing
+							</td>
+						</tr>
+						<tr>
+							<td><code>--dry-run</code></td>
+							<td>
+								<code>.claude/workflows-plan.json</code> — and nothing else
+							</td>
+							<td>
+								You want the plan as data, to read carefully or to diff against last time's
+							</td>
+						</tr>
+						<tr>
+							<td>neither</td>
+							<td>Everything in the approved plan</td>
+							<td>You have read the plan and decided</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<p>
+				Both flags stop before the approval gate. Neither asks you anything beyond the level, and
+				<code>--check</code> is the one to reach for by reflex when the question is diagnostic.
+			</p>
+
+			<h2>The file that remembers</h2>
+
+			<p>
+				<code>.claude/workflows.json</code> holds four things: the level, the plugin version, the
+				date, and — the load-bearing part — <strong>a content hash of every schema and subagent that
+				run owns</strong>.
+			</p>
+
+			<p>That hash answers one question on every later run, per file:</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>On disk versus the recorded hash</th>
+							<th class="col-label">Group</th>
+							<th>What happens</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>No record for this name</td>
+							<td><code>copy</code> or <code>collide</code></td>
+							<td>
+								<code>copy</code> if the file is absent; <code>collide</code> if a file with that
+								name exists but setup never wrote it
+							</td>
+						</tr>
+						<tr>
+							<td>Matches — still byte-identical</td>
+							<td><code>update</code></td>
+							<td>Refreshed automatically. This is how you take an update</td>
+						</tr>
+						<tr>
+							<td>Differs — you edited it</td>
+							<td><code>collide</code></td>
+							<td>
+								Reported by name, never reverted. <strong>Your edit made the file yours.</strong>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					<code>plugins/workflows/scripts/record.d.mts</code> and the grouping logic in
+					<code>plan.mjs</code>. Absent hashes mean nothing can be proven to be setup's, so every
+					existing name is reported as a collision — the conservative answer, never a silent
+					overwrite.
+				</caption>
+			</div>
+
+			<div class="note">
+				<span class="label">This is the point, not a limitation</span>
+				<p>
+					A tool that reverted your edits on every update would be a tool you stopped running. A
+					tool that never updated anything would drift. The hash gives you both: setup's untouched
+					files refresh, your edited ones are reported and left alone, and you find out which is
+					which before anything is written.
+				</p>
+			</div>
+
+			<h2>The set of owned files is derived, not typed</h2>
+
+			<p>
+				A run owns <code>copy</code> plus <code>update</code>, for schemas and agents alike, and the
+				recorder derives that set from the approved plan itself rather than from a list the agent
+				assembles. A mistyped list cannot make a file setup's that the plan never claimed.
+			</p>
+
+			<p>
+				There is exactly one thing the plan cannot know — which collisions you approved, since
+				approval happens after the plan is built. Those names are passed separately, and each is
+				honoured <em>only</em> if it actually appears in the plan's collision list. Anything else is
+				reported as <code>ignored</code>.
+			</p>
+
+			<div class="stop" data-background="dark">
+				<span class="label">Never pass a declined name</span>
+				<p>
+					Recording a name you declined would make your file setup's, and the
+					<em>next</em> run would replace it with no gate and no mention. This is the one place in
+					the whole procedure where a careless argument causes silent data loss on a future run.
+				</p>
+				<span class="cite"><code>skills/setup/SKILL.md</code> §4 step 8</span>
+			</div>
+
+			<h2>Why the record is written before verification</h2>
+
+			<p>
+				Step 8 records the run; step 9 verifies it. That order is deliberate, and the reasoning is
+				worth borrowing for your own tools.
+			</p>
+
+			<p>
+				Verification exits non-zero on a failed check — and a plugin that a
+				<em>managed marketplace legitimately blocked</em> is a failed check. Reverse the order, and a
+				managed-marketplace repository would apply the entire payload and then never record it. Every
+				file that run wrote would come back on the next run as <em>yours</em>, as a collision, for
+				ever.
+			</p>
+
+			<p>
+				The record states what setup wrote. That is true whether or not the config reached the model.
+			</p>
+
+			<h2>Do this now — prove the hash to yourself</h2>
+
+			<ol class="steps">
+				<li>
+					<strong>Confirm the baseline.</strong> In a repository you have already set up:
+					<pre><code>/workflows:setup --check</code></pre>
+					Every schema and agent should be in <code>update</code>, and nothing in
+					<code>collide</code>.
+				</li>
+				<li>
+					<strong>Edit one file setup wrote.</strong> Add a comment line to a schema — a real edit,
+					but a harmless one:
+					<pre><code>echo '# note: our team keeps the design gate mandatory' \
+  &gt;&gt; openspec/schemas/craft-driven/schema.yaml</code></pre>
+				</li>
+				<li>
+					<strong>Check again.</strong> That schema has moved from <code>update</code> to
+					<code>collide</code>. Nothing was written; the report just changed.
+					<pre><code>/workflows:setup --check</code></pre>
+				</li>
+				<li>
+					<strong>Revert, and check a third time.</strong> It is back in <code>update</code>. The
+					hash is a content hash, not a timestamp — putting the bytes back puts the ownership back.
+					<pre><code>git checkout -- openspec/schemas/craft-driven/schema.yaml
+/workflows:setup --check</code></pre>
+				</li>
+			</ol>
+
+			<p>
+				Four commands, and you now know from observation rather than from this page what an edit
+				costs and what it buys.
+			</p>
+
+			<h2>The department-scale question</h2>
+
+			<p>
+				"Which of our repositories have fallen behind?" is the question <code>--check</code> was
+				built for. It writes nothing, so it is safe to run across every repository you have,
+				including ones you do not maintain.
+			</p>
+
+			<p>
+				The other half of the answer is the recorded plugin <em>version</em>: a repository set up at
+				<code>0.1.0</code> whose record still says <code>0.1.0</code> has not taken any update since,
+				whatever its files look like.
+			</p>
+
+			<div class="drift">
+				<span class="label">A committed settings file installs nothing</span>
+				<p>
+					<code>.claude/settings.json</code> commits, and it records which plugins <em>should</em> be
+					enabled — but cloning a configured repository does not install them for the person
+					cloning. Every teammate installs the <code>workflows</code> plugin and runs
+					<code>/workflows:setup</code> once. Reconcile mode installs only what is missing, so on a
+					correctly configured repository that run is nearly a no-op.
+				</p>
+			</div>
+
+			<h2>Recall check</h2>
+
+			<p data-quiz-tally class="drill-score"></p>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					You edit a schema setup wrote, then re-run setup. What happens to your edit?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="The changed hash moves it to collide, which is reported not written."
+						>
+							Reported, and left alone
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Reverting your edit is what the ownership hash exists to prevent."
+						>
+							Reverted, and then noted
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Merging schema YAML is not something setup ever attempts."
+						>
+							Merged into the update
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">Why does setup record the run <em>before</em> it verifies?</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="A blocked plugin fails verification, and an unrecorded run loses ownership."
+						>
+							A failed check would skip it
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Speed decides nothing here; both steps are effectively instant."
+						>
+							A record makes the check faster
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Verification never reads the record, so it needs nothing from it."
+						>
+							A check needs the record first
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					Which flag is safe to run across repositories you do not maintain?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="It reports and stops, writing nothing whatsoever to the repo."
+						>
+							The report-only one
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="It writes one plan file, so it is not strictly read-only."
+						>
+							The plan-writing one
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="With no flag at all, an approval applies the entire plan."
+						>
+							The full-apply one
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="appendix">
+				<span class="label">Appendix · for the plugin's author</span>
+				<p>
+					The README is explicit that invariant I3 — a plugin id you have already decided is
+					skipped, never installed over — is <em>not</em> proven end to end. The fixture disables a
+					plugin the level's manifest never mentions, so what that test establishes is narrower:
+					nothing in the pipeline rewrites <code>.claude/settings.json</code> wholesale. The rule
+					itself is covered by unit tests in <code>tests/workflows-plan.test.ts</code> and
+					<code>tests/workflows-settings.test.ts</code>. Worth knowing before you cite I3 to a
+					colleague.
+				</p>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Read this next</h2>
+				<p>
+					<strong
+						>Primary source:
+						<a href="../../README.md"><code>plugins/workflows/README.md</code></a></strong
+					>, the "Verification and limits" and "For teammates" sections. Short, and it is the only
+					place that states plainly which invariants are proven against real fixtures and which are
+					not.
+				</p>
+			</footer>
+
+			<div class="ask">
+				<p>
+					<strong>Ask for the sweep.</strong> "Run <code>/workflows:setup --check</code> in each of
+					these repositories and give me one table: level, recorded version, and anything in
+					<code>collide</code>." That is the department-scale answer, and it is read-only.
+				</p>
+			</div>
+
+			<nav class="nav">
+				<span><a href="0003-read-the-plan-gate.html">← Lesson 03 · The plan gate</a></span>
+				<span
+					><a href="0005-the-five-things-setup-cannot-do.html"
+						>Lesson 05 · What setup cannot do →</a
+					></span
+				>
+			</nav>
+		</main>
+		<script src="../assets/quiz.js"></script>
+	</body>
+</html>

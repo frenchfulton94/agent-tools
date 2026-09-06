@@ -1,0 +1,389 @@
+name: craft-driven
+version: 1
+description: >-
+  Feature workflow that pairs OpenSpec's artifact governance with the
+  Superpowers development methodology (brainstorming, written plans, TDD,
+  subagent execution, code review, evidence-first verification) and the
+  Impeccable design skill for any change that touches a user interface.
+  Flow: brainstorm -> proposal -> specs -> design-brief (UI only) ->
+  design (when warranted) -> tasks -> apply -> verification -> archive.
+
+artifacts:
+  - id: brainstorm
+    generates: brainstorm.md
+    description: Record of the collaborative design conversation and the approved intent
+    template: brainstorm.md
+    instruction: |
+      Run the design conversation first, then write its record. If the
+      superpowers:brainstorming skill is available, invoke it and follow it:
+      classify the request (spike / bounded / architectural), announce the
+      classification, ask clarifying questions one at a time, propose 2-3
+      approaches for architectural work, and get your human partner's explicit
+      approval of the intended approach before anything else is created. If the
+      skill is not installed, run the same conversation yourself using the
+      template's sections as the agenda.
+
+      This artifact exists because the approval is only enforceable if it is
+      written down: later artifacts and reviewers cite this file as the agreed
+      intent. So the file records what actually happened, not an idealized
+      version - the classification, the questions that mattered and their
+      answers, the approaches considered with trade-offs, the approach the
+      user approved, and any constraints or anti-goals they stated.
+
+      While exploring project context, also take a one-pass capability
+      survey and record it in the template's Relevant Capabilities section:
+      installed skills, MCP servers and their tools, plugins and slash
+      commands, language servers or linters wired into the harness, and
+      subagent/agent tools - kept to the ones plausibly relevant to this
+      request's tech and task (a database MCP for a migration, a browser
+      tool for anything rendered, a framework skill for the stack in use).
+      List each with one line on where it will earn its keep, and note the
+      section is a session snapshot: availability differs across sessions,
+      so downstream steps re-check before relying on an entry. If an
+      installed skill covers the conversation you are about to have, invoke
+      it now rather than approximating it from memory.
+
+      Two outcomes end the workflow early; say so in the file and tell the user:
+      - A spike produces an answer, not a change. Record the findings and
+        recommendation here, then suggest archiving or deleting this change
+        folder rather than continuing to proposal.
+      - A bounded task (a small change to an existing flow in this repo) may
+        not need the full artifact chain. Record the approved short design,
+        then ask the user whether to continue with specs or set
+        `skip_specs: true` in the change's `.openspec.yaml` and go straight
+        to tasks.
+
+      During this step your only outputs are the conversation and this file -
+      code, scaffolding, and other artifacts come after the approval. The
+      approval gate scales the ceremony, never the approval:
+      even a two-sentence design gets an explicit yes before you proceed.
+
+      Before finishing, verify the file names the approved approach in one
+      sentence a stranger could act on. If you cannot write that sentence,
+      the conversation is not done.
+    requires: []
+
+  - id: proposal
+    generates: proposal.md
+    description: Why the change is needed, what changes, and which capabilities it touches
+    template: proposal.md
+    instruction: |
+      Create the proposal that establishes why this change is needed. Read
+      brainstorm.md first and stay inside the approach the user approved
+      there; if you now believe the approach should differ, go back to the
+      user before writing a proposal that contradicts the approval.
+
+      Sections:
+      - Why: 1-2 sentences on the problem or opportunity.
+      - What Changes: bullet list of concrete changes. Mark breaking changes
+        with **BREAKING**.
+      - Capabilities: the contract between proposal and specs. List new
+        capabilities (each becomes `specs/<capability-path>/spec.md`;
+        kebab-case for any path segment you introduce) and modified
+        capabilities (exact existing paths under `openspec/specs/`). Research
+        existing specs before filling this in. Only list a modified capability
+        when spec-level behavior changes, not implementation detail.
+      - Surfaces: name every user-facing surface this change touches (page,
+        screen, component, flow), or write "None - no UI impact". This line
+        decides whether the design-brief artifact gets created, so be honest
+        rather than optimistic: a new CLI flag is not a surface; a settings
+        panel is.
+      - Impact: affected code, APIs, dependencies, systems.
+
+      A change with no capabilities at all (pure refactor, tooling, docs)
+      must set `skip_specs: true` in its `.openspec.yaml` - `openspec
+      validate` rejects a zero-delta change without that marker. Do not
+      invent a requirement to satisfy validation.
+
+      Keep it to 1-2 pages. Motivation and scope live here; how-to lives in
+      design.md and the design brief.
+    requires:
+      - brainstorm
+
+  - id: specs
+    generates: "specs/**/*.md"
+    description: Delta specifications - the behavior contract for the change
+    template: spec.md
+    instruction: |
+      Create one delta spec per capability listed in the proposal. A spec is
+      a behavior contract: observable behavior, inputs, outputs, error
+      conditions, and external constraints. If the implementation could
+      change without changing externally visible behavior, it does not
+      belong here - put it in design.md.
+
+      Format contract (the archive merge and validator parse this exactly):
+      - Delta sections use `##` headers: ADDED Requirements, MODIFIED
+        Requirements, REMOVED Requirements, RENAMED Requirements.
+      - Each requirement: `### Requirement: <name>` with SHALL/MUST wording.
+      - Each scenario: `#### Scenario: <name>` - exactly four hashtags,
+        because the parser matches that depth and silently drops scenarios
+        at any other depth. Every requirement needs at least one scenario.
+      - MODIFIED requirements must carry the full updated requirement block,
+        copied from the current main spec and edited - partial content loses
+        detail at archive time. REMOVED requirements need **Reason** and
+        **Migration**.
+      - A brand-new capability's delta starts with `## Purpose` (one or two
+        sentences, 50+ characters). Never add Purpose to a delta for an
+        existing capability.
+
+      Write scenarios as future test cases: name the case in the title
+      ("Rejects an expired token", not "Test 2") and cover the failure paths
+      alongside the happy path - empty input, the second click, the thing
+      that goes wrong. Each scenario here becomes a red test in tasks.md, so
+      a scenario you cannot imagine testing is a scenario to rewrite.
+
+      When the proposal's Surfaces section names UI, give each surface's
+      user-visible behavior its own requirements, and include scenarios for
+      the states real users hit: loading, empty, error, and keyboard-only
+      use. These become the acceptance bar the impeccable quality passes
+      check against later.
+
+      Before finishing, re-read each requirement and ask: could a tester who
+      has never seen the code tell whether it passed? Sharpen any that fail
+      that test.
+    requires:
+      - proposal
+
+  - id: design-brief
+    generates: design-brief.md
+    description: Approved design direction for the user-facing surfaces (UI changes only)
+    template: design-brief.md
+    instruction: |
+      Create this artifact only if the proposal's Surfaces section names at
+      least one user-facing surface. If it says "None - no UI impact", skip
+      this artifact, tell the user you skipped it and why, and move on.
+
+      If the impeccable skill is installed, produce the brief through it: run
+      its setup (context.mjs), then follow reference/shape.md - discovery
+      interview, direction resolution (via new-work.md when the surface is
+      new or the visual world is being replaced), and the written brief.
+      Shape ends with the user confirming the brief; that confirmation is
+      this artifact's approval gate. If impeccable is not installed, run the
+      same interview yourself using the template's sections and still get an
+      explicit confirmation before finishing.
+
+      The brief records decisions a builder must not re-litigate mid-task:
+      - Visitor mode for each surface - Persuade, Operate, Read, or
+        Experience - chosen from the surface, not the product (a tool's
+        landing page is still Persuade; a fashion house's docs are still
+        Read).
+      - Visual authority: whether the surface inherits the incumbent visual
+        world (refinement preserves) or a replacement world was chosen and
+        approved (redesign replaces). Never split the difference.
+      - The selected direction, scope and anti-goals, material states and
+        realistic content ranges, and the constraints that bind (platform,
+        accessibility, localization, performance).
+
+      State intent, not CSS: the brief says what the surface must achieve
+      and which world it lives in, and leaves pixel decisions to the build.
+      Keep it as small as the work allows - three to five bullets for a
+      settled refinement, the full structure only for ambiguous or
+      multi-screen work.
+    requires:
+      - proposal
+
+  - id: design
+    generates: design.md
+    description: Technical design - architecture decisions and approach
+    template: design.md
+    instruction: |
+      Create design.md only if any of these apply: the change is
+      cross-cutting (multiple services or modules) or introduces a new
+      architectural pattern; it adds an external dependency or significant
+      data-model changes; it carries security, performance, or migration
+      complexity; or there is ambiguity that benefits from technical
+      decisions before coding. Otherwise skip it and tell the user why.
+
+      When you do create it, dispatch the craft-design-gate subagent
+      (.claude/agents/craft-design-gate.md) - it is pinned to the top-tier
+      model at xhigh effort so this session can stay on the cheap tier.
+      Its prompt must name the change directory path; a subagent inherits
+      nothing else. It returns the design.md draft plus caller actions:
+      write the draft here, then resolve every returned question with the
+      user before finishing - a question that would change the specs, the
+      approach, or the task breakdown must be settled now, not baked in as
+      an assumption. If the subagent is missing or fails to launch, say so
+      and write the artifact inline as follows.
+
+      Sections: Context (current state and constraints only - reference the
+      proposal for motivation), Goals / Non-Goals, Decisions (each key
+      choice with rationale and the alternatives considered), Risks /
+      Trade-offs ([risk] -> mitigation), Migration Plan when applicable, and
+      Open Questions.
+
+      Honor the brainstorm: the approaches considered and rejected there are
+      this document's "alternatives considered" - cite them rather than
+      re-arguing them, and do not resurrect a rejected approach without
+      going back to the user.
+
+      Open Questions are for genuinely deferrable unknowns. If a question
+      would change the specs, the approach, or the task breakdown, resolve
+      it now by asking the user - do not bake an unstated assumption into
+      later artifacts.
+    requires:
+      - proposal
+
+  - id: tasks
+    generates: tasks.md
+    description: Implementation plan as a TDD checklist the apply phase tracks
+    template: tasks.md
+    instruction: |
+      Write the implementation plan. If the superpowers:writing-plans skill
+      is available, invoke it and apply its discipline here; either way,
+      write for an engineer with zero context for this codebase and
+      questionable taste: exact file paths, actual test code, exact commands
+      with expected output, interfaces between tasks spelled out. DRY.
+      YAGNI. TDD. Frequent commits.
+
+      First check design.md (if it exists) for Open Questions. If any would
+      change what gets built, resolve them with the user before writing a
+      single task.
+
+      Format contract - the apply phase parses checkboxes to track progress,
+      so every trackable step must be a checkbox of the form
+      `- [ ] N.M description`. Anything else is invisible to tracking.
+
+      Structure each task group as one deliverable with its own red-green
+      cycle:
+      - A `## N. <Component>` heading, followed by non-checkbox context
+        lines: **Files** (create/modify/test with exact paths),
+        **Interfaces** (what this task consumes from earlier tasks and
+        produces for later ones - exact names and signatures, because an
+        implementer may see only their own task), and **Specs** (which
+        requirement/scenario this task implements).
+      - Checkbox steps in strict TDD order, each 2-5 minutes of work:
+        write the failing test (include the actual test code in a fenced
+        block above the checkbox), run it and confirm it fails for the
+        right reason, write the minimal implementation, run it and confirm
+        it passes, commit. Each verification step names the exact command
+        and the expected outcome.
+
+      For tasks that build the surfaces in design-brief.md, add steps that
+      make the brief checkable: implement against the committed visual world,
+      cover the loading/empty/error/keyboard scenarios from the specs, and
+      (when impeccable is installed) run its detector on the edited files
+      and fix findings before the task's commit.
+
+      Consult brainstorm.md's Relevant Capabilities when drawing tasks: when
+      a task's work matches a surveyed skill, MCP tool, or command, name it
+      in that task's **Tooling** line with the exact invocation. A plan may
+      be executed by a fresh subagent that inherits nothing from this
+      session, so a tool the plan does not name is a tool the executor does
+      not have; and because availability shifts between sessions, phrase
+      each entry as "use X when available, otherwise <fallback>".
+
+      Placeholders are plan failures - never "TBD", "add appropriate error
+      handling", "write tests for the above" without the test code, or
+      "similar to Task N" instead of repeating the code.
+
+      After writing the full plan, self-review before finishing: walk each
+      spec requirement and point to the task that implements it (add tasks
+      for gaps); scan for the placeholder patterns above; and check that
+      names and signatures used in later tasks match the ones defined in
+      earlier tasks. Fix inline and move on.
+    requires:
+      - specs
+      - design-brief
+      - design
+
+  - id: verification
+    generates: verification.md
+    description: Fresh evidence that the implementation matches the specs - the archive gate
+    template: verification.md
+    instruction: |
+      Create this artifact only after implementation: if tasks.md still has
+      unchecked boxes, stop, say so, and point the user at the apply step
+      instead. This file is deliberately the last planning artifact so that
+      `openspec archive` warns about an incomplete change until the evidence
+      exists - it is the written form of "no completion claims without fresh
+      verification evidence".
+
+      Every claim in this file must be backed by a command you ran while
+      writing it and the observed output. "Should pass", a run from earlier
+      in the session, or a subagent's success report are not evidence - if
+      you have not run the command for this file, run it now.
+
+      Produce, in order:
+      1. Test evidence: the full test-suite command, exit code, and pass/fail
+         counts, pasted from the run.
+      2. Spec walk: each requirement from the delta specs with the test or
+         observed behavior that demonstrates it, cited as file:line or a
+         command plus its output. Name uncovered scenarios plainly rather
+         than rounding up.
+      3. Code review: dispatch the verification-reviewer subagent
+         (.claude/agents/verification-reviewer.md) over the change's commit
+         range - its prompt must carry the change directory path, the base
+         SHA, and the head SHA, since a subagent inherits nothing. It is
+         pinned to a strong model at xhigh effort and applies
+         superpowers:requesting-code-review itself; when it is missing or
+         fails to launch, dispatch a generic fresh-context reviewer
+         subagent with the same inputs (using
+         superpowers:requesting-code-review when available - base SHA,
+         head SHA, and the plan as requirements).
+         Record findings by severity and how each Critical and Important one
+         was resolved. Receive the feedback with technical evaluation, not
+         performative agreement: verify each finding against the codebase
+         and push back in writing where the reviewer is wrong. If no
+         subagent tool exists in this session, do the review pass yourself
+         against the diff and label it self-review.
+      4. Design quality (only when design-brief.md exists): run impeccable's
+         critique and audit on the changed surfaces, record scores, detector
+         findings, and what was fixed; confirm the loading/empty/error/
+         keyboard scenarios from the specs render correctly - through a
+         browser-automation tool against the running app when one is
+         available in this session, since observed rendering outranks
+         reasoning about source. If impeccable is not installed, note that
+         and record a manual pass against the brief instead.
+      5. Verdict: ready-to-archive, or a list of what still blocks, each
+         item naming the artifact or code that must change.
+
+      A verdict of ready-to-archive with any Critical finding unresolved or
+      any test failing contradicts itself - the verdict follows the
+      evidence, not the desire to be done.
+    requires:
+      - tasks
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Implement the plan in tasks.md, in order, checking off each step as its
+    verification passes. Read the brainstorm, proposal, specs, design-brief,
+    and design context files first - they are the authority when a task is
+    ambiguous.
+
+    Before the first task, re-check which capabilities this session actually
+    has: the skills, MCP tools, commands, and subagent tools named in
+    brainstorm.md's Relevant Capabilities and in each task's Tooling line,
+    plus anything newly installed since planning. Use the real tool over the
+    approximation whenever both exist - the database MCP over hand-rolled
+    SQL against a guessed schema, the browser tool over imagining how a page
+    renders, the framework skill over memory of its conventions - and when a
+    named tool is absent here, use the task's stated fallback and say so.
+    When dispatching an implementer subagent, its prompt carries the task's
+    Tooling line and the relevant skill names verbatim: subagents inherit
+    nothing, so an unmentioned capability is an unused one.
+
+    Execution discipline (superpowers): if subagent tools are available,
+    prefer superpowers:subagent-driven-development - a fresh implementer
+    subagent per task with a task review between tasks; otherwise follow
+    superpowers:executing-plans in this session. Either way the plan's TDD
+    steps are the law: no production code before its failing test, and a
+    checkbox is only marked when its named verification actually passed just
+    now. When a test fails or behavior surprises you, switch to
+    superpowers:systematic-debugging and find the root cause before
+    changing code - symptom patches create rework.
+
+    Design discipline (impeccable): before editing any UI file, run
+    impeccable's setup and load its craft-floor reference; build inside the
+    world committed in design-brief.md, and treat detector/hook findings on
+    edited files as part of the task, fixed before that task's commit.
+    Refinement preserves the incumbent look; only a brief-approved redesign
+    replaces it.
+
+    Pause and ask rather than guess when a task is unclear, when
+    implementation reveals a design issue (suggest updating the artifacts -
+    the workflow is fluid), or when work beyond the specs is needed - surface
+    added scope instead of silently absorbing or narrowing it. When every
+    box is checked, direct the user to the verification artifact; archive
+    comes after its verdict.

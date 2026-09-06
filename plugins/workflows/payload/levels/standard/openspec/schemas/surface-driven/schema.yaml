@@ -1,0 +1,234 @@
+name: surface-driven
+version: 1
+description: >-
+  Design-led workflow for changes that are primarily a user-facing surface -
+  a landing page, dashboard, flow, redesign, or component system. Impeccable
+  leads (shape -> committed direction -> craft-floor build -> critique/audit),
+  while Superpowers supplies the execution discipline (approval gates, TDD on
+  behavior, systematic debugging, evidence-first completion).
+  Flow: design-brief -> proposal -> specs -> tasks -> apply -> quality -> archive.
+
+artifacts:
+  - id: design-brief
+    generates: design-brief.md
+    description: The confirmed design brief - discovery interview and committed direction
+    template: design-brief.md
+    instruction: |
+      Start with design discovery, not code. If the impeccable skill is
+      installed, produce this artifact through it: run its setup
+      (context.mjs; run init first when PRODUCT.md is missing), then follow
+      reference/shape.md - two or three questions per round on purpose,
+      people, and outcome, a second round only for material gaps. For a new
+      surface or a replacement visual world, continue through new-work.md's
+      direction process (visual authority, world/concept choice) before
+      writing the brief. If impeccable is not installed, run the same
+      interview yourself using the template's sections.
+
+      Whichever path, the brief ends with the user explicitly confirming it -
+      that confirmation is the approval gate for everything downstream, so
+      present the brief, wait for a yes or one correction round, and record
+      where the confirmation happened. This step's deliverable is intent and
+      the committed world; code and pixel values belong to the build that
+      follows.
+
+      Record per surface: the visitor mode (Persuade / Operate / Read /
+      Experience, chosen from the surface, not the product), the visual
+      authority (inherit the incumbent world, or the approved replacement),
+      the selected direction, outcome and real content, material states with
+      realistic content ranges, and binding constraints. Keep it as small as
+      the work allows - a settled refinement needs three to five bullets.
+
+      While exploring the project, also take a one-pass capability survey
+      and record it in the template's Relevant Capabilities section:
+      installed skills, MCP servers and their tools, plugins and commands,
+      and subagent/agent tools relevant to this surface work - impeccable
+      itself, a design-tool MCP (e.g. Figma) when the direction has source
+      artwork, browser automation for inspection rounds, image generation
+      for comps, framework skills for the stack. One line each on where it
+      earns its keep, marked as a session snapshot since availability
+      differs across sessions; downstream steps re-check before relying on
+      an entry.
+    requires: []
+
+  - id: proposal
+    generates: proposal.md
+    description: Why the surface work is worth doing and what it touches
+    template: proposal.md
+    instruction: |
+      Write the proposal from the confirmed brief. Keep it short - the brief
+      already carries the design decisions, so this document only has to
+      establish why the work matters, what concretely changes, and which
+      capabilities it touches.
+
+      Sections: Why (1-2 sentences), What Changes (bullets; mark breaking
+      changes with **BREAKING**), Capabilities (new capabilities become
+      `specs/<capability-path>/spec.md`, kebab-case for new segments;
+      modified capabilities use exact existing paths under
+      `openspec/specs/` and are listed only when requirement-level behavior
+      changes), and Impact.
+
+      Surface work usually does change observable behavior - navigation,
+      states, interactions, accessibility - so expect at least one
+      capability. Only a pure visual refinement with zero behavior change
+      justifies `skip_specs: true` in the change's `.openspec.yaml`; if you
+      reach for it, say so to the user and why.
+    requires:
+      - design-brief
+
+  - id: specs
+    generates: "specs/**/*.md"
+    description: Delta specs for the surface's observable behavior
+    template: spec.md
+    instruction: |
+      Write the behavior contract for the surface: what a visitor can
+      observe and rely on, not how it is styled or built. The brief's
+      "States and Ranges" section is your scenario checklist - every state
+      it names (loading, empty, error, success, permissions, overflow)
+      should appear as a scenario on some requirement, plus keyboard-only
+      operation and the responsive behavior users depend on.
+
+      Format contract (parsed exactly by validation and archive):
+      - Delta sections use `##` headers: ADDED / MODIFIED / REMOVED /
+        RENAMED Requirements.
+      - `### Requirement: <name>` with SHALL/MUST wording; every
+        requirement has at least one `#### Scenario:` at exactly four
+        hashtags - other depths are silently dropped by the parser.
+      - MODIFIED requirements carry the full updated block copied from the
+        current main spec; REMOVED ones carry **Reason** and **Migration**.
+      - A brand-new capability's delta opens with `## Purpose` (one or two
+        sentences, 50+ characters); never add Purpose for an existing
+        capability.
+
+      Keep aesthetic judgment out of requirements - "the hero SHALL feel
+      bold" is not testable and belongs to the brief; "the pricing table
+      SHALL remain operable at 320px viewport width" is a requirement. The
+      quality artifact later checks the build against both documents, each
+      on its own terms.
+    requires:
+      - proposal
+
+  - id: tasks
+    generates: tasks.md
+    description: Build checklist - design tasks with inspection steps, behavior tasks with TDD
+    template: tasks.md
+    instruction: |
+      Break the build into tasks small enough to complete in one session,
+      ordered by dependency, written for an engineer with zero context for
+      this codebase: exact file paths, exact commands, expected outcomes.
+      The apply phase parses checkboxes to track progress, so every
+      trackable step is `- [ ] N.M description` - anything else is
+      invisible to tracking.
+
+      Two kinds of task, two disciplines:
+      - Behavior tasks (state machines, data wiring, validation, routing)
+        follow strict TDD: failing test written first (actual test code in
+        the task, not "write tests"), a step confirming it fails for the
+        right reason, minimal implementation, a step confirming green, then
+        commit.
+      - Surface tasks (layout, type, color, motion, states) end in bounded
+        inspection instead of an open polish loop: build fully against the
+        committed world, then one batched inspection round at the
+        representative sizes (desktop and mobile together), fix everything
+        it shows in one batch, confirm with at most one more round, and
+        stop. When impeccable's detector or hook is available, add a step
+        to run it on the edited files and fix findings before the commit.
+
+      Each task group starts with non-checkbox context lines: **Files**,
+      **Interfaces** (exact names and signatures neighboring tasks rely
+      on), **Tooling** (skills, MCP tools, or commands this task should
+      use, drawn from the brief's Relevant Capabilities, each with its
+      exact invocation and a fallback - a fresh subagent executor only
+      knows the tools the plan names), and **Brief/Specs** (which brief
+      section and which requirement/scenario the task serves).
+      Placeholders are plan failures: no "TBD", no "add appropriate error
+      handling", no "similar to Task N" instead of the actual content.
+
+      Self-review before finishing: point each spec requirement and each
+      brief commitment at a task (add tasks for gaps), scan for
+      placeholders, and check that names used across tasks agree.
+    requires:
+      - specs
+
+  - id: quality
+    generates: quality.md
+    description: Design and production quality evidence - the archive gate
+    template: quality.md
+    instruction: |
+      Create this artifact only after implementation: if tasks.md still has
+      unchecked boxes, stop and point the user at the apply step. This file
+      is last on purpose - `openspec archive` warns about an incomplete
+      change until it exists, which makes "quality checked" a written,
+      evidence-backed claim rather than a feeling.
+
+      Every claim here is backed by something you ran or observed while
+      writing this file - a command and its output, a score from a run, a
+      screenshot pass you actually made. Reports from earlier in the
+      session or from subagents are leads, not evidence.
+
+      Produce, in order:
+      1. Critique: with impeccable installed, run its critique command on
+         the primary surfaces (two isolated assessments where subagents
+         exist) and record the synthesized findings and any degraded-run
+         banner. Without impeccable, do a written design review against the
+         brief: hierarchy, information architecture, emotional fit, states,
+         copy.
+      2. Audit: impeccable's audit (accessibility, performance, theming,
+         responsive, code quality) with dimension scores, or the same
+         checks by hand. Record detector findings and what was fixed.
+      3. Behavior evidence: the test-suite command with exit code and
+         counts, and a walk of each spec requirement to the test or
+         observed behavior proving it - file:line or command plus output.
+         Name uncovered scenarios plainly.
+      4. Brief fidelity: confirm the shipped surfaces honor the committed
+         world and the brief's anti-goals, and that every state in "States
+         and Ranges" renders correctly - observed through a
+         browser-automation tool against the running app when one is
+         available, since a rendered state is evidence and a reasoned-about
+         one is a guess. The brief wins over taste: note any place the
+         build drifted and whether it was corrected or approved.
+      5. Verdict: ready-to-archive, or the blockers, each naming what must
+         change. Fixes discovered here go back through apply; re-run only
+         the affected checks, then update this file.
+    requires:
+      - tasks
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Build the surface task by task, checking off each step as its named
+    verification passes. Read the brief, proposal, and specs first - the
+    brief is the design authority and is not re-litigated mid-task; when
+    the build genuinely argues for changing it, pause and take it back to
+    the user instead of drifting.
+
+    Before the first task, re-check which capabilities this session has:
+    the entries in the brief's Relevant Capabilities and each task's
+    Tooling line, plus anything newly installed. Prefer the real tool over
+    the approximation - run inspection rounds through a browser-automation
+    tool against the live app rather than reasoning about source, pull
+    tokens from the design-tool MCP rather than eyeballing a screenshot -
+    and when a named tool is absent, use the task's stated fallback and say
+    so. Subagent prompts carry the task's Tooling line verbatim; subagents
+    inherit nothing, so an unmentioned capability is an unused one.
+
+    Design discipline (impeccable): run its setup once, and load the
+    craft-floor reference before the first UI edit - it carries the quality
+    floor and the bans no detector catches. Build inside the committed
+    world; treat detector and hook findings on edited files as part of the
+    task, fixed before its commit. Verify in bounded passes, not a loop:
+    one batched inspection round, one batched fix, at most one confirming
+    round.
+
+    Execution discipline (superpowers): behavior tasks follow their TDD
+    steps exactly - no production code before its failing test, and a
+    checkbox is marked only when its verification just passed. Prefer
+    subagent-driven execution with a review between tasks when subagent
+    tools exist; otherwise execute inline. On any failure or surprise, find
+    the root cause before changing code (systematic-debugging) - symptom
+    patches on a design surface compound into incoherence.
+
+    Pause and ask rather than guess on ambiguity, revealed design issues
+    (suggest updating the artifacts - the workflow is fluid), or scope
+    beyond the specs. When every box is checked, direct the user to the
+    quality artifact; archive comes after its verdict.

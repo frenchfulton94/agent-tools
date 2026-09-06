@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "typescript",
+  "displayName": "TypeScript",
+  "version": "0.1.0",
+  "description": "The TypeScript toolchain end to end — compiler settings and type-level design for new code, tightening loose types and migrating JavaScript incrementally, reading compiler errors that do not say what they mean, testing with Vitest, bundling with Vite, formatting and linting with Biome, typed database schemas and migrations with Drizzle ORM, and running it all on Bun.",
+  "author": {
+    "name": "Agent Tools",
+    "email": "michael@frenchfultonjr.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "typescript",
+    "tsconfig",
+    "vitest",
+    "vite",
+    "biome",
+    "bun",
+    "drizzle",
+    "orm",
+    "testing",
+    "refactoring",
+    "type-errors"
+  ]
+}

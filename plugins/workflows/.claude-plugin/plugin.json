@@ -1,0 +1,12 @@
+{
+  "name": "workflows",
+  "version": "0.4.0",
+  "description": "Sets up or reconciles a project's OpenSpec workflow in one command: schemas and subagents for a chosen complexity level, a rewritten openspec/config.yaml that carries forward what you wrote, and guarded plugin installation. Re-runnable, with --check for read-only drift reporting. Also routes a piece of work to the right schema among the twelve it installs, and ships a self-paced learning package covering installation, routing, and every workflow end to end.",
+  "author": {
+    "name": "Agent Tools",
+    "email": "michael@frenchfultonjr.dev"
+  },
+  "dependencies": [
+    { "name": "meta-skills", "marketplace": "agent-tools" }
+  ]
+}

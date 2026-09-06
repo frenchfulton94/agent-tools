@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Model &amp; effort card — workflows</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+	</head>
+	<body>
+		<main class="page page--wide">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Reference</span><span class="sep">·</span><span>Print this</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1>Model &amp; effort card</h1>
+				<p class="deck">
+					Every row carries a <strong>source</strong> column, because the two kinds of answer here are
+					not interchangeable: a <em>pin</em> executes on its own, and a <em>recommendation</em> is
+					advice you have to act on at an artifact boundary. Tier changes the budget, not the pick.
+				</p>
+			</header>
+
+			<div class="grid">
+				<section class="card">
+					<h3>Pin</h3>
+					<p>
+						A <code>model:</code> / <code>effort:</code> line in an agent file this plugin installs. It
+						runs whether or not anyone reads this card, and it outranks your session's setting.
+					</p>
+				</section>
+				<section class="card">
+					<h3>Recommendation</h3>
+					<p>
+						From an attached usage guide. Nothing enforces it — if you want it, you set it at an
+						artifact boundary.
+					</p>
+				</section>
+				<section class="card">
+					<h3>Tier note</h3>
+					<p>
+						What your subscription changes. Never which model you <em>can</em> pick — only what the
+						weekly bucket lets you spend, and how Fable is billed.
+					</p>
+				</section>
+			</div>
+
+			<h2>The rule, in four lines</h2>
+
+			<ol>
+				<li>
+					<strong>Planning gets depth.</strong> Durable multi-step judgement — specs, root cause,
+					refactor strategy, migration plan — at low token volume. A wrong plan is the most expensive
+					error in the chain.
+				</li>
+				<li>
+					<strong>Implementation gets speed.</strong> Apply is a long loop of edits, commands and test
+					runs; it is latency- and output-dominated. Except where the implementation is genuinely
+					hard.
+				</li>
+				<li>
+					<strong>Interactive means <code>high</code>, not <code>xhigh</code>.</strong> With you in the
+					loop between short turns, the top setting mostly buys latency. Reserve <code>xhigh</code>
+					for the deep artifacts that run without you.
+				</li>
+				<li>
+					<strong>Escalate on evidence.</strong> Shallow spec from a strong model → go up. Rework from
+					a cheap implementation pass → go up. Otherwise leave it alone.
+				</li>
+			</ol>
+
+			<h2>Pins — the eight that execute</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Level</th>
+							<th>Agent</th>
+							<th>Runs at</th>
+							<th>Model</th>
+							<th>Effort</th>
+							<th>Source</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>minimal</code></td>
+							<td><code>bridge-design-gate</code></td>
+							<td><code>mattpocock-bridge</code> · design</td>
+							<td><code>opus</code></td>
+							<td><code>xhigh</code></td>
+							<td>pin</td>
+						</tr>
+						<tr>
+							<td><code>minimal</code></td>
+							<td><code>code-review-standards</code></td>
+							<td>apply · review, Standards axis</td>
+							<td><code>opus</code></td>
+							<td><code>high</code></td>
+							<td>pin</td>
+						</tr>
+						<tr>
+							<td><code>minimal</code></td>
+							<td><code>code-review-spec</code></td>
+							<td>apply · review, Spec axis</td>
+							<td><code>sonnet</code></td>
+							<td><code>medium</code></td>
+							<td>pin</td>
+						</tr>
+						<tr>
+							<td><code>standard</code></td>
+							<td><code>craft-design-gate</code></td>
+							<td><code>craft-driven</code> · design</td>
+							<td><code>opus</code></td>
+							<td><code>xhigh</code></td>
+							<td>pin</td>
+						</tr>
+						<tr>
+							<td><code>standard</code></td>
+							<td><code>verification-reviewer</code></td>
+							<td><code>craft-driven</code> · verification, step 3</td>
+							<td><code>opus</code></td>
+							<td><code>xhigh</code></td>
+							<td>pin</td>
+						</tr>
+						<tr>
+							<td><code>advanced</code></td>
+							<td><code>design-gate</code></td>
+							<td><code>feature</code> · design</td>
+							<td><code>opus</code></td>
+							<td><code>xhigh</code></td>
+							<td>pin</td>
+						</tr>
+						<tr>
+							<td><code>advanced</code></td>
+							<td><code>review-gate</code></td>
+							<td><code>feature</code> · review</td>
+							<td><code>opus</code></td>
+							<td><code>xhigh</code></td>
+							<td>pin</td>
+						</tr>
+						<tr>
+							<td><code>advanced</code></td>
+							<td><code>taste-preflight</code></td>
+							<td><code>feature</code> · review, UI pre-flight</td>
+							<td><code>sonnet</code></td>
+							<td><code>medium</code></td>
+							<td>pin</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					<code>plugins/workflows/payload/levels/*/agents/*.md</code> frontmatter. Note the shape:
+					every design gate at the top tier, review split by axis onto two tiers, and the expensive
+					work pushed out of your session "so this session can stay on the cheap tier".
+				</caption>
+			</div>
+
+			<h2>Recommendations — <code>minimal</code> and <code>standard</code></h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th class="col-label">Artifact</th>
+							<th><code>mattpocock-bridge</code></th>
+							<th><code>bugfix-flow</code></th>
+							<th><code>craft-driven</code></th>
+							<th><code>surface-driven</code></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>opening</td>
+							<td>grill · Opus high</td>
+							<td><strong>diagnose · Opus xhigh</strong></td>
+							<td>brainstorm · Opus high</td>
+							<td>design-brief · Opus high new world / Sonnet medium refinement</td>
+						</tr>
+						<tr>
+							<td>proposal</td>
+							<td>Opus high</td>
+							<td>—</td>
+							<td>Opus high</td>
+							<td>Sonnet medium</td>
+						</tr>
+						<tr>
+							<td>surface / design-brief</td>
+							<td>Sonnet medium · Opus high for a new world</td>
+							<td>—</td>
+							<td>Sonnet medium · Opus high for a new world</td>
+							<td>(leads)</td>
+						</tr>
+						<tr>
+							<td>specs</td>
+							<td>Opus high</td>
+							<td>Sonnet medium</td>
+							<td>Opus high</td>
+							<td>Sonnet medium · Opus high if the surface is broad</td>
+						</tr>
+						<tr>
+							<td>design</td>
+							<td><strong>top tier xhigh</strong> — matches the pin</td>
+							<td>—</td>
+							<td><strong>top tier xhigh</strong> — matches the pin</td>
+							<td>—</td>
+						</tr>
+						<tr>
+							<td>tasks</td>
+							<td>Opus high</td>
+							<td>Sonnet low–medium</td>
+							<td>Opus high</td>
+							<td>Opus high</td>
+						</tr>
+						<tr>
+							<td>apply</td>
+							<td>Sonnet medium</td>
+							<td>Sonnet medium</td>
+							<td>Sonnet workers, Haiku mechanical; Opus on BLOCKED</td>
+							<td>Sonnet medium — surface tasks stay off Haiku</td>
+						</tr>
+						<tr>
+							<td>apply · review</td>
+							<td>split — matches the two pins</td>
+							<td>Sonnet · Opus high when the fix touched shared code</td>
+							<td>(in verification)</td>
+							<td>(in quality)</td>
+						</tr>
+						<tr>
+							<td>closing gate</td>
+							<td>—</td>
+							<td>—</td>
+							<td>verification Sonnet medium + <strong>Opus xhigh reviewer</strong> — matches the pin</td>
+							<td>quality Sonnet medium · Opus high verdict on a large redesign</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					Attached <code>mattpocock-superpowers-schema-model-effort.md</code>. Its top-tier rows are
+					Fable 5; on a Pro plan those are Opus 5 at xhigh, which is what the agent files pin. Five of
+					its recommendations coincide exactly with a pin — marked above.
+				</caption>
+			</div>
+
+			<h2>Recommendations — the <code>advanced</code> eight</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Schema</th>
+							<th>Planning</th>
+							<th>Implementation</th>
+							<th>Source</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>feature</code></td>
+							<td>Opus 5 high — <strong>xhigh at the design gate</strong></td>
+							<td>Sonnet 5 medium — <strong>xhigh at the review gate</strong>; Haiku mechanical</td>
+							<td>guide · 3 pins</td>
+						</tr>
+						<tr>
+							<td><code>bugfix</code></td>
+							<td><strong>Opus 5 xhigh</strong> — root cause</td>
+							<td>Sonnet 5 medium</td>
+							<td>guide</td>
+						</tr>
+						<tr>
+							<td><code>refactor</code></td>
+							<td>Opus 5 high</td>
+							<td>Sonnet 5 medium; Haiku bulk</td>
+							<td>guide</td>
+						</tr>
+						<tr>
+							<td><code>upgrade</code></td>
+							<td>Opus 5 high</td>
+							<td>Sonnet 5 medium; Haiku bulk</td>
+							<td>guide</td>
+						</tr>
+						<tr>
+							<td><code>setup</code></td>
+							<td>Opus 5 high</td>
+							<td>Sonnet 5 medium; Haiku file generation</td>
+							<td>guide</td>
+						</tr>
+						<tr>
+							<td><code>hotfix</code></td>
+							<td>Sonnet 5 low–medium triage · <strong>Opus 5 xhigh postmortem</strong></td>
+							<td>Sonnet 5 medium</td>
+							<td>guide</td>
+						</tr>
+						<tr>
+							<td><code>spike</code></td>
+							<td>Sonnet 5 low–medium</td>
+							<td>Sonnet 5 medium; Haiku explore</td>
+							<td>guide</td>
+						</tr>
+						<tr>
+							<td><code>rapid</code></td>
+							<td>Sonnet 5 low–medium</td>
+							<td>Sonnet 5 medium</td>
+							<td>guide</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					Attached subscription-tier guide, baseline table. <strong>Four cells carry the premium
+					spend on every tier:</strong> the feature design gate, the feature review gate, bugfix root
+					cause, and the hotfix postmortem. The plugin pins the first two; the other two are switches
+					you make in your own session.
+				</caption>
+			</div>
+
+			<h2>Tier adaptation</h2>
+
+			<p>
+				All three consumer tiers can select every model. What differs is the weekly bucket and how
+				Fable is billed — so tier changes what you can afford, not what you can pick.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Tier</th>
+							<th class="col-label">Fable 5</th>
+							<th>Adaptation</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="nowrap">Pro</td>
+							<td>Not in-plan — usage credits only</td>
+							<td>
+								Opus 5 xhigh replaces Fable at both feature gates, which is what this plugin ships.
+								<code>opusplan</code> for planning-heavy schemas. Protect bugfix root cause and the
+								hotfix postmortem at xhigh; drop marginal <code>refactor</code>/<code>upgrade</code>
+								planning to Sonnet when the bucket is tight. No Opus on <code>spike</code>
+							</td>
+						</tr>
+						<tr>
+							<td class="nowrap">Max 5x</td>
+							<td>In-plan, ≤50% of weekly limits</td>
+							<td>
+								Opus 5 default; Opus-plan plus Sonnet-implement holds across a disciplined workweek. A
+								Fable session weighs about twice an Opus one, so the 50% cap arrives in roughly half
+								the sessions the figure suggests — gates only, if at all
+							</td>
+						</tr>
+						<tr>
+							<td class="nowrap">Max 20x</td>
+							<td>In-plan, same 50% cap</td>
+							<td>
+								Nothing downgraded; Opus planning daily is fine. Gate-only Fable stays inside the cap.
+								Not a default driver even here
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					Hitting the Fable cap ends Fable for the week, not the week itself — the recovery is
+					switching to Opus, not waiting for a reset.
+				</caption>
+			</div>
+
+			<h2>Burn control</h2>
+
+			<div class="grid">
+				<section class="card">
+					<h3><code>opusplan</code></h3>
+					<p>
+						Opus in plan mode, Sonnet in execution, switched at the boundary. It is rules 1 and 2
+						above expressed as one alias, and the first thing to reach for on Pro.
+					</p>
+				</section>
+				<section class="card">
+					<h3>Effort defaults</h3>
+					<p>
+						Default effort is <strong><code>high</code></strong> on every current model;
+						<code>xhigh</code> must be opted into. The deliberate moves are <em>down</em> to
+						<code>medium</code> for mechanical loops and <em>up</em> to <code>xhigh</code> at a gate.
+					</p>
+				</section>
+				<section class="card">
+					<h3>Nothing rescues you</h3>
+					<p>
+						Hitting a usage limit never triggers a model switch — rate-limit, billing, auth,
+						request-size and transport errors are all excluded from the fallback machinery. Manage it
+						yourself.
+					</p>
+				</section>
+				<section class="card">
+					<h3>Context hygiene</h3>
+					<p>
+						One task per session, clear between tasks. Long uncleared sessions are the main cause of
+						surprise burn — which is also why every schema here says one slice per session.
+					</p>
+				</section>
+				<section class="card">
+					<h3>Monitoring</h3>
+					<p>
+						<code>/usage</code> for session and weekly buckets, <code>/status</code> for the current
+						model and account, <code>/cost</code> for API spend. <code>/status</code> covers model and
+						effort continuously.
+					</p>
+				</section>
+				<section class="card">
+					<h3>Fable's strings</h3>
+					<p>
+						Mandatory 30-day retention on its traffic class, unavailable under zero-data-retention,
+						and classifiers that fall back more often. Opus 5 wins most published head-to-heads at
+						half the rate — benchmark before pinning Fable anywhere.
+					</p>
+				</section>
+			</div>
+
+			<h2>Two things that silently defeat every pin</h2>
+
+			<div class="grid">
+				<section class="card">
+					<h3>The subagent-model override</h3>
+					<p>
+						<code>CLAUDE_CODE_SUBAGENT_MODEL</code> sits highest in the resolution order — above the
+						per-invocation model and above frontmatter <code>model:</code>. Set it and all eight pins
+						collapse to one tier, with no warning. The per-axis review split stops being a split.
+						Leave it unset; <code>inherit</code> is the same as unset.
+					</p>
+				</section>
+				<section class="card">
+					<h3>The organisation's model allowlist</h3>
+					<p>
+						A <code>model:</code> value is checked against <code>availableModels</code>, and an
+						<strong>excluded value is skipped — the agent runs on the inherited model instead</strong>.
+						If <code>opus</code> is unavailable to you, your design gate is running on your session's
+						model while the schema still says otherwise.
+					</p>
+				</section>
+			</div>
+
+			<p>
+				Resolution order, highest first: <code>CLAUDE_CODE_SUBAGENT_MODEL</code> → the per-invocation
+				model → frontmatter <code>model:</code> → the main conversation's model. Subagents inherit the
+				main conversation's extended-thinking configuration; there is no per-subagent thinking setting.
+			</p>
+
+			<h2>Confirm, do not assume</h2>
+
+			<p>
+				<code>/status</code> reports the live <strong>model</strong> and
+				<strong>effort</strong> alongside the agent name, workspace, git state, and context usage.
+				Switch at artifact boundaries and glance at it after each switch.
+			</p>
+
+			<h2>Why gate agents draft and return</h2>
+
+			<p>
+				<code>AskUserQuestion</code> is removed from every subagent regardless of what
+				<code>tools:</code> says. A gate whose sign-off needs a human answer therefore cannot get one —
+				which is why all four design gates draft the artifact and return open questions to the caller,
+				and why the caller must resolve them before finishing. Anything a subagent needs must be in its
+				prompt: a subagent inherits no conversation, no files read, no skills invoked.
+			</p>
+
+			<footer class="lesson-foot">
+				<h2>Sources</h2>
+				<p>
+					Pins: <code>plugins/workflows/payload/levels/*/agents/*.md</code>. Resolution order,
+					allowlist behaviour, and the <code>AskUserQuestion</code> restriction:
+					<code>plugins/meta-skills/skills/authoring-subagents/references/frontmatter.md</code> and
+					<code>tool-access.md</code>. Per-artifact recommendations for <code>minimal</code> and
+					<code>standard</code>: the mattpocock model-and-effort guide. The <code>advanced</code>
+					eight, the tier table, and burn control: the Claude Code subscription-tier guide. Usage
+					limits, prices and promotional windows in that guide are dated and were not verified here —
+					check <code>/usage</code> and Anthropic's own pages before budgeting against them.
+				</p>
+			</footer>
+
+			<nav class="nav">
+				<span><a href="command-card.html">← Command card</a></span>
+				<span><a href="failure-modes.html">Failure modes →</a></span>
+			</nav>
+		</main>
+	</body>
+</html>

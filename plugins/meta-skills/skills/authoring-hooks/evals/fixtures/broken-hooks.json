@@ -1,0 +1,62 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": ["./evals/fixtures/guard.sh"]
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": ["./evals/fixtures/context.sh"]
+          }
+        ]
+      }
+    ],
+    "postCompact": [
+      {
+        "matcher": "auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": ["./evals/fixtures/context.sh"]
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Summarize the repository state.",
+            "if": "Bash(git *)"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "mcp__memory",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./notify.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+name: rapid
+version: 1
+description: >
+  Minimal-overhead workflow for tiny, low-risk changes with no contract
+  impact. Two artifacts; discipline rides in config rules rather than extra
+  artifacts. Escalate to feature the moment a public contract is touched.
+  Invokes TDD and verification skills by name at apply; skill names written
+  pack:skill - confirm in the agent's skill list.
+
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    description: Brief statement of what and why
+    template: proposal.md
+    instruction: |
+      One or two paragraphs on what and why; skip specs and design. If the
+      change touches a public API, URL, analytics event, schema, or config
+      contract - or turns out non-trivial - stop and recreate it under the
+      feature schema instead.
+    requires: []
+
+  - id: tasks
+    generates: tasks.md
+    description: Implementation checklist
+    template: tasks.md
+    instruction: |
+      List concrete steps as checkboxes with brief acceptance criteria; keep
+      each step small and test-backed.
+    requires: [proposal]
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Invoke superpowers:test-driven-development (fallback chain:
+    mattpocock-skills:tdd, then agent-skills:test-driven-development; if nothing
+    is installed: failing test first).
+    Run the full suite and lint, then
+    superpowers:verification-before-completion before marking tasks
+    complete. Commit to a short-lived branch or open a small PR.

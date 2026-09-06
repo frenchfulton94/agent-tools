@@ -1,0 +1,41 @@
+{
+	"target": "reviewing-code-security",
+	"decoys": [
+		"vite",
+		"vitest-testing",
+		"writing-typescript",
+		"refactoring-typescript",
+		"debugging-type-errors",
+		"authoring-skills",
+		"authoring-subagents",
+		"authoring-hooks",
+		"authoring-plugins",
+		"improving-prompts",
+		"managing-project-memory"
+	],
+	"synthetic": ["code-review"],
+	"acknowledgedOmissions": [
+		"bem-css",
+		"bits-ui",
+		"bun",
+		"choosing-a-workflow",
+		"configuring-biome",
+		"configuring-dev-containers",
+		"configuring-openspec",
+		"configuring-zed",
+		"containerizing-apps",
+		"controlled-engineering-english",
+		"drizzle-development",
+		"feature-sliced-design",
+		"internationalized-date-time",
+		"layerchart",
+		"maintaining-plugin-marketplaces",
+		"managing-container-runtimes",
+		"mapping-project-tooling",
+		"sanitizing-untrusted-html",
+		"securing-container-supply-chain",
+		"setup",
+		"styling-with-tailwind",
+		"using-paraglide-js"
+	]
+}

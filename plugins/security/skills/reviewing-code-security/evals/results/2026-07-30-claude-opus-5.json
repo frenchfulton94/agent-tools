@@ -1,0 +1,846 @@
+{
+	"date": "2026-07-30",
+	"model": "claude-opus-5",
+	"trialsPerProbe": 3,
+	"lineup": [
+		{
+			"name": "reviewing-code-security",
+			"description": "Reviews code for security vulnerabilities against the OWASP Cheat Sheet Series, citing a specific cheatsheet for every finding. Use when the user asks for a security review, audit, or assessment of code, wants a branch or pull request checked for security issues before merge, asks whether something is safe or exploitable, or raises a specific concern like injection, XSS, CSRF, authentication, session handling, secrets, file uploads, deserialization, SSRF, or access control. Also use when the user asks how a framework wants something done securely, or asks what OWASP says about a pattern — even if they never say \"security\"."
+		},
+		{
+			"name": "vite",
+			"description": "Professionally configure, use, debug, and upgrade Vite projects. Use this skill whenever a task involves Vite in any way — editing or creating vite.config.ts/js, scaffolding a frontend app (React, Vue, Svelte, Solid, etc. via create-vite), dev server issues (port, HMR, proxy, CORS), path aliases, environment variables (.env files, import.meta.env, VITE_ prefix), production builds (vite build, Rolldown, chunking, browser targets, library mode, multi-page apps), static deployment base paths, Vite plugins, SSR, or migrating between Vite majors. Trigger even when the user doesn't say \"Vite\" but mentions these files, commands, or errors (e.g. \"npm run dev fails\", \"import.meta.env is undefined\", \"configure a proxy for my API\"). Do NOT rely on training data for Vite specifics — this skill includes a live doc map because Vite changed bundlers (Rollup/esbuild → Rolldown/Oxc in v8)."
+		},
+		{
+			"name": "vitest-testing",
+			"description": "Write, run, debug, and maintain professional JavaScript/TypeScript tests with Vitest — unit tests, mocking (vi.fn, vi.spyOn, vi.mock), async tests, snapshots, fixtures, coverage, and vitest.config setup. Use this skill whenever the user wants tests written for JS/TS code, mentions Vitest, vitest.config, \"unit tests\" in a Vite/Node/React/Vue project, needs failing Vitest tests fixed or flaky tests debugged, wants a test suite reviewed or migrated from Jest, or asks to set up test coverage — even if they don't name Vitest explicitly but the project uses it (vitest in package.json)."
+		},
+		{
+			"name": "writing-typescript",
+			"description": "Chooses TypeScript compiler settings and type-level designs for new code — tsconfig and module resolution, strictness flags, API surface shape, and `satisfies` over annotations to preserve literal inference. Use when starting a TypeScript file, package, or project, when writing or reviewing a tsconfig.json, when choosing between interface/type/enum/union or between overloads and unions, when picking module and target settings, and when a config object, route table, or lookup map must be checked against a constraint without losing its specific types. Also use when the user asks for \"a TypeScript setup\", a starter config, or best practices for a new TS codebase, even if they don't name a compiler option. Not for routine authoring of a single function where no config or design decision is at stake."
+		},
+		{
+			"name": "refactoring-typescript",
+			"description": "Tightens loose TypeScript and migrates JavaScript to TypeScript incrementally — removing `any` and unchecked assertions, staging strictness flags, converting files with JSDoc first, and changing types in code that already ships. Use when the user wants to make an existing codebase stricter or better-typed, convert a JS project or file to TS, remove `any`/`@ts-ignore`/non-null assertions, adopt a new strictness flag without breaking the build, or upgrade a project to a newer TypeScript version. Also use for \"clean up these types\", \"why is this typed as any\", and gradual-typing questions, even when the user doesn't mention migration. Scoped to type-level change — not general code restructuring, renaming, or framework migration."
+		},
+		{
+			"name": "debugging-type-errors",
+			"description": "Diagnoses TypeScript compiler errors and build-shape problems by reading error elaborations bottom-up, isolating narrowing and inference failures, and tracing why tsc included a file or resolved an import a given way. Use when tsc reports an error the user wants explained or fixed, when an error message seems wrong or unrelated to the code, when narrowing \"stops working\" inside callbacks or after assignments, when a project errors or emits to unexpected output paths after a TypeScript upgrade, when an import type-checks but fails at runtime, or when the user pastes a compiler error. Also use for \"cannot find name\", \"not assignable to\", \"possibly undefined\", and excessively-deep instantiation errors, even when the user only pastes code and says it doesn't compile. Not for runtime exceptions or test-runner configuration that tsc never reported."
+		},
+		{
+			"name": "authoring-skills",
+			"description": "Creates, audits, improves, and evaluates Agent Skills — SKILL.md packages with references, scripts, and evals. Use when the user wants to build a new skill, review or fix an existing one, make a skill trigger reliably, shrink a bloated skill, port a repeated workflow or checklist into a skill, or test whether a skill actually changes agent behavior. Also use when a skill misfires — agents ignore it, follow only its description, or over-trigger on it — and when the user says they keep re-explaining the same multi-step process or workflow every session, even if they never use the word \"skill\". For plain prompts or CLAUDE.md memory files, prefer their dedicated skills."
+		},
+		{
+			"name": "authoring-subagents",
+			"description": "Creates, audits, and debugs Claude Code subagents — agent markdown files with frontmatter, tool grants, model and permission settings, and descriptions that drive delegation. Use when the user wants a specialized agent for a recurring task, wants to review or improve an agent they already have, wants to move noisy work out of the main context, wants to restrict which tools an agent can touch, or has a subagent that is never delegated to, launches with no tools, returns thin results, or ignores fields set in its frontmatter. Also use when the user asks whether to use a subagent, a skill, or an agent team for a piece of work."
+		},
+		{
+			"name": "authoring-hooks",
+			"description": "Creates, audits, and debugs Claude Code hooks — event selection, matcher syntax, handler configuration in settings.json or a plugin hooks.json, and the exit-code and JSON output contracts. Use when the user wants something to happen automatically at a point in the agent loop, wants to enforce a rule that plain instructions keep failing to enforce, wants to block or rewrite a tool call, wants to inject context at session start, wants to review or tighten hooks they already have, or has a hook that silently never fires, fires too often, or fires but does not block. Also use when the user says Claude keeps doing something despite being told not to, even if they never say \"hook\"."
+		},
+		{
+			"name": "authoring-plugins",
+			"description": "Creates, audits, and packages Claude Code plugins — plugin.json manifests, component directories, marketplace entries, and the local install-and-validate loop. Use when the user wants to build a plugin, review or clean up one they already have, bundle existing skills, agents, or hooks into one distributable unit, publish or host a marketplace, or fix a plugin whose components load partially or not at all or whose updates never reach users. Also use when the user asks why a skill, agent, or hook inside their plugin is not being picked up, how a bundled script should be referenced, or how to distribute agent tooling to a team. For authoring the individual components, prefer the dedicated skills for skills, hooks, and subagents."
+		},
+		{
+			"name": "improving-prompts",
+			"description": "Reviews and rewrites prompts of any kind — system prompts, user prompts, agent instructions, slash commands, prompt templates — to make them clearer, leaner, and more effective on current Claude models. Use when the user shares a prompt and asks to improve, review, tighten, fix, optimize, or debug it, when a prompt underperforms, over-triggers, or gets ignored, when migrating prompts written for older models, or when drafting a high-stakes prompt from scratch. Also use when the user describes prompt symptoms without saying \"prompt\" — \"my agent keeps doing X\", \"the model ignores my instructions\", \"the output is too verbose\", \"it worked on the old model but not now\". Not for Agent Skill packages (SKILL.md) or project memory files (CLAUDE.md) — prefer their dedicated skills for those artifact types."
+		},
+		{
+			"name": "managing-project-memory",
+			"description": "Audits, improves, and creates CLAUDE.md files and the rest of a repo's project memory — CLAUDE.local.md, AGENTS.md, .claude/rules — the instruction files coding agents load at session start. Use when the user asks to audit, fix, shrink, restructure, write, or init a CLAUDE.md, when memory files are bloated, stale, or ignored, when deciding whether guidance belongs in memory, a skill, a rules file, or a hook, when capturing what a session revealed so the next session has it, or when setting up a repo so agents behave consistently. Also use on symptoms alone — \"the agent keeps forgetting our conventions\", \"it ignores our style guide\", \"I repeat the same setup every session\"."
+		},
+		{
+			"name": "manhattan-brand-artifacts",
+			"description": "Use when building, mocking up, generating, reviewing or improving any visual or web deliverable for Manhattan University (manhattan.edu) — a page, mockup, dashboard, React component, chart, flowchart, diagram, in-chat visual, report, or Word/PDF/slide deck. The brand is usually implied, not named, and any one signal is enough: \"on brand\", \"our branding\", \"match our site\", \"look like manhattan.edu\", \"came from us\", \"the Jaspers\" — or a university surface such as admissions, the registrar, financial aid, a faculty directory, a named program or school, or an events, news or policy page. Also use to critique, grade, tighten, harden or restyle an existing Manhattan deliverable. Output is built from the University's real tokens, fonts, logos and icons, validated to WCAG 2.2 AA. Not for generic non-Manhattan design, competitor research, font comparisons, summarizing text, reviewing or debugging code, grading student work, or editing prose that has no visual surface."
+		},
+		{
+			"name": "code-review",
+			"description": "Reviews a change for correctness, clarity, and maintainability — reading a diff, a branch, or a pull request and reporting problems with specific line references. Use when the user asks for a code review, wants feedback on a change before merging, asks whether an implementation looks right, or asks what could be improved in code they just wrote."
+		}
+	],
+	"problems": [],
+	"records": [
+		{
+			"trial": "fire-1.t1",
+			"probe": "fire-1",
+			"expectation": "fire",
+			"trialNumber": 1,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "The user explicitly asked for a security review of a branch before merge, which is exactly this skill's stated trigger."
+			}
+		},
+		{
+			"trial": "fire-1.t2",
+			"probe": "fire-1",
+			"expectation": "fire",
+			"trialNumber": 2,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "The request is explicitly a security review of a branch before merge, which is exactly this skill's trigger."
+			}
+		},
+		{
+			"trial": "fire-1.t3",
+			"probe": "fire-1",
+			"expectation": "fire",
+			"trialNumber": 3,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "The request is explicitly a security review of a branch, which is exactly this skill's trigger."
+			}
+		},
+		{
+			"trial": "fire-2.t1",
+			"probe": "fire-2",
+			"expectation": "fire",
+			"trialNumber": 1,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "The user is asking whether specific code is exploitable via SQL injection, an explicit injection/security-review trigger for that skill."
+			}
+		},
+		{
+			"trial": "fire-2.t2",
+			"probe": "fire-2",
+			"expectation": "fire",
+			"trialNumber": 2,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "The question asks whether specific code is exploitable via SQL injection, which is exactly the security-review trigger."
+			}
+		},
+		{
+			"trial": "fire-2.t3",
+			"probe": "fire-2",
+			"expectation": "fire",
+			"trialNumber": 3,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "The question is a targeted security assessment of code for injection, exactly what that skill covers."
+			}
+		},
+		{
+			"trial": "fire-3.t1",
+			"probe": "fire-3",
+			"expectation": "fire",
+			"trialNumber": 1,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "The request is an explicit security audit of code, which is exactly this skill's trigger."
+			}
+		},
+		{
+			"trial": "fire-3.t2",
+			"probe": "fire-3",
+			"expectation": "fire",
+			"trialNumber": 2,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "The request is an explicit security audit of a codebase, which is exactly what that skill covers (OWASP-cited findings)."
+			}
+		},
+		{
+			"trial": "fire-3.t3",
+			"probe": "fire-3",
+			"expectation": "fire",
+			"trialNumber": 3,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "The request is a direct security audit of code, which is exactly this skill's OWASP-cheatsheet-backed review workflow."
+			}
+		},
+		{
+			"trial": "fire-4.t1",
+			"probe": "fire-4",
+			"expectation": "fire",
+			"trialNumber": 1,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "Password storage hashing is a security question the OWASP-based review skill covers directly (Password Storage Cheat Sheet)."
+			}
+		},
+		{
+			"trial": "fire-4.t2",
+			"probe": "fire-4",
+			"expectation": "fire",
+			"trialNumber": 2,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "Password storage hashing is a security question the OWASP-backed review skill covers directly (Password Storage Cheat Sheet)."
+			}
+		},
+		{
+			"trial": "fire-4.t3",
+			"probe": "fire-4",
+			"expectation": "fire",
+			"trialNumber": 3,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "Password storage hashing is a security question the OWASP-backed security review skill covers directly (Password Storage Cheat Sheet)."
+			}
+		},
+		{
+			"trial": "fire-5.t1",
+			"probe": "fire-5",
+			"expectation": "fire",
+			"trialNumber": 1,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "File upload safety is a security review question the OWASP-based skill explicitly covers (file uploads, injection, access control)."
+			}
+		},
+		{
+			"trial": "fire-5.t2",
+			"probe": "fire-5",
+			"expectation": "fire",
+			"trialNumber": 2,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "Asking whether a file upload handler is safe is a direct security-review request, and that skill covers file uploads against OWASP cheatsheets."
+			}
+		},
+		{
+			"trial": "fire-5.t3",
+			"probe": "fire-5",
+			"expectation": "fire",
+			"trialNumber": 3,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "File upload safety is a security review of specific code, exactly what this OWASP-cheatsheet-backed skill covers."
+			}
+		},
+		{
+			"trial": "fire-6.t1",
+			"probe": "fire-6",
+			"expectation": "fire",
+			"trialNumber": 1,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "The skill explicitly covers questions about what OWASP says about a pattern, including authentication/session topics like JWT expiry."
+			}
+		},
+		{
+			"trial": "fire-6.t2",
+			"probe": "fire-6",
+			"expectation": "fire",
+			"trialNumber": 2,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "The question asks directly what OWASP says about a security pattern (JWT expiry), which that skill explicitly covers via the OWASP Cheat Sheet Series."
+			}
+		},
+		{
+			"trial": "fire-6.t3",
+			"probe": "fire-6",
+			"expectation": "fire",
+			"trialNumber": 3,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "The question asks what OWASP says about a specific security topic (JWT expiry), which is exactly the OWASP-cheatsheet-citing scope of that skill."
+			}
+		},
+		{
+			"trial": "fire-7.t1",
+			"probe": "fire-7",
+			"expectation": "fire",
+			"trialNumber": 1,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "An IDOR/broken-access-control report is exactly the access-control review case that skill covers, with OWASP citations."
+			}
+		},
+		{
+			"trial": "fire-7.t2",
+			"probe": "fire-7",
+			"expectation": "fire",
+			"trialNumber": 2,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "An IDOR/broken-access-control report is exactly the OWASP-backed security review this skill covers."
+			}
+		},
+		{
+			"trial": "fire-7.t3",
+			"probe": "fire-7",
+			"expectation": "fire",
+			"trialNumber": 3,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "A user-reported IDOR/broken access control on order lookup is exactly the OWASP-backed access-control audit that skill covers."
+			}
+		},
+		{
+			"trial": "fire-8.t1",
+			"probe": "fire-8",
+			"expectation": "fire",
+			"trialNumber": 1,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "Rendering user-supplied HTML is an XSS/sanitization safety question, which is exactly this skill's OWASP-cited security review scope."
+			}
+		},
+		{
+			"trial": "fire-8.t2",
+			"probe": "fire-8",
+			"expectation": "fire",
+			"trialNumber": 2,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "Question is about XSS safety of rendering user-supplied HTML, squarely the OWASP-based security review skill's trigger."
+			}
+		},
+		{
+			"trial": "fire-8.t3",
+			"probe": "fire-8",
+			"expectation": "fire",
+			"trialNumber": 3,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "Rendering user-supplied HTML is an XSS/sanitization question, exactly what the OWASP-based security review skill covers."
+			}
+		},
+		{
+			"trial": "fire-9.t1",
+			"probe": "fire-9",
+			"expectation": "fire",
+			"trialNumber": 1,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "Auth-focused PR review maps directly to the OWASP-backed security review skill; I'd pair it with code-review but security is the primary fit."
+			}
+		},
+		{
+			"trial": "fire-9.t2",
+			"probe": "fire-9",
+			"expectation": "fire",
+			"trialNumber": 2,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "Auth code review is squarely security-sensitive, so the OWASP-backed security review skill fits better than the generic code-review skill (which I'd consider alongside it)."
+			}
+		},
+		{
+			"trial": "fire-9.t3",
+			"probe": "fire-9",
+			"expectation": "fire",
+			"trialNumber": 3,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "Auth code review is security-sensitive, so the OWASP-based security review skill fits better than the generic code-review skill."
+			}
+		},
+		{
+			"trial": "fire-10.t1",
+			"probe": "fire-10",
+			"expectation": "fire",
+			"trialNumber": 1,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "Asking what to worry about before exposing an endpoint publicly is a security review request, which that skill covers with OWASP-cited findings."
+			}
+		},
+		{
+			"trial": "fire-10.t2",
+			"probe": "fire-10",
+			"expectation": "fire",
+			"trialNumber": 2,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "Pre-exposure review of a public endpoint is exactly a security audit — OWASP-cited findings on authz, injection, input validation, and rate limiting."
+			}
+		},
+		{
+			"trial": "fire-10.t3",
+			"probe": "fire-10",
+			"expectation": "fire",
+			"trialNumber": 3,
+			"fired": true,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "reviewing-code-security",
+				"reason": "Pre-exposure risk check on an endpoint is exactly a security review of code, which this skill covers with OWASP-cited findings."
+			}
+		},
+		{
+			"trial": "nofire-1.t1",
+			"probe": "nofire-1",
+			"expectation": "nofire",
+			"trialNumber": 1,
+			"fired": false,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "code-review",
+				"reason": "The request is a direct ask for a code review of a change, which is exactly the code-review skill's stated trigger."
+			}
+		},
+		{
+			"trial": "nofire-1.t2",
+			"probe": "nofire-1",
+			"expectation": "nofire",
+			"trialNumber": 2,
+			"fired": false,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "code-review",
+				"reason": "The request is explicitly a code review of a change, which is exactly the code-review skill's trigger."
+			}
+		},
+		{
+			"trial": "nofire-1.t3",
+			"probe": "nofire-1",
+			"expectation": "nofire",
+			"trialNumber": 3,
+			"fired": false,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "code-review",
+				"reason": "The request is a direct ask for a code review of a change, which is exactly the code-review skill's stated trigger."
+			}
+		},
+		{
+			"trial": "nofire-2.t1",
+			"probe": "nofire-2",
+			"expectation": "nofire",
+			"trialNumber": 1,
+			"fired": false,
+			"outcome": "out-of-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "superpowers:systematic-debugging",
+				"reason": "A vague 'why is X broken' bug report is a debugging task, and the superpowers rule mandates invoking systematic-debugging before any exploration or clarifying questions."
+			}
+		},
+		{
+			"trial": "nofire-2.t2",
+			"probe": "nofire-2",
+			"expectation": "nofire",
+			"trialNumber": 2,
+			"fired": false,
+			"outcome": "unnamed",
+			"answer": {
+				"would_load": true,
+				"skill_named": "",
+				"reason": "The vague bug report calls for superpowers:systematic-debugging (a process skill outside the numbered list), not any of the 14 listed skills — no diff to review, no compiler error, and no evidence yet that it's a Vite/TS/security issue."
+			}
+		},
+		{
+			"trial": "nofire-2.t3",
+			"probe": "nofire-2",
+			"expectation": "nofire",
+			"trialNumber": 3,
+			"fired": false,
+			"outcome": "unnamed",
+			"answer": {
+				"would_load": true,
+				"skill_named": "",
+				"reason": "The listed skills cover Vite/TS/authoring/design topics, not diagnosing a broken auth flow; I'd reach for superpowers:systematic-debugging instead, which isn't among these fourteen."
+			}
+		},
+		{
+			"trial": "nofire-3.t1",
+			"probe": "nofire-3",
+			"expectation": "nofire",
+			"trialNumber": 1,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "No listed skill covers authoring a generic login form; the security, TypeScript-config, and brand skills only fit if a review, config decision, or Manhattan surface were in play, and none is stated."
+			}
+		},
+		{
+			"trial": "nofire-3.t2",
+			"probe": "nofire-3",
+			"expectation": "nofire",
+			"trialNumber": 2,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "No listed skill covers writing a login form; the request lacks framework/stack signals (not Manhattan-branded, no Vite/TS config decision, no review or test task), so I'd ask for stack details or just write it."
+			}
+		},
+		{
+			"trial": "nofire-3.t3",
+			"probe": "nofire-3",
+			"expectation": "nofire",
+			"trialNumber": 3,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "No listed skill covers writing a generic login form; the framework and stack are unspecified, and none of the Vite/TS/security/brand skills clearly apply yet."
+			}
+		},
+		{
+			"trial": "nofire-4.t1",
+			"probe": "nofire-4",
+			"expectation": "nofire",
+			"trialNumber": 1,
+			"fired": false,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "vitest-testing",
+				"reason": "Failing JS/TS tests on a module is squarely the vitest-testing skill's debug-and-fix scope, pending confirmation the project uses Vitest."
+			}
+		},
+		{
+			"trial": "nofire-4.t2",
+			"probe": "nofire-4",
+			"expectation": "nofire",
+			"trialNumber": 2,
+			"fired": false,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "vitest-testing",
+				"reason": "Failing JS/TS tests in a session module is exactly the debug-failing-Vitest-tests case, though I'd confirm the runner is Vitest first."
+			}
+		},
+		{
+			"trial": "nofire-4.t3",
+			"probe": "nofire-4",
+			"expectation": "nofire",
+			"trialNumber": 3,
+			"fired": false,
+			"outcome": "in-lineup",
+			"answer": {
+				"would_load": true,
+				"skill_named": "vitest-testing",
+				"reason": "Failing JS/TS tests is squarely vitest-testing's debug-failing-tests case, though I'd first confirm the project actually uses Vitest rather than another runner."
+			}
+		},
+		{
+			"trial": "nofire-5.t1",
+			"probe": "nofire-5",
+			"expectation": "nofire",
+			"trialNumber": 1,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "This is a general conceptual explanation request, not a review/audit of specific code, so the OWASP security-review skill and all other listed skills don't apply."
+			}
+		},
+		{
+			"trial": "nofire-5.t2",
+			"probe": "nofire-5",
+			"expectation": "nofire",
+			"trialNumber": 2,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "General conceptual explanation of JWTs — no listed skill covers explaining a protocol; the security skill is for reviewing actual code."
+			}
+		},
+		{
+			"trial": "nofire-5.t3",
+			"probe": "nofire-5",
+			"expectation": "nofire",
+			"trialNumber": 3,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "A general conceptual explanation of JWTs isn't code review, security auditing of specific code, or any other listed skill's scope."
+			}
+		},
+		{
+			"trial": "nofire-6.t1",
+			"probe": "nofire-6",
+			"expectation": "nofire",
+			"trialNumber": 1,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "No listed skill covers local dev HTTPS/TLS setup; the vite skill would only fit if the project were confirmed Vite, which isn't established yet."
+			}
+		},
+		{
+			"trial": "nofire-6.t2",
+			"probe": "nofire-6",
+			"expectation": "nofire",
+			"trialNumber": 2,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "The request is too ambiguous to match a skill — no stack, tool, or config file is named yet; Vite is only one of many possible dev environments, so I'd ask what the dev setup is before loading anything."
+			}
+		},
+		{
+			"trial": "nofire-6.t3",
+			"probe": "nofire-6",
+			"expectation": "nofire",
+			"trialNumber": 3,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "The request is too underspecified to match a skill — no stack, server, or tooling named yet; Vite's skill would only apply if the dev server turns out to be Vite, so I'd ask first."
+			}
+		},
+		{
+			"trial": "nofire-7.t1",
+			"probe": "nofire-7",
+			"expectation": "nofire",
+			"trialNumber": 1,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "A mechanical rename across the codebase needs no listed skill — none covers symbol renaming, and I'd first need to know which function is meant."
+			}
+		},
+		{
+			"trial": "nofire-7.t2",
+			"probe": "nofire-7",
+			"expectation": "nofire",
+			"trialNumber": 2,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "A mechanical rename across the codebase is routine editing; no listed skill covers symbol renaming, and refactoring-typescript is scoped to type-level change, explicitly not renaming."
+			}
+		},
+		{
+			"trial": "nofire-7.t3",
+			"probe": "nofire-7",
+			"expectation": "nofire",
+			"trialNumber": 3,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "A mechanical rename across files needs codebase search/edit, not any of the listed config, authoring, review, or design skills."
+			}
+		},
+		{
+			"trial": "nofire-8.t1",
+			"probe": "nofire-8",
+			"expectation": "nofire",
+			"trialNumber": 1,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "No listed skill covers SQL/database query performance analysis; the question is also too vague to act on without seeing the query and schema."
+			}
+		},
+		{
+			"trial": "nofire-8.t2",
+			"probe": "nofire-8",
+			"expectation": "nofire",
+			"trialNumber": 2,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "No listed skill covers SQL/database query performance; the available skills are Vite, TS, testing, authoring, and brand/review-specific."
+			}
+		},
+		{
+			"trial": "nofire-8.t3",
+			"probe": "nofire-8",
+			"expectation": "nofire",
+			"trialNumber": 3,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "No listed skill covers SQL/database query performance, and the question is too vague to map onto the TypeScript, Vite, testing, or review skills without more context."
+			}
+		},
+		{
+			"trial": "nofire-9.t1",
+			"probe": "nofire-9",
+			"expectation": "nofire",
+			"trialNumber": 1,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "No listed skill covers implementing rate limiting; the security-review skill is for auditing existing code, not writing a new feature, and I'd first need to inspect the endpoint's stack."
+			}
+		},
+		{
+			"trial": "nofire-9.t2",
+			"probe": "nofire-9",
+			"expectation": "nofire",
+			"trialNumber": 2,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "No listed skill covers implementing rate limiting; I'd first need to see the endpoint's framework and code, and the security-review skill is for auditing existing code, not writing this feature."
+			}
+		},
+		{
+			"trial": "nofire-9.t3",
+			"probe": "nofire-9",
+			"expectation": "nofire",
+			"trialNumber": 3,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "No listed skill covers implementing rate limiting; the security-review and code-review skills target auditing existing code, not writing this feature, and the request names no Vite/TypeScript/authoring concern."
+			}
+		},
+		{
+			"trial": "nofire-10.t1",
+			"probe": "nofire-10",
+			"expectation": "nofire",
+			"trialNumber": 1,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "The question asks about an existing organizational/project password policy — a lookup in repo docs or config, not a security code review or any other listed skill's task."
+			}
+		},
+		{
+			"trial": "nofire-10.t2",
+			"probe": "nofire-10",
+			"expectation": "nofire",
+			"trialNumber": 2,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "The question asks about an organizational password policy, not a coding task any listed skill covers — no security-review of code is being requested."
+			}
+		},
+		{
+			"trial": "nofire-10.t3",
+			"probe": "nofire-10",
+			"expectation": "nofire",
+			"trialNumber": 3,
+			"fired": false,
+			"outcome": "declined",
+			"answer": {
+				"would_load": false,
+				"skill_named": "",
+				"reason": "The question asks about an organizational password policy document, not a coding task any listed skill covers; the security skill reviews code against OWASP rather than reporting internal policy."
+			}
+		}
+	]
+}

@@ -1,0 +1,76 @@
+# Core word list from references/dictionary.md. One approved word per meaning.
+#
+# Keys are regular expressions, as Vale's substitution rule allows, so verbs
+# catch their inflections: utilize, utilizes, utilized, utilizing.
+#
+# Terms whose technical sense is allowed (fetch, emit, invoke, commit, expose,
+# enable, drop, append, fail, validate, block, consume, load, deprecated) are
+# omitted: a substitution rule cannot tell the two senses apart, so they stay
+# with review.
+#
+# The modify and remove families live in CoreWordsCased.yml instead. Spec tools
+# use ALL-CAPS words as structure — OpenSpec's ADDED / MODIFIED / REMOVED /
+# RENAMED delta headers are keywords — and this rule is case-insensitive, so it
+# cannot tell MODIFIED the keyword from modified the verb.
+#
+# Patterns here must stay RE2-safe: Vale's regex engine has no lookahead or
+# lookbehind. scripts/tests/test_vale_rules.py enforces that.
+extends: substitution
+message: "Dictionary: use '%s' instead of '%s'."
+level: warning
+ignorecase: true
+swap:
+  "utiliz(?:e|es|ed|ing)": use
+  "utilis(?:e|es|ed|ing)": use
+  "make use of": use
+  "leverag(?:e|es|ed|ing)": use
+  "prior to": before
+  "in advance of": before
+  "subsequent to": after
+  "commenc(?:e|es|ed|ing)": start
+  "initiat(?:e|es|ed|ing)": start
+  "kick(?:s|ed)? off": start
+  "ceas(?:e|es|ed|ing)": stop
+  "alter(?:s|ed|ing)?": change
+  "amend(?:s|ed|ing)?": change
+  "purg(?:e|es|ed|ing)": delete
+  "eliminat(?:e|es|ed|ing)": delete
+  "necessitat(?:e|es|ed|ing)": need
+  "locat(?:e|es|ed|ing)": find
+  "transmit(?:s|ted|ting)?": send
+  "dispatch(?:es|ed|ing)?": send
+  "obtain(?:s|ed|ing)?": get
+  "acquir(?:e|es|ed|ing)": get
+  "provision(?:s|ed|ing)?": "set up"
+  "stand up": "set up"
+  "regarding": about
+  "concerning": about
+  "with respect to": about
+  "due to the fact that": because
+  "owing to": because
+  "in the event that": if
+  "at this time": now
+  "at present": now
+  "subsequently": then
+  "thereafter": then
+  "numerous": many
+  "a multitude of": many
+  "the majority of": most
+  "a number of": some
+  "is required to": must
+  "is able to": can
+  "has the ability to": can
+  "assist(?:s|ed|ing)?": help
+  "facilitat(?:e|es|ed|ing)": help
+  "endeavor(?:s|ed|ing)?": try
+  "attempt(?:s|ed|ing)?": try
+  "remediat(?:e|es|ed|ing)": fix
+  "error(?:s|ed)? out": break
+  "ensur(?:e|es|ed|ing)": "make sure"
+  "guarantee(?:s|d|ing)?": "make sure"
+  "retain(?:s|ed|ing)?": keep
+  "preserv(?:e|es|ed|ing)": keep
+  "persist(?:s|ed|ing)?": write
+  "at all times": always
+  "under no circumstances": never
+  "each and every": every

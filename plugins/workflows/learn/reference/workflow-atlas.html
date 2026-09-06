@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Workflow atlas — workflows</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+	</head>
+	<body>
+		<main class="page page--wide">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Reference</span><span class="sep">·</span><span>Print this</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1>Workflow atlas</h1>
+				<p class="deck">
+					All twelve schemas: level, chain, the one gate that is the reason it exists, and its escape
+					hatches. Counted and quoted from the twelve <code>schema.yaml</code> files.
+				</p>
+			</header>
+
+			<h2>At a glance</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Level</th>
+							<th>Schemas</th>
+							<th>Artifacts</th>
+							<th>Longest chain</th>
+							<th>Router</th>
+							<th>Packs it needs</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>minimal</code></td>
+							<td>2</td>
+							<td>9</td>
+							<td>6</td>
+							<td>no</td>
+							<td><code>mattpocock-skills</code></td>
+						</tr>
+						<tr>
+							<td><code>standard</code></td>
+							<td>2</td>
+							<td>12</td>
+							<td>7</td>
+							<td>no</td>
+							<td><code>superpowers</code></td>
+						</tr>
+						<tr>
+							<td><code>advanced</code></td>
+							<td>8</td>
+							<td>32</td>
+							<td>10</td>
+							<td>yes</td>
+							<td><code>agent-skills</code>, <code>mattpocock-skills</code>, <code>superpowers</code></td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					Impeccable and taste-skill arrive with the web overlay, independently of level, when a web
+					project is detected.
+				</caption>
+			</div>
+
+			<h2><code>minimal</code></h2>
+
+			<section class="card">
+				<h3><code>mattpocock-bridge</code> · 6 artifacts · default</h3>
+				<ul class="chain">
+					<li data-gate>grill</li>
+					<li class="arrow">→</li>
+					<li>proposal</li>
+					<li class="arrow">→</li>
+					<li data-optional>surface</li>
+					<li class="arrow">→</li>
+					<li>specs</li>
+					<li class="arrow">→</li>
+					<li data-optional>design</li>
+					<li class="arrow">→</li>
+					<li>tasks</li>
+					<li class="arrow">→</li>
+					<li>apply</li>
+				</ul>
+				<dl class="kv">
+					<dt>Gate</dt>
+					<dd>The grill. An interview in rounds, writing to <code>CONTEXT.md</code> and ADRs.</dd>
+					<dt>Requires</dt>
+					<dd>
+						<code>proposal</code> ← grill · <code>surface</code> ← proposal ·
+						<code>specs</code> ← proposal+surface · <code>design</code> ← proposal+specs ·
+						<code>tasks</code> ← specs+design
+					</dd>
+					<dt>Hatches</dt>
+					<dd>
+						<code>skip_grill</code> (stub) · <code>skip_surface</code> (stub) ·
+						<code>skip_specs</code> (CLI) · <code>design</code> skipped deliberately
+					</dd>
+					<dt>Reopen</dt>
+					<dd>Realise it is a defect → <code>bugfix-flow</code></dd>
+					<dt>Review at apply</dt>
+					<dd>Two axes in parallel: <code>code-review-spec</code>, <code>code-review-standards</code></dd>
+				</dl>
+			</section>
+
+			<section class="card">
+				<h3><code>bugfix-flow</code> · 3 artifacts · per change</h3>
+				<ul class="chain">
+					<li data-gate>diagnose</li>
+					<li class="arrow">→</li>
+					<li>specs</li>
+					<li class="arrow">→</li>
+					<li>tasks</li>
+					<li class="arrow">→</li>
+					<li>apply</li>
+				</ul>
+				<dl class="kv">
+					<dt>Gate</dt>
+					<dd>
+						A written root cause. <code>diagnose</code> carries reproduction, root cause, fix layer
+						with reasoning, and the seam the regression test sits at.
+					</dd>
+					<dt>Hatch</dt>
+					<dd>
+						<code>skip_specs</code> when the spec already covered the case — the regression test holds
+						the line
+					</dd>
+					<dt>Reopen</dt>
+					<dd>
+						The fix is a redesign → <code>mattpocock-bridge</code>. Reproduction still triggers →
+						<code>diagnose.md</code> is wrong, not the code
+					</dd>
+				</dl>
+			</section>
+
+			<h2><code>standard</code></h2>
+
+			<section class="card">
+				<h3><code>craft-driven</code> · 7 artifacts · default</h3>
+				<ul class="chain">
+					<li>brainstorm</li>
+					<li class="arrow">→</li>
+					<li>proposal</li>
+					<li class="arrow">→</li>
+					<li>specs</li>
+					<li class="arrow">+</li>
+					<li data-optional>design-brief</li>
+					<li class="arrow">+</li>
+					<li data-optional>design</li>
+					<li class="arrow">→</li>
+					<li>tasks</li>
+					<li class="arrow">→</li>
+					<li>apply</li>
+					<li class="arrow">→</li>
+					<li data-gate>verification</li>
+				</ul>
+				<dl class="kv">
+					<dt>Gate</dt>
+					<dd>
+						<code>verification</code>. Archive warns until it exists. Every claim backed by a command
+						run <em>while writing this file</em>
+					</dd>
+					<dt>Requires</dt>
+					<dd>
+						<code>specs</code>, <code>design-brief</code>, <code>design</code> all ← proposal ·
+						<code>tasks</code> ← all three · <code>verification</code> ← tasks
+					</dd>
+					<dt><code>design-brief</code> exists when</dt>
+					<dd>The proposal's Surfaces section names at least one user-facing surface</dd>
+					<dt><code>design</code> exists when</dt>
+					<dd>
+						Cross-cutting · new pattern · new dependency · significant data-model change · security,
+						performance or migration complexity · genuine ambiguity
+					</dd>
+					<dt>Dispatches</dt>
+					<dd>
+						<code>craft-design-gate</code> (design) · <code>verification-reviewer</code>
+						(verification step 3)
+					</dd>
+				</dl>
+			</section>
+
+			<section class="card">
+				<h3><code>surface-driven</code> · 5 artifacts · per change</h3>
+				<ul class="chain">
+					<li>design-brief</li>
+					<li class="arrow">→</li>
+					<li>proposal</li>
+					<li class="arrow">→</li>
+					<li>specs</li>
+					<li class="arrow">→</li>
+					<li>tasks</li>
+					<li class="arrow">→</li>
+					<li>apply</li>
+					<li class="arrow">→</li>
+					<li data-gate>quality</li>
+				</ul>
+				<dl class="kv">
+					<dt>Gate</dt>
+					<dd>
+						<code>quality</code>. Critique → audit → behaviour evidence → brief fidelity → verdict.
+						Reports from earlier in the session or from subagents are leads, not evidence
+					</dd>
+					<dt>Shape</dt>
+					<dd>Strictly linear. The brief leads; the proposal is deliberately short</dd>
+					<dt>Hatch</dt>
+					<dd><code>skip_specs</code> where no observable behaviour changes</dd>
+					<dt>Dispatches</dt>
+					<dd>None pinned — the quality pass runs in your main session</dd>
+				</dl>
+			</section>
+
+			<h2><code>advanced</code></h2>
+
+			<section class="card">
+				<h3><code>feature</code> · 10 artifacts · config default</h3>
+				<ul class="chain">
+					<li>brainstorm</li>
+					<li class="arrow">→</li>
+					<li>constraints</li>
+					<li class="arrow">→</li>
+					<li>proposal</li>
+					<li class="arrow">→</li>
+					<li>specs</li>
+					<li class="arrow">→</li>
+					<li>design</li>
+					<li class="arrow">→</li>
+					<li>migration</li>
+					<li class="arrow">→</li>
+					<li data-gate>review</li>
+					<li class="arrow">→</li>
+					<li>tasks</li>
+					<li class="arrow">→</li>
+					<li>plan</li>
+					<li class="arrow">→</li>
+					<li data-gate>verification</li>
+				</ul>
+				<dl class="kv">
+					<dt>Gate</dt>
+					<dd>
+						<code>review</code> must <strong>PASS</strong> before <code>tasks</code>. On BLOCK: fix
+						upstream artifacts and re-dispatch. Do not soften or re-adjudicate — the gate runs on a
+						stronger model than the session
+					</dd>
+					<dt>Dispatches</dt>
+					<dd>
+						<code>design-gate</code> (design) · <code>taste-preflight</code> then
+						<code>review-gate</code> (review)
+					</dd>
+					<dt>Two files, two jobs</dt>
+					<dd>
+						<code>tasks.md</code> coarse and tracked, checkboxes exactly <code>- [ ] </code> ·
+						<code>plan.md</code> micro-step with real test code, no placeholders
+					</dd>
+					<dt>Scales</dt>
+					<dd>
+						<code>constraints</code> and <code>migration</code> go from three lines for net-new
+						flag-gated work to full rigour on an existing system
+					</dd>
+				</dl>
+			</section>
+
+			<div class="grid">
+				<section class="card">
+					<h3><code>bugfix</code> · 4</h3>
+					<ul class="chain">
+						<li>reproduction</li>
+						<li class="arrow">→</li>
+						<li data-gate>rootcause</li>
+						<li class="arrow">→</li>
+						<li>fix</li>
+						<li class="arrow">→</li>
+						<li>tasks</li>
+					</ul>
+					<dl class="kv">
+						<dt>Gate</dt>
+						<dd>No fix proposed before the root cause completes</dd>
+						<dt>Also does</dt>
+						<dd>
+							Same-class scan elsewhere in the codebase · a three-way spec classification whose common
+							answer is "the spec was silent"
+						</dd>
+						<dt>Performance</dt>
+						<dd>Measured baseline and numeric target in <code>reproduction</code>; that target is the guard</dd>
+					</dl>
+				</section>
+
+				<section class="card">
+					<h3><code>refactor</code> · 3</h3>
+					<ul class="chain">
+						<li data-gate>characterization</li>
+						<li class="arrow">→</li>
+						<li>strategy</li>
+						<li class="arrow">→</li>
+						<li>tasks</li>
+					</ul>
+					<dl class="kv">
+						<dt>Gate</dt>
+						<dd>Behaviour pinned by tests, coverage gaps closed, before any code moves</dd>
+						<dt>Per task</dt>
+						<dd>One mechanical step · "suite green, no assertion changed"</dd>
+						<dt>Degenerate case</dt>
+						<dd>Coverage-only: state "no restructure" and let tasks be the test list</dd>
+					</dl>
+				</section>
+
+				<section class="card">
+					<h3><code>rapid</code> · 2</h3>
+					<ul class="chain">
+						<li data-gate>proposal</li>
+						<li class="arrow">→</li>
+						<li>tasks</li>
+					</ul>
+					<dl class="kv">
+						<dt>Gate</dt>
+						<dd>The contract check. Discipline rides in config rules, not extra artifacts</dd>
+						<dt>Tripwire</dt>
+						<dd>
+							Public API, URL, analytics event, schema, config contract — or non-trivial → recreate as
+							<code>feature</code>
+						</dd>
+						<dt>Still does</dt>
+						<dd>TDD, full suite and lint, evidence before completion</dd>
+					</dl>
+				</section>
+
+				<section class="card">
+					<h3><code>setup</code> · 3</h3>
+					<ul class="chain">
+						<li>decisions</li>
+						<li class="arrow">→</li>
+						<li>conventions</li>
+						<li class="arrow">→</li>
+						<li>tasks</li>
+					</ul>
+					<dl class="kv">
+						<dt>Inverts</dt>
+						<dd>No <code>specs</code> artifact — no behaviour exists yet to spec</dd>
+						<dt>Exit criterion</dt>
+						<dd>A walking skeleton green in CI</dd>
+						<dt>Written to be copied</dt>
+						<dd>
+							<code>conventions</code> is materialized into <code>CONTEXT.md</code>,
+							<code>AGENTS.md</code>, config context, and a <code>DESIGN.md</code> stub
+						</dd>
+						<dt>Last task</dt>
+						<dd><code>TOOLS.md</code>, after the skeleton — never at scaffold time</dd>
+					</dl>
+				</section>
+
+				<section class="card">
+					<h3><code>spike</code> · 2</h3>
+					<ul class="chain">
+						<li data-gate>question</li>
+						<li class="arrow">→</li>
+						<li>apply</li>
+						<li class="arrow">→</li>
+						<li>findings</li>
+					</ul>
+					<dl class="kv">
+						<dt>Inverts</dt>
+						<dd>Code never merges. Apply tracks <code>question.md</code>, not a task file</dd>
+						<dt>Gate</dt>
+						<dd>A hard timebox. When it expires, findings get written with whatever exists</dd>
+						<dt>Mandatory</dt>
+						<dd>
+							A disposition: code discarded, plus either a follow-up <code>feature</code> or an explicit
+							decision not to proceed
+						</dd>
+					</dl>
+				</section>
+
+				<section class="card">
+					<h3><code>upgrade</code> · 5</h3>
+					<ul class="chain">
+						<li>inventory</li>
+						<li class="arrow">→</li>
+						<li data-gate>surfaces</li>
+						<li class="arrow">→</li>
+						<li>migration</li>
+						<li class="arrow">→</li>
+						<li>tasks</li>
+						<li class="arrow">→</li>
+						<li data-gate>verification</li>
+					</ul>
+					<dl class="kv">
+						<dt>Inverts</dt>
+						<dd>Constraints come from someone else's release notes; success means behaviour unchanged</dd>
+						<dt>Gate</dt>
+						<dd>
+							<code>surfaces</code> — real call sites by search, paths and counts. The map narrows, the
+							search proves
+						</dd>
+						<dt>Classes</dt>
+						<dd>mechanical (codemod) · behavioral (equivalence test) · unknown (spike first)</dd>
+						<dt>Never</dt>
+						<dd>Ship a changed behaviour as an upgrade. Refresh <code>TOOLS.md</code> after the bump</dd>
+					</dl>
+				</section>
+
+				<section class="card">
+					<h3><code>hotfix</code> · 3</h3>
+					<ul class="chain">
+						<li data-gate>triage</li>
+						<li class="arrow">→</li>
+						<li>tasks</li>
+						<li class="arrow">→</li>
+						<li>apply</li>
+						<li class="arrow">→</li>
+						<li data-gate>postmortem</li>
+					</ul>
+					<dl class="kv">
+						<dt>Inverts</dt>
+						<dd>Depth comes after shipping. Triage takes minutes, not hours</dd>
+						<dt>First diagnostic</dt>
+						<dd>What changed recently — deploys, flags, config</dd>
+						<dt>Prefer</dt>
+						<dd>Rollback over forward-fix when both are viable. Every step names its observable signal</dd>
+						<dt>Mandatory</dt>
+						<dd>A linked follow-up change for the durable fix</dd>
+					</dl>
+				</section>
+			</div>
+
+			<h2>Standing documents, and which skill owns each</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Document</th>
+							<th>Owning skill</th>
+							<th>Read by</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>CONTEXT.md</code> — domain language</td>
+							<td><code>mattpocock-skills:domain-modeling</code></td>
+							<td><code>feature</code> constraints</td>
+						</tr>
+						<tr>
+							<td><code>TOOLS.md</code> — stack and command facts</td>
+							<td><code>mapping-project-tooling</code></td>
+							<td><code>feature</code> constraints, <code>upgrade</code> surfaces</td>
+						</tr>
+						<tr>
+							<td><code>AGENTS.md</code> / <code>CLAUDE.md</code> and the router</td>
+							<td><code>managing-project-memory</code></td>
+							<td>Every change, at session start</td>
+						</tr>
+						<tr>
+							<td><code>DESIGN.md</code> — design tokens</td>
+							<td><code>impeccable</code></td>
+							<td><code>feature</code> design, both design briefs</td>
+						</tr>
+						<tr>
+							<td><code>docs/GLOSSARY.md</code> — bound terms</td>
+							<td><code>controlled-engineering-english</code></td>
+							<td>All prose-bearing artifacts</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					<code>payload/levels/advanced/openspec/README.md</code>. Six stores outlive a change:
+					behaviour to <code>openspec/specs/</code>, vocabulary to <code>CONTEXT.md</code>, binding
+					decisions to <code>docs/adr/</code>, product truth to <code>PRODUCT.md</code>, visual tokens
+					to <code>DESIGN.md</code>, stack facts to <code>TOOLS.md</code>. Anything inside a change
+					folder archives as history.
+				</caption>
+			</div>
+
+			<nav class="nav">
+				<span><a href="router-card.html">← Router card</a></span>
+				<span><a href="command-card.html">Command card →</a></span>
+			</nav>
+		</main>
+	</body>
+</html>

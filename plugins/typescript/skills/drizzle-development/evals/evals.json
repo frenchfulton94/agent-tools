@@ -1,0 +1,49 @@
+{
+  "skill_name": "drizzle-development",
+  "evals": [
+    {
+      "id": 1,
+      "name": "blog-schema-from-scratch",
+      "prompt": "I'm starting a new Next.js app with Postgres (plain node-postgres driver) and want to use drizzle. Set up the schema for a simple blog: users, posts, and comments. Users can write many posts, posts have many comments, and comments belong to a user and a post. Also add tags with a many-to-many to posts. Use snake_case in the database but camelCase in my code. Include the drizzle config and relations so I can use db.query.",
+      "expected_output": "A schema.ts using pgTable with generatedAlwaysAsIdentity PKs, snake_case handling, exported models, array-form indexes where used; a relations.ts using defineRelations (v1 API) with .through() for the posts<->tags many-to-many; a drizzle.config.ts with dialect/schema/out/dbCredentials; a db.ts passing { relations } to drizzle().",
+      "files": [],
+      "assertions": [
+        "All schema models (tables, enums) are exported",
+        "Relations use the v1 defineRelations API, not the legacy relations() helper",
+        "The posts-to-tags many-to-many uses .through() on the junction table columns",
+        "Snake_case is handled via the snakeCase builder or explicit column name aliases (camelCase TS keys do not silently become camelCase DB columns)",
+        "drizzle.config.ts includes dialect, schema path, and dbCredentials",
+        "The db initialization passes relations to drizzle() so db.query works",
+        "Primary keys use generatedAlwaysAsIdentity (or an explicitly justified alternative), not bare serial without comment"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "review-buggy-rqb-code",
+      "prompt": "hey can you review this drizzle code? typescript compiles but the ordering acts weird when i nest things, and security team flagged the search function:\n\n```ts\nimport { sql, desc } from 'drizzle-orm';\nimport { posts, comments, users } from './schema';\n\nexport async function getFeed() {\n  return db.query.posts.findMany({\n    orderBy: sql`${posts.createdAt} desc`,\n    with: {\n      comments: { orderBy: desc(comments.id) },\n    },\n  });\n}\n\nexport async function searchUsers(term: string) {\n  return db.execute(sql.raw(`select * from users where name ilike '%${term}%'`));\n}\n\nexport async function getUserStats() {\n  return db.query.users.findMany({\n    extras: {\n      postCount: sql<number>`(select count(*) from posts where posts.author_id = users.id)`,\n    },\n  });\n}\n```",
+      "expected_output": "A review that catches: (1) orderBy using imported table objects instead of the callback parameter in relational queries, with corrected code; (2) sql.raw() with interpolated user input is SQL injection — fix with parameterized sql`` or ilike operator; (3) extras referencing the imported table and using a raw aggregate subquery — should use the callback parameter and db.$count. Corrected code for each.",
+      "files": [],
+      "assertions": [
+        "Identifies that orderBy in relational queries must use the callback parameter, not the imported table object, and explains why (aliasing in nested scopes)",
+        "Provides corrected orderBy code using the callback form",
+        "Flags sql.raw() with interpolated user input as SQL injection and provides a parameterized fix",
+        "Fixes the extras block to use the callback parameter (and db.$count or equivalent for the count)",
+        "Does not introduce new API mistakes (e.g., mixing v0 and v1 idioms)"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "migration-workflow-advice",
+      "prompt": "Our team of 5 has been using `drizzle-kit push` against our shared staging Postgres since the prototype days and now we're about to launch. Two questions: how should we set up migrations properly for production + CI, and how do we handle a data backfill (we're splitting a `name` column into `first_name`/`last_name`) as part of that?",
+      "expected_output": "Advice to switch from push to generate+migrate for the team/production context, with the concrete commands, config, and the __drizzle_migrations tracking table explained; a warning about not mixing push and generate against the same database and how to baseline; use of drizzle-kit generate --custom for the backfill SQL so it lives in the ordered migration history; mention of drizzle-kit check for team race conditions.",
+      "files": [],
+      "assertions": [
+        "Recommends generate + migrate (not push) for the team/production scenario and explains why push no longer fits",
+        "Warns about mixing push and generate histories against the same database and addresses how to transition/baseline",
+        "Recommends drizzle-kit generate --custom (custom migration) for the backfill SQL so it stays in the versioned history",
+        "Shows the actual commands and where migration files/tracking live (out folder, __drizzle_migrations)",
+        "Mentions team-safety tooling such as drizzle-kit check or committing snapshots/journal to version control"
+      ]
+    }
+  ]
+}

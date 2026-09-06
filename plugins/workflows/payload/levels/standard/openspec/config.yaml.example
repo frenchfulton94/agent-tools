@@ -1,0 +1,68 @@
+# Copy the relevant parts into <your-project>/openspec/config.yaml
+
+# Default workflow for new changes (override per change with --schema)
+schema: craft-driven
+
+# Injected into every artifact prompt. Point at canonical files instead of
+# restating their contents - a copied stack list here is a second copy that
+# goes stale (see mapping-project-tooling's rule on pointers vs copies).
+context: |
+  Read ./TOOLS.md (if present) before proposing work that touches
+  dependencies, scripts, build config, tests, or deployment. It is the
+  canonical, evidence-cited map of this repo's package manager, commands,
+  key dependencies, local wrappers, and committed agent capabilities.
+  Precedence when sources disagree: the repo's own files (manifest,
+  lockfile, config) beat TOOLS.md; TOOLS.md beats memory and habit; the
+  current change's Relevant Capabilities snapshot beats TOOLS.md only for
+  session-volatile capabilities (what this session can actually invoke).
+  Design system: PRODUCT.md and DESIGN.md at repo root (Impeccable-managed).
+  Plans and specs are binding: surface added scope instead of absorbing it.
+
+# Artifact-specific rules (matched by artifact id)
+rules:
+  brainstorm:
+    - Record the exact message in which the user approved the intent
+    - Seed the Relevant Capabilities survey from TOOLS.md's Agent
+      capabilities section when the file exists - entries committed to the
+      repo are unconditional, session-only capabilities are marked as such
+      with a fallback
+  specs:
+    - Reference existing patterns in openspec/specs/ before inventing new capability paths
+  tasks:
+    - Every command in a task comes from TOOLS.md's Commands table, the
+      manifest scripts, or the task file - never from memory, and never a
+      different package manager than the committed lockfile's
+    - Where TOOLS.md lists a local wrapper for a dependency, tasks import
+      the wrapper, and no task installs a package for a capability an
+      existing dependency already covers
+    - When a process skill and a role/tool skill both apply to a task, the
+      Tooling line names the process skill as the discipline and the role
+      skill's script as the tool (e.g. superpowers TDD + tdd_workflow.py
+      phase validation; requesting-code-review + adversarial personas)
+  verification:
+    - Paste command output verbatim; no paraphrased evidence
+    - If the change touched the manifest, lockfile, scripts, or deploy
+      config, run mapping-project-tooling's check_tools_md.py (or the
+      manual checklist) and record the result - drift found is a blocker
+      until TOOLS.md is corrected in this change
+
+# Advisory guidance for the apply/archive operations
+operations:
+  apply:
+    guidance:
+      - Read TOOLS.md again before the first task that changes
+        dependencies, scripts, build config, test setup, or deploy
+        settings; propose additions before installing anything new
+      - Run the focused test for a task before the full suite, using the
+        repo's own commands
+      - Fix Impeccable hook findings before each task's commit
+      - When a task changes a fact TOOLS.md records (manager, command,
+        dependency version, layout, deploy target), update the affected
+        TOOLS.md lines and its Last verified date in the same task - scoped
+        to what changed, not a full regeneration
+  archive:
+    guidance:
+      - Do not archive while the verification (or quality) verdict lists blockers
+      - Do not archive a change that altered stack facts without the
+        matching TOOLS.md update - a stale map with an authoritative tone
+        is worse than none

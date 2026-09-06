@@ -1,0 +1,8 @@
+{
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "rm -rf build",
+    "description": "Clean the build directory"
+  },
+  "tool_use_id": "toolu_simulated"
+}

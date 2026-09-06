@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>11 · Advanced, the situational four</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+		<link rel="stylesheet" href="../assets/quiz.css" />
+	</head>
+	<body>
+		<main class="page">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Lesson 11</span><span class="sep">·</span><span>Running them</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1><code>advanced</code>, the situational four</h1>
+				<p class="deck">
+					<code>setup</code>, <code>spike</code>, <code>upgrade</code>, <code>hotfix</code> — the
+					four kinds of work that get mangled when a repository only knows how to do features and
+					bugs. Each one inverts something the other chains take for granted.
+				</p>
+			</header>
+
+			<section class="objective">
+				<h2>By the end</h2>
+				<p>
+					You can drive all four, and you can say what each one inverts — which is the thing that
+					makes it a separate schema rather than a variation.
+				</p>
+			</section>
+
+			<p class="prereq">
+				<strong>Prerequisites:</strong>
+				<a href="0010-advanced-the-everyday-four.html">Lesson 10</a>. These four are shorter chains
+				than <code>feature</code>, so this is a lighter lesson than the last one.
+			</p>
+
+			<h2>What each one inverts</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Schema</th>
+							<th>The inversion</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>setup</code></td>
+							<td>
+								<strong>No <code>specs</code> artifact at all</strong> — no behaviour exists yet to
+								spec. It writes the standing documents every <em>other</em> schema reads
+							</td>
+						</tr>
+						<tr>
+							<td><code>spike</code></td>
+							<td>
+								<strong>The code never merges.</strong> The deliverable is a written answer, and a
+								hard timebox is part of the artifact
+							</td>
+						</tr>
+						<tr>
+							<td><code>upgrade</code></td>
+							<td>
+								<strong>The constraints come from someone else's release notes</strong>, and success
+								means behaviour is <em>unchanged</em>
+							</td>
+						</tr>
+						<tr>
+							<td><code>hotfix</code></td>
+							<td>
+								<strong>Depth comes after shipping.</strong> A minutes-long triage gates the
+								mitigation; the full investigation is backfilled
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2><code>setup</code> — bootstrap a repository</h2>
+
+			<ul class="chain">
+				<li>decisions</li>
+				<li class="arrow">→</li>
+				<li>conventions</li>
+				<li class="arrow">→</li>
+				<li>tasks</li>
+			</ul>
+
+			<p>
+				<code>decisions</code> is a one-question-at-a-time stack interview, and nearly every choice
+				becomes an ADR — at bootstrap almost everything passes the ADR three-gate test, because
+				everything is hard to reverse later.
+			</p>
+
+			<p>
+				<code>conventions</code> is written <strong>to be copied, not summarized</strong>. Its content
+				gets materialized during apply into <code>CONTEXT.md</code>, <code>AGENTS.md</code>, the
+				OpenSpec config context, and a <code>DESIGN.md</code> stub for UI projects.
+			</p>
+
+			<p>
+				The exit criterion for <code>tasks</code> is a <strong>walking skeleton</strong>: the thinnest
+				end-to-end slice building, testing, and deploying green in CI.
+			</p>
+
+			<div class="note">
+				<span class="label">Why <code>TOOLS.md</code> comes last</span>
+				<p>
+					There is one deliberate post-skeleton task: generate <code>TOOLS.md</code> via
+					<code>mapping-project-tooling</code>. That skill's own rule forbids writing it before
+					evidence exists on disk, so it runs <em>after</em> the skeleton lands, never at scaffold
+					time. A stack map written from intentions rather than from a lockfile is worse than none.
+				</p>
+			</div>
+
+			<h2><code>spike</code> — a question, timeboxed</h2>
+
+			<ul class="chain">
+				<li data-gate>question</li>
+				<li class="arrow">→</li>
+				<li>apply</li>
+				<li class="arrow">→</li>
+				<li>findings</li>
+			</ul>
+
+			<p>
+				This is the one chain where <code>apply</code> does not track <code>tasks.md</code> — it
+				tracks <code>question.md</code>, whose experiment checkboxes <em>are</em> the task list.
+			</p>
+
+			<p>
+				<code>question</code> frames one primary question, the decision it informs, what evidence
+				would count as an answer, and a hard timebox. When the timebox expires, findings get written
+				with whatever evidence exists — <strong>an unbounded spike is just unplanned
+				development.</strong>
+			</p>
+
+			<p>
+				Apply works in an isolated worktree that will never merge, with quality bars relaxed by
+				design. Then <code>findings</code>: the answer first, evidence rather than impressions, a
+				recommendation, and a mandatory <strong>disposition</strong> — code discarded, and either a
+				follow-up <code>feature</code> change for the learnings or an explicit decision not to
+				proceed.
+			</p>
+
+			<div class="stop" data-background="dark">
+				<span class="label">A spike without written findings produced nothing</span>
+				<p>
+					The code is thrown away by design, so if the findings are not written the whole change was
+					wasted. And remember from
+					<a href="0007-escape-hatches-and-their-costs.html">lesson 07</a>: the archive warning
+					counts <em>tracked checkboxes</em>, not artifact files, so ticking the last experiment box
+					before writing <code>findings.md</code> is how this quietly goes wrong.
+				</p>
+			</div>
+
+			<h2><code>upgrade</code> — someone else's breaking changes</h2>
+
+			<ul class="chain">
+				<li>inventory</li>
+				<li class="arrow">→</li>
+				<li data-gate>surfaces</li>
+				<li class="arrow">→</li>
+				<li>migration</li>
+				<li class="arrow">→</li>
+				<li>tasks</li>
+				<li class="arrow">→</li>
+				<li data-gate>verification</li>
+			</ul>
+
+			<p>
+				<code>inventory</code> records current and target versions and inventories breaking changes
+				<strong>from official release notes and changelogs, citing URLs</strong>. The premise is
+				stated plainly: memory of an API is not evidence of its current shape. Each entry gets an
+				applies-to-us verdict, and stepping-stone versions are listed if the jump spans several
+				majors.
+			</p>
+
+			<p>
+				<code>surfaces</code> is the artifact that actually bounds the work. For each applicable
+				breaking change, find real call sites <strong>by search — grep or AST — with paths and
+				counts</strong>. Start from <code>TOOLS.md</code>'s dependency map when it exists, then
+				grep-verify: <em>the map narrows, the search proves</em>. Then classify each surface:
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Class</th>
+							<th>Means</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>mechanical</td>
+							<td>Codemod-able</td>
+						</tr>
+						<tr>
+							<td>behavioral</td>
+							<td>Needs a test to prove equivalence</td>
+						</tr>
+						<tr>
+							<td>unknown</td>
+							<td>Spike first</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>Skipping this scan is how upgrades discover breakage in production.</caption>
+			</div>
+
+			<p>
+				Apply fixes mechanical surfaces first, then behavioral ones with their equivalence tests. On
+				an unexplained behavioural diff: stop, and either fix forward or roll back —
+				<strong>never ship a changed behaviour as an "upgrade"</strong>. Commit the lockfile with the
+				code, then refresh <code>TOOLS.md</code>, because an upgrade that leaves it stale plants the
+				next agent's wrong-package-manager bug.
+			</p>
+
+			<h2><code>hotfix</code> — ship first, document after</h2>
+
+			<ul class="chain">
+				<li data-gate>triage</li>
+				<li class="arrow">→</li>
+				<li>tasks</li>
+				<li class="arrow">→</li>
+				<li>apply</li>
+				<li class="arrow">→</li>
+				<li data-gate>postmortem</li>
+			</ul>
+
+			<p>
+				<code>triage</code> takes <strong>minutes, not hours</strong>: what is broken, since when,
+				severity, who is affected. The first diagnostic is <em>what changed recently</em> — deploys,
+				flags, config. Then decide rollback versus forward-fix explicitly, and name the approver.
+			</p>
+
+			<p>
+				Every step in <code>tasks</code> names the observable signal proving it worked — error rate, a
+				monitor, a user report — because under incident pressure "it should be fixed now" is how
+				incidents recur an hour later.
+			</p>
+
+			<p>
+				<strong>Rollback beats forward-fix when both are viable.</strong> It is faster and better
+				understood.
+			</p>
+
+			<div class="note">
+				<span class="label">The postmortem is the one place the reset runs <em>upward</em></span>
+				<p>
+					Everywhere else, the step between planning and <code>/opsx:apply</code> is a step
+					<em>down</em> in depth. Here it is the other way round: the postmortem comes after apply, and
+					it is one of the few artifacts in the whole plugin that wants the top tier at
+					<code>xhigh</code> (<a href="0012-pair-a-model-and-effort.html">lesson 12</a>). Do the same
+					three commands, aimed the other way — <code>/clear</code>, <code>/model</code> or
+					<code>/effort</code> up to that depth, then
+					<code>/opsx:continue &lt;name&gt;</code>. Clearing matters more here than anywhere: the
+					window you are carrying is an incident, and the artifact that follows it is meant to be
+					blameless.
+				</p>
+			</div>
+
+			<div class="stop" data-background="dark">
+				<span class="label">A hotfix without a follow-up leaves the root cause in production</span>
+				<p>
+					<code>postmortem</code> is blameless — timeline, root cause, why existing tests and review
+					missed it — and it applies the full investigation rigour triage skipped, retrospectively.
+					Then it <strong>creates the follow-up change</strong> that does the durable fix, usually a
+					<code>bugfix</code>, and links it. That creation is mandatory, not encouraged.
+				</p>
+			</div>
+
+			<h2>Recall check</h2>
+
+			<p data-quiz-tally class="drill-score"></p>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">Why does <code>setup</code> have no <code>specs</code> artifact?</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Nothing has been built yet, so there is no behaviour to contract."
+						>
+							No behaviour exists yet
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Bootstrap changes are large, so brevity is not the reason."
+						>
+							Bootstraps stay very short
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Specs would validate fine; there is simply nothing to write."
+						>
+							Validation rejects them all
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">A <code>spike</code>'s timebox expires with the question unanswered. What now?</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Findings get written with whatever evidence exists; the timebox is hard."
+						>
+							Write findings, evidence as-is
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Extending it is what makes a spike unplanned development."
+						>
+							Extend it, finish properly
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Archiving with no findings means the spike produced nothing."
+						>
+							Archive it, findings later
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					In <code>upgrade</code>, what proves where a breaking change actually lands?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="The map narrows and the search proves; paths and counts are required."
+						>
+							Searching the actual code
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="It narrows where to look, and is explicitly not the proof."
+						>
+							The stack map recorded
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Release notes say what changed, not where you use it."
+						>
+							The upstream release notes
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					Both a rollback and a forward-fix would work in an incident. Which does the schema prefer?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Faster and better understood, so it wins whenever both are viable."
+						>
+							Rollback, when both work
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="A forward-fix is the slower, less understood path under pressure."
+						>
+							Forward, when both work
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Triage names an approver precisely so this is not left open."
+						>
+							Either, approver decides it
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="appendix">
+				<span class="label">Appendix · <code>setup</code> the schema versus <code>/workflows:setup</code> the command</span>
+				<p>
+					Two different things with the same word, and the collision is worth naming out loud for a
+					teammate. <code>/workflows:setup</code> is this plugin's command — it configures a
+					repository's OpenSpec layer. The <code>setup</code> <em>schema</em> is one of the eight
+					<code>advanced</code> workflows — it bootstraps a repository's code, CI and standing docs.
+					You would typically run the command first and then, in a genuinely new repository, create a
+					change under the schema.
+				</p>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Read this next</h2>
+				<p>
+					<strong
+						>Primary source:
+						<a href="../../payload/levels/advanced/openspec/README.md"
+							><code>advanced/openspec/README.md</code></a
+						></strong
+					>. One page: the which-schema-when table, the artifact chains, the standing documents and
+					which skill owns each, and how the eight schemas reach into the four skill packs.
+				</p>
+			</footer>
+
+			<footer class="lesson-foot">
+				<h2>Reference</h2>
+				<p>
+					<a href="../reference/workflow-atlas.html">Workflow atlas</a> — all twelve, now that you
+					have met them all.
+				</p>
+			</footer>
+
+			<div class="ask">
+				<p>
+					<strong>Rehearse the hotfix before you need it.</strong> "Walk me through a
+					<code>hotfix</code> change for a hypothetical checkout outage — triage, the mitigation
+					steps with their signals, and what the follow-up change would be." Rehearsing an incident
+					workflow calmly is the only time you will ever read it carefully.
+				</p>
+			</div>
+
+			<nav class="nav">
+				<span
+					><a href="0010-advanced-the-everyday-four.html">← Lesson 10 · The everyday four</a></span
+				>
+				<span
+					><a href="0012-pair-a-model-and-effort.html">Lesson 12 · Model and effort →</a></span
+				>
+			</nav>
+		</main>
+		<script src="../assets/quiz.js"></script>
+	</body>
+</html>

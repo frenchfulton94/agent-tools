@@ -1,0 +1,294 @@
+name: feature
+version: 1
+description: >
+  Full-rigor workflow for new capabilities and intentional behavior changes,
+  in new or existing code. Absorbs the earlier greenfield and brownfield
+  schemas. Invokes installed skills by name (superpowers and
+  addyosmani/agent-skills packs) with a manual fallback per invocation.
+  Skill names are written pack:skill - confirm exact names in the agent's
+  skill list, since installation prefixes vary.
+
+artifacts:
+  - id: brainstorm
+    generates: brainstorm.md
+    description: Requirements and design exploration through dialogue
+    template: brainstorm.md
+    instruction: |
+      Turn the raw idea into a validated direction before any spec is
+      written. Classify the request first and announce the classification:
+      architectural work continues this chain; bounded work (a small change
+      to an existing flow) is cheaper under the rapid schema, so suggest
+      recreating it there - de-escalation costs one command, ceremony costs
+      hours; a question in disguise belongs under the spike schema.
+      Then invoke superpowers:brainstorming via the Skill tool and
+      redirect its output into this change directory as brainstorm.md. In a
+      repo that keeps a CONTEXT.md domain model, invoke mattpocock-skills:grilling
+      (model-invoked) and run mattpocock-skills:domain-modeling inside each round -
+      a term settled in round one is one later rounds use precisely.
+      /grill-with-docs is user-invoked and unreachable from here; offer the
+      human that command if they would rather drive. If neither pack,
+      invoke agent-skills:interview-me then agent-skills:idea-refine.
+      If neither pack is installed, follow the template: one question at a
+      time, 2-3 approaches with trade-offs and a recommendation, sectioned
+      approval, YAGNI. If the user already knows exactly what to build,
+      write a short brainstorm.md stating the agreed approach.
+      While exploring, take a one-pass capability survey into the template's
+      Relevant Capabilities section: installed skills, MCP servers and their
+      tools, commands, and subagent tools, kept to what is plausibly
+      relevant to this task, one line each on where it earns its keep. Mark
+      it a session snapshot - availability differs between sessions, so
+      downstream steps re-check before relying on an entry.
+    requires: []
+
+  - id: constraints
+    generates: constraints.md
+    description: Existing constraints, invariants, and domain language to preserve
+    template: constraints.md
+    instruction: |
+      Explore before proposing. Invoke mattpocock-skills:domain-modeling for the
+      ubiquitous-language work: challenge this change's terms against the
+      glossary, stress-test with edge-case scenarios, update CONTEXT.md
+      inline (fallback: record the language manually per the template).
+      Read TOOLS.md at the repo root if present for verified stack,
+      command, and capability facts; if it is missing or stale in the
+      touched area, invoke mapping-project-tooling to create or refresh it
+      rather than guessing from convention.
+      For UI-touching changes, also record States and ranges for each
+      touched surface - first-run, empty, loading, error, success,
+      permissions, overflow, and realistic minimum/typical/maximum content.
+      Each state that changes what the user observes earns a spec scenario;
+      states captured after the specs are the requirements nobody writes.
+      For
+      existing code, also document current architecture, invariants, test
+      coverage of the affected area, existing design tokens
+      for UI surfaces, and the never-change-silently list (public APIs,
+      URLs, analytics events, form fields, schemas). For net-new code:
+      record the stack and convention decisions being locked in, and mark
+      inapplicable sections "N/A - net new" rather than deleting them.
+    requires: [brainstorm]
+
+  - id: proposal
+    generates: proposal.md
+    description: Why the change is needed, what changes, and the blast radius
+    template: proposal.md
+    instruction: |
+      Explain why (the problem), not how. State what changes using From/To
+      phrasing, list every affected surface with a blast-radius
+      classification, and state the rollback posture. Add a Surfaces line
+      naming every user-facing surface this change touches, or "None - no
+      UI impact": this line decides whether the design UI clauses run, so
+      be honest rather than optimistic - a new CLI flag is not a surface, a
+      settings panel is. Keep the Why roughly
+      50-1000 characters.
+    requires: [constraints]
+
+  - id: specs
+    generates: specs/**/*.md
+    description: Testable requirements as delta specs with Given/When/Then
+    template: spec.md
+    instruction: |
+      Invoke agent-skills:spec-driven-development for its
+      requirements-elicitation rigor (testable success criteria, boundaries,
+      open questions), but emit OpenSpec delta grammar: "### Requirement:"
+      with an RFC 2119 keyword and "#### Scenario:" blocks in
+      Given/When/Then, under ADDED/MODIFIED/REMOVED headings. Where the
+      skill's PRD document shape conflicts with the delta format, the delta
+      format wins - the OpenSpec validator hardcodes it, and a spec that
+      fails validation helps no one. A MODIFIED block replaces the whole
+      requirement, so repeat every surviving scenario. Fallback without the
+      skill: follow the template and reframe vague asks into measurable
+      criteria yourself. /to-spec is user-invoked and unreachable from here; when the
+      brainstorm already captured every decision, carry its discipline -
+      synthesize without re-interviewing - or offer the human the command,
+      then re-shape the output into delta grammar.
+    requires: [proposal]
+
+  - id: design
+    generates: design.md
+    description: Technical design and decisions stated before implementation
+    template: design.md
+    instruction: |
+      Dispatch the design-gate subagent (.claude/agents/design-gate.md) -
+      it is pinned to the top-tier model at xhigh effort so this session
+      can stay on the cheap tier. Its prompt must name the change
+      directory path and quote the proposal's Surfaces line verbatim; a
+      subagent inherits nothing else. It returns the design.md draft plus
+      open questions: write the draft here, resolve the questions with the
+      user, and agree the Seams table with the user before this artifact
+      is done - tests are written only at agreed seams. If the subagent is
+      missing or fails to launch, say so and fall back to the inline flow:
+      explain how - architecture, components, data flow, error handling,
+      and the testing approach that proves each requirement. Invoke by
+      name as each applies: mattpocock-skills:codebase-design for module
+      structure (deep modules - substantial behavior behind small
+      interfaces at clean seams, testable through the interface);
+      agent-skills:api-and-interface-design when designing any external
+      API or contract; agent-skills:documentation-and-adrs when writing
+      ADR entries (gate: hard to reverse AND surprising without context
+      AND a real trade-off). The proposal's Surfaces line is the trigger
+      for the UI clauses - when it says none, skip them and say so. For
+      named surfaces, invoke impeccable (surface mode + tokens, reference
+      DESIGN.md) plus agent-skills:frontend-ui-engineering for the
+      engineering half - accessibility roles and states, contrast,
+      keyboard operability, reduced-motion - set at design time rather
+      than caught at review. Add a Seams table: the public boundaries this
+      change is tested at, every spec scenario covered by exactly one seam
+      by name, and explicit regression rows for REMOVED requirements -
+      removals are where regressions hide because nothing points at them.
+      Follow existing patterns in existing code; no unrelated refactoring.
+      Final fallback: template sections carry the same structure.
+    requires: [specs]
+
+  - id: migration
+    generates: migration.md
+    description: Migration, rollout, and rollback plan
+    template: migration.md
+    instruction: |
+      Invoke agent-skills:deprecation-and-migration to plan the transition:
+      expand/contract for schema and data changes, backfill/dual-write
+      order, flag gating, explicit rollback triggers and procedure, the
+      point of no return, and deprecation class with timeline for anything
+      removed. For net-new flag-gated work this can be three lines: net-new,
+      flag name, rollback = flag off. Fallback: follow the template.
+    requires: [design]
+
+  - id: review
+    generates: review.md
+    description: Pre-implementation review gate across quality axes
+    template: review.md
+    instruction: |
+      When the proposal's Surfaces line names any surface, first dispatch
+      the taste-preflight subagent (.claude/agents/taste-preflight.md) -
+      it runs the anti-slop UI pre-flight on a cheap model; pass it the
+      change directory path. Then dispatch the review-gate subagent
+      (.claude/agents/review-gate.md) - it is pinned to the top-tier model
+      at xhigh effort so this session can stay on the cheap tier. Its
+      prompt must name the change directory path and include the
+      taste-preflight findings verbatim when they exist; a subagent
+      inherits nothing else. Write the review-gate's returned content here
+      verbatim as review.md. On BLOCK: surface the [Critical] findings to
+      the user, fix the upstream artifacts, and re-dispatch - the gate
+      must PASS before tasks are generated. Do not soften or re-adjudicate
+      its findings in this session; the gate runs on a stronger model than
+      this one. If a subagent is missing or fails to launch, say so and
+      fall back to the inline flow: invoke
+      agent-skills:code-review-and-quality for the five-axis review and
+      severity vocabulary; invoke agent-skills:security-and-hardening when
+      the change touches input, auth, storage, or external integrations;
+      invoke taste-skill for the UI pre-flight gate on user-facing
+      surfaces. Confirm every requirement has a testable scenario and
+      nothing on the never-change-silently list breaks without explicit
+      approval. Confirm the design Seams table covers every scenario by
+      name and carries a regression row for each removal. Final fallback:
+      apply the template axes manually.
+    requires: [migration]
+
+  - id: tasks
+    generates: tasks.md
+    description: Coarse, ordered implementation checklist for progress tracking
+    template: tasks.md
+    instruction: |
+      Invoke agent-skills:planning-and-task-breakdown to decompose the
+      reviewed design into dependency-ordered tasks with per-task acceptance
+      criteria, and agent-skills:incremental-implementation for the slicing
+      discipline (thin vertical slices, flag-gated where useful). /to-tickets is user-invoked and unreachable from here; for tracker
+      teams, carry its discipline - tracer-bullet slices with explicit
+      blocking edges, one issue per slice - or offer the human the command,
+      then mirror the published list here since this file is what the CLI
+      tracks. Keep checkboxes in the exact "- [ ] " form: apply parses that
+      form and any other shape is invisible to progress tracking. This file
+      is the tracked progress list; keep it coarse - micro-step
+      decomposition lives in plan.md. Include instrumentation tasks per
+      agent-skills:observability-and-instrumentation, built in parallel
+      with the slices rather than after them. Give each task a Tooling line
+      drawn from the brainstorm's capability snapshot - "use X when
+      available, otherwise <fallback>" - because an executor subagent
+      inherits nothing from this session, so a tool the plan does not name
+      is a tool the executor does not have. Fallback: follow the template.
+    requires: [review]
+
+  - id: plan
+    generates: plan.md
+    description: Micro-step, test-first implementation plan
+    template: plan.md
+    instruction: |
+      Invoke superpowers:writing-plans and redirect output here as plan.md:
+      2-5 minute steps, exact file paths, explicit TDD cycle per step,
+      written for a skilled implementer with zero codebase context.
+      Include the actual failing-test code in a fenced block above its
+      checkbox, and an Interfaces line per task naming the exact signatures
+      it consumes and produces - an implementer may see only their own
+      task. Placeholders are plan failures: write the real test instead of
+      "write tests for the above", the real handling instead of "add
+      appropriate error handling", the repeated code instead of "similar to
+      task N". After writing, walk each spec requirement to the task that
+      implements it, scan for the placeholder patterns, and check that
+      later tasks use the names earlier tasks defined.
+      Fallback: follow the template structure manually.
+    requires: [tasks]
+
+  - id: verification
+    generates: verification.md
+    description: Fresh evidence that the implementation matches the specs
+    template: verification.md
+    instruction: |
+      Create this only after implementation - unchecked boxes in tasks.md
+      mean the apply step is where to point the user instead. Every claim
+      is backed by a command run while writing this file and its observed
+      output: "should pass", a run from earlier in the session, or a
+      subagent's success report is not evidence. Produce, in order: the
+      full-suite command with exit code and counts pasted verbatim; a spec
+      walk citing the test or observed behavior for each requirement as
+      file:line or command plus output, naming uncovered scenarios plainly;
+      a fresh-context review (superpowers:requesting-code-review with base
+      and head SHAs when available, self-review labeled as such otherwise),
+      with findings evaluated technically - verify each against the
+      codebase and push back in writing where the reviewer is wrong, since
+      performative agreement wastes the review; for named surfaces, the
+      anti-slop pre-flight against rendered state through a browser tool
+      when one exists, because a rendered state is evidence and a
+      reasoned-about one is a guess; and a verdict. A ready-to-archive
+      verdict with a failing test or an unresolved critical finding
+      contradicts itself - the verdict follows the evidence.
+    requires: [plan]
+
+apply:
+  requires: [plan]
+  tracks: tasks.md
+  instruction: |
+    Precheck: confirm each skill below in the available skill list; if one
+    is missing, use the named fallback rather than skipping the step.
+    Re-check the session's actual capabilities against the brainstorm
+    snapshot and each task's Tooling line, and prefer the real tool over
+    the approximation - the database MCP over hand-rolled SQL against a
+    guessed schema, the browser tool over imagining how a page renders -
+    saying so audibly when a named tool is absent. A dispatched subagent's
+    prompt carries its task's Tooling line verbatim.
+    1. Workspace -> superpowers:using-git-worktrees (fallback: create a branch)
+    2. Execute   -> superpowers:subagent-driven-development (transitively
+       applies superpowers:test-driven-development and
+       superpowers:requesting-code-review)
+       (fallback chain, in order: superpowers:executing-plans in-session
+       from plan.md; the /implement discipline carried in prose - mattpocock-skills:tdd at
+       the seams design.md agreed, closing with mattpocock-skills:code-review,
+       both model-invoked; /implement itself is user-invoked and
+       unreachable from here;
+       agent-skills:test-driven-development; if nothing is installed:
+       failing test first, always). Apply reviewer feedback per
+       superpowers:receiving-code-review. When a non-trivial decision
+       arises mid-implementation that plan.md did not pre-decide, invoke
+       agent-skills:doubt-driven-development to cross-examine it before
+       coding it, and record the surviving decision back into design.md's
+       ADRs - an in-flight decision that lives only in a commit message
+       has escaped the artifact trail.
+    3. Verify    -> superpowers:verification-before-completion; every
+       tasks.md checkbox complete; migration steps executed in order and
+       rollback path exercised where feasible; structural validation passes;
+       work committed. Then direct the user to verification.md - archive
+       comes after its verdict.
+    4. Finish    -> superpowers:finishing-a-development-branch
+       (fallback: open a PR referencing this change)
+    Session discipline: build one task or slice per fresh session where the
+    harness allows - a finished slice's context is disposable, and long
+    sessions degrade past roughly 150k tokens; compact at artifact
+    boundaries, never mid-task.

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "meta-skills",
+  "displayName": "Meta Skills",
+  "version": "0.1.0",
+  "description": "Authoring and maintenance skills for Claude Code's own extension surfaces — skills, subagents, hooks, plugins, and the marketplaces that distribute them — plus prompt rewriting, project memory, a repo-root TOOLS.md map, and Controlled Engineering English for documentation. Ships the `controlled-english` output style.",
+  "author": {
+    "name": "Agent Tools",
+    "email": "michael@frenchfultonjr.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "subagents",
+    "hooks",
+    "plugins",
+    "marketplace",
+    "prompts",
+    "claude-md",
+    "documentation",
+    "tooling"
+  ]
+}

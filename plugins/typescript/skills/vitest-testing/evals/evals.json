@@ -1,0 +1,45 @@
+{
+	"evals": [
+		{
+			"expectations": [
+				"A test file matching *.test.ts is created and `npx vitest run` exits 0 with all tests passing",
+				"Error paths are asserted with expect(() => ...).toThrow(...) using a wrapping function, including the error message",
+				"The boundary of the discount rule (total exactly 100 vs over 100) is explicitly tested",
+				"Tests are grouped in describe blocks per exported function and names describe behavior (no 'works correctly' style names)",
+				"toBeCloseTo (not toBe) is used for any floating-point total assertions, or totals are constructed to avoid float error",
+				"No .only or .skip modifiers are left in the committed test file"
+			],
+			"expected_output": "A cart.test.ts co-located with the source, grouped by describe per function, covering happy paths, boundaries (exactly $100 vs above), and error paths with wrapped toThrow assertions; all tests pass under `vitest run`.",
+			"files": [],
+			"id": 1,
+			"prompt": "I have a cart.ts module in my project (TypeScript, vitest already installed) with addItem, removeItem and getTotal functions. addItem throws for quantity <= 0, removeItem throws if the sku isn't in the cart, getTotal applies a 10% discount over $100. Can you write a proper test suite for it? I want edge cases covered too."
+		},
+		{
+			"expectations": [
+				"The ./db.ts module is mocked with vi.mock (not by hitting a real database) and the suite passes under `npx vitest run`",
+				"System time is controlled (vi.setSystemTime or vi.useFakeTimers) and restored (vi.useRealTimers or equivalent) so it does not leak between tests",
+				"Mock state is cleaned between tests via config (mockReset in Vitest 4, plus restoreMocks for spies) or explicit per-test reset, not left to accumulate",
+				"The null-user case asserts the rejection/throw including the 'User not found' message",
+				"vi.mocked or a typed factory is used so the mocked getUser is driven per-test (e.g. mockResolvedValue), demonstrating different return values across tests"
+			],
+			"expected_output": "Tests that mock the db module with vi.mock, control time with vi.setSystemTime/fake timers, assert the null-user error via rejects/toThrow, and clean up mock and timer state so tests are order-independent; suite passes under `vitest run`.",
+			"files": [],
+			"id": 2,
+			"prompt": "my orderService.ts calls getUser from ./db.ts and stamps orders with Date.now(). the db hits a real postgres in dev so tests can't touch it. write vitest tests for createOrder including the case where getUser returns null (should throw 'User not found'). also the createdAt timestamp should be deterministic in tests"
+		},
+		{
+			"expectations": [
+				"vitest.config.ts imports defineConfig from 'vitest/config' (not from 'vite')",
+				"Mock hygiene is enabled in the config (mockReset: true for Vitest 4, with restoreMocks for spies)",
+				"Coverage is configured with include limited to src/** and `npx vitest run --coverage` exits 0 producing a coverage report",
+				"The CI-facing script uses `vitest run` (non-watch), not bare `vitest`",
+				"An example test exists and passes"
+			],
+			"expected_output": "vitest + @vitest/coverage-v8 installed, a vitest.config.ts importing defineConfig from 'vitest/config' with restoreMocks and coverage.include for src, package.json scripts using `vitest run` for CI, an example passing test, and `vitest run --coverage` producing a report.",
+			"files": [],
+			"id": 3,
+			"prompt": "we just spun up a new node + typescript repo (no vite). set up vitest for us with coverage reporting and sensible defaults, add an example test so we can see it working, and make it CI-friendly. our source lives in src/"
+		}
+	],
+	"skill_name": "vitest-testing"
+}

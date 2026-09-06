@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "frontend",
+  "displayName": "Frontend",
+  "version": "0.1.0",
+  "description": "The web application stack this organisation builds on, leaning SvelteKit — headless components with Bits UI, charts with LayerChart, Tailwind CSS v4 themes and utilities, BEM class naming, Feature-Sliced Design layout, internationalization with Paraglide JS and @internationalized/date, and sanitizing untrusted HTML with DOMPurify.",
+  "author": {
+    "name": "Agent Tools",
+    "email": "michael@frenchfultonjr.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "svelte",
+    "sveltekit",
+    "tailwind",
+    "bits-ui",
+    "layerchart",
+    "i18n",
+    "bem",
+    "feature-sliced-design",
+    "dompurify"
+  ]
+}

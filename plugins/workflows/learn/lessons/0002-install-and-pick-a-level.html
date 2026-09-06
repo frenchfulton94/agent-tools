@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>02 · Install and pick a level</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+		<link rel="stylesheet" href="../assets/quiz.css" />
+	</head>
+	<body>
+		<main class="page">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Lesson 02</span><span class="sep">·</span><span>Install and set up</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1>Install, and pick a level</h1>
+				<p class="deck">
+					Setup asks you exactly one question, and this is it. It arrives with a recommendation read
+					off your own commit history — but it recommends rather than decides, and the difference
+					between the three levels is how many kinds of work your repository actually sees.
+				</p>
+			</header>
+
+			<section class="objective">
+				<h2>By the end</h2>
+				<p>
+					The plugin is installed, and you can name the level you would choose for a repository you
+					work in — with a reason drawn from the ladder rather than from taste.
+				</p>
+			</section>
+
+			<p class="prereq">
+				<strong>Prerequisites:</strong>
+				<a href="0001-three-layers-one-command.html">Lesson 01</a>. You need a repository you can
+				experiment in, and Node 20.19 or newer for the OpenSpec CLI.
+			</p>
+
+			<h2>Install</h2>
+
+			<pre><code>claude plugin marketplace add YOUR-GITHUB-OWNER/agent-tools --scope project
+claude plugin install workflows@agent-tools --scope project</code></pre>
+
+			<p>
+				<code>--scope project</code> writes to the repository's <code>.claude/settings.json</code>,
+				which you commit — so the setup travels with the repo instead of living on one workstation.
+				Run both commands in
+				<a href="https://code.claude.com/docs/en/permission-modes#eliminate-prompts-with-auto-mode"
+					>auto mode</a
+				>
+				— Claude Code's default permission mode on Pro, Max, and Team plans — and a classifier
+				approves them instead of prompting you for each one.
+			</p>
+
+			<p>
+				<code>meta-skills</code> arrives with it. The plugin declares it as a manifest dependency, so
+				the skills that produce <code>TOOLS.md</code> and <code>CLAUDE.md</code> are installed and
+				enabled <em>before</em> setup ever runs. That is not a convenience — it removes an ordering
+				problem that would otherwise force setup into two passes with a restart in the middle.
+			</p>
+			<span class="cite">
+				<code>plugins/workflows/.claude-plugin/plugin.json</code> —
+				<code>"dependencies": [{ "name": "meta-skills", … }]</code>
+			</span>
+
+			<div class="note">
+				<span class="label">Do not run setup yet</span>
+				<p>
+					Read <a href="0003-read-the-plan-gate.html">lesson 03</a> first. Setup will show you a
+					plan and wait, and the plan is the thing worth learning to read. Running it now means
+					approving something you cannot yet evaluate.
+				</p>
+			</div>
+
+			<h2>The ladder</h2>
+
+			<p>
+				The levels are not small, medium and large versions of one workflow. Each rung adds
+				<em>kinds of work</em> the repository knows how to handle.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Level</th>
+							<th>Schemas</th>
+							<th>Artifacts</th>
+							<th>Longest chain</th>
+							<th>Router</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>minimal</code></td>
+							<td><code>mattpocock-bridge</code>, <code>bugfix-flow</code></td>
+							<td>9</td>
+							<td>6</td>
+							<td>no</td>
+						</tr>
+						<tr>
+							<td><code>standard</code></td>
+							<td><code>craft-driven</code>, <code>surface-driven</code></td>
+							<td>12</td>
+							<td>7</td>
+							<td>no</td>
+						</tr>
+						<tr>
+							<td><code>advanced</code></td>
+							<td>
+								<code>feature</code>, <code>bugfix</code>, <code>refactor</code>,
+								<code>rapid</code>, <code>setup</code>, <code>spike</code>,
+								<code>upgrade</code>, <code>hotfix</code>
+							</td>
+							<td>32</td>
+							<td>10</td>
+							<td>yes</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					Counted from <code>plugins/workflows/payload/levels/*/openspec/schemas/*/schema.yaml</code>.
+					The levels ship <strong>disjoint</strong> schema sets — no schema name appears at two
+					levels.
+				</caption>
+			</div>
+
+			<h2>What each level is opinionated about</h2>
+
+			<h3><code>minimal</code> — two schemas, one interview</h3>
+
+			<p>
+				Built on <a href="https://github.com/mattpocock/skills">mattpocock/skills</a>. The default
+				workflow, <code>mattpocock-bridge</code>, opens with a <em>grill</em>: an interview in rounds
+				that sharpens the idea and writes what it learns into <code>CONTEXT.md</code> and ADRs
+				before any spec exists. Its companion, <code>bugfix-flow</code>, deliberately drops the
+				interview and the proposal — a defect needs no case made for fixing it — and gates
+				everything behind a written root cause.
+			</p>
+
+			<p>
+				<strong>Cost of entry:</strong> the pack must be installed, and
+				<code>/setup-matt-pocock-skills</code> must have been run once in the repository. That is an
+				interview only a human can answer, so setup cannot do it for you.
+			</p>
+
+			<h3><code>standard</code> — two schemas, one of them design-led</h3>
+
+			<p>
+				Built on <a href="https://github.com/obra/superpowers">obra/superpowers</a>, plus
+				<a href="https://impeccable.style/llms.txt">Impeccable</a> for anything touching a user
+				interface. <code>craft-driven</code> is the feature workflow: brainstorm, proposal, specs,
+				then TDD and evidence-first verification. <code>surface-driven</code> inverts the lead for
+				work that <em>is</em> a surface — a landing page, a dashboard, a redesign — letting the
+				design brief drive and Superpowers supply the execution discipline.
+			</p>
+
+			<p>
+				<strong>Choose between them per change</strong>, not per project. That decision is
+				<a href="0009-standard-end-to-end.html">lesson 09</a>.
+			</p>
+
+			<h3><code>advanced</code> — eight schemas and a router</h3>
+
+			<p>
+				Organized by <em>change type</em> rather than by methodology. This is the only level with a
+				router: <code>ROUTING.md</code>, which the agent reads before creating any change and which
+				classifies the request in one pass. It is also the only level that can handle a production
+				incident, a dependency upgrade, a timeboxed spike, or a fresh repository bootstrap as
+				first-class work rather than forcing them through a feature chain.
+			</p>
+
+			<p>
+				<strong>Cost of entry:</strong> three skill packs — mattpocock, superpowers, and
+				<a href="https://github.com/addyosmani/agent-skills">addyosmani/agent-skills</a> — and the
+				same human interview <code>minimal</code> needs.
+			</p>
+
+			<h2>What gets installed alongside</h2>
+
+			<p>
+				Independently of the level, setup merges in a base set of plugins, and a second set on top
+				when it detects a web project. It never overwrites a choice you have already made in
+				<code>.claude/settings.json</code>.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th class="col-label">Manifest</th>
+							<th>Adds</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>base, always</td>
+							<td>
+								<code>claude-code-setup</code>, <code>claude-security</code>,
+								<code>commit-commands</code>, <code>meta-skills</code>, <code>security</code>.
+								<code>meta-skills</code> is the one that carries the
+								<code>controlled-english</code> output style, which is why setup ends by telling you
+								to select it under <code>/config</code> — a style ships with its plugin, and nothing
+								can pick one for you.
+							</td>
+						</tr>
+						<tr>
+							<td>web, when detected</td>
+							<td>
+								<code>browser-use</code>, <code>chrome-devtools-mcp</code>,
+								<code>impeccable</code>, <code>modern-web-guidance</code>,
+								<code>playwright</code>, <code>taste-skill</code>, <code>typescript-lsp</code>,
+								<code>web-development</code>
+							</td>
+						</tr>
+						<tr>
+							<td><code>minimal</code></td>
+							<td><code>mattpocock-skills</code></td>
+						</tr>
+						<tr>
+							<td><code>standard</code></td>
+							<td><code>superpowers</code></td>
+						</tr>
+						<tr>
+							<td><code>advanced</code></td>
+							<td>
+								<code>agent-skills</code>, <code>mattpocock-skills</code>,
+								<code>superpowers</code>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					<code>plugins/workflows/payload/base/settings.base.json</code>,
+					<code>settings.base.web.json</code>, and
+					<code>payload/levels/*/settings.json</code>. Whether the repository is a web project is
+					detected, not asked.
+				</caption>
+			</div>
+
+			<h2>How to actually choose</h2>
+
+			<div class="note">
+				<span class="label">Setup runs this for you — and you should still know it</span>
+				<p>
+					Before it asks, setup reads the repository's recent commit subjects, sorts them into kinds,
+					and comes back with a recommended level and the evidence for it. It recommends; it does not
+					decide. Knowing the procedure below is what lets you tell a good recommendation from one
+					drawn off forty commits of a rewrite that is not how this repo usually works.
+				</p>
+			</div>
+
+			<p>The procedure, which is one question about the repository rather than about yourself:</p>
+
+			<ol class="steps">
+				<li>
+					<strong>List the last ten pieces of work in this repository.</strong> Pull them from
+					<code>git log</code> or your tracker — real ones, not imagined ones.
+				</li>
+				<li>
+					<strong>Sort them into kinds.</strong> New capability, defect, structural cleanup, trivial
+					change, dependency bump, incident, open question, bootstrap.
+				</li>
+				<li>
+					<strong>Count the kinds, not the items.</strong> Two or three kinds and a feature-plus-bugfix
+					shape means <code>minimal</code> or <code>standard</code>. Five or more kinds — especially
+					if upgrades or incidents are among them — means <code>advanced</code>.
+				</li>
+				<li>
+					<strong>Break the tie on methodology.</strong> Between <code>minimal</code> and
+					<code>standard</code>: does the work usually start with an unclear idea that needs
+					interviewing, or with a surface someone can already picture? Interview →
+					<code>minimal</code>. Surface → <code>standard</code>.
+				</li>
+			</ol>
+
+			<div class="note">
+				<span class="label">Choosing wrong is cheap</span>
+				<p>
+					Re-run <code>/workflows:setup</code> with a different level. The run record
+					<em>merges</em> rather than replaces, so the previous level's files stay on disk and stay
+					owned by setup — returning to that level later updates them instead of reporting a
+					collision that never happened.
+				</p>
+				<span class="cite"><code>skills/setup/SKILL.md</code> step 8 — "The record merges into whatever is already there"</span>
+			</div>
+
+			<h2>Recall check</h2>
+
+			<p data-quiz-tally class="drill-score"></p>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">Which level is the only one that ships a schema router?</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Eight schemas need a router; two can be chosen by hand."
+						>
+							The eight-schema one
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Its two schemas are picked per change with a schema flag."
+						>
+							The interview-led one
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Its two schemas are picked by whether work is a surface."
+						>
+							The Superpowers one
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					Why does the plugin declare <code>meta-skills</code> as a manifest dependency?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Otherwise setup needs two passes with a restart between them."
+						>
+							To fix an ordering problem
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Bundling is not what a dependency does; both stay separate."
+						>
+							To keep one plugin smaller
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Version pinning is a marketplace concern, not this one."
+						>
+							To pin a working version
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">You switch a repository from <code>advanced</code> to <code>minimal</code>. What happens to the eight schemas the earlier level installed?</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="The run record merges, so they stay on disk and stay setup's."
+						>
+							They remain, still owned
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Setup deletes nothing; removal is always your own decision."
+						>
+							They are deleted first
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Orphaning them is exactly what merging the record prevents."
+						>
+							They become yours now
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Read this next</h2>
+				<p>
+					<strong
+						>Primary source:
+						<a
+							href="https://github.com/Fission-AI/OpenSpec/blob/main/docs/getting-started.md"
+							>OpenSpec — Getting started</a
+						></strong
+					>. This plugin configures OpenSpec; it does not replace it. Ten minutes on what a
+					<em>change</em> and a <em>spec</em> are will make every later lesson land faster.
+				</p>
+			</footer>
+
+			<footer class="lesson-foot">
+				<h2>Reference</h2>
+				<p>
+					<a href="../reference/workflow-atlas.html">Workflow atlas</a> — all twelve schemas, one
+					page: level, chain, gates, escape hatches. Print it.
+				</p>
+			</footer>
+
+			<div class="ask">
+				<p>
+					<strong>Ask your teacher to do step 1 for you.</strong> Try: "read the last thirty commits
+					in this repo, sort them into change kinds, and tell me which level the ladder points at."
+					That is a better answer than a guess, and it uses evidence you already have.
+				</p>
+			</div>
+
+			<nav class="nav">
+				<span
+					><a href="0001-three-layers-one-command.html">← Lesson 01 · Three layers</a></span
+				>
+				<span><a href="0003-read-the-plan-gate.html">Lesson 03 · Read the plan gate →</a></span>
+			</nav>
+		</main>
+		<script src="../assets/quiz.js"></script>
+	</body>
+</html>

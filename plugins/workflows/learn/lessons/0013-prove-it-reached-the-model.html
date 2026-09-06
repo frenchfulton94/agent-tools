@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>13 · Prove it reached the model</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+		<link rel="stylesheet" href="../assets/quiz.css" />
+	</head>
+	<body>
+		<main class="page">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Lesson 13</span><span class="sep">·</span><span>Models and proof</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1>Prove it reached the model</h1>
+				<p class="deck">
+					A configuration that does nothing looks exactly like one that works. OpenSpec drops bad
+					fields and carries on, warning only to stderr — so the last thing to learn is the one
+					command that shows what the assistant actually receives.
+				</p>
+			</header>
+
+			<section class="objective">
+				<h2>By the end</h2>
+				<p>
+					You can prove that your <code>context:</code> and every rule you wrote are actually
+					reaching the model, and you can name the five ways they silently fail to.
+				</p>
+			</section>
+
+			<p class="prereq">
+				<strong>Prerequisites:</strong>
+				<a href="0003-read-the-plan-gate.html">Lesson 03</a> and
+				<a href="0008-minimal-end-to-end.html">lesson 08</a>. This is the last lesson, and the one to
+				come back to whenever something "isn't working".
+			</p>
+
+			<h2>Why silence is not success</h2>
+
+			<blockquote>
+				<p>
+					"Parsing is deliberately resilient: an invalid or unparseable field is dropped with a
+					<code>console.warn</code> and the rest of the config still loads."
+				</p>
+			</blockquote>
+			<span class="cite"><code>plugins/workflows/skills/configuring-openspec/SKILL.md</code></span>
+
+			<p>
+				That is a good design — one bad field should not break a project. It is also why every
+				OpenSpec configuration problem presents identically: <em>nothing happens</em>. No error, no
+				failure, no missing file. The rule you wrote just never fires.
+			</p>
+
+			<div class="stop" data-background="dark">
+				<span class="label">Run diagnostics in a plain terminal, not piped</span>
+				<p>
+					Dropped-field warnings go to <strong>stderr</strong> and are trivially lost to a pipe, a
+					redirect, or a tool that only surfaces stdout. This is the single most common reason a
+					warning that would have explained everything was never seen.
+				</p>
+			</div>
+
+			<h2>The five silent failures</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>What went wrong</th>
+							<th>What you see</th>
+							<th>Fix</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>
+								<code>context:</code> is over <strong>50KB</strong>
+							</td>
+							<td>Nothing. The <em>entire</em> field is dropped</td>
+							<td>
+								Summarize, or point at a file instead of pasting it. Treat the cap as a ceiling to
+								stay far below
+							</td>
+						</tr>
+						<tr>
+							<td>A <code>rules:</code> key matches no artifact id</td>
+							<td>
+								<code>Unknown artifact ID in rules: X</code> — on stderr, on every command
+							</td>
+							<td>
+								<code>openspec schemas --json</code> lists the ids per schema. Common right after
+								adopting a schema that renamed artifacts
+							</td>
+						</tr>
+						<tr>
+							<td>The config file is not where OpenSpec looks</td>
+							<td>Nothing at all</td>
+							<td>
+								Only <code>openspec/config.yaml</code> and <code>openspec/config.yml</code> are
+								probed, in that order. A root-level file, or one a directory up, is invisible
+							</td>
+						</tr>
+						<tr>
+							<td>One field failed its type check</td>
+							<td>A <code>console.warn</code> on stderr; everything else loads normally</td>
+							<td>Read stderr. The rest of the config working is not evidence this field did</td>
+						</tr>
+						<tr>
+							<td>You used <code>openspec config set</code></td>
+							<td>The command succeeds. The project is unchanged</td>
+							<td>
+								That writes the <strong>machine</strong> JSON config, never the project YAML. Edit
+								<code>openspec/config.yaml</code> by hand
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					<code>skills/configuring-openspec/references/troubleshooting.md</code>, "Config not
+					applied". No restart is ever needed — config is read fresh on every command.
+				</caption>
+			</div>
+
+			<h2>The command that settles it</h2>
+
+			<p>Three diagnostics, and the third is decisive:</p>
+
+			<pre><code>openspec --version                                       # is the CLI there, and how old
+openspec schema which --all                              # which schema wins, and from where
+openspec instructions &lt;artifact&gt; --change &lt;name&gt; --json  # what the assistant actually receives</code></pre>
+
+			<p>
+				That last one is the only way to see the resolved template, the injected
+				<code>context</code>, the matching <code>rules</code>, and the dependency paths — the real
+				payload. <strong>If a value is absent from that output, the problem is upstream of the
+				assistant.</strong> Read it before changing anything else.
+			</p>
+
+			<h2>How setup proves it, and why the probe exists</h2>
+
+			<p>
+				Setup's own verification step does not check that files exist. File presence proves nothing
+				here, precisely because OpenSpec drops fields that fail validation and warns only to stderr.
+				So it does three behavioural checks instead.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Check</th>
+							<th>How</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Your specs and changes are untouched</td>
+							<td>
+								Compares tree hashes taken <em>before</em> anything was written against hashes taken
+								after
+							</td>
+						</tr>
+						<tr>
+							<td>The config actually reaches the model</td>
+							<td>
+								Creates a throwaway change — <code>zz-workflows-setup-probe</code> — runs
+								<code>openspec instructions … --json</code> against it, and confirms the payload
+								really contains <code>context</code> and every expected rule
+							</td>
+						</tr>
+						<tr>
+							<td>The planned plugins are installed</td>
+							<td>
+								Confirms every id in the <em>plan's</em> install list appears in
+								<code>claude plugin list --json</code>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption><code>plugins/workflows/scripts/verify.d.mts</code>.</caption>
+			</div>
+
+			<p>Two details in there are worth stealing for your own tooling.</p>
+
+			<div class="note">
+				<span class="label">The probe is deleted, never archived</span>
+				<p>
+					Removing it with <code>openspec archive</code> would merge its delta specs into
+					<code>openspec/specs/</code> — writing into your work product, which is the one thing setup
+					must never do. So the probe's directory is deleted directly, at both its active path and
+					any archived path found by suffix match. A survivor at either, or any thrown error along
+					the way, is reported as a failed check rather than allowed to propagate.
+				</p>
+			</div>
+
+			<div class="note">
+				<span class="label">The plugin check uses the <em>planned</em> list, not the reported one</span>
+				<p>
+					Feeding it what the install step reported installing would make the check assert that what
+					install said it installed is installed — which cannot fail for the case it exists to catch.
+					A plugin a managed marketplace blocked never enters that second list. So the check uses the
+					plan's list, and <strong>a blocked plugin failing this check is the correct outcome</strong>
+					— a result to report, not an obstacle to route around.
+				</p>
+			</div>
+
+			<h2>Do this now</h2>
+
+			<ol class="steps">
+				<li>
+					<strong>Pick a real change and dump its payload.</strong> Any artifact id from its schema:
+					<pre><code>openspec instructions specs --change let-advisors-export-plans --json</code></pre>
+				</li>
+				<li>
+					<strong>Find your <code>context</code> in it.</strong> Not a summary of it — the text. If it
+					is missing, check its byte count against the 50KB cap first.
+				</li>
+				<li>
+					<strong>Find a rule you know is keyed to that artifact.</strong> If it is absent, the key
+					does not match an artifact id in the schema <em>this change</em> uses. Confirm with:
+					<pre><code>openspec schemas --json</code></pre>
+				</li>
+				<li>
+					<strong>Break it on purpose, then watch it fail silently.</strong> Add a rule under a key
+					like <code>notarealartifact:</code>, run any <code>openspec</code> command in a plain
+					terminal, and read stderr. Seeing
+					<code>Unknown artifact ID in rules</code> once, deliberately, is worth more than reading
+					about it. Then remove it.
+				</li>
+				<li>
+					<strong>Run the whole gate.</strong>
+					<pre><code>openspec validate --all --strict</code></pre>
+				</li>
+			</ol>
+
+			<h2>One more thing status will not tell you</h2>
+
+			<p>
+				From <a href="0009-standard-end-to-end.html">lesson 09</a>: artifact status is pure filesystem
+				existence. <code>DONE</code> means <em>a file is there</em> — not that it validates, not that
+				its dependencies were ever written. An agent should build the required set by walking each
+				artifact's <code>requires</code> edges transitively, not by trusting status. So should you.
+			</p>
+
+			<h2>Recall check</h2>
+
+			<p data-quiz-tally class="drill-score"></p>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					Your <code>context:</code> is 51KB. How much of it reaches the model?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="One byte past the cap and the entire field is dropped, silently."
+						>
+							None of it whatsoever
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="There is no truncation behaviour; it is all or nothing."
+						>
+							All but the excess
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="No error is raised, which is exactly what makes this one bite."
+						>
+							None, plus an error
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					Which command shows what the assistant actually receives?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Template, injected context, matching rules, dependency paths — the payload."
+						>
+							The instructions one
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="It reports file existence per artifact, not prompt content."
+						>
+							The status-check one
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="It checks changes and specs, and never shows injected context."
+						>
+							The strict-validate one
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					Why is the verification probe deleted rather than archived?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Archiving merges its delta specs into your specs directory."
+						>
+							Archiving would write specs
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Speed is irrelevant; the concern is writing into your work."
+						>
+							Deleting is much faster
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Archive works fine here; the problem is what it merges."
+						>
+							Archiving needs three yeses
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					You edited <code>openspec/config.yaml</code>. What do you restart?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Config is read fresh on every command, so nothing needs restarting."
+						>
+							Nothing, no restart needed
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="No caching exists here, so a session restart changes nothing."
+						>
+							The assistant's whole session
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Update regenerates command files; it does not reload config."
+						>
+							The generated command files
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="appendix">
+				<span class="label">Appendix · what this plugin does not prove about itself</span>
+				<p>
+					The README is unusually candid, and reading it is part of using the plugin honestly. The
+					setup skill's own orchestration is <strong>unverified end to end</strong>:
+					<code>claude -p --plugin-dir</code> cannot drive it, because the
+					<code>meta-skills</code> dependency does not resolve under <code>--plugin-dir</code>
+					loading and the approval gate cannot complete inside one <code>-p</code> turn. The prose has
+					been reviewed, not executed. Invariant I3 is proven narrower than it sounds. The
+					<code>config.yaml</code> backup path and the artifact-id union are covered by unit tests
+					rather than the end-to-end suite. And the Windows <code>%APPDATA%</code> path has never been
+					run on Windows. None of that makes the plugin untrustworthy — it makes its claims legible,
+					which is the more useful property.
+				</p>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Read this next</h2>
+				<p>
+					<strong
+						>Primary source:
+						<a href="../../skills/configuring-openspec/references/troubleshooting.md"
+							><code>troubleshooting.md</code></a
+						></strong
+					>. Symptom → cause → fix, and the one document in this package to read <em>before</em>
+					editing anything when something is reported as broken. Start at "Diagnosing in three
+					commands".
+				</p>
+			</footer>
+
+			<footer class="lesson-foot">
+				<h2>Reference</h2>
+				<p>
+					<a href="../reference/failure-modes.html">Failure modes</a> — all of these on one printable
+					page, plus the four-hash trap, the checkbox trap, and the whole-block
+					<code>MODIFIED</code> trap.
+				</p>
+			</footer>
+
+			<div class="ask">
+				<p>
+					<strong>That is the course.</strong> From here, the useful question to bring your teacher is
+					always a specific one: "here is the change, here is what I expected, here is what
+					<code>instructions --json</code> returned." Diagnose from the payload, not from the
+					symptom.
+				</p>
+			</div>
+
+			<nav class="nav">
+				<span
+					><a href="0012-pair-a-model-and-effort.html">← Lesson 12 · Model and effort</a></span
+				>
+				<span><a href="../index.html">All lessons →</a></span>
+			</nav>
+		</main>
+		<script src="../assets/quiz.js"></script>
+	</body>
+</html>

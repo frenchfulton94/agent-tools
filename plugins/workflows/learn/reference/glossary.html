@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Glossary — workflows</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+	</head>
+	<body>
+		<main class="page page--wide">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Reference</span><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1>Glossary</h1>
+				<p class="deck">
+					The bound vocabulary for this plugin. Every lesson uses these words in exactly these
+					senses, and where two sources use one word for two things, both are listed with the
+					collision named.
+				</p>
+			</header>
+
+			<h2>The core five</h2>
+
+			<div class="grid">
+				<section class="card">
+					<h3>Level</h3>
+					<p>
+						One of <code>minimal</code>, <code>standard</code>, <code>advanced</code> — the single
+						question <code>/workflows:setup</code> asks. A level names a set of schemas, subagents,
+						a config example, and a plugin manifest. The three sets are <strong>disjoint</strong>: no
+						schema name appears at two levels.
+					</p>
+				</section>
+
+				<section class="card">
+					<h3>Schema</h3>
+					<p>
+						A workflow definition: which artifacts a change has, and how they depend on each other.
+						Lives at <code>openspec/schemas/&lt;name&gt;/schema.yaml</code> with a
+						<code>templates/</code> directory beside it. This plugin ships twelve.
+					</p>
+				</section>
+
+				<section class="card">
+					<h3>Artifact</h3>
+					<p>
+						One document in a schema's chain, with four required fields — <code>id</code>,
+						<code>generates</code>, <code>description</code>, <code>template</code> — plus optional
+						<code>instruction</code> and <code>requires</code>. The <code>instruction</code> is the
+						prompt the agent actually receives.
+					</p>
+				</section>
+
+				<section class="card">
+					<h3>Change</h3>
+					<p>
+						One unit of work, as a directory under <code>openspec/changes/&lt;name&gt;/</code> holding
+						its artifacts and its <code>.openspec.yaml</code>. Lowercase kebab-case; a leading number
+						is allowed. Archiving merges its delta specs into <code>openspec/specs/</code>.
+					</p>
+				</section>
+
+				<section class="card">
+					<h3>Delta spec</h3>
+					<p>
+						The behaviour contract a change adds, modifies, or removes, under the change's
+						<code>specs/</code>. <code>ADDED</code> / <code>MODIFIED</code> / <code>REMOVED</code>
+						blocks. A <code>MODIFIED</code> block replaces the <em>whole</em> requirement, so it must
+						carry every surviving scenario.
+					</p>
+				</section>
+			</div>
+
+			<h2>Ownership and setup</h2>
+
+			<dl class="kv">
+				<dt><code>copy</code></dt>
+				<dd>Plan group: the file is not there yet. Setup will write it.</dd>
+
+				<dt><code>update</code></dt>
+				<dd>
+					Plan group: a previous run wrote it and nobody has edited it since — the recorded hash still
+					matches. Refreshing these is how a re-run takes updates.
+				</dd>
+
+				<dt><code>collide</code></dt>
+				<dd>
+					Plan group: your file, or one of setup's you have since changed. Reported by name, never
+					replaced without individual approval. "Approve all" is not an answer.
+				</dd>
+
+				<dt>Reconcile mode</dt>
+				<dd>
+					A run where <code>.claude/workflows.json</code> already exists. The alternative is
+					<em>fresh</em>. Reconcile installs only what is missing.
+				</dd>
+
+				<dt>Probe change</dt>
+				<dd>
+					<code>zz-workflows-setup-probe</code> — a throwaway change setup's verification creates,
+					queries with <code>instructions --json</code>, then removes by deleting the directory
+					directly. Never archived, because archiving would write into your specs.
+				</dd>
+
+				<dt>Drift</dt>
+				<dd>
+					The gap between what a repository has and what its level currently ships.
+					<code>--check</code> reports it and writes nothing.
+				</dd>
+			</dl>
+
+			<h2>OpenSpec configuration</h2>
+
+			<dl class="kv">
+				<dt><code>context</code></dt>
+				<dd>
+					Prose injected into <strong>every</strong> artifact's instructions, wrapped in
+					<code>&lt;context&gt;</code> tags. Hard-capped at 50KB; one byte over and the entire field is
+					dropped silently.
+				</dd>
+
+				<dt><code>rules</code></dt>
+				<dd>
+					A map of artifact id → list of strings, injected <strong>only</strong> for the matching
+					artifact. Artifact-specific formatting belongs here, never in <code>context</code>.
+				</dd>
+
+				<dt>Operation</dt>
+				<dd>
+					A phase that is not an artifact — <code>apply</code>, <code>archive</code>. It has
+					<code>requires</code>, a <code>tracks</code> file, and advisory
+					<code>guidance</code>. <code>apply</code> is an operation, which is why it never appears as
+					an artifact id.
+				</dd>
+
+				<dt>Profile</dt>
+				<dd>
+					<strong>Machine-global</strong> OpenSpec setting deciding which <code>/opsx:*</code>
+					commands exist. Two presets: <code>core</code> (six commands) and <code>custom</code> (a
+					selection you make). Setup never writes it.
+				</dd>
+
+				<dt>Store</dt>
+				<dd>
+					A standalone OpenSpec repository registered on this machine, addressed with
+					<code>--store &lt;id&gt;</code>. Without one, commands act on the nearest local
+					<code>openspec/</code> root.
+				</dd>
+			</dl>
+
+			<h2>Doing the work</h2>
+
+			<dl class="kv">
+				<dt>Slice</dt>
+				<dd>
+					One tracer-bullet unit of implementation: a thin vertical cut built test-first in a single
+					session, reviewed, committed. Each slice is self-contained, so the finished slice's context
+					is disposable.
+				</dd>
+
+				<dt>Seam</dt>
+				<dd>
+					The public boundary a test is written at. Agreed up front in <code>design</code> — the
+					Seams table — because an unagreed seam is where test effort goes to waste.
+				</dd>
+
+				<dt>Characterization test</dt>
+				<dd>
+					A test that pins <em>current</em> behaviour before any code moves. <code>refactor</code>'s
+					safety net and its first artifact.
+				</dd>
+
+				<dt>Walking skeleton</dt>
+				<dd>
+					The thinnest end-to-end slice building, testing, and deploying green in CI.
+					<code>setup</code>'s exit criterion.
+				</dd>
+
+				<dt>Visitor mode</dt>
+				<dd>
+					Persuade, Operate, Read, or Experience — chosen from the <em>surface</em>, not the product.
+					Set in a design brief.
+				</dd>
+
+				<dt>Two-axis review</dt>
+				<dd>
+					A review split into a mechanical <strong>Spec</strong> axis (diff versus what was asked) and
+					a judgement <strong>Standards</strong> axis (code as code), run as parallel subagents on
+					different model tiers.
+				</dd>
+			</dl>
+
+			<h2>Escape hatches</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Key</th>
+							<th>Read by the CLI?</th>
+							<th>Effect</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>skip_specs</code></td>
+							<td>Yes</td>
+							<td>
+								Status shows the stage skipped and excludes it from the count. Declaring it
+								<em>and</em> writing spec files is a validation conflict
+							</td>
+						</tr>
+						<tr>
+							<td><code>retire_capabilities</code></td>
+							<td>Yes</td>
+							<td>
+								Archive may delete a capability's spec file rather than aborting. Recoverable only
+								from git
+							</td>
+						</tr>
+						<tr>
+							<td><code>skip_grill</code></td>
+							<td><strong>No</strong></td>
+							<td>Records the judgement. A one-line stub <code>grill.md</code> unblocks the graph</td>
+						</tr>
+						<tr>
+							<td><code>skip_surface</code></td>
+							<td><strong>No</strong></td>
+							<td>Same — the key is for people, the stub file is for the dependency graph</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2>Collisions worth naming</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Word</th>
+							<th>Sense A</th>
+							<th>Sense B</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><strong>setup</strong></td>
+							<td>
+								<code>/workflows:setup</code> — this plugin's command, which configures a repository's
+								OpenSpec layer
+							</td>
+							<td>
+								The <code>setup</code> <em>schema</em> — one of the eight <code>advanced</code>
+								workflows, which bootstraps a repository's code and CI
+							</td>
+						</tr>
+						<tr>
+							<td><strong>config</strong></td>
+							<td>
+								<code>openspec/config.yaml</code> — the <em>project</em> YAML: default schema,
+								context, rules. Edited by hand
+							</td>
+							<td>
+								<code>~/.config/openspec/config.json</code> — the <em>machine</em> JSON: profile,
+								delivery, telemetry. Edited by <code>openspec config set</code>
+							</td>
+						</tr>
+						<tr>
+							<td><strong>design</strong></td>
+							<td>
+								<code>design.md</code> — the technical design artifact: architecture, decisions,
+								seams, ADRs
+							</td>
+							<td>
+								<code>design-brief.md</code> / <code>surface.md</code> — the <em>visual</em> design
+								brief: mode, direction, states
+							</td>
+						</tr>
+						<tr>
+							<td><strong>tasks</strong> vs <strong>plan</strong></td>
+							<td>
+								<code>tasks.md</code> — the coarse, <em>tracked</em> checklist. Checkboxes must be
+								exactly <code>- [ ] </code>
+							</td>
+							<td>
+								<code>plan.md</code> (<code>feature</code> only) — the micro-step, two-to-five-minute
+								decomposition with real test code
+							</td>
+						</tr>
+						<tr>
+							<td><strong>verification</strong></td>
+							<td>
+								The archive-gate <em>artifact</em> in <code>craft-driven</code>,
+								<code>feature</code>, and <code>upgrade</code>
+							</td>
+							<td>
+								Setup's own step 9 — behavioural checks that the config reached the model and your
+								specs were untouched
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Sources</h2>
+				<p>
+					Terms are taken from <code>plugins/workflows/skills/setup/SKILL.md</code>,
+					<code>skills/configuring-openspec/</code> and its five references, the twelve
+					<code>schema.yaml</code> files, and
+					<a href="https://github.com/Fission-AI/OpenSpec/blob/main/docs/glossary.md"
+						>OpenSpec's own glossary</a
+					>. Where this plugin and OpenSpec use a word differently, this page follows the plugin.
+				</p>
+			</footer>
+
+			<nav class="nav">
+				<span><a href="../index.html">← All lessons</a></span>
+				<span><a href="router-card.html">Router card →</a></span>
+			</nav>
+		</main>
+	</body>
+</html>

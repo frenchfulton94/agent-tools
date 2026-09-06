@@ -1,0 +1,94 @@
+name: upgrade
+version: 1
+description: >
+  Workflow for dependency, framework, and platform version changes. The
+  defining trait: constraints come from someone else's release notes, and
+  success means behavior is unchanged. Inventory breaking changes from
+  official sources, scan actual usage, plan ordered migration with rollback,
+  verify equivalence. Invokes agent-skills:source-driven-development for
+  the changelog inventory and agent-skills:deprecation-and-migration for
+  the migration plan; skill names written pack:skill - confirm in the
+  agent's skill list.
+
+artifacts:
+  - id: inventory
+    generates: inventory.md
+    description: Version delta and breaking-change inventory from official sources
+    template: inventory.md
+    instruction: |
+      Record current and target versions and the motivation (EOL, CVE,
+      needed feature). Invoke agent-skills:source-driven-development to
+      inventory breaking changes from official release notes and
+      changelogs, citing URLs - memory of an API is not evidence of its
+      current shape (that is the skill's own premise; it holds in fallback
+      mode too). Give each entry an applies-to-us verdict.
+      Include stepping-stone versions if the jump spans several majors.
+    requires: []
+
+  - id: surfaces
+    generates: surfaces.md
+    description: Search-verified usage scan and per-surface risk class
+    template: surfaces.md
+    instruction: |
+      For each applicable breaking change, find actual call sites by search
+      (grep/AST), with paths and counts. Start from TOOLS.md's dependency
+      and capability map when present (mapping-project-tooling) - it names
+      where each library is imported - then grep-verify: the map narrows,
+      the search proves. Classify each surface: mechanical
+      (codemod-able), behavioral (needs a test to prove equivalence), or
+      unknown (spike first). This scan bounds the real work; skipping it is
+      how upgrades discover breakage in production.
+    requires: [inventory]
+
+  - id: migration
+    generates: migration.md
+    description: Ordered upgrade steps, verification, and rollback
+    template: migration.md
+    instruction: |
+      Invoke agent-skills:deprecation-and-migration to plan the bump:
+      single step or stepping-stone versions, codemods to run, any
+      dual-version or flag period. Define verification that behavior is
+      unchanged - full suite, smoke tests, contract/snapshot tests for the
+      behavioral surfaces. Specify rollback (lockfile/version revert) and the
+      point of no return, such as a migrated data format.
+    requires: [surfaces]
+
+  - id: tasks
+    generates: tasks.md
+    description: Checklist through bump, fixes, and verification
+    template: tasks.md
+    instruction: |
+      Turn migration into checkboxes: bump, run codemods, fix each surface,
+      run verification. Acceptance for the change overall is the full
+      verification suite green with zero behavioral diffs.
+    requires: [migration]
+
+  - id: verification
+    generates: verification.md
+    description: Fresh evidence that behavior is unchanged after the bump
+    template: verification.md
+    instruction: |
+      Create this only after implementation. Every claim is backed by a
+      command run while writing this file: paste the full verification
+      suite's command, exit code, and counts verbatim; walk each behavioral
+      surface from surfaces.md to the equivalence test that proves it,
+      cited as file:line; record the lockfile diff summary and the TOOLS.md
+      refresh; and give a verdict. Ready-to-archive with any behavioral
+      diff unexplained contradicts itself - the verdict follows the
+      evidence.
+    requires: [tasks]
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Execute in migration order on a branch. After the bump, fix surfaces
+    mechanical-first, then behavioral with their equivalence tests. Run
+    full verification, then superpowers:verification-before-completion
+    before claiming done; on unexplained behavioral diffs, stop and either
+    fix
+    forward or roll back per migration.md rather than shipping a changed
+    behavior as an "upgrade". Commit the lockfile with the code changes,
+    then refresh TOOLS.md via mapping-project-tooling so the standing map
+    matches the new reality - an upgrade that leaves TOOLS.md stale plants
+    the next agent's wrong-package-manager bug.

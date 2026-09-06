@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Learning the workflows plugin</title>
+		<link rel="icon" href="assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="assets/lesson.css" />
+	</head>
+	<body>
+		<main class="page page--wide">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>agent-tools</span><span class="sep">·</span><span>workflows plugin</span
+					><span class="sep">·</span><span>Self-paced</span>
+				</p>
+				<h1>Learning the <code>workflows</code> plugin</h1>
+				<p class="deck">
+					Thirteen short lessons and six reference cards, for adopting spec-driven development in any
+					repository. Written for someone who has never seen OpenSpec, with author-level
+					detail in marked appendices. Every claim cites the plugin source.
+				</p>
+			</header>
+
+			<section class="objective">
+				<h2>Start here</h2>
+				<p>
+					Lessons run in order and each one is finishable in a sitting.
+					<a href="lessons/0001-three-layers-one-command.html">Lesson 01</a> needs nothing installed.
+					If you only have twenty minutes ever, do
+					<a href="lessons/0006-route-a-task-in-one-pass.html">lesson 06</a> — routing is the skill
+					that pays for the rest.
+				</p>
+			</section>
+
+			<h2>Part 1 · Orientation</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Lesson</th>
+							<th>You will be able to</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>01</td>
+							<td><a href="lessons/0001-three-layers-one-command.html">Three layers, one command</a></td>
+							<td>
+								Say which of three layers owns any file setup touches, and recite the six things it
+								refuses to do
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2>Part 2 · Install and set up</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Lesson</th>
+							<th>You will be able to</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>02</td>
+							<td><a href="lessons/0002-install-and-pick-a-level.html">Install, and pick a level</a></td>
+							<td>
+								Install the plugin and choose a level against your own repository, from the ladder
+								rather than from taste
+							</td>
+						</tr>
+						<tr>
+							<td>03</td>
+							<td><a href="lessons/0003-read-the-plan-gate.html">Read the plan gate</a></td>
+							<td>
+								Read a plan line by line and decide each collision individually. The most useful
+								skill in the course
+							</td>
+						</tr>
+						<tr>
+							<td>04</td>
+							<td>
+								<a href="lessons/0004-check-dry-run-and-the-re-run-contract.html"
+									><code>--check</code>, <code>--dry-run</code>, and the re-run contract</a
+								>
+							</td>
+							<td>
+								Answer "which of our repositories have fallen behind?" with output, and explain what
+								editing a setup-written file costs
+							</td>
+						</tr>
+						<tr>
+							<td>05</td>
+							<td>
+								<a href="lessons/0005-the-five-things-setup-cannot-do.html"
+									>The five things setup cannot do</a
+								>
+							</td>
+							<td>
+								Finish the interactive steps, switch your output style, and make the machine-global
+								profile decision knowingly
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2>Part 3 · Choosing the right workflow</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Lesson</th>
+							<th>You will be able to</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>06</td>
+							<td><a href="lessons/0006-route-a-task-in-one-pass.html">Route a task in one pass</a></td>
+							<td>
+								Name the right schema for a one-line request and cite the rule that decided it.
+								Includes a twelve-prompt drill
+							</td>
+						</tr>
+						<tr>
+							<td>07</td>
+							<td>
+								<a href="lessons/0007-escape-hatches-and-their-costs.html">Escape hatches and their costs</a>
+							</td>
+							<td>
+								Skip an artifact a change genuinely does not need, knowing which hatches the CLI reads
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2>Part 4 · Running each workflow end to end</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Lesson</th>
+							<th>Covers</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>08</td>
+							<td><a href="lessons/0008-minimal-end-to-end.html"><code>minimal</code>, end to end</a></td>
+							<td><code>mattpocock-bridge</code> · <code>bugfix-flow</code></td>
+						</tr>
+						<tr>
+							<td>09</td>
+							<td><a href="lessons/0009-standard-end-to-end.html"><code>standard</code>, end to end</a></td>
+							<td><code>craft-driven</code> · <code>surface-driven</code></td>
+						</tr>
+						<tr>
+							<td>10</td>
+							<td>
+								<a href="lessons/0010-advanced-the-everyday-four.html"
+									><code>advanced</code>, the everyday four</a
+								>
+							</td>
+							<td>
+								<code>feature</code> · <code>bugfix</code> · <code>refactor</code> ·
+								<code>rapid</code>
+							</td>
+						</tr>
+						<tr>
+							<td>11</td>
+							<td>
+								<a href="lessons/0011-advanced-the-situational-four.html"
+									><code>advanced</code>, the situational four</a
+								>
+							</td>
+							<td>
+								<code>setup</code> · <code>spike</code> · <code>upgrade</code> ·
+								<code>hotfix</code>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>All twelve schemas the plugin ships are driven end to end across these four lessons.</caption>
+			</div>
+
+			<h2>Part 5 · Models and proof</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Lesson</th>
+							<th>You will be able to</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>12</td>
+							<td>
+								<a href="lessons/0012-pair-a-model-and-effort.html">Pair a model and effort with each phase</a>
+							</td>
+							<td>
+								Choose model and effort per phase, know which eight are already pinned, know what your
+								subscription tier changes, and know the settings that silently defeat the pins
+							</td>
+						</tr>
+						<tr>
+							<td>13</td>
+							<td><a href="lessons/0013-prove-it-reached-the-model.html">Prove it reached the model</a></td>
+							<td>
+								Prove your context and rules actually arrive, and name the five ways they silently do
+								not
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2>Reference — print these</h2>
+
+			<div class="grid">
+				<section class="card">
+					<h3><a href="reference/glossary.html">Glossary</a></h3>
+					<p>
+						The bound vocabulary, plus the five words this system uses for two different things —
+						<em>setup</em>, <em>config</em>, <em>design</em>, <em>tasks</em>, <em>verification</em>.
+					</p>
+				</section>
+				<section class="card">
+					<h3><a href="reference/router-card.html">Router card</a></h3>
+					<p>
+						The decision tree, the prompt signals, the guardrails. Keep it beside you for a week and
+						you will not need it again.
+					</p>
+				</section>
+				<section class="card">
+					<h3><a href="reference/workflow-atlas.html">Workflow atlas</a></h3>
+					<p>All twelve schemas: chain, gate, escape hatches, dispatched agents. One page.</p>
+				</section>
+				<section class="card">
+					<h3><a href="reference/command-card.html">Command card</a></h3>
+					<p>
+						Every command, split by where you type it — chat or terminal — plus which files exist and
+						who owns each.
+					</p>
+				</section>
+				<section class="card">
+					<h3><a href="reference/model-effort-card.html">Model &amp; effort card</a></h3>
+					<p>
+						All twelve workflows, plus the tier adaptation and burn control. A <em>source</em> column
+						keeps a pin that executes distinct from a recommendation you have to act on.
+					</p>
+				</section>
+				<section class="card">
+					<h3><a href="reference/failure-modes.html">Failure modes</a></h3>
+					<p>
+						Everything that fails quietly, symptom first. Start here whenever something "isn't
+						working".
+					</p>
+				</section>
+			</div>
+
+			<h2>How to use this with an agent</h2>
+
+			<p>
+				The agent in your session is the teacher. Every lesson ends with a suggested question, and they
+				share a shape: <strong>name the file, name what you expected, name what you got.</strong> "Read
+				the last thirty commits and tell me which level the ladder points at" beats "which level should
+				I use?", because the first one can be answered from evidence.
+			</p>
+
+			<div class="note">
+				<span class="label">Where this course does not go</span>
+				<p>
+					Authoring a thirteenth schema is out of scope — the <code>configuring-openspec</code> skill
+					owns that. So is what happens <em>inside</em> the skill packs the schemas hand off to
+					(superpowers, mattpocock, impeccable, agent-skills): the lessons teach the handoff point and
+					name the skill, and the far side is that pack's own documentation. And no usage figures are
+					quoted: subscription limits are published as relative multipliers only, so lesson 12 teaches
+					the routing consequences and points at <code>/usage</code> rather than at a number.
+				</p>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>The workspace behind this</h2>
+				<p>
+					These pages are the published half of a <code>/teach</code> workspace at
+					<code>plugins/workflows/learn/</code>: <code>MISSION.md</code> (why this exists),
+					<code>RESOURCES.md</code> (every source, ranked by trust, with an explicit gaps section),
+					<code>NOTES.md</code> (conventions and open questions), and
+					<code>learning-records/</code>. Read <code>RESOURCES.md</code> before trusting any claim
+					here — it says which sources outrank which, and where the evidence runs out.
+				</p>
+			</footer>
+
+			<footer class="lesson-foot">
+				<h2>The plugin itself</h2>
+				<p>
+					<a href="../README.md"><code>plugins/workflows/README.md</code></a> ·
+					<a href="../skills/setup/SKILL.md">the setup procedure</a> ·
+					<a href="../payload/levels/advanced/openspec/ROUTING.md">the router</a> ·
+					<a href="../skills/configuring-openspec/">the OpenSpec reference skill</a>
+				</p>
+			</footer>
+		</main>
+	</body>
+</html>

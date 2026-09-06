@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-marketplace.json",
+  "name": "agent-tools",
+  "owner": {
+    "name": "Agent Tools",
+    "email": "michael@frenchfultonjr.dev",
+    "url": "https://github.com/YOUR-GITHUB-OWNER/agent-tools"
+  },
+  "metadata": {
+    "description": "Claude Code plugins for this catalog — agent tooling, the TypeScript and SvelteKit stacks, containers, OWASP-grounded security review, and OpenSpec workflow setup.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "meta-skills",
+      "source": "./plugins/meta-skills",
+      "category": "development",
+      "description": "Authoring and maintenance skills for Claude Code's own extension surfaces — skills, subagents, hooks, plugins, and the marketplaces that distribute them — plus prompt rewriting, project memory, a repo-root TOOLS.md map, and Controlled Engineering English for documentation. Ships the `controlled-english` output style."
+    },
+    {
+      "name": "typescript",
+      "source": "./plugins/typescript",
+      "category": "development",
+      "description": "The TypeScript toolchain end to end — compiler settings and type-level design for new code, tightening loose types and migrating JavaScript incrementally, reading compiler errors that do not say what they mean, testing with Vitest, bundling with Vite, formatting and linting with Biome, typed database schemas and migrations with Drizzle ORM, and running it all on Bun."
+    },
+    {
+      "name": "frontend",
+      "source": "./plugins/frontend",
+      "category": "development",
+      "description": "The web application stack this organisation builds on, leaning SvelteKit — headless components with Bits UI, charts with LayerChart, Tailwind CSS v4 themes and utilities, BEM class naming, Feature-Sliced Design layout, internationalization with Paraglide JS and @internationalized/date, and sanitizing untrusted HTML with DOMPurify."
+    },
+    {
+      "name": "docker-workbench",
+      "source": "./plugins/docker-workbench",
+      "category": "devops",
+      "description": "Set up, use, and configure Docker and containers — Dockerfiles and Compose, dev containers for VS Code and Codespaces, runtime setup across OrbStack, Docker Desktop, Colima and Engine, runtime hardening, vulnerability scanning and image signing, isolated build/runtime debugging, and a guard against irreversible volume loss."
+    },
+    {
+      "name": "security",
+      "source": "./plugins/security",
+      "category": "security",
+      "description": "OWASP-grounded security review. Audits a branch diff or a whole repository against a vendored, pinned copy of the OWASP Cheat Sheet Series, citing a cheatsheet section and a verbatim quote for every finding, checked by a verifier that CI runs over every committed report. Also ships an advisory PostToolUse hook that flags high-confidence credential formats in files Claude writes."
+    },
+    {
+      "name": "workflows",
+      "source": "./plugins/workflows",
+      "category": "workflow",
+      "description": "Sets up or reconciles a project's OpenSpec workflow in one command: schemas and subagents for a chosen complexity level, a rewritten openspec/config.yaml that carries forward what you wrote, and guarded plugin installation. Re-runnable, with --check for read-only drift reporting. Also routes a piece of work to the right schema among the twelve it installs, and ships a self-paced learning package covering installation, routing, and every workflow end to end."
+    },
+    {
+      "name": "zed",
+      "source": "./plugins/zed",
+      "category": "development",
+      "description": "Configures and customizes the Zed editor — settings.json and keymap.json, themes and fonts, per-language and LSP options, formatters, tasks, snippets, extensions, and AI and agent configuration."
+    }
+  ]
+}

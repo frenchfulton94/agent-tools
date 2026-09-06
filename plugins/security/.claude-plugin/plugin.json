@@ -1,0 +1,9 @@
+{
+  "name": "security",
+  "version": "0.3.1",
+  "description": "OWASP-grounded security review. Audits a branch diff or a whole repository against a vendored, pinned copy of the OWASP Cheat Sheet Series, citing a cheatsheet section and a verbatim quote for every finding, checked by a verifier that CI runs over every committed report. Also ships an advisory PostToolUse hook that flags high-confidence credential formats in files Claude writes.",
+  "author": {
+    "name": "Agent Tools",
+    "email": "michael@frenchfultonjr.dev"
+  }
+}

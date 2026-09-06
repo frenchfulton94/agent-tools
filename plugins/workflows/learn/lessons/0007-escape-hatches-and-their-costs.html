@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>07 · Escape hatches and their costs</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+		<link rel="stylesheet" href="../assets/quiz.css" />
+	</head>
+	<body>
+		<main class="page">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Lesson 07</span><span class="sep">·</span><span>Choosing</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1>Escape hatches and their costs</h1>
+				<p class="deck">
+					Every schema has doors marked "this artifact does not apply here". Two of them the CLI
+					actually understands. The others are conventions that only work because someone writes a
+					stub, and knowing which is which saves you a confusing afternoon.
+				</p>
+			</header>
+
+			<section class="objective">
+				<h2>By the end</h2>
+				<p>
+					You can skip an artifact a change genuinely does not need, and you know which hatches
+					change what the CLI reports versus which only leave an audit trail.
+				</p>
+			</section>
+
+			<p class="prereq">
+				<strong>Prerequisites:</strong>
+				<a href="0006-route-a-task-in-one-pass.html">Lesson 06</a>. Short lesson — ten minutes.
+			</p>
+
+			<h2>Where hatches live</h2>
+
+			<p>
+				All of them go in the change's own <code>.openspec.yaml</code>, beside its
+				<code>schema:</code> line. That file is created by
+				<code>openspec new change</code> and edited by hand for exactly these declarations.
+			</p>
+
+			<pre><code># openspec/changes/refresh-nav-markup/.openspec.yaml
+schema: mattpocock-bridge
+skip_specs: true
+skip_surface: true</code></pre>
+
+			<h2>The two the CLI reads</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Hatch</th>
+							<th>Use when</th>
+							<th>What the CLI does</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>skip_specs: true</code></td>
+							<td>
+								Pure refactor, tooling, or docs work — no spec-level behaviour change is owed
+							</td>
+							<td>
+								<code>openspec status</code> renders the stage as
+								<code>[~] specs (skipped: change declares skip_specs)</code> and excludes it from
+								the progress count. Without it, <code>validate</code> rejects a change with zero
+								deltas
+							</td>
+						</tr>
+						<tr>
+							<td><code>retire_capabilities: true</code></td>
+							<td>
+								A <code>REMOVED</code> entry takes a capability's <em>last</em> requirement
+							</td>
+							<td>
+								Archive deletes <code>openspec/specs/&lt;capability&gt;/spec.md</code> instead of
+								aborting, names each retirement in its warnings, and prints the restoring
+								<code>git checkout</code>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					<code>skills/configuring-openspec/references/config-reference.md</code>. These are the only
+					two boolean declarations OpenSpec itself understands.
+				</caption>
+			</div>
+
+			<div class="stop" data-background="dark">
+				<span class="label">Declaring <code>skip_specs</code> and then writing spec files is a validation conflict</span>
+				<p>
+					That is deliberate: it means a stale marker cannot linger unnoticed. If you set the hatch
+					and later discover a delta is owed, remove the marker in the same edit that adds the spec.
+				</p>
+			</div>
+
+			<div class="note">
+				<span class="label"><code>retire_capabilities</code> is recoverable only from git</span>
+				<p>
+					That is why it is opt-in rather than inferred. Set it in the same edit as the
+					<code>REMOVED</code> entry, and say so out loud to whoever is reviewing — a deleted spec
+					file is the one thing in this whole system that leaves no trace in
+					<code>openspec/specs/</code>.
+				</p>
+			</div>
+
+			<h2>The ones that are conventions, not features</h2>
+
+			<p>
+				<code>mattpocock-bridge</code> defines two more hatches. Both are read by the
+				<em>schema instruction</em>, not by the CLI — because only paths under
+				<code>specs/</code> get a real skipped status.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th class="col-label">Hatch</th>
+							<th>Use when</th>
+							<th>What actually unblocks the graph</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>skip_grill: true</code></td>
+							<td>The change is genuinely one decision wide</td>
+							<td>
+								A <strong>stub <code>grill.md</code></strong> — one line, giving the reason and the
+								date. The key itself does nothing to the CLI
+							</td>
+						</tr>
+						<tr>
+							<td><code>skip_surface: true</code></td>
+							<td>
+								Backend, data, tooling, or infrastructure — nothing a person looks at
+							</td>
+							<td>
+								A <strong>stub <code>surface.md</code></strong>, same shape. The key records the
+								judgement; the file moves the graph
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					<code>payload/levels/minimal/openspec/schemas/mattpocock-bridge/schema.yaml</code>, the
+					<code>grill</code> and <code>surface</code> instructions: "The CLI does not read this key
+					(only paths under <code>specs/</code> get a real skipped status), so the stub file is what
+					unblocks the rest of the graph and what leaves the audit trail."
+				</caption>
+			</div>
+
+			<p>
+				So the mental model is: <strong>the key is for the humans and the agent; the stub file is for
+				the dependency graph.</strong> Writing the key without the stub leaves the chain blocked and
+				you wondering why. Writing the stub without the key loses the reason.
+			</p>
+
+			<h2>Skipping <code>design</code> — no key at all</h2>
+
+			<p>
+				Both <code>mattpocock-bridge</code> and <code>craft-driven</code> treat
+				<code>design</code> as conditional, and neither uses a declaration for it. You skip it
+				<em>deliberately and say so</em>. The conditions are stated in the schemas:
+			</p>
+
+			<ul>
+				<li>
+					<strong>Skip it</strong> when the change is one module, adds no dependency, and raises no
+					security, performance, or migration question.
+				</li>
+				<li>
+					<strong>Write it</strong> when the change is cross-cutting, adds a dependency, introduces a
+					new pattern, or carries data-model, security, performance, or migration complexity — or
+					when there is genuine ambiguity about the approach.
+				</li>
+			</ul>
+
+			<p>
+				That condition list is worth memorising, because it is also the trigger for the most
+				expensive model setting in the whole system —
+				<a href="0012-pair-a-model-and-effort.html">lesson 12</a> comes back to it.
+			</p>
+
+			<h2>The reopen hatches</h2>
+
+			<p>
+				Two schemas tell you to <em>abandon the chain</em> rather than skip an artifact. These are not
+				failures; they are the routing guardrails firing late.
+			</p>
+
+			<ul>
+				<li>
+					<strong><code>bugfix-flow</code> → <code>mattpocock-bridge</code>:</strong> when
+					<code>diagnose</code> finds a fault whose fix is a redesign. The signal is the fix
+					<em>altering</em> behaviour the product cares about rather than restoring behaviour it
+					already promised.
+				</li>
+				<li>
+					<strong><code>mattpocock-bridge</code> → <code>bugfix-flow</code>:</strong> when
+					<code>grill</code> realises this is a defect fix. It says so and offers the reopen command
+					rather than interviewing you about a bug.
+				</li>
+			</ul>
+
+			<p>Reopening is a fresh change under the other schema — one sentence, with the schema named:</p>
+
+			<pre><code>/opsx:new &lt;what the fix really is&gt;, using bugfix-flow</code></pre>
+
+			<p>Or in a terminal, when you already know the slug you want:</p>
+
+			<pre><code>openspec new change &lt;name&gt; --schema bugfix-flow</code></pre>
+
+			<div class="drift">
+				<span class="label">A post-apply artifact is gated by a checkbox, not a file</span>
+				<p>
+					<code>spike</code>'s <code>findings</code> and <code>hotfix</code>'s
+					<code>postmortem</code> are written <em>after</em> the work. They are held open by
+					checkboxes in the tracked task file, because the CLI's archive warning counts
+					<strong>tracked checkboxes, not artifact files</strong>. Ticking the box before writing the
+					artifact is how a postmortem quietly never happens.
+				</p>
+				<span class="cite"><code>payload/levels/advanced/openspec/README.md</code>, "Routing"</span>
+			</div>
+
+			<h2>Recall check</h2>
+
+			<p data-quiz-tally class="drill-score"></p>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					You set <code>skip_surface: true</code> and nothing moves. What is missing?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="The CLI ignores that key, so a one-line stub file unblocks the graph."
+						>
+							The one-line stub file
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Validation is not what gates a non-specs artifact's readiness."
+						>
+							The strict validate pass
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Re-running setup writes schemas; it does not advance a change."
+						>
+							The second setup run
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					A change declares <code>skip_specs</code> and also has a spec file. What happens?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="It is a validation conflict, so a stale marker cannot linger unseen."
+						>
+							Validation reports a conflict
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Silently preferring either one is exactly the stale-marker trap."
+						>
+							Validation prefers the marker
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Silently preferring either one is exactly the stale-marker trap."
+						>
+							Validation prefers the file
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					Which hatch deletes a file under <code>openspec/specs/</code> on archive?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Only this one, and only for a capability's last requirement."
+						>
+							The capability-retiring one
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="That one only marks the stage skipped in status output."
+						>
+							The spec-delta-skipping one
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="That one writes a stub and the CLI never reads its key."
+						>
+							The surface-skipping one
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Read this next</h2>
+				<p>
+					<strong
+						>Primary source:
+						<a href="../../skills/configuring-openspec/references/config-reference.md"
+							><code>config-reference.md</code></a
+						></strong
+					>, the <code>.openspec.yaml</code> section. Every field, its type, and the exact behaviour
+					of both real hatches — verified against OpenSpec's source rather than only its docs.
+				</p>
+			</footer>
+
+			<div class="ask">
+				<p>
+					<strong>Ask before you skip.</strong> "This change touches only the build script — should
+					it declare <code>skip_specs</code>, and does anything else need a stub?" Naming the change
+					lets the agent read its <code>.openspec.yaml</code> and its schema, which beats a general
+					answer.
+				</p>
+			</div>
+
+			<nav class="nav">
+				<span><a href="0006-route-a-task-in-one-pass.html">← Lesson 06 · Route a task</a></span>
+				<span
+					><a href="0008-minimal-end-to-end.html">Lesson 08 · Minimal, end to end →</a></span
+				>
+			</nav>
+		</main>
+		<script src="../assets/quiz.js"></script>
+	</body>
+</html>

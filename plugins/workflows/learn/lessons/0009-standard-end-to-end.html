@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>09 · Standard, end to end</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+		<link rel="stylesheet" href="../assets/quiz.css" />
+	</head>
+	<body>
+		<main class="page">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Lesson 09</span><span class="sep">·</span><span>Running them</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1><code>standard</code>, end to end</h1>
+				<p class="deck">
+					Two schemas that differ only in what leads. One puts behaviour first and treats the surface
+					as a consequence; the other puts the surface first and treats behaviour as its
+					implementation. Getting the choice right is most of the work.
+				</p>
+			</header>
+
+			<section class="objective">
+				<h2>By the end</h2>
+				<p>
+					You have driven a change through <code>craft-driven</code>, you can say when
+					<code>design-brief</code> and <code>design</code> exist at all, and you can choose
+					<code>surface-driven</code> for the right reason.
+				</p>
+			</section>
+
+			<p class="prereq">
+				<strong>Prerequisites:</strong>
+				<a href="0008-minimal-end-to-end.html">Lesson 08</a> — the artifact-at-a-time loop and the
+				spec formatting rules carry over unchanged.
+			</p>
+
+			<h2>The two chains</h2>
+
+			<h3><code>craft-driven</code> — behaviour leads</h3>
+
+			<ul class="chain">
+				<li>brainstorm</li>
+				<li class="arrow">→</li>
+				<li>proposal</li>
+				<li class="arrow">→</li>
+				<li>specs</li>
+				<li class="arrow">+</li>
+				<li data-optional>design-brief</li>
+				<li class="arrow">+</li>
+				<li data-optional>design</li>
+				<li class="arrow">→</li>
+				<li>tasks</li>
+				<li class="arrow">→</li>
+				<li>apply</li>
+				<li class="arrow">→</li>
+				<li data-gate>verification</li>
+			</ul>
+
+			<p>
+				<code>specs</code>, <code>design-brief</code>, and <code>design</code> all depend only on
+				<code>proposal</code>, so all three become ready together and
+				<code>tasks</code> waits for all three. Two of them are conditional.
+			</p>
+
+			<h3><code>surface-driven</code> — the surface leads</h3>
+
+			<ul class="chain">
+				<li>design-brief</li>
+				<li class="arrow">→</li>
+				<li>proposal</li>
+				<li class="arrow">→</li>
+				<li>specs</li>
+				<li class="arrow">→</li>
+				<li>tasks</li>
+				<li class="arrow">→</li>
+				<li>apply</li>
+				<li class="arrow">→</li>
+				<li data-gate>quality</li>
+			</ul>
+
+			<p>
+				Strictly linear, and the brief comes <em>first</em> — before anything is written down as a
+				requirement. The proposal is deliberately short, because the brief already carries the
+				decisions.
+			</p>
+
+			<h2>Choosing between them</h2>
+
+			<p>
+				One question: <strong>is this change primarily a user-facing surface?</strong> A landing page,
+				a dashboard, a flow, a redesign, a component system. If yes, the design brief should lead and
+				you want <code>surface-driven</code>. If the surface is a consequence of new behaviour rather
+				than the point of the work, you want <code>craft-driven</code>.
+			</p>
+
+			<pre><code>/opsx:new redesign the admissions dashboard, using surface-driven</code></pre>
+
+			<p>
+				Or in a terminal, when you would rather write the slug yourself:
+				<code>openspec new change redesign-admissions-dashboard --schema surface-driven</code>.
+			</p>
+
+			<div class="note">
+				<span class="label">Not a project-wide decision</span>
+				<p>
+					<code>craft-driven</code> is the config default; <code>surface-driven</code> is selected
+					per change by naming it — in the sentence you give <code>/opsx:new</code>, or as
+					<code>--schema</code> on the command. A repository will use both, and that is the intended
+					shape.
+				</p>
+			</div>
+
+			<div class="note">
+				<span class="label">The loop is the same one you already know</span>
+				<p>
+					<code>/opsx:continue redesign-admissions-dashboard</code> for each artifact, naming the
+					change every time. Then, once the last planning artifact lands and before a line of code is
+					written: <code>/clear</code>, <code>/model</code> — arrow left or right for effort, or
+					<code>/effort</code> on its own — and
+					<code>/opsx:apply redesign-admissions-dashboard</code>.
+					<a href="0008-minimal-end-to-end.html">Lesson 08</a> has the reasoning; it does not change
+					between levels.
+				</p>
+			</div>
+
+			<h2>The two conditional artifacts</h2>
+
+			<h3><code>design-brief</code> — gated on the proposal's own words</h3>
+
+			<p>
+				Create it <strong>only if the proposal's Surfaces section names at least one user-facing
+				surface</strong>. If it says "None — no UI impact", skip the artifact, tell the user you
+				skipped it and why, and move on.
+			</p>
+
+			<p>
+				That makes the proposal's Surfaces line load-bearing rather than decorative: it is the switch
+				that turns the whole UI path on or off. Write it honestly.
+			</p>
+
+			<p>What the brief must settle, so a builder cannot re-litigate it mid-task:</p>
+
+			<ul>
+				<li>
+					<strong>Visitor mode</strong> for each surface — Persuade, Operate, Read, or Experience —
+					<em>chosen from the surface, not the product</em>. A tool's landing page is still Persuade;
+					a fashion house's docs are still Read.
+				</li>
+				<li>
+					<strong>Visual authority</strong> — does the surface inherit the incumbent visual world
+					(refinement preserves), or was a replacement world chosen and approved (redesign replaces)?
+					<em>Never split the difference.</em>
+				</li>
+				<li>
+					The selected direction, scope and anti-goals, material states and realistic content ranges,
+					and the constraints that bind.
+				</li>
+			</ul>
+
+			<p>
+				<strong>State intent, not CSS.</strong> Three to five bullets for a settled refinement; the
+				full structure only for ambiguous or multi-screen work.
+			</p>
+
+			<h3><code>design</code> — gated on complexity</h3>
+
+			<p>Create <code>design.md</code> only if any of these apply:</p>
+
+			<ul>
+				<li>the change is cross-cutting — multiple services or modules — or introduces a new architectural pattern;</li>
+				<li>it adds an external dependency, or significant data-model changes;</li>
+				<li>it carries security, performance, or migration complexity;</li>
+				<li>there is ambiguity that benefits from technical decisions before coding.</li>
+			</ul>
+
+			<p>Otherwise skip it and tell the user why.</p>
+
+			<div class="note">
+				<span class="label">The trigger <em>is</em> the tier signal</span>
+				<p>
+					Notice that this artifact only exists when the change is already the hard case. That is why
+					the schema dispatches a subagent for it, and why that subagent is pinned to the top tier —
+					<a href="0012-pair-a-model-and-effort.html">lesson 12</a> builds on exactly this.
+				</p>
+			</div>
+
+			<h2>The subagent dispatch pattern</h2>
+
+			<p>
+				Both of <code>craft-driven</code>'s expensive steps hand off to a pinned subagent, and the
+				pattern is identical each time. Learn it once.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Step</th>
+							<th>Agent</th>
+							<th>Its prompt must carry</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>design</code></td>
+							<td><code>craft-design-gate</code></td>
+							<td>The change directory path</td>
+						</tr>
+						<tr>
+							<td><code>verification</code>, step 3</td>
+							<td><code>verification-reviewer</code></td>
+							<td>The change directory path, the base SHA, and the head SHA</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					<code>payload/levels/standard/agents/</code>. Both are pinned to a strong model at
+					<code>xhigh</code> effort, and the schema says why: "so this session can stay on the cheap
+					tier".
+				</caption>
+			</div>
+
+			<p>Three rules that come with the pattern:</p>
+
+			<ol>
+				<li>
+					<strong>A subagent inherits nothing.</strong> Not your conversation, not files you have
+					read, not skills you invoked. If the prompt does not name it, the agent does not have it.
+					That is why the required inputs are spelled out per agent.
+				</li>
+				<li>
+					<strong>It returns a draft plus caller actions.</strong> It cannot ask you questions — it
+					has no way to. So it collects open questions and hands them back, and
+					<strong>you</strong> resolve every one before finishing the artifact. A question that would
+					change the specs, the approach, or the task breakdown must be settled now, not baked in as
+					an assumption.
+				</li>
+				<li>
+					<strong>Missing is not fatal.</strong> If the agent is absent or fails to launch, say so
+					and do the work inline — the schema gives the sections. Every dispatch in every schema has
+					a stated fallback.
+				</li>
+			</ol>
+
+			<h2>The archive gate</h2>
+
+			<p>
+				Both schemas put an evidence artifact last on purpose:
+				<code>verification</code> for <code>craft-driven</code>, <code>quality</code> for
+				<code>surface-driven</code>. <code>openspec archive</code> warns about an incomplete change
+				until it exists, which turns "it works" into a written, evidence-backed claim.
+			</p>
+
+			<div class="stop" data-background="dark">
+				<span class="label">What counts as evidence</span>
+				<p>
+					Every claim must be backed by a command you ran <em>while writing this file</em> and its
+					observed output. "Should pass" is not evidence. A run from earlier in the session is not
+					evidence. <strong>A subagent's success report is not evidence</strong> — it is a lead. If
+					you have not run the command for this file, run it now.
+				</p>
+				<p>
+					And: a verdict of ready-to-archive with any Critical finding unresolved, or any test
+					failing, contradicts itself. The verdict follows the evidence.
+				</p>
+			</div>
+
+			<p>
+				One clause worth reading twice, in <code>verification</code> step 3: receive the reviewer's
+				feedback <em>with technical evaluation, not performative agreement</em> — verify each finding
+				against the codebase and push back in writing where the reviewer is wrong.
+			</p>
+
+			<h2>A trap worth knowing before it bites</h2>
+
+			<p>
+				Artifact status is <strong>pure filesystem existence</strong>:
+			</p>
+
+			<pre><code>BLOCKED ──────────► READY ──────────► DONE
+missing deps      all deps done     file exists</code></pre>
+
+			<p>
+				So an artifact can read <code>done</code> while its dependencies were never written — writing
+				<code>tasks.md</code> by hand marks <code>tasks</code> done with no <code>specs</code> at all.
+				<code>openspec status</code> will tell you the chain is fine. It is not.
+			</p>
+
+			<p>
+				This is also, incidentally, why a skipped artifact's one-line stub works: the file exists, so
+				the graph moves.
+			</p>
+			<span class="cite">
+				<code>skills/configuring-openspec/references/custom-schemas.md</code>, "Dependency graph
+				semantics"
+			</span>
+
+			<h2>Recall check</h2>
+
+			<p data-quiz-tally class="drill-score"></p>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					What decides whether <code>craft-driven</code>'s <code>design-brief</code> gets written?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="The proposal's Surfaces section is the switch for the whole UI path."
+						>
+							The proposal's Surfaces section
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Web detection sets which plugins install, not which artifacts exist."
+						>
+							The project's detected webness
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="The chosen schema decides the chain, not this one artifact."
+						>
+							The change's selected schema
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					A dispatched design-gate subagent hits an open question. What does it do?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="It cannot ask you anything, so it returns questions for the caller."
+						>
+							Returns the open question
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Asking is exactly what a subagent has no mechanism to do."
+						>
+							Asks the user directly
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="A baked-in assumption is what the returned-questions rule prevents."
+						>
+							Assumes the likely answer
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					A subagent reports the suite passed. Can you cite that in <code>verification.md</code>?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="A report is a lead; run the command yourself for this file."
+						>
+							No, that is a lead
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Naming the agent does not turn a report into observed output."
+						>
+							Yes, if it is named
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Recency is not the test; running it for this file is the test."
+						>
+							Yes, if it ran lately
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					<code>openspec status</code> shows <code>tasks</code> as done. What does that prove?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Status is pure file existence, so it proves only that a file is there."
+						>
+							File existence, nothing more
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Dependencies can be entirely missing while status still reads done."
+						>
+							Its dependencies were written
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Validation is a separate command and status never implies it."
+						>
+							Its contents passed validation
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="appendix">
+				<span class="label">Appendix · one detail the guides disagree on</span>
+				<p>
+					The attached mattpocock guide assigns <code>surface-driven</code>'s
+					<code>quality</code> artifact to a mid-tier model at medium effort and says "this schema
+					never needs Fable". The plugin source ships <em>no subagent at all</em> for that artifact —
+					both of <code>standard</code>'s agents belong to <code>craft-driven</code>. So the quality
+					pass runs in your main session at whatever model you are on, and the guide's
+					recommendation is advice to you rather than a pin in a file. Worth knowing before you
+					assume something is enforcing it.
+				</p>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Read this next</h2>
+				<p>
+					<strong
+						>Primary source: the two schemas themselves —
+						<a href="../../payload/levels/standard/openspec/schemas/craft-driven/schema.yaml"
+							><code>craft-driven/schema.yaml</code></a
+						>
+						and
+						<a href="../../payload/levels/standard/openspec/schemas/surface-driven/schema.yaml"
+							><code>surface-driven/schema.yaml</code></a
+						></strong
+					>. Read the <code>instruction:</code> fields, not the descriptions. The instruction is the
+					prompt the agent actually receives, and no summary — including this lesson — replaces it.
+				</p>
+			</footer>
+
+			<footer class="lesson-foot">
+				<h2>Reference</h2>
+				<p>
+					<a href="../reference/workflow-atlas.html">Workflow atlas</a> — both chains, their gates,
+					and their conditional artifacts, beside the other ten.
+				</p>
+			</footer>
+
+			<div class="ask">
+				<p>
+					<strong>Test the surface decision on real work.</strong> "Here are three things in our
+					backlog. For each, tell me <code>craft-driven</code> or <code>surface-driven</code>, and
+					whether the proposal's Surfaces line would be 'None'." The second half is the part people
+					get wrong.
+				</p>
+			</div>
+
+			<nav class="nav">
+				<span><a href="0008-minimal-end-to-end.html">← Lesson 08 · Minimal</a></span>
+				<span
+					><a href="0010-advanced-the-everyday-four.html"
+						>Lesson 10 · Advanced, the everyday four →</a
+					></span
+				>
+			</nav>
+		</main>
+		<script src="../assets/quiz.js"></script>
+	</body>
+</html>

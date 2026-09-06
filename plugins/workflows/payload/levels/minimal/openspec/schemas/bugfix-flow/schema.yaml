@@ -1,0 +1,160 @@
+name: bugfix-flow
+version: 1
+description: >
+  Defect fixes, where the problem is known and the cause is not.
+  diagnose -> specs -> tasks.
+
+  A companion to mattpocock-bridge, selected per change by naming it —
+  `/opsx:new <what is broken>, using bugfix-flow`, or in a terminal
+  `openspec new change <name> --schema bugfix-flow`. It drops the interview and the
+  proposal — a defect needs no case made for fixing it — and gates everything behind a
+  written root cause, so the fix cannot be written before the cause is understood.
+
+  Requires the mattpocock skills. Only model-invoked skills are invoked from these
+  instructions.
+
+artifacts:
+  - id: diagnose
+    generates: diagnose.md
+    description: Reproduction, root cause, the layer to fix at, and the seam the regression test sits at
+    template: diagnose.md
+    instruction: |
+      Find the cause before anyone writes a fix. This artifact exists to make that
+      order structural rather than a good intention.
+
+      Invoke `diagnosing-bugs`. It reproduces the fault, builds a feedback loop
+      tight enough to iterate against, and narrows to the cause by bisecting the
+      pipeline rather than by reading code and guessing. Take the commands that loop
+      runs from TOOLS.md rather than from habit — a feedback loop built on the wrong
+      package manager or a script that no longer exists costs the session before the
+      diagnosis starts.
+
+      Record four things:
+
+      - **Reproduction** — the smallest reliable way to trigger the fault, and what
+        is observed versus expected. A reproduction someone else can run is what
+        makes the rest of this checkable.
+      - **Root cause** — what actually produces the fault, at the level of the code
+        or data that is wrong. "The date parsed in the wrong timezone" is a cause;
+        "the date was wrong" is the symptom restated.
+      - **Fix layer** — symptom or cause, with the reasoning. Fixing at the symptom
+        is sometimes right, under a deadline or where the cause sits behind a
+        migration, and saying so plainly is what makes it a decision rather than an
+        accident. Where you fix at the symptom, say what would have to happen to
+        fix it properly, so the next person inherits the choice rather than the
+        surprise.
+      - **Seam** — the public boundary the regression test will sit at, and what it
+        exposes. Prefer a seam the codebase already has and one the reproduction
+        can drive directly. `/tdd` writes tests only at agreed seams, so put this to
+        the user and get their agreement before this artifact is done.
+
+      Where the diagnosis opens a genuine fork — the cause sits under a design
+      decision worth revisiting, or the right fix would change behaviour the product
+      cares about — put that fork to the user rather than choosing for them. A fault
+      whose fix is a redesign belongs in a full change under `mattpocock-bridge`
+      instead; say so and stop.
+
+      Where a term the diagnosis depends on is fuzzy or overloaded, invoke
+      `domain-modeling` and write it to CONTEXT.md as you go.
+    requires: []
+
+  - id: specs
+    generates: "specs/**/*.md"
+    description: The case the spec was silent about, as a requirement that stops the fault returning
+    template: spec.md
+    instruction: |
+      Decide whether this fault changes what the system promises, and write the
+      delta when it does.
+
+      Read the capability's spec under `openspec/specs/` and compare it against the
+      fault:
+
+      - **The spec covered this case and the code disagreed.** The spec was right,
+        no delta is owed. Set `skip_specs: true` in the change's `.openspec.yaml`
+        and move on — the regression test in tasks.md is what holds the line here.
+      - **The spec was silent about the case that broke.** That silence is the bug
+        behind the bug. Add the missing case as an ADDED requirement with a scenario
+        covering it, and expect this to be the common outcome: faults cluster where
+        nobody wrote down what should happen.
+      - **The spec said something the fault proves wrong.** Use MODIFIED, copying
+        the entire existing requirement block from the main spec, header included,
+        then editing it. Archive replaces the whole block by matching that header,
+        so a partial copy silently drops what was left out.
+
+      Write to `specs/<capability-path>/spec.md`, preserving the exact existing path.
+      A defect fix rarely creates a capability; where it seems to, the fault is
+      probably larger than a bugfix and belongs in a full change.
+
+      Format:
+      - `### Requirement: <name>`, described with SHALL or MUST.
+      - `#### Scenario: <name>` with WHEN/THEN bullets, at exactly four hashtags —
+        the parser skips three-hashtag scenarios without reporting an error, so a
+        mis-levelled one is lost at archive with no warning.
+      - Write the scenario so the reproduction from diagnose.md satisfies it. That
+        correspondence is the whole point: the scenario is the reproduction, made
+        permanent.
+    requires:
+      - diagnose
+
+  - id: tasks
+    generates: tasks.md
+    description: The failing test, the fix, and anything the diagnosis showed also needs doing
+    template: tasks.md
+    instruction: |
+      Write the work as checkboxes, in the order a test-first fix happens.
+
+      Most defect fixes are one slice, and one `##` group is the right shape for
+      them. Open it with the regression test, since a test written after a passing
+      fix proves only that the code does what it currently does:
+
+      ```
+      ## 1. <what is being fixed> (<tracker reference>)
+
+      - [ ] 1.1 Failing test at <seam from diagnose.md> reproducing the fault
+      - [ ] 1.2 <the fix>
+      - [ ] 1.3 <anything the diagnosis showed is also broken or missing>
+      ```
+
+      Checkboxes take the exact `- [ ] X.Y ` form; apply parses them to track
+      progress and a line in any other shape is invisible to it.
+
+      Split into more than one group when the diagnosis found the cause spans
+      modules, or when a symptom fix ships now and the cause fix follows — give the
+      cause fix its own group and its own tracker issue so it survives the urgency
+      that produced the symptom fix.
+
+      Read `docs/agents/issue-tracker.md` for where issues live, and publish one
+      issue per group with the `ready-for-agent` label, in dependency order. Each
+      group names its tracker reference; the detail lives in the issue and tasks.md
+      indexes it.
+
+      Where the diagnosis surfaced faults beyond the one reported, list them here as
+      their own groups only when they share the cause. An unrelated fault found
+      along the way belongs in its own change, filed rather than folded in.
+    requires:
+      - specs
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Fix it test-first, at the seam the diagnosis agreed.
+
+    Read diagnose.md before the code. The reproduction tells you when you are done,
+    and the fix-layer decision tells you where you are allowed to work.
+
+    1. Invoke `tdd`. Write the failing test first, at the seam diagnose.md names,
+       driving it with the recorded reproduction. Watch it fail for the reason the
+       diagnosis gave rather than for an unrelated one — a test that fails for the
+       wrong reason passes for the wrong reason too.
+    2. Write the smallest fix that makes it pass, staying at the agreed layer.
+    3. Typecheck and run the affected tests as you go, using the commands TOOLS.md
+       records; run the full suite once the fix is in. A defect fix touching shared
+       code is exactly where a regression hides.
+    4. Invoke `code-review` with the slice's start commit as the fixed point and the
+       change's specs as the spec source. Act on its findings before committing.
+    5. Tick the boxes in tasks.md, update the issue, and commit.
+
+    Pause and ask when the fix does not hold — when the reproduction still triggers,
+    or the cause turns out to be elsewhere. That means diagnose.md is wrong, and the
+    artifact to update is diagnose.md, not the code.

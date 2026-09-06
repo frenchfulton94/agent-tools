@@ -1,0 +1,41 @@
+{
+	"evals": [
+		{
+			"expectations": [
+				"Produces a valid vite.config.ts using defineConfig with server.proxy mapping /api to localhost:8000",
+				"Adds resolve.alias for '@' pointing at ./src",
+				"Updates or instructs matching tsconfig paths ('@/*': ['./src/*']) so editor and bundler stay in sync",
+				"Notes the proxy only applies to the dev server, not production"
+			],
+			"expected_output": "A vite.config.ts with a dev server proxy for /api to http://localhost:8000 and an '@' -> src alias, plus matching tsconfig paths so the editor agrees with the bundler, and a note that the proxy is dev-only.",
+			"files": [],
+			"id": 1,
+			"prompt": "hey, I scaffolded a react-ts app with create-vite (vite 8) and my backend runs on localhost:8000. fetch('/api/todos') fails with CORS in dev. also I'm sick of ../../.. imports, want @ to point at src. can you set up my vite config?"
+		},
+		{
+			"expectations": [
+				"Explains Vite 8 switched to Rolldown and that manualChunks (object form) is removed / function form deprecated",
+				"Provides config using build.rolldownOptions.output.codeSplitting with a group matching react/react-dom",
+				"Does NOT present manualChunks as the solution for Vite 8",
+				"Points to or consults current Rolldown/Vite docs rather than relying on pre-v8 knowledge"
+			],
+			"expected_output": "An explanation that Vite 8 uses Rolldown and manualChunks is removed/deprecated, with a working config using build.rolldownOptions.output.codeSplitting groups for a react vendor chunk.",
+			"files": [],
+			"id": 2,
+			"prompt": "our vite 8 build produces one giant 900kb js file. I want react and react-dom in their own vendor chunk for better caching. I tried build.rollupOptions.output.manualChunks like a blog post said but vite complains. what's the right way now?"
+		},
+		{
+			"expectations": [
+				"Identifies that Vite loads .env files only after the config resolves, so env vars from .env are unavailable during config evaluation",
+				"Shows the loadEnv(mode, ...) pattern inside a function-form defineConfig",
+				"Explains vite build defaults to mode 'production' and that --mode staging loads .env.staging",
+				"Clarifies that a custom mode does not change NODE_ENV / import.meta.env.PROD"
+			],
+			"expected_output": "Explanation that .env files load after config resolution (use loadEnv in the config), and that builds default to production mode so 'vite build --mode staging' is needed to load .env.staging, with the mode vs NODE_ENV distinction.",
+			"files": [],
+			"id": 3,
+			"prompt": "two problems: (1) in vite.config.ts I read import.meta env / process.env.VITE_API_URL to set the dev port and it's always undefined even though it's in my .env, (2) when I run 'vite build' for our staging site it uses the production title from .env.production instead of .env.staging. why??"
+		}
+	],
+	"skill_name": "vite"
+}

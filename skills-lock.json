@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "skills": {
+    "authoring-hooks": {
+      "source": "./plugins/meta-skills/skills",
+      "sourceType": "local",
+      "computedHash": "59b2d330b1aec9c2b4cb0c1fe9ad3b934d0de005dd5ad8cd9e60be41eb787f57"
+    },
+    "authoring-plugins": {
+      "source": "./plugins/meta-skills/skills",
+      "sourceType": "local",
+      "computedHash": "6bde45224e70089a51a2f3500b90caf35f4a41283642c540fce532265cdfb3ef"
+    },
+    "authoring-skills": {
+      "source": "./plugins/meta-skills/skills",
+      "sourceType": "local",
+      "computedHash": "3d7da8fb8c296fbf3d96c8b0aace6aae34e04e849eef66d0b5a0657315d45ec0"
+    },
+    "authoring-subagents": {
+      "source": "./plugins/meta-skills/skills",
+      "sourceType": "local",
+      "computedHash": "ec046be9567180ab51c1cc485f5b50620d586315ff3ca27eb5b70879ce745f70"
+    },
+    "bun": {
+      "source": "./plugins/typescript/skills",
+      "sourceType": "local",
+      "computedHash": "0bc86c561f714060b5f9b39cefde02ce86f738f1d007397bdc1efd4212f3711c"
+    },
+    "configuring-biome": {
+      "source": "./plugins/typescript/skills",
+      "sourceType": "local",
+      "computedHash": "70b77a167a3a32cc056f72122e610fabd29e2284d8b96ace8c01127aae7f261d"
+    },
+    "controlled-engineering-english": {
+      "source": "./plugins/meta-skills/skills",
+      "sourceType": "local",
+      "computedHash": "572b20e1fba5eff33bedbffb133ce344018ab8432588359bbb7ec40aefbb3f09"
+    },
+    "debugging-type-errors": {
+      "source": "./plugins/typescript/skills",
+      "sourceType": "local",
+      "computedHash": "9f3615a32949023eae83c498522edc9bb3a446075f38f324b96bb6a594dd87d8"
+    },
+    "improving-prompts": {
+      "source": "./plugins/meta-skills/skills",
+      "sourceType": "local",
+      "computedHash": "bc6202fbdde8bd1b05a5536941ed2ee7045cd88e6a77000a77b35d5a66ee6323"
+    },
+    "maintaining-plugin-marketplaces": {
+      "source": "./plugins/meta-skills/skills",
+      "sourceType": "local",
+      "computedHash": "9c6fb8bb8294e927daf7157cbc5088b59ce92473e3b8664f6d2a1af46953eebf"
+    },
+    "managing-project-memory": {
+      "source": "./plugins/meta-skills/skills",
+      "sourceType": "local",
+      "computedHash": "77793c5febb31bc873c8e509702c40d3c3d659a8bebdaeb6268c379d1ad91297"
+    },
+    "refactoring-typescript": {
+      "source": "./plugins/typescript/skills",
+      "sourceType": "local",
+      "computedHash": "0543a1188362e69160b29522d27d670e145057af8c323b35e4ecda2010ba60de"
+    },
+    "vitest-testing": {
+      "source": "./plugins/typescript/skills",
+      "sourceType": "local",
+      "computedHash": "eb6db048c15151c9eb3ce01b4600d24ecb9f3bdef2971412baf27f66526d4929"
+    },
+    "writing-typescript": {
+      "source": "./plugins/typescript/skills",
+      "sourceType": "local",
+      "computedHash": "10357ce8ebd3799db25a37889dacb293239598077417a70e1075a852badb1276"
+    }
+  }
+}

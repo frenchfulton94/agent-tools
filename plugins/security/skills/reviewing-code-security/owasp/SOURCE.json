@@ -1,0 +1,13 @@
+{
+  "repo": "OWASP/CheatSheetSeries",
+  "ref": "master",
+  "sha": "2a21d7eb677eb89acf7176bab0b150382818bbc0",
+  "syncedAt": "2026-07-28T19:23:59.558Z",
+  "sheetCount": 120,
+  "stubs": [
+    "Access_Control_Cheat_Sheet.md",
+    "Injection_Prevention_in_Java_Cheat_Sheet.md",
+    "TLS_Cipher_String_Cheat_Sheet.md",
+    "Transport_Layer_Protection_Cheat_Sheet.md"
+  ]
+}

@@ -1,0 +1,46 @@
+name: spike
+version: 1
+description: >
+  Timeboxed exploration to answer one question by building throwaway code.
+  Not for production changes: code never merges; learnings graduate through
+  a new feature change. Invokes superpowers:using-git-worktrees for
+  isolation at apply; skill names written pack:skill - confirm in the
+  agent's skill list.
+
+artifacts:
+  - id: question
+    generates: question.md
+    description: The question, timebox, success criteria, and experiment list
+    template: question.md
+    instruction: |
+      Frame one primary question and the decision it informs. Set a hard
+      timebox - when it expires, findings get written with whatever evidence
+      exists, because an unbounded spike is just unplanned development.
+      Define what evidence would count as an answer, then list the
+      experiments as checkboxes; the apply phase tracks this file.
+    requires: []
+
+  - id: findings
+    generates: findings.md
+    description: Answer, evidence, recommendation, and disposition
+    template: findings.md
+    instruction: |
+      Complete this after the experiments conclude (or the timebox expires)
+      and before archiving the change. Lead with the answer, back it with
+      evidence (measurements, snippets, branch links) rather than
+      impressions, give a recommendation, and record the disposition: code
+      discarded, and either a follow-up feature change created for the
+      learnings or an explicit decision not to proceed.
+    requires: [question]
+
+apply:
+  requires: [question]
+  tracks: question.md
+  instruction: |
+    Invoke superpowers:using-git-worktrees to work in an isolated worktree
+    that will never merge (fallback: a throwaway branch), and
+    mattpocock-skills:prototype for the exploration itself - it is built for
+    throwaway feasibility work, so quality bars are relaxed by design. Check off
+    experiments in question.md as evidence is captured. Hard-stop at the
+    timebox. Then complete findings.md before archiving; a spike without
+    written findings produced nothing durable.

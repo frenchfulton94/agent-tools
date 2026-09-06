@@ -1,0 +1,76 @@
+name: setup
+version: 1
+description: >
+  Workflow for bootstrapping a new repository or project. Creates the standing
+  documents every other schema reads (CONTEXT.md language, never-change-silently
+  list, AGENTS.md router, config context) and proves the skeleton works in CI.
+  No specs artifact - no behavior exists yet to spec. Sources: addyosmani PRD
+  fields (tech stack, commands, boundaries); mattpocock (CONTEXT.md, ubiquitous
+  language); impeccable (PRODUCT.md/DESIGN.md captured once); obra/superpowers
+  (walking-skeleton discipline); engineering judgment. Skill names written
+  pack:skill - confirm in the agent's skill list.
+
+artifacts:
+  - id: decisions
+    generates: decisions.md
+    description: Stack choices and foundational ADRs
+    template: decisions.md
+    instruction: |
+      Invoke superpowers:brainstorming (fallback: agent-skills:interview-me)
+      to choose the stack with the user: languages, framework, datastore,
+      test framework, package manager, deploy target. Record each
+      foundational choice via agent-skills:documentation-and-adrs as an ADR (Context / Decision / Consequences / Alternatives) -
+      at bootstrap nearly every choice passes the ADR three-gate test because
+      everything is hard to reverse later. Ask one question at a time;
+      recommend defaults.
+    requires: []
+
+  - id: conventions
+    generates: conventions.md
+    description: Standing conventions the whole schema set will read
+    template: conventions.md
+    instruction: |
+      Write the conventions other changes will inherit: seed ubiquitous
+      language, testing strategy and coverage bar, lint/format/commit rules,
+      agent boundaries (Always / Ask first / Never), and a starter
+      never-change-silently list. This content gets materialized into
+      CONTEXT.md, AGENTS.md, and openspec config context during apply - write
+      it to be copied, not summarized.
+    requires: [decisions]
+
+  - id: tasks
+    generates: tasks.md
+    description: Scaffold checklist through a green walking skeleton
+    template: tasks.md
+    instruction: |
+      List the bootstrap steps: repo scaffold, package manifest, lint/format,
+      test harness with one real test, CI pipeline, deploy stub, standing-doc
+      materialization. The exit criterion is a walking skeleton: the thinnest
+      end-to-end slice building, testing, and deploying green in CI. Add
+      one post-skeleton task: generate TOOLS.md via mapping-project-tooling
+      - that skill's own rule forbids writing it before evidence exists on
+      disk, so it runs after the skeleton lands, never at scaffold time.
+    requires: [conventions]
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Scaffold per decisions.md. Materialize conventions.md into the repo:
+    CONTEXT.md (language + invariants), AGENTS.md (boundaries + the schema
+    router from ROUTING.md), openspec config context, and a DESIGN.md stub
+    for UI projects. If the mattpocock pack is installed, ask the user to run
+    /setup-matt-pocock-skills here (user-invoked; the agent cannot fire
+    it) - it is that pack's own
+    run-once repo configuration (tracker, triage labels, domain doc
+    layout) and belongs in bootstrap. Invoke managing-project-memory to
+    materialize and right-size AGENTS.md/CLAUDE.md - it owns what earns
+    permanent residence there (past ~200 lines adherence drops), including
+    whether the schema router lives in the root file, an @import, or a
+    rules file. If controlled-engineering-english is installed, run its
+    glossary setup and add the AGENTS.md pointer line (Glossary: <path>).
+    Prove the walking skeleton: one commit that builds,
+    passes its one real test, and deploys (or dry-runs) green in CI before
+    any feature work starts. Invoke
+    superpowers:verification-before-completion, then verify every tasks.md
+    box is checked.

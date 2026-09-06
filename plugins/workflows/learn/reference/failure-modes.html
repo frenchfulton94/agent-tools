@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Failure modes — workflows</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+	</head>
+	<body>
+		<main class="page page--wide">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Reference</span><span class="sep">·</span><span>Print this</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1>Failure modes</h1>
+				<p class="deck">
+					Everything in this system that fails <em>quietly</em>. Grouped by where it bites, symptom
+					first. If something "isn't working", start here rather than editing.
+				</p>
+			</header>
+
+			<div class="stop" data-background="dark">
+				<span class="label">Run diagnostics in a plain terminal, unpiped</span>
+				<p>
+					Half the entries below produce a <code>console.warn</code> on <strong>stderr</strong> that
+					would have told you exactly what happened. A pipe, a redirect, or a tool that only surfaces
+					stdout loses it. This is the single most common reason a silent failure stayed silent.
+				</p>
+			</div>
+
+			<h2>The three commands that settle almost everything</h2>
+
+			<pre><code>openspec --version                                       # is the CLI there, and how old
+openspec schema which --all                              # which schema wins, and from where
+openspec instructions &lt;artifact&gt; --change &lt;name&gt; --json  # what the assistant actually receives</code></pre>
+
+			<p>
+				The third is decisive for anything about context, rules, or templates. Absent from that
+				payload means the problem is upstream of the assistant.
+			</p>
+
+			<h2>Configuration that does nothing</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Symptom</th>
+							<th>Cause</th>
+							<th>Fix</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>The whole <code>context</code> never appears</td>
+							<td>It is over <strong>50KB</strong>. The entire field is dropped, silently</td>
+							<td>
+								Summarize, or point at a file instead of pasting it. Treat the cap as a ceiling to
+								stay far below, not a budget
+							</td>
+						</tr>
+						<tr>
+							<td>A rule never fires</td>
+							<td>
+								Its key matches no artifact id in the schema <em>this change</em> uses.
+								<code>Unknown artifact ID in rules: X</code> on stderr, every command
+							</td>
+							<td>
+								<code>openspec schemas --json</code> lists ids per schema. Common right after
+								adopting a schema that renamed artifacts
+							</td>
+						</tr>
+						<tr>
+							<td>Nothing in the config applies at all</td>
+							<td>
+								The file is not where OpenSpec looks. Only <code>openspec/config.yaml</code> and
+								<code>openspec/config.yml</code> are probed, in that order
+							</td>
+							<td>
+								A root-level file, or one a directory up, is invisible. If both exist,
+								<code>.yaml</code> wins and your <code>.yml</code> edits do nothing
+							</td>
+						</tr>
+						<tr>
+							<td>One field applies, another does not</td>
+							<td>
+								That field failed its type check. Parsing is per-field and resilient — the bad field
+								is dropped, everything else loads
+							</td>
+							<td>
+								Read stderr. The rest of the config working is <em>not</em> evidence this field did
+							</td>
+						</tr>
+						<tr>
+							<td>Invalid YAML anywhere</td>
+							<td>The whole config is ignored, with a warning</td>
+							<td>Run it through a YAML validator</td>
+						</tr>
+						<tr>
+							<td><code>openspec config set</code> succeeded, nothing changed</td>
+							<td>
+								That writes the <strong>machine</strong> JSON config, never the project YAML
+							</td>
+							<td>Edit <code>openspec/config.yaml</code> by hand</td>
+						</tr>
+						<tr>
+							<td>Waiting for a restart</td>
+							<td>None is needed</td>
+							<td>Config is read fresh on every command</td>
+						</tr>
+						<tr>
+							<td>A top-level key is ignored</td>
+							<td>
+								Only these exist: <code>schema</code>, <code>context</code>, <code>rules</code>,
+								<code>operations</code>, <code>references</code>, <code>store</code>,
+								<code>githubCopilot</code>
+							</td>
+							<td>Anything else is ignored outright</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2>Markup that parses to nothing</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Symptom</th>
+							<th>Cause</th>
+							<th>Fix</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>A scenario is silently ignored</td>
+							<td>
+								Scenarios need <strong>exactly four hashes</strong> — <code>#### Scenario:</code>.
+								Three hashes, or a bullet, does not parse
+							</td>
+							<td>Count the hashes. There is no lenient parse for this</td>
+						</tr>
+						<tr>
+							<td>Scenarios vanish after an archive</td>
+							<td>
+								A <code>MODIFIED</code> requirement <strong>replaces the whole block</strong>. Archive
+								matches on the requirement header
+							</td>
+							<td>
+								Copy the entire requirement block, header included, carrying every surviving
+								scenario — not only the edited ones
+							</td>
+						</tr>
+						<tr>
+							<td>A task never shows in progress tracking</td>
+							<td>
+								Its checkbox is not exactly <code>- [ ] </code>. Apply parses that form; any other
+								shape is <em>invisible</em>, not an error
+							</td>
+							<td>Fix the marker. <code>* [ ]</code> and <code>-[ ]</code> both fail</td>
+						</tr>
+						<tr>
+							<td>A placeholder reached an executor</td>
+							<td>
+								"Write tests for the above" in a <code>plan.md</code>. The implementer may see only
+								their own task
+							</td>
+							<td>
+								Placeholders are plan failures. Write the real test code, the real handling, the
+								repeated code
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2>Status and structure that lie</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Symptom</th>
+							<th>Cause</th>
+							<th>Fix</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>An artifact reads <code>done</code> with nothing behind it</td>
+							<td>
+								Status is <strong>pure filesystem existence</strong>: BLOCKED (missing deps) → READY
+								(deps done) → DONE (file exists). Writing <code>tasks.md</code> by hand marks
+								<code>tasks</code> done with no <code>specs</code>
+							</td>
+							<td>
+								Walk each artifact's <code>requires</code> edges transitively rather than trusting
+								status
+							</td>
+						</tr>
+						<tr>
+							<td>An escape-hatch key seems to do nothing</td>
+							<td>
+								<code>skip_grill</code> and <code>skip_surface</code> are <strong>not read by the
+								CLI</strong> — only paths under <code>specs/</code> get a real skipped status
+							</td>
+							<td>
+								Write the one-line stub file. The key records the judgement; the file moves the graph
+							</td>
+						</tr>
+						<tr>
+							<td>A change archives without merging anything</td>
+							<td>
+								A custom schema satisfies only one of the two <code>specs</code> rules: the id must be
+								<code>specs</code> <em>and</em> <code>generates</code> must stay under
+								<code>specs/</code>
+							</td>
+							<td>
+								Archive and sync find deltas through the <em>id</em>; <code>skip_specs</code> matches
+								on the <em>path prefix</em>. Satisfy both
+							</td>
+						</tr>
+						<tr>
+							<td>Validation rejects a change with no deltas</td>
+							<td>A change with zero spec deltas fails unless it declares <code>skip_specs</code></td>
+							<td>
+								Declare it — but declaring it <em>and</em> writing spec files is a validation
+								conflict, so a stale marker cannot linger
+							</td>
+						</tr>
+						<tr>
+							<td>Archive aborts on a capability</td>
+							<td>A <code>REMOVED</code> entry takes a capability's last requirement</td>
+							<td>
+								Add <code>retire_capabilities: true</code>. The deletion is recoverable only from
+								git, which is why it is opt-in
+							</td>
+						</tr>
+						<tr>
+							<td>A post-apply artifact never gets written</td>
+							<td>
+								The archive warning counts <strong>tracked checkboxes, not artifact files</strong>.
+								Ticking the last box satisfies it
+							</td>
+							<td>
+								Write <code>findings.md</code> / <code>postmortem.md</code> before ticking the last
+								box
+							</td>
+						</tr>
+						<tr>
+							<td>A forked schema does nothing</td>
+							<td>Nothing in the precedence chain names it</td>
+							<td>
+								<code>--schema</code> flag → the change's <code>.openspec.yaml</code> →
+								<code>openspec/config.yaml</code> → <code>spec-driven</code>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2>Commands and sessions</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Symptom</th>
+							<th>Cause</th>
+							<th>Fix</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>A slash command "does not exist"</td>
+							<td>
+								Wrong half of the product — <code>/opsx:propose</code> goes in the assistant's chat,
+								not a shell
+							</td>
+							<td>The most common failure there is. Check where you typed it</td>
+						</tr>
+						<tr>
+							<td><code>/opsx:continue</code> is missing</td>
+							<td>
+								It is not in the <code>core</code> profile. There is <strong>no
+								<code>expanded</code> preset</strong> — extra workflows come from a
+								<code>custom</code> selection
+							</td>
+							<td>
+								<code>openspec config profile</code>, then <code>openspec update</code> in the
+								project. Upgrade the CLI first
+							</td>
+						</tr>
+						<tr>
+							<td><code>openspec update</code> reports everything current</td>
+							<td>
+								Instruction files are generated by the <em>installed</em> CLI. An outdated one never
+								writes the newer workflows
+							</td>
+							<td>Upgrade the package before running update</td>
+						</tr>
+						<tr>
+							<td>
+								<code>/opsx:apply</code> or <code>/opsx:continue</code> asks which change you mean
+							</td>
+							<td>
+								Both infer the change from the conversation when you omit the name, and you cleared
+								the window or started a new session — so there is nothing to infer from
+							</td>
+							<td>
+								Not a fault. Name the change:
+								<code>/opsx:apply &lt;change&gt;</code>. Do it every time and it never comes up
+							</td>
+						</tr>
+						<tr>
+							<td>Apply drifts, re-litigates settled decisions, or runs out of room</td>
+							<td>
+								The planning window was carried into implementation. Everything apply needs is already
+								written down in the artifacts; the session copy is dead weight
+							</td>
+							<td>
+								<code>/clear</code>, re-pick with <code>/model</code> or <code>/effort</code>, then
+								<code>/opsx:apply &lt;change&gt;</code>. Clearing loses nothing — artifact state is
+								file existence
+							</td>
+						</tr>
+						<tr>
+							<td>A model switch does not seem to change anything</td>
+							<td>
+								It was made inside a full window, which still travels with every following turn
+							</td>
+							<td>
+								<code>/clear</code> first, then switch. Confirm with <code>/status</code> rather than
+								assuming
+							</td>
+						</tr>
+						<tr>
+							<td>Archive exits 1 in CI or from an agent</td>
+							<td>It asks up to three confirmations, and stdin is closed</td>
+							<td>Pass the change name and <code>--yes</code></td>
+						</tr>
+						<tr>
+							<td>Customisation disappeared after an update</td>
+							<td>
+								Generated skill and command files are OpenSpec's to own; <code>openspec update</code>
+								overwrites them
+							</td>
+							<td>
+								Customization belongs in <code>config.yaml</code>, schemas, and templates — never in
+								the generated files
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2>Models and subagents</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Symptom</th>
+							<th>Cause</th>
+							<th>Fix</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Every gate seems to run on the same model</td>
+							<td>
+								<code>CLAUDE_CODE_SUBAGENT_MODEL</code> is set. It outranks frontmatter
+								<code>model:</code>, so all eight pins collapse — no warning
+							</td>
+							<td>Unset it. <code>inherit</code> is equivalent to unset</td>
+						</tr>
+						<tr>
+							<td>A gate pinned to <code>opus</code> did not run on it</td>
+							<td>
+								The value is not in the organisation's <code>availableModels</code> allowlist. An
+								excluded value is <strong>skipped</strong>, and the agent inherits instead
+							</td>
+							<td>
+								Confirm what is available to you before trusting a pin. There is no fallback ladder —
+								it inherits
+							</td>
+						</tr>
+						<tr>
+							<td>A dispatched agent produced something generic</td>
+							<td>
+								A subagent inherits <strong>nothing</strong> — no conversation, no files read, no
+								skills invoked
+							</td>
+							<td>
+								Name every input in its prompt. The schemas spell out per agent what must be carried
+								(change directory, base SHA, head SHA, tracker reference)
+							</td>
+						</tr>
+						<tr>
+							<td>A gate agent never asked its question</td>
+							<td>
+								<code>AskUserQuestion</code> is removed from every subagent regardless of
+								<code>tools:</code>
+							</td>
+							<td>
+								It returns open questions instead. <em>You</em> resolve them before finishing the
+								artifact
+							</td>
+						</tr>
+						<tr>
+							<td>Quality degrades late in a long session</td>
+							<td>A session degrades once it passes roughly 150k tokens</td>
+							<td>
+								One slice per session. Each slice is self-contained, so the finished slice's context
+								is disposable
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2>Setup itself</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Symptom</th>
+							<th>Cause</th>
+							<th>Fix</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>A file you edited comes back as a collision every run</td>
+							<td>
+								Working as designed. Your edit changed the content hash, so the file is now yours
+							</td>
+							<td>
+								Keep the edit and decline, or revert the bytes to hand ownership back. A content hash,
+								not a timestamp
+							</td>
+						</tr>
+						<tr>
+							<td>The plan's plugin and status-line sections look wrong</td>
+							<td>
+								<code>.claude/settings.json</code> could not be read. That warning leads the list and
+								invalidates both sections
+							</td>
+							<td>Fix the file, do not approve around it</td>
+						</tr>
+						<tr>
+							<td>Setup stopped before touching the config</td>
+							<td>
+								The artifact-id lookup from the CLI failed. Classifying rules against an empty union
+								would discard every rule you wrote
+							</td>
+							<td>Correct outcome. Fix the CLI, then re-run</td>
+						</tr>
+						<tr>
+							<td>Verification failed on a plugin</td>
+							<td>
+								A managed marketplace blocked it. The check uses the <em>planned</em> list, not what
+								install reported
+							</td>
+							<td>
+								Also the correct outcome — a result to report, not an obstacle to route around
+							</td>
+						</tr>
+						<tr>
+							<td>A teammate cloned the repo and has no plugins</td>
+							<td>
+								A committed <code>.claude/settings.json</code> records intent; it does not install
+								anything for anyone
+							</td>
+							<td>
+								They install the plugin and run <code>/workflows:setup</code> once. Reconcile mode
+								installs only what is missing
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Sources</h2>
+				<p>
+					<code>plugins/workflows/skills/configuring-openspec/references/troubleshooting.md</code>
+					and <code>config-reference.md</code> and <code>custom-schemas.md</code>;
+					<code>skills/setup/SKILL.md</code>; <code>scripts/verify.d.mts</code>; the twelve
+					<code>schema.yaml</code> files;
+					<code>plugins/meta-skills/skills/authoring-subagents/references/</code>.
+				</p>
+			</footer>
+
+			<nav class="nav">
+				<span><a href="model-effort-card.html">← Model &amp; effort card</a></span>
+				<span><a href="../index.html">All lessons →</a></span>
+			</nav>
+		</main>
+	</body>
+</html>

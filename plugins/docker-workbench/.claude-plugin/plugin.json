@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "docker-workbench",
+  "displayName": "Docker Workbench",
+  "version": "0.3.0",
+  "description": "Set up, use, and configure Docker and containers — Dockerfiles and Compose, dev containers for VS Code and Codespaces, runtime setup across OrbStack, Docker Desktop, Colima and Engine, runtime hardening, vulnerability scanning and image signing, isolated build/runtime debugging, and a guard against irreversible volume loss.",
+  "author": {
+    "name": "Docker Workbench contributors"
+  },
+  "license": "MIT",
+  "keywords": [
+    "docker",
+    "containers",
+    "compose",
+    "dockerfile",
+    "devcontainer",
+    "orbstack",
+    "devops",
+    "security",
+    "sbom",
+    "supply-chain"
+  ]
+}

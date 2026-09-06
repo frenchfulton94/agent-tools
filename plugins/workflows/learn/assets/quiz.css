@@ -1,0 +1,183 @@
+/* =============================================================================
+   quiz.css — styles for the quiz.js and router-drill.js components.
+   Linked only by lessons that use them. Depends on lesson.css tokens, and
+   follows the same two rules: Figtree for all UI, flat at rest.
+
+   The wrong-answer signal is carried by the border, not by red text: the
+   brand's alert red clears 3:1 as a non-text boundary on every light band but
+   not 4.5:1 as body text, so the label stays ink with a line-through.
+   ========================================================================== */
+
+.quiz,
+.drill {
+	margin: var(--block) 0;
+	padding: var(--gap) calc(var(--gap) * 1.15);
+	background: var(--ground-raised);
+	border: 1px solid var(--rule);
+	border-radius: var(--radius);
+}
+
+.quiz-prompt {
+	font: 600 1.0625rem/1.5 var(--sans);
+	letter-spacing: -0.005em;
+	margin: 0 0 var(--gap);
+	color: var(--ink);
+}
+
+.drill-prompt {
+	font: 425 0.9375rem/1.6 var(--mono);
+	margin: 0 0 var(--gap);
+	color: var(--ink);
+}
+
+.quiz-choices,
+.drill-choices {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: calc(var(--step) * 0.9);
+}
+
+.drill-choices {
+	flex-direction: row;
+	flex-wrap: wrap;
+}
+
+.quiz-choices li,
+.drill-choices li {
+	margin: 0;
+}
+
+.quiz-choices button,
+.drill-choices button {
+	display: block;
+	width: 100%;
+	text-align: left;
+	font: 425 0.9375rem/1.5 var(--sans);
+	color: var(--ink);
+	background: var(--ground);
+	border: 1.5px solid var(--rule-strong);
+	border-radius: var(--radius-sm);
+	padding: 0.6em 0.8em;
+	cursor: pointer;
+	transition:
+		background 160ms ease,
+		border-color 160ms ease;
+}
+
+.drill-choices button {
+	width: auto;
+	font-family: var(--mono);
+	font-size: 0.875rem;
+	padding: 0.44em 0.72em;
+}
+
+.quiz-choices button:hover:not(:disabled),
+.drill-choices button:hover:not(:disabled) {
+	background: var(--ground-sunk);
+	border-color: var(--gold-deep);
+}
+
+.quiz-choices button:disabled,
+.drill-choices button:disabled {
+	cursor: default;
+}
+
+/* Marks are set only after an answer, so nothing in the resting state hints at
+   which choice is correct. */
+.quiz-choices button[data-mark="right"],
+.drill-choices button[data-mark="right"] {
+	background: var(--ground-mist);
+	border-color: var(--accent);
+	color: var(--accent-ink);
+	font-weight: 600;
+}
+
+.quiz-choices button[data-mark="wrong"],
+.drill-choices button[data-mark="wrong"] {
+	background: var(--ground-sunk);
+	border-color: #eb0027;
+	color: var(--ink-soft);
+	text-decoration: line-through;
+}
+
+.quiz-choices button[data-mark="dim"],
+.drill-choices button[data-mark="dim"] {
+	opacity: 0.55;
+}
+
+.quiz-result,
+.drill-result {
+	margin: var(--gap) 0 0;
+	font: 425 0.9375rem/1.6 var(--sans);
+	color: var(--ink-soft);
+}
+
+.quiz-result:empty,
+.drill-result:empty {
+	display: none;
+}
+
+.quiz-result b,
+.drill-result b {
+	color: var(--ink);
+	font-weight: 600;
+}
+
+.quiz-reset,
+.drill-reset {
+	font: 425 0.875rem/1.4 var(--sans);
+	color: var(--ink-soft);
+	background: none;
+	border: 0;
+	border-bottom: 1px solid var(--gold-deep);
+	padding: 0 0 1px;
+	margin-top: var(--gap);
+	cursor: pointer;
+}
+
+.quiz-reset:hover,
+.drill-reset:hover {
+	color: var(--ink);
+	border-bottom-color: var(--ink);
+}
+
+/* --- drill: many items, one score --------------------------------------- */
+
+.drill-items {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--gap);
+}
+
+.drill-items > li {
+	margin: 0;
+	padding-bottom: var(--gap);
+	border-bottom: 1px solid var(--rule);
+}
+
+.drill-items > li:last-child {
+	border-bottom: 0;
+	padding-bottom: 0;
+}
+
+.drill-score {
+	font: 600 0.8125rem/1.2 var(--sans);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--gold-text);
+	margin: 0 0 var(--gap);
+	padding-bottom: var(--step);
+	border-bottom: 1px solid var(--rule);
+}
+
+.drill-noscript {
+	font: 425 0.9375rem/1.6 var(--sans);
+	color: var(--ink-soft);
+	margin: 0;
+}

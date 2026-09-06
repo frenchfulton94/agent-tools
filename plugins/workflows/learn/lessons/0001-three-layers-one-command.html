@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>01 · Three layers, one command</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+		<link rel="stylesheet" href="../assets/quiz.css" />
+	</head>
+	<body>
+		<main class="page">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Lesson 01</span><span class="sep">·</span><span>Orientation</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1>Three layers, one command</h1>
+				<p class="deck">
+					Almost every confusing thing about this plugin becomes obvious once you know which of
+					three places a file lives in. Learn the three places first; everything else in the
+					course hangs off them.
+				</p>
+			</header>
+
+			<section class="objective">
+				<h2>By the end</h2>
+				<p>
+					You can point at any file <code>/workflows:setup</code> touches and say which layer owns
+					it — the plugin, your repository, or your own work product — and you can recite the six
+					things setup refuses to do.
+				</p>
+			</section>
+
+			<p class="prereq">
+				<strong>Prerequisites:</strong> none. You do not need OpenSpec installed to finish this
+				lesson, and you should not install anything yet.
+			</p>
+
+			<h2>The problem this plugin exists to solve</h2>
+
+			<p>
+				Spec-driven development with OpenSpec needs a pile of configuration: which workflow a change
+				follows, what context every prompt carries, which subagents exist, which skill packs are
+				enabled. Set that up by hand in five repositories and you get five slightly different
+				setups, all drifting. Copy it between repositories and the copies drift faster.
+			</p>
+
+			<p>
+				<code>/workflows:setup</code> is one command that writes all of it, and — this is the part
+				that matters — is safe to run again. Re-running is how a repository takes updates.
+			</p>
+
+			<div class="note">
+				<span class="label">The design insight</span>
+				<p>
+					The plugin splits its content on one question, and it is not "code or prose". It is
+					<strong>when does this guidance have to fire?</strong> A schema router has to fire at a
+					known moment — before a change is created — so it lives in your repository where memory
+					reliably loads it. Reference prose you consult on demand lives in the plugin, as a
+					skill, so there is one copy that updates when the plugin does.
+				</p>
+				<span class="cite">
+					<code>docs/ideas/workflows-plugin.md</code> — "not what is code vs. prose, but when the
+					guidance has to fire"
+				</span>
+			</div>
+
+			<h2>Layer 1 — the plugin</h2>
+
+			<p>
+				Installed once, lives outside your repository, updates when you update the plugin. You never
+				edit anything here.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>What</th>
+							<th>Where</th>
+							<th>Why it is here</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>The setup procedure</td>
+							<td><code>skills/setup/SKILL.md</code></td>
+							<td>One copy of the procedure, updated with the plugin</td>
+						</tr>
+						<tr>
+							<td>OpenSpec reference prose</td>
+							<td><code>skills/configuring-openspec/</code></td>
+							<td>Consulted on demand, so it never needs to be in memory</td>
+						</tr>
+						<tr>
+							<td>Detect, plan, verify, record</td>
+							<td><code>scripts/*.mjs</code></td>
+							<td>Facts a procedure must never derive by hand</td>
+						</tr>
+						<tr>
+							<td>Everything it installs</td>
+							<td><code>payload/</code></td>
+							<td>The schemas, agents and config examples, per level</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2>Layer 2 — your repository</h2>
+
+			<p>
+				Copied in by setup, then committed. Version-controlled, visible to CI, visible to teammates.
+				This is the layer you may edit — and editing it has a specific consequence you will learn in
+				<a href="0004-check-dry-run-and-the-re-run-contract.html">lesson 04</a>.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>What</th>
+							<th>Where</th>
+							<th>Written by</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Workflow definitions</td>
+							<td><code>openspec/schemas/&lt;name&gt;/</code></td>
+							<td>Setup, additively</td>
+						</tr>
+						<tr>
+							<td>Subagents</td>
+							<td><code>.claude/agents/*.md</code></td>
+							<td>Setup, additively</td>
+						</tr>
+						<tr>
+							<td>Project config</td>
+							<td><code>openspec/config.yaml</code></td>
+							<td>Setup — the one file it <em>replaces</em>, after backing it up</td>
+						</tr>
+						<tr>
+							<td>Plugin and status-line choices</td>
+							<td><code>.claude/settings.json</code></td>
+							<td>Setup, filling only keys you have not decided</td>
+						</tr>
+						<tr>
+							<td>What setup installed</td>
+							<td><code>.claude/workflows.json</code></td>
+							<td>Setup — the level, version, date, and a hash per file it owns</td>
+						</tr>
+						<tr>
+							<td>Stack and memory docs</td>
+							<td><code>TOOLS.md</code>, <code>CLAUDE.md</code></td>
+							<td>Skills setup invokes, not setup itself</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2>Layer 3 — your work product</h2>
+
+			<p>
+				<code>openspec/specs/</code> holds what your software is contracted to do.
+				<code>openspec/changes/</code> holds the changes in flight. Setup manages the schema and
+				configuration layer <em>around</em> these two directories and never writes into them.
+			</p>
+
+			<p>
+				That guarantee is not a promise in prose. Setup hashes both directory trees before it
+				touches anything, hashes them again afterwards, and reports a failed check if either moved.
+			</p>
+			<span class="cite">
+				<code>plugins/workflows/skills/setup/SKILL.md</code> steps 1 and 9 —
+				<code>hashTree</code> before, <code>verify</code> after
+			</span>
+
+			<h2>The six refusals</h2>
+
+			<p>
+				A tool that rewrites files in a repository it is a guest in earns trust by what it declines
+				to do. Setup declines six things, always, at every level.
+			</p>
+
+			<ol>
+				<li>
+					<strong>It will not overwrite a value already in <code>.claude/settings.json</code>.</strong>
+					A plugin you disabled on purpose stays disabled.
+					Setup fills only keys you have not decided.
+				</li>
+				<li>
+					<strong
+						>It will not touch <code>openspec/specs/</code> or
+						<code>openspec/changes/</code>.</strong
+					>
+					Those are layer 3.
+				</li>
+				<li>
+					<strong>It will not replace a schema or subagent without naming it first.</strong> A
+					same-name collision is shown before you approve, never applied silently — and that
+					includes a file setup itself wrote that you have since edited.
+				</li>
+				<li>
+					<strong>It will not run <code>openspec init</code> over an existing
+						<code>openspec/</code>.</strong>
+					Only a repository with no <code>openspec/</code> at all gets initialized, because
+					<code>init</code> has a legacy-cleanup path.
+				</li>
+				<li>
+					<strong>It will not write <code>openspec config profile</code>.</strong> That value is
+					machine-global — shared by every project you run OpenSpec in on this machine. Setup
+					reports its current value and leaves the decision to you.
+				</li>
+				<li>
+					<strong>It will not transmit anything.</strong> Every <code>openspec</code> invocation the
+					plugin makes sets <code>OPENSPEC_TELEMETRY=0</code> and <code>DO_NOT_TRACK=1</code>,
+					because every <code>openspec</code> subcommand runs a hook that POSTs to a third-party
+					endpoint.
+				</li>
+			</ol>
+			<span class="cite">
+				<code>plugins/workflows/README.md</code> — "What it will not do". Refusal 6 is pinned by
+				tests on both halves: the scripts on every spawn, and the setup procedure on every command
+				it tells the agent to run.
+			</span>
+
+			<h2>Recall check</h2>
+
+			<p data-quiz-tally class="drill-score"></p>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					Which pair of directories does setup manage the layer around, but never write into?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Your contracts and your work in flight — layer three."
+						>
+							The changes and specs directories
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Setup writes both of those additively, every run."
+						>
+							The schemas and agents directories
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Those two live in the plugin, so nothing writes them."
+						>
+							The payload and scripts directories
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">Why does the schema router live in your repository, not the plugin?</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="It has to fire before a change is created, so memory must hold it."
+						>
+							Because of when it must fire
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Length decides nothing here; the trigger moment decides it."
+						>
+							Because of how long it runs
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Prose in the plugin is the cheaper option, not the costlier one."
+						>
+							Because of what it would cost
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					Which file does setup replace rather than merge — after backing it up?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="The level's example is the base; your old file is only input."
+						>
+							The OpenSpec project config
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="That one is only ever filled in at keys you left undecided."
+						>
+							The local Claude settings
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="That is written fresh by setup and merged, never replaced."
+						>
+							The prior-run record file
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Read this next</h2>
+				<p>
+					<strong
+						>Primary source:
+						<a href="../../README.md"><code>plugins/workflows/README.md</code></a></strong
+					>. Five minutes, and it is the most honest document in this package — its
+					"Verification and limits" section tells you which of its own claims are proven end to
+					end and which are only reviewed. Read it before you install anything.
+				</p>
+			</footer>
+
+			<footer class="lesson-foot">
+				<h2>Reference</h2>
+				<p>
+					<a href="../reference/glossary.html">Glossary</a> — start here whenever a word in these
+					lessons is doing work you cannot see. <em>Level</em>, <em>schema</em>,
+					<em>artifact</em>, and <em>change</em> are the four that carry the most weight.
+				</p>
+			</footer>
+
+			<div class="ask">
+				<p>
+					<strong>Your teacher is the agent that wrote this.</strong> If a layer boundary is still
+					fuzzy, ask — for example: "show me every file
+					<code>/workflows:setup</code> would write in this repo, grouped by layer."
+				</p>
+				<p>
+					Answers get better when you name the file you are looking at. The lessons cite paths for
+					exactly that reason.
+				</p>
+			</div>
+
+			<nav class="nav">
+				<span><a href="../index.html">← All lessons</a></span>
+				<span
+					><a href="0002-install-and-pick-a-level.html">Lesson 02 · Install and pick a level →</a></span
+				>
+			</nav>
+		</main>
+		<script src="../assets/quiz.js"></script>
+	</body>
+</html>

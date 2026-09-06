@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Command card — workflows</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+	</head>
+	<body>
+		<main class="page page--wide">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Reference</span><span class="sep">·</span><span>Print this</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1>Command card</h1>
+				<p class="deck">
+					Split by <em>where you type it</em>, because that is the single most common failure:
+					<code>/opsx:propose</code> goes in the assistant's chat, <code>openspec …</code> goes in a
+					terminal.
+				</p>
+			</header>
+
+			<h2>In the assistant's chat</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Command</th>
+							<th>Does</th>
+							<th>Profile</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>/workflows:setup [level] [--check|--dry-run]</code></td>
+							<td>
+								Sets up or reconciles this repository's OpenSpec workflow. One question, a plan, and
+								nothing written before you approve it
+							</td>
+							<td>—</td>
+						</tr>
+						<tr>
+							<td><code>/opsx:explore</code></td>
+							<td>Think through an idea. No structure required, no change created yet</td>
+							<td><code>core</code></td>
+						</tr>
+						<tr>
+							<td><code>/opsx:propose &lt;name or a sentence&gt;</code></td>
+							<td>
+								Create a change <em>and</em> generate all its planning artifacts in one step. The
+								default quick path
+							</td>
+							<td><code>core</code></td>
+						</tr>
+						<tr>
+							<td><code>/opsx:apply &lt;change&gt;</code></td>
+							<td>
+								Work through tasks, ticking them off. Name the change — with the window cleared,
+								there is nothing left for it to infer from
+							</td>
+							<td><code>core</code></td>
+						</tr>
+						<tr>
+							<td><code>/opsx:update &lt;change&gt; - &lt;what changed&gt;</code></td>
+							<td>
+								Revise existing planning artifacts and keep them coherent, in any direction. Never
+								edits code, never creates missing artifacts
+							</td>
+							<td><code>core</code></td>
+						</tr>
+						<tr>
+							<td><code>/opsx:sync &lt;change&gt;</code></td>
+							<td>
+								Merge this change's delta specs into the main specs while the change stays active.
+								Optional
+							</td>
+							<td><code>core</code></td>
+						</tr>
+						<tr>
+							<td><code>/opsx:archive &lt;change&gt;</code></td>
+							<td>Archive when done. Prompts you to sync if you have not</td>
+							<td><code>core</code></td>
+						</tr>
+						<tr>
+							<td><code>/opsx:new &lt;name or a sentence&gt;</code></td>
+							<td>
+								<strong>The way to start a change.</strong> Takes a kebab-case name <em>or</em> a
+								description it derives one from; name a schema in the sentence to route it. Scaffolds
+								and shows the first artifact's template — writes no artifacts
+							</td>
+							<td><strong>custom</strong></td>
+						</tr>
+						<tr>
+							<td><code>/opsx:continue &lt;change&gt;</code></td>
+							<td>
+								Show what is ready, then create <strong>one</strong> artifact. The
+								artifact-at-a-time loop every level's flow assumes, and the way to resume a change in
+								a brand-new session — it reads the filesystem, not your history
+							</td>
+							<td><strong>custom</strong></td>
+						</tr>
+						<tr>
+							<td><code>/opsx:ff &lt;change&gt;</code></td>
+							<td>Fast-forward: create all planning artifacts at once</td>
+							<td><strong>custom</strong></td>
+						</tr>
+						<tr>
+							<td><code>/opsx:verify</code></td>
+							<td>Validate the implementation against the artifacts</td>
+							<td><strong>custom</strong></td>
+						</tr>
+						<tr>
+							<td><code>/opsx:bulk-archive</code></td>
+							<td>Archive several completed changes</td>
+							<td><strong>custom</strong></td>
+						</tr>
+						<tr>
+							<td><code>/opsx:onboard</code></td>
+							<td>OpenSpec's own guided walkthrough of one end-to-end change</td>
+							<td><strong>custom</strong></td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					<code>core</code> is the default profile's six. The rest need a custom workflow selection —
+					<code>openspec config profile</code>, then <code>openspec update</code>. Spelling is per
+					tool: Codex uses <code>$openspec-propose</code>, Kimi
+					<code>/skill:openspec-propose</code>, Amazon Q <code>@opsx-propose</code>.
+				</caption>
+			</div>
+
+			<h2>The loop, in order</h2>
+
+			<pre><code>/opsx:new     &lt;what you want, in a sentence&gt;, using &lt;schema&gt;
+
+/opsx:continue &lt;change&gt;        # once per artifact, naming the change every time
+   ↳ /clear, then /model or /effort, whenever the next artifact wants a different depth
+
+── all planning artifacts created ──────────────────────────────────
+/clear                          # 1. the artifacts are files now; apply needs the room
+/model                          # 2. model with up/down, its effort with left/right
+                                #    (or /effort alone, when only the depth is wrong)
+/opsx:apply    &lt;change&gt;         # 3. with the name — you just cleared what it would infer from
+────────────────────────────────────────────────────────────────────
+
+/opsx:sync    &lt;change&gt;         # optional
+/opsx:archive &lt;change&gt;</code></pre>
+
+			<div class="stop" data-background="dark">
+				<span class="label">Clear before you switch, and clear before you apply</span>
+				<p>
+					A model or effort switch made inside a full window still drags that window into every turn
+					that follows, so <code>/clear</code> comes <strong>first</strong>, not after. And nothing a
+					chain needs lives in a session — artifact state is pure file existence — so clearing costs
+					the change nothing and buys the implementation loop its whole window back.
+				</p>
+				<p>
+					The one thing it does take is the assistant's ability to guess which change you mean. Name
+					the change in every <code>opsx</code> command and that cost disappears too.
+				</p>
+			</div>
+
+			<h2>In a terminal</h2>
+
+			<h3>Orientation — run these when lost</h3>
+
+			<pre><code>openspec --version                    # is the CLI there, and how old (needs Node >= 20.19)
+openspec schemas                      # which schemas exist, and where each resolves from
+openspec schema which --all           # project vs user vs package, per schema
+openspec config list                  # the machine profile, delivery, selected workflows
+openspec status --change &lt;name&gt; --json  # which artifacts exist, are ready, or are blocked</code></pre>
+
+			<h3>Doing the work</h3>
+
+			<p>
+				The first line is the optional terminal form of <code>/opsx:new</code> — same scaffold, but you
+				write the slug and you get no first-artifact template. Prefer it in scripts.
+			</p>
+
+			<pre><code>openspec new change &lt;slug&gt; --schema &lt;schema&gt;   # lowercase kebab-case; leading number allowed
+openspec validate --all --strict
+openspec schema validate &lt;name&gt;                # structure, templates exist, no cycles
+openspec archive &lt;name&gt; --yes                  # --yes required with stdin closed</code></pre>
+
+			<h3>The decisive diagnostic</h3>
+
+			<pre><code>openspec instructions &lt;artifact&gt; --change &lt;name&gt; --json</code></pre>
+
+			<p>
+				The only way to see what the assistant actually receives: resolved template, injected
+				<code>context</code>, matching <code>rules</code>, dependency paths. If a value is absent
+				here, the problem is upstream of the assistant. <strong>Run it unpiped</strong> — dropped-field
+				warnings go to stderr.
+			</p>
+
+			<h3>Setting the profile</h3>
+
+			<pre><code>npm install -g @fission-ai/openspec@latest   # upgrade FIRST, or update writes stale files
+openspec config profile                      # wizard; select new + continue at minimum
+openspec update                              # regenerate this project's tool files</code></pre>
+
+			<div class="note">
+				<span class="label">Machine versus project</span>
+				<p>
+					<code>openspec config get/set/edit</code> operates on the <strong>machine</strong> JSON
+					config only. It never touches <code>openspec/config.yaml</code>. Conflating the two is the
+					most common wasted edit there is.
+				</p>
+			</div>
+
+			<h2>This plugin's flags</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Flag</th>
+							<th>Writes</th>
+							<th>Use it when</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>--check</code></td>
+							<td>Nothing at all</td>
+							<td>You want a drift report, including on a repository you do not maintain</td>
+						</tr>
+						<tr>
+							<td><code>--dry-run</code></td>
+							<td><code>.claude/workflows-plan.json</code>, and nothing else</td>
+							<td>You want the plan as data, to read or to diff against last time's</td>
+						</tr>
+						<tr>
+							<td>neither</td>
+							<td>Everything in the approved plan</td>
+							<td>You have read the plan and decided, collision by collision</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2>The human steps</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Step</th>
+							<th>Writes</th>
+							<th>Then</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>/mattpocock-skills:setup-matt-pocock-skills</code></td>
+							<td><code>docs/agents/issue-tracker.md</code></td>
+							<td>Re-run <code>/workflows:setup</code> to fold it into <code>context:</code></td>
+						</tr>
+						<tr>
+							<td><code>/impeccable init</code></td>
+							<td><code>PRODUCT.md</code>, <code>DESIGN.md</code></td>
+							<td>Re-run <code>/workflows:setup</code></td>
+						</tr>
+						<tr>
+							<td><code>/reload-plugins</code></td>
+							<td>Nothing</td>
+							<td>Activates newly installed plugins in this session</td>
+						</tr>
+						<tr>
+							<td>
+								<code>/config</code> → select <code>controlled-english</code>
+							</td>
+							<td>Nothing</td>
+							<td>
+								<strong>After the reload, not before.</strong> The style ships with the
+								<code>meta-skills</code> plugin, so it is not in the list until that plugin is active
+							</td>
+						</tr>
+						<tr>
+							<td><code>openspec config profile</code></td>
+							<td>The <strong>machine</strong> config — every project on it</td>
+							<td>
+								<code>openspec update</code> in each project. A department decision, not a repository
+								one
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2>Files, and who owns them</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Path</th>
+							<th>Scope</th>
+							<th>Owner</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>openspec/config.yaml</code></td>
+							<td>This project: default schema, injected context, per-artifact rules</td>
+							<td>You — replaced by setup, after a backup, with a diff you approve</td>
+						</tr>
+						<tr>
+							<td><code>openspec/schemas/&lt;name&gt;/</code></td>
+							<td>This project: workflow definitions</td>
+							<td>Setup, additively — yours the moment you edit one</td>
+						</tr>
+						<tr>
+							<td><code>openspec/changes/&lt;change&gt;/.openspec.yaml</code></td>
+							<td>One change: schema, <code>skip_specs</code>, <code>retire_capabilities</code></td>
+							<td>You</td>
+						</tr>
+						<tr>
+							<td><code>openspec/specs/</code>, <code>openspec/changes/</code></td>
+							<td>Your work product</td>
+							<td>You, entirely. Setup never writes here</td>
+						</tr>
+						<tr>
+							<td><code>.claude/agents/*.md</code></td>
+							<td>This project: subagents</td>
+							<td>Setup, additively — same ownership rule as schemas</td>
+						</tr>
+						<tr>
+							<td><code>.claude/settings.json</code></td>
+							<td>This project: plugins</td>
+							<td>You. Setup fills only keys you have not decided</td>
+						</tr>
+						<tr>
+							<td><code>.claude/workflows.json</code></td>
+							<td>What setup installed: level, version, date, a hash per owned file</td>
+							<td>Setup. Merged, never replaced</td>
+						</tr>
+						<tr>
+							<td><code>~/.config/openspec/config.json</code></td>
+							<td>This machine: profile, delivery, telemetry</td>
+							<td>You, via <code>openspec config</code>. Setup never writes it</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Sources</h2>
+				<p>
+					<code>plugins/workflows/README.md</code> and <code>skills/setup/SKILL.md</code> for this
+					plugin's surface; <code>skills/configuring-openspec/references/cli-reference.md</code> and
+					<code>troubleshooting.md</code> for the CLI;
+					<a href="https://github.com/Fission-AI/OpenSpec/blob/main/docs/commands.md"
+						>OpenSpec — Commands</a
+					>
+					for the core/custom split.
+				</p>
+			</footer>
+
+			<nav class="nav">
+				<span><a href="workflow-atlas.html">← Workflow atlas</a></span>
+				<span><a href="model-effort-card.html">Model &amp; effort card →</a></span>
+			</nav>
+		</main>
+	</body>
+</html>

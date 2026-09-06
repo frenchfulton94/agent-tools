@@ -1,0 +1,154 @@
+# openspec/config.yaml — recommended project config for the change-type schema set.
+# Rules are injected only for the matching artifact id; `context` is injected
+# into every artifact (capped ~50KB). Note: artifact ids shared across schemas
+# (tasks, proposal, migration) share their rules — written below to read
+# correctly in every schema that uses the id.
+
+schema: feature   # default when the router is unsure; override with --schema
+
+context: |
+  <Fill in the angle-bracket slots before first use - the cheapest quality
+  lever in this whole setup.>
+
+  Read ./TOOLS.md before starting work, and again before changing dependencies,
+  scripts, build config, test setup, or deploy settings. It is the canonical map
+  of this project's stack, commands, and agent capabilities - take package
+  manager and command names from it rather than the ones you would reach for by
+  default. Where the repo has no TOOLS.md, the mapping-project-tooling skill
+  builds one from evidence on disk. Where TOOLS.md and the repo's own manifest or
+  lockfile disagree, the repo wins: verify, then correct TOOLS.md in this change.
+
+  Public contracts, never to change silently: <APIs, URLs, analytics events,
+  data schemas, config keys>
+  Constraints not visible from the code: <what this project cannot use, and why>
+  API style and where it is specified: <REST/GraphQL/gRPC; path to the spec>
+
+  Before creating a change, read the schema router (ROUTING.md / AGENTS.md)
+  and pass the chosen schema: openspec new change <slug> --schema <schema>.
+
+  On UI work with impeccable installed, leave Anthropic's frontend-design
+  skill disabled - two design skills with different vocabularies cancel out.
+
+  Six stores outlive a change; write each fact to its owner: behaviour to
+  openspec/specs/, vocabulary to CONTEXT.md, binding decisions to docs/adr/,
+  product truth to PRODUCT.md, visual tokens to DESIGN.md (frontmatter
+  normative), and stack, commands, and agent capabilities to TOOLS.md.
+  Anything inside a change folder archives as history.
+
+  Prefer the real tool over the approximation whenever both exist, and say
+  so when a named tool is absent. A dispatched subagent inherits nothing:
+  its prompt names every capability it should use. Guidance that must fire
+  every time is a hook, not a memory line - memory is advisory and agents
+  deviate under pressure.
+
+rules:
+  brainstorm:
+    - Ask one question at a time; prefer multiple-choice.
+    - Record the exact message in which the user approved the intent, so the approval is citable.
+    - Propose 2-3 approaches with trade-offs; lead with a recommendation.
+    - Present the design in sections and get approval before proceeding.
+    - Apply YAGNI; record what is explicitly out of scope.
+
+  constraints:
+    - Record the domain's ubiquitous language; align terms to CONTEXT.md if present.
+    - List everything that must never change silently (APIs, URLs, analytics events, form fields, schemas).
+    - For UI surfaces, audit and extract existing brand/design tokens before proposing changes.
+
+  proposal:
+    - Keep the Why between roughly 50 and 1000 characters.
+    - Use From/To phrasing for behavioral changes.
+    - State impact and the rollback posture.
+
+  specs:
+    - Every requirement is observable and testable, with at least one Given/When/Then scenario.
+    - Use RFC 2119 keywords (MUST/SHALL/SHOULD/MAY) for requirement strength.
+    - A MODIFIED delta replaces the whole requirement - repeat every surviving scenario.
+    - Reframe vague asks into measurable criteria (e.g. "fast" -> "LCP < 2.5s on 4G").
+    - Reference existing patterns before inventing new ones.
+    - When controlled-engineering-english is installed, write requirement prose in its spec register - one glossary term per concept, no SHOULD where the requirement is absolute.
+
+  design:
+    - State decisions before implementation.
+    - Record an ADR only when a decision is hard to reverse AND surprising without context AND a real trade-off.
+    - For UI surfaces, name the surface mode (Persuade/Operate/Read/Experience) and reference DESIGN.md if present.
+    - When controlled-engineering-english is installed, ADR prose follows its engineer register.
+
+  migration:
+    - Prefer expand/contract for schema and data changes.
+    - Specify explicit rollback triggers and the exact rollback procedure; name the point of no return.
+    - Classify each removal as compulsory or advisory deprecation, with a timeline.
+
+  review:
+    - Review across five axes - correctness, readability/architecture, security, performance, testability - leading with correctness and security.
+    - Label findings by severity (Critical / Nit / Optional / FYI).
+    - Approve when the change improves overall code health, even if not perfect.
+    - Target ~100 changed lines per reviewable unit; ~300 is the ceiling; split anything near ~1000.
+    - Screen input, auth, storage, and external integrations against the OWASP Top 10.
+    - For UI surfaces, run the anti-slop pre-flight - WCAG AA contrast, no default AI-purple, no em-dash tells, no fake screenshots.
+
+  tasks:
+    - Decompose into small, independently verifiable steps with acceptance criteria and dependency order.
+    - Keep every step rollback-friendly; each step names how it is verified.
+    - Name each task's tooling as "use X when available, otherwise <fallback>" - an executor subagent inherits nothing, so an unnamed tool is an unused one.
+
+  plan:
+    - Each step is one 2-5 minute action with exact file paths.
+    - TDD iron law - no production code without a failing test first; code written before its test gets deleted and redone.
+    - Make the cycle explicit - RED, verify red, GREEN, verify green, REFACTOR, COMMIT.
+    - Placeholders are plan failures; write the real test code, the real handling, the repeated code.
+
+  reproduction:
+    - Note relevant session capabilities (skills, MCP tools, subagents) before planning; a fresh executor inherits nothing, so name tools in tasks.
+    - Write the failing test before any fix; if truly untestable, justify and give a manual verification script.
+    - Pin the environment - versions, config, data preconditions.
+
+  rootcause:
+    - Trace symptom to faulty assumption (five whys), not just to the faulty line.
+    - Scan for the same bug class elsewhere in the codebase; record hits or "none found".
+
+  fix:
+    - Prefer the cause layer; a documented symptom fix is a decision, an undocumented one is an accident.
+    - Include a spec delta only if the documented contract changes.
+
+  characterization:
+    - Pin current behavior with tests before moving any code; record coverage gaps and close them first.
+
+  strategy:
+    - Sequence as small reversible steps, tests green and committable after each.
+    - No behavior change at any step; a changed test assertion means reclassify to feature.
+
+  question:
+    - One primary question per spike, with a hard timebox and the decision it informs.
+
+  findings:
+    - Evidence over opinion - measurements and snippets, not impressions.
+    - Disposition is mandatory - code discarded; learnings graduate via a new feature change.
+
+  inventory:
+    - Note relevant session capabilities before planning; name tools in tasks - a fresh executor inherits nothing.
+    - Cite official release notes/changelogs by URL; list each breaking change with an applies-to-us verdict.
+
+  surfaces:
+    - Verify usage by search (grep/AST), not memory; give paths and counts per breaking change.
+    - Classify each surface - mechanical (codemod), behavioral (needs a test), unknown (spike first).
+
+  triage:
+    - Decide rollback vs forward-fix explicitly and name the approver.
+    - Keep triage to minutes, not hours - depth belongs in the postmortem.
+
+  postmortem:
+    - Blameless; include a timeline and why existing tests/review missed it.
+    - Creating the follow-up bugfix/feature change is mandatory; link it.
+    - When controlled-engineering-english is installed, write the executive summary in stakeholder register and the technical timeline in engineer register.
+
+  decisions:
+    - One question at a time when eliciting stack choices; recommend defaults.
+    - At bootstrap most stack choices pass the ADR three-gate test - record them.
+
+  conventions:
+    - Write conventions to be copied into standing docs during apply, not summarized.
+    - Point AGENTS.md at the project glossary (Glossary: <path>) when controlled-engineering-english is installed.
+
+  verification:
+    - Paste command output verbatim; no paraphrased evidence.
+    - A run from earlier in the session is not evidence; run the command for this file.

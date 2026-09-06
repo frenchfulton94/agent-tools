@@ -1,0 +1,17 @@
+{
+	"enabledPlugins": {
+		"claude-code-setup@claude-plugins-official": true,
+		"claude-security@claude-plugins-official": true,
+		"commit-commands@claude-plugins-official": true,
+		"meta-skills@agent-tools": true,
+		"security@agent-tools": true
+	},
+	"extraKnownMarketplaces": {
+		"agent-tools": {
+			"source": {
+				"repo": "YOUR-GITHUB-OWNER/agent-tools",
+				"source": "github"
+			}
+		}
+	}
+}

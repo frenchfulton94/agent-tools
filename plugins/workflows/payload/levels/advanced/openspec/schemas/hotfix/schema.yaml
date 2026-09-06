@@ -1,0 +1,59 @@
+name: hotfix
+version: 1
+description: >
+  Workflow for production incidents where urgency inverts the normal flow:
+  a minutes-long triage gates the mitigation, and depth is backfilled in a
+  postmortem after shipping. Without this schema, incidents get forced
+  through slower chains and steps get skipped ad hoc. Sources: engineering
+  judgment on incident response; addyosmani (verification per step);
+  mattpocock (what-changed-recently as first diagnostic).
+
+artifacts:
+  - id: triage
+    generates: triage.md
+    description: Incident summary and mitigation decision - minutes, not hours
+    template: triage.md
+    instruction: |
+      Capture what is broken, since when, severity, and who is affected;
+      check what changed recently (deploys, flags, config) as the first
+      diagnostic. Decide rollback vs forward-fix explicitly and name the
+      approver. Keep this to minutes - depth belongs in the postmortem, and
+      time spent polishing triage is time users stay broken.
+    requires: []
+
+  - id: tasks
+    generates: tasks.md
+    description: Mitigation checklist with a verification signal per step
+    template: tasks.md
+    instruction: |
+      List the smallest steps that stop the bleeding. Every step names the
+      observable signal proving it worked (error rate, monitor, user
+      report), because under incident pressure "it should be fixed now" is
+      how incidents recur an hour later.
+    requires: [triage]
+
+  - id: postmortem
+    generates: postmortem.md
+    description: Blameless postmortem backfilled after shipping
+    template: postmortem.md
+    instruction: |
+      Complete after the mitigation ships and before archiving. Invoke
+      superpowers:systematic-debugging retrospectively for the root-cause
+      phases - the incident is over, so the full investigation rigor that
+      triage skipped applies now (fallback:
+      agent-skills:debugging-and-error-recovery, or the template).
+      Blameless: timeline, root cause, why existing tests and review
+      missed it. Then
+      create the follow-up change that does the durable fix (usually a
+      bugfix; sometimes a feature) and link it here - a hotfix without a
+      follow-up leaves the root cause in production.
+    requires: [tasks]
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Execute the mitigation now, verifying each step's signal before the next.
+    Rollback beats forward-fix when both are viable - it is faster and better
+    understood. Once stable: confirm signals have held, then complete
+    postmortem.md and create the linked follow-up change before archiving.

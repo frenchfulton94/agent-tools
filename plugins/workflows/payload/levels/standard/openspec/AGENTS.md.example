@@ -1,0 +1,38 @@
+# Tooling
+
+<!-- Drop-in block: merge into your repo's AGENTS.md (have CLAUDE.md import it
+     with a line reading @AGENTS.md, or symlink, so there is one source of
+     truth across agents). These lines load at every session start and are
+     re-sent on every turn - keep only what survives the test "would removing
+     this cause the agent a mistake?", and keep the whole file under ~200
+     lines. This block is the always-on layer; the per-change capability
+     snapshot and per-task tool pointers live in the OpenSpec artifacts, which
+     load just-in-time. -->
+
+- Prefer a real capability over its approximation: the database MCP over
+  hand-written SQL against a guessed schema, browser automation over
+  reasoning about how a page renders, the design-tool MCP's tokens over
+  eyeballed values, an installed skill over memory of its domain.
+- Subagents inherit nothing from this session. A dispatch prompt must name
+  the tools, skills, and file paths the subagent needs - an unmentioned
+  capability is an unused one.
+- Read ./TOOLS.md before starting work in this repo, and again before
+  changing dependencies, scripts, build config, test setup, or deploy
+  settings. It is the canonical, evidence-cited map of this project's
+  stack, commands, and committed agent capabilities. If it disagrees with
+  the manifest, lockfile, or config, the repo wins - verify, then correct
+  TOOLS.md as part of your change. (No TOOLS.md yet? The
+  mapping-project-tooling skill creates one from repo evidence.)
+- OpenSpec changes record a fresh per-change capability snapshot in the
+  first artifact (`brainstorm.md` or `design-brief.md`, section "Relevant
+  Capabilities") and per-task pointers in `tasks.md` Tooling lines. For
+  change work, trust those over this list - they are newer.
+- Process skills outrank role skills. Inside an OpenSpec change, the
+  skills the schema names are the discipline (superpowers for TDD, review,
+  debugging, verification; impeccable and the confirmed brief for design);
+  role/tool skill packs (e.g. engineering-team collections) contribute
+  scripts, personas, and patterns through Tooling lines. When a role
+  skill's workflow disagrees with the named discipline - generating tests
+  from written code instead of writing the failing test first, scaffold
+  styling instead of the committed visual world - the discipline wins and
+  the role skill supplies tools only.

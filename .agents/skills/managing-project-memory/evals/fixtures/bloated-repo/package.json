@@ -1,0 +1,9 @@
+{
+	"name": "acme-orders-service",
+	"scripts": {
+		"build": "tsc -p tsconfig.build.json",
+		"dev": "tsx watch src/index.ts",
+		"lint": "eslint src test"
+	},
+	"version": "3.4.1"
+}

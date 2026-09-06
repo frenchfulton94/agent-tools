@@ -1,0 +1,24 @@
+{
+	"enabledPlugins": {
+		"browser-use@claude-plugins-official": true,
+		"chrome-devtools-mcp@claude-plugins-official": true,
+		"frontend@agent-tools": true,
+		"impeccable@impeccable": true,
+		"modern-web-guidance@claude-plugins-official": true,
+		"playwright@claude-plugins-official": true,
+		"taste-skill@taste-skill": true,
+		"typescript-lsp@claude-plugins-official": true,
+		"typescript@agent-tools": true
+	},
+	"extraKnownMarketplaces": {
+		"agent-tools": {
+			"source": { "repo": "YOUR-GITHUB-OWNER/agent-tools", "source": "github" }
+		},
+		"impeccable": {
+			"source": { "repo": "pbakaus/impeccable", "source": "github" }
+		},
+		"taste-skill": {
+			"source": { "repo": "Leonxlnx/taste-skill", "source": "github" }
+		}
+	}
+}

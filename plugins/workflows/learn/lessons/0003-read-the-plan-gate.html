@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>03 · Read the plan gate</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+		<link rel="stylesheet" href="../assets/quiz.css" />
+	</head>
+	<body>
+		<main class="page">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Lesson 03</span><span class="sep">·</span><span>Install and set up</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1>Read the plan gate</h1>
+				<p class="deck">
+					Setup shows you a plan and stops. Nothing is written before you approve it — not a
+					schema, not a config, not a scratch file. That gate is the whole safety model, and
+					reading it is the single most useful skill in this course.
+				</p>
+			</header>
+
+			<section class="objective">
+				<h2>By the end</h2>
+				<p>
+					You can read a <code>/workflows:setup</code> plan line by line and say, for each entry,
+					what will happen to that file and whether you should approve it. You know why
+					<em>collide</em> is asked one file at a time.
+				</p>
+			</section>
+
+			<p class="prereq">
+				<strong>Prerequisites:</strong>
+				<a href="0002-install-and-pick-a-level.html">Lesson 02</a>, plugin installed, a level in
+				mind.
+			</p>
+
+			<h2>Why the gate exists</h2>
+
+			<blockquote>
+				<p>
+					"This command replaces a file the user wrote, in a repository you are a guest in, so that
+					gate is the whole safety model."
+				</p>
+			</blockquote>
+			<span class="cite"><code>plugins/workflows/skills/setup/SKILL.md</code></span>
+
+			<p>
+				Setup runs in four movements: <strong>detect</strong> (read the repository's real state),
+				<strong>ask</strong> (one question — the level, carrying a recommendation setup read off
+				your commit history), <strong>plan</strong> (build the complete
+				list of intended writes), <strong>approve</strong>, then apply. The plan is a data structure,
+				not a summary: the agent renders it for you, saves the approved copy
+				<em>outside</em> the repository, and applies that exact copy.
+			</p>
+
+			<div class="note">
+				<span class="label">Why the approved copy is frozen</span>
+				<p>
+					Re-running the planner partway through apply would replan against a half-applied
+					repository, and hand you something you never approved. So the approved plan is written to
+					a temporary path outside the repo and followed literally.
+				</p>
+				<span class="cite"><code>skills/setup/SKILL.md</code> §3, final paragraph</span>
+			</div>
+
+			<div class="note">
+				<span class="label">The gate survives auto mode</span>
+				<p>
+					The level question and the plan approval are both an <code>AskUserQuestion</code>, which
+					no permission mode auto-approves — not <code>auto</code>, not even
+					<code>bypassPermissions</code>. Running the session in
+					<a href="https://code.claude.com/docs/en/permission-modes#eliminate-prompts-with-auto-mode"
+						>auto mode</a
+					>
+					removes the routine prompts around the file writes setup performs <em>after</em> you
+					approve; it does not touch the gate itself.
+				</p>
+			</div>
+
+			<h2>What is in a plan</h2>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th class="col-label">Field</th>
+							<th>Values</th>
+							<th>What it decides</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>mode</code></td>
+							<td><code>fresh</code> · <code>reconcile</code></td>
+							<td>
+								Whether <code>.claude/workflows.json</code> exists — i.e. whether this repository
+								has been set up before
+							</td>
+						</tr>
+						<tr>
+							<td><code>web</code></td>
+							<td>boolean</td>
+							<td>Detected, never asked. Adds the web plugin overlay</td>
+						</tr>
+						<tr>
+							<td><code>openspecInit</code></td>
+							<td>boolean</td>
+							<td>
+								True only when <code>openspec/</code> is genuinely absent — never inferred another
+								way
+							</td>
+						</tr>
+						<tr>
+							<td><code>schemas</code>, <code>agents</code></td>
+							<td>
+								<code>copy</code> · <code>update</code> · <code>collide</code>
+							</td>
+							<td>The three groups. This is the safety story — see below</td>
+						</tr>
+						<tr>
+							<td><code>config</code></td>
+							<td><code>create</code> · <code>replace</code>, plus <code>backupTo</code></td>
+							<td>The one destructive step, and where your old file is saved</td>
+						</tr>
+						<tr>
+							<td><code>plugins</code></td>
+							<td><code>install</code> · <code>disable</code> · <code>skip</code></td>
+							<td>
+								Every skip carries a <em>reason</em>. Read the reasons; that is where "you already
+								decided this" shows up
+							</td>
+						</tr>
+						<tr>
+							<td><code>humanSteps</code></td>
+							<td>list</td>
+							<td>What will still be left for you afterwards</td>
+						</tr>
+						<tr>
+							<td><code>probeChange</code></td>
+							<td><code>zz-workflows-setup-probe</code></td>
+							<td>
+								The throwaway change verification creates and removes to prove config reached the
+								model
+							</td>
+						</tr>
+						<tr>
+							<td><code>warnings</code></td>
+							<td>list</td>
+							<td>Read these first, not last</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					Field names and value sets from
+					<code>plugins/workflows/scripts/plan.d.mts</code> (the <code>Plan</code> interface).
+				</caption>
+			</div>
+
+			<h2>The three groups, and why they matter</h2>
+
+			<p>
+				Schemas and agents are each sorted into three groups. The difference between them is the
+				entire ownership model.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Group</th>
+							<th>Means</th>
+							<th>Setup will</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>copy</code></td>
+							<td>Not there yet</td>
+							<td>Write it</td>
+						</tr>
+						<tr>
+							<td><code>update</code></td>
+							<td>
+								A previous run wrote it and nobody has edited it since — the hash in
+								<code>.claude/workflows.json</code> still matches
+							</td>
+							<td>Refresh it. <strong>This is how a re-run takes updates.</strong></td>
+						</tr>
+						<tr>
+							<td><code>collide</code></td>
+							<td>
+								Your own file — or one of setup's that <em>you have since changed</em>
+							</td>
+							<td>
+								Report it. Never replace it unless you approve <em>that specific name</em>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="stop" data-background="dark">
+				<span class="label">"Approve all" is not an answer</span>
+				<p>
+					Collisions are asked about individually, by name. That is written into the procedure, not
+					left to the agent's judgement — because a blanket yes is how someone's customised subagent
+					gets silently replaced. If you are ever offered a single yes/no over a list of collisions,
+					that run is not following the skill.
+				</p>
+				<span class="cite"><code>skills/setup/SKILL.md</code> §3 — "'approve all' is not an answer to this question"</span>
+			</div>
+
+			<div class="drift">
+				<span class="label">The warning that invalidates half the plan</span>
+				<p>
+					If <code>.claude/settings.json</code> cannot be read, the plugin and status-line sections
+					of the plan are meaningless — setup cannot know what you have already decided. That
+					warning leads the list, and the correct response is to fix the file, not to approve
+					around it.
+				</p>
+			</div>
+
+			<h2>A plan, and what to make of it</h2>
+
+			<p>
+				Here is a realistic plan for a web repository being reconciled at
+				<code>standard</code>. Read it before the questions below.
+			</p>
+
+			<pre><code>{
+  "mode": "reconcile",
+  "level": "standard",
+  "web": true,
+  "openspecInit": false,
+  "schemas": {
+    "copy": ["surface-driven"],
+    "update": ["craft-driven"],
+    "collide": []
+  },
+  "agents": {
+    "copy": ["verification-reviewer.md"],
+    "update": [],
+    "collide": ["craft-design-gate.md"]
+  },
+  "config": {
+    "action": "replace",
+    "backupTo": "openspec/config.yaml.bak-20260828T144102-1"
+  },
+  "plugins": {
+    "install": ["impeccable@impeccable", "taste-skill@taste-skill"],
+    "disable": [],
+    "skip": [
+      { "id": "playwright@claude-plugins-official",
+        "reason": "already decided in .claude/settings.json" }
+    ],
+    "marketplaces": [
+      { "name": "impeccable", "source": { "repo": "pbakaus/impeccable" } }
+    ]
+  },
+  "humanSteps": [
+    "Run /impeccable init - writes PRODUCT.md and DESIGN.md.",
+    "Run /reload-plugins to activate the newly installed plugins."
+  ],
+  "probeChange": "zz-workflows-setup-probe",
+  "warnings": []
+}</code></pre>
+
+			<p>Three things in that plan deserve a decision from you:</p>
+
+			<ul>
+				<li>
+					<strong><code>craft-design-gate.md</code> is a collision.</strong> Either you customised
+					it, or setup wrote it and you edited it. You will be asked about this one file by name.
+					Decline unless you know what you changed and want it gone.
+				</li>
+				<li>
+					<strong><code>playwright</code> was skipped because you already decided it.</strong> If
+					that surprises you, the surprise is in <code>settings.json</code>, not in setup.
+				</li>
+				<li>
+					<strong>Nothing is written before you approve.</strong> Read the whole plan; the
+					collisions and skips above are the only places a decision is being asked of you.
+				</li>
+			</ul>
+
+			<h2>The one destructive step</h2>
+
+			<p>
+				<code>openspec/config.yaml</code> is replaced, not merged. Your existing file is
+				<em>input</em>, not the base — the level's example is the base, and your file supplies what is
+				project-specific. Four things happen in order:
+			</p>
+
+			<ol class="steps">
+				<li>
+					<strong>Backup.</strong> To the plan's <code>backupTo</code> path, which is
+					collision-resistant by construction — a timestamp plus a per-process counter, so two
+					backups in the same millisecond cannot overwrite each other.
+				</li>
+				<li>
+					<strong>Get the authoritative artifact-id union.</strong> From the OpenSpec CLI, never
+					from schema YAML and never by guessing. If that call fails, setup
+					<strong>stops</strong> — because classifying your rules against an empty union would mark
+					every rule you wrote as unmatched and discard it.
+				</li>
+				<li>
+					<strong>Classify your rules.</strong> Rules keyed to an artifact id any installed schema
+					defines are <em>carried</em>. Rules keyed to anything else are <em>unmatched</em> — and
+					unmatched rules are never dropped and never left under <code>rules:</code>, where
+					OpenSpec would warn about them on every command. They go into a trailing comment block,
+					verbatim.
+				</li>
+				<li>
+					<strong>Show you the diff</strong> — carried over, dropped with the reason, unmatched —
+					and get agreement before writing.
+				</li>
+			</ol>
+			<span class="cite">
+				<code>skills/setup/SKILL.md</code> §5 and
+				<code>scripts/config-facts.mjs</code> — <code>backupPath</code>,
+				<code>artifactIds</code>, <code>classifyRules</code>, <code>commentBlock</code>,
+				<code>contextSize</code>
+			</span>
+
+			<div class="note">
+				<span class="label">The 50KB cliff</span>
+				<p>
+					<code>context:</code> is injected into <em>every</em> artifact prompt and is hard-capped at
+					50KB. One byte past the cap and OpenSpec drops the entire field, silently. Treat the cap
+					as a ceiling to stay far below, not a budget to spend. You will prove whether yours
+					arrived in <a href="0013-prove-it-reached-the-model.html">lesson 13</a>.
+				</p>
+			</div>
+
+			<h2>Do this now</h2>
+
+			<ol class="steps">
+				<li>
+					<strong>Run the read-only version first.</strong> It writes nothing at all:
+					<pre><code>/workflows:setup standard --check</code></pre>
+				</li>
+				<li>
+					<strong>Then get the plan as data.</strong> This writes exactly one file,
+					<code>.claude/workflows-plan.json</code>, and nothing else:
+					<pre><code>/workflows:setup standard --dry-run</code></pre>
+					Open it. Compare it against the field table above until every key means something.
+				</li>
+				<li>
+					<strong>Now run it for real</strong> and approve deliberately — declining every collision
+					on the first pass is a perfectly good answer.
+					<pre><code>/workflows:setup standard</code></pre>
+				</li>
+			</ol>
+
+			<h2>Recall check</h2>
+
+			<p data-quiz-tally class="drill-score"></p>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					A schema is in the <code>update</code> group. What is true about it?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Setup wrote it, and its hash still matches, so it is refreshable."
+						>
+							Setup wrote it, unedited since
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="An edited file moves to collide, which is reported not refreshed."
+						>
+							Setup wrote it, edited since
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="A file that is not there yet is in the copy group instead."
+						>
+							Setup never wrote it before
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					The artifact-id lookup from the OpenSpec CLI fails. What should happen?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="An empty union would mark every rule you wrote as unmatched."
+						>
+							Stop, and report the error
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Reading the YAML is exactly what the procedure forbids here."
+						>
+							Read the schema files instead
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Built-in ids alone are a partial union, which is the trap."
+						>
+							Fall back to built-in ids
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					In the plan above, why was <code>playwright</code> skipped?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Setup fills only keys you have not decided, and reports the rest."
+						>
+							Your settings already decided
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Web detection was true here, so the overlay did apply."
+						>
+							Web detection returned false
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="A marketplace block is reported as blocked, not as skipped."
+						>
+							Its marketplace refused it
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					Where does an unmatched <code>rules:</code> entry from your old config end up?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Verbatim, in a trailing comment block that cannot warn on commands."
+						>
+							Kept as a trailing comment
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Left there it would warn on every single OpenSpec command."
+						>
+							Kept under the rules key
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Dropping a rule you wrote is the exact failure this forbids."
+						>
+							Dropped with a stderr note
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="appendix">
+				<span class="label">Appendix · for the plugin's author</span>
+				<p>
+					The plan's own failure mode is worth knowing: <code>plan.mjs</code> writes nothing to
+					stdout unless <code>buildPlan</code> succeeds, so a pipeline consumer can never receive
+					JSON it might mistake for a real plan. An unknown level exits non-zero with empty stdout
+					and just its message; any other error gets a full stack, because that is a defect in the
+					module rather than a typo. <code>payloadRoot</code> is a test-only seam and throws on a
+					bad path rather than degrading to an empty but plausible plan — which is exactly what it
+					used to do.
+				</p>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Read this next</h2>
+				<p>
+					<strong
+						>Primary source:
+						<a href="../../skills/setup/SKILL.md"
+							><code>plugins/workflows/skills/setup/SKILL.md</code></a
+						></strong
+					>, sections 3 and 5. It is the procedure itself, and it is written to be read by a
+					person. Section 5 in particular is the only complete account of the
+					<code>config.yaml</code> rewrite.
+				</p>
+			</footer>
+
+			<footer class="lesson-foot">
+				<h2>Reference</h2>
+				<p>
+					<a href="../reference/command-card.html">Command card</a> — every flag, and which
+					commands run in chat versus a terminal.
+					<a href="../reference/failure-modes.html">Failure modes</a> — the silent ones, including
+					the 50KB cliff.
+				</p>
+			</footer>
+
+			<div class="ask">
+				<p>
+					<strong>Ask before you approve.</strong> "Explain the
+					<code>craft-design-gate.md</code> collision — diff what is on disk against what the
+					plugin ships, and tell me what I would lose." That is a question an agent can answer
+					precisely, and it is the right question at a collision.
+				</p>
+			</div>
+
+			<nav class="nav">
+				<span><a href="0002-install-and-pick-a-level.html">← Lesson 02 · Pick a level</a></span>
+				<span
+					><a href="0004-check-dry-run-and-the-re-run-contract.html"
+						>Lesson 04 · The re-run contract →</a
+					></span
+				>
+			</nav>
+		</main>
+		<script src="../assets/quiz.js"></script>
+	</body>
+</html>

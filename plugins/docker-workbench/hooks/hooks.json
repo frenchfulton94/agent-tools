@@ -1,0 +1,18 @@
+{
+  "description": "Blocks container commands that irreversibly destroy volume data; asks before machine-wide image and cache wipes",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/docker-guard.sh"],
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

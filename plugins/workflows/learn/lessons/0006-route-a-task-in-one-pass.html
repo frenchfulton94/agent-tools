@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>06 · Route a task in one pass</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+		<link rel="stylesheet" href="../assets/quiz.css" />
+	</head>
+	<body>
+		<main class="page">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Lesson 06</span><span class="sep">·</span><span>Choosing</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1>Route a task in one pass</h1>
+				<p class="deck">
+					Nothing picks the workflow for you. OpenSpec has no auto-selection — the schema is chosen
+					at the moment a change is created, and choosing badly costs you the whole chain. This is
+					the lesson that pays for the course.
+				</p>
+			</header>
+
+			<section class="objective">
+				<h2>By the end</h2>
+				<p>
+					Given a one-line work request, you name the right schema in one pass and cite the rule
+					that decided it. You can also state the four guardrails that force a reclassification
+					mid-flight.
+				</p>
+			</section>
+
+			<p class="prereq">
+				<strong>Prerequisites:</strong>
+				<a href="0002-install-and-pick-a-level.html">Lesson 02</a>. You do not need setup to have run
+				— this lesson is pure judgement, and it is worth doing before your first real change.
+			</p>
+
+			<h2>First, how a schema actually gets chosen</h2>
+
+			<p>Four sources, in strict precedence order. The first one present wins.</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Source</th>
+							<th>Scope</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>1</td>
+							<td><code>--schema &lt;name&gt;</code> on the command</td>
+							<td>This one change, decided now</td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>The change's <code>.openspec.yaml</code></td>
+							<td>This one change, decided earlier</td>
+						</tr>
+						<tr>
+							<td>3</td>
+							<td><code>openspec/config.yaml</code>'s <code>schema:</code></td>
+							<td>Every change in this project by default</td>
+						</tr>
+						<tr>
+							<td>4</td>
+							<td><code>spec-driven</code></td>
+							<td>OpenSpec's built-in fallback</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					From <code>skills/configuring-openspec/SKILL.md</code>. A schema you installed does
+					nothing at all until something in this list names it.
+				</caption>
+			</div>
+
+			<p>
+				So routing, concretely, is one sentence in the assistant's chat with the schema named in it:
+			</p>
+
+			<pre><code>/opsx:new &lt;what you want, in a sentence&gt;, using &lt;schema&gt;</code></pre>
+
+			<p>
+				<code>/opsx:new</code> takes either a kebab-case change name or a description, derives the slug
+				when you give it the latter, and passes <code>--schema</code> through only when you actually
+				named one — otherwise it lets row 3 of the table decide. Naming the schema in the sentence is
+				therefore how you exercise row 1.
+			</p>
+
+			<p>
+				<strong>The terminal form is the same routing decision</strong>, with the slug written by you
+				rather than derived:
+			</p>
+
+			<pre><code>openspec new change &lt;slug&gt; --schema &lt;schema&gt;</code></pre>
+
+			<p>Change names are lowercase kebab-case; a leading number is allowed (<code>100-add-export</code>).</p>
+
+			<h2>At <code>minimal</code> and <code>standard</code>, it is a two-way call</h2>
+
+			<p>
+				Neither level ships a router, because with two schemas you do not need one. Both decisions
+				come down to a single distinguishing factor — which is exactly how a good router works.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Level</th>
+							<th class="col-label">Default</th>
+							<th>The other one</th>
+							<th>What distinguishes them</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>minimal</code></td>
+							<td><code>mattpocock-bridge</code></td>
+							<td><code>bugfix-flow</code></td>
+							<td>
+								Is the problem known and the cause unknown? Then it is a defect, and a defect needs
+								no case made for fixing it — no interview, no proposal, and the fix gated behind a
+								written root cause.
+							</td>
+						</tr>
+						<tr>
+							<td><code>standard</code></td>
+							<td><code>craft-driven</code></td>
+							<td><code>surface-driven</code></td>
+							<td>
+								Is the change <em>primarily</em> a user-facing surface — a landing page, dashboard,
+								flow, redesign, component system? Then design leads and Superpowers executes.
+								Otherwise behaviour leads.
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="note">
+				<span class="label">A fault whose fix is a redesign is not a bugfix</span>
+				<p>
+					<code>bugfix-flow</code>'s own <code>diagnose</code> artifact says to stop and reopen under
+					<code>mattpocock-bridge</code> when this happens. The signal: the fix
+					<em>alters</em> behaviour the product cares about, rather than restoring behaviour it
+					already promised.
+				</p>
+			</div>
+
+			<h2>At <code>advanced</code>, the router does the work</h2>
+
+			<p>
+				<code>ROUTING.md</code> is installed where your agent reads instructions, and the agent reads
+				it before creating any change. Eight branches, and <strong>first match wins</strong> — which
+				is why the order is not alphabetical or aesthetic. It is triage order.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>If…</th>
+							<th>→</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>1</td>
+							<td>Production is broken <strong>now</strong> — incident, outage, users blocked</td>
+							<td><code>hotfix</code></td>
+						</tr>
+						<tr>
+							<td>2</td>
+							<td>New repository or project bootstrap — "init", "scaffold", "set up the project"</td>
+							<td><code>setup</code></td>
+						</tr>
+						<tr>
+							<td>3</td>
+							<td>
+								Something behaves wrong versus intent — bug, error, crash, regression, "too slow"
+							</td>
+							<td><code>bugfix</code></td>
+						</tr>
+						<tr>
+							<td>4</td>
+							<td>
+								Dependency, framework or platform version change — bump, EOL, CVE, "migrate to vN"
+							</td>
+							<td><code>upgrade</code></td>
+						</tr>
+						<tr>
+							<td>5</td>
+							<td>
+								Structure changes but behaviour must not — clean up, extract, rename, de-dupe, tech
+								debt
+							</td>
+							<td><code>refactor</code></td>
+						</tr>
+						<tr>
+							<td>6</td>
+							<td>
+								An open question answered by building — try, compare, POC, feasibility, "which
+								library"
+							</td>
+							<td><code>spike</code></td>
+						</tr>
+						<tr>
+							<td>7</td>
+							<td>
+								New capability or intentional behaviour change — <strong>including</strong> removals
+								and deprecations
+							</td>
+							<td><code>feature</code></td>
+						</tr>
+						<tr>
+							<td>8</td>
+							<td>Trivial, low-risk, no contract impact — typo, copy, config value, docs</td>
+							<td><code>rapid</code></td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					<code>payload/levels/advanced/openspec/ROUTING.md</code>. Two sub-rules matter more than
+					they look: <strong>performance work is a bugfix</strong> (measure a baseline and set a
+					numeric target before changing code), and <strong>coverage backfill is a refactor</strong>
+					(characterization is the deliverable).
+				</caption>
+			</div>
+
+			<h2>The four guardrails</h2>
+
+			<p>
+				Routing is not a one-time decision you defend. These four force a reclassification the
+				moment they trigger, and all four are in the router itself.
+			</p>
+
+			<ul>
+				<li>
+					<strong><code>rapid</code> → <code>feature</code>:</strong> the moment a public API, URL,
+					analytics event, data schema, or config contract is touched. Stop and recreate.
+				</li>
+				<li>
+					<strong><code>refactor</code> → <code>feature</code>:</strong> if any test assertion has to
+					change, behaviour is changing. Stop and reclassify.
+				</li>
+				<li>
+					<strong><code>spike</code>:</strong> code is throwaway and never merges. Learnings graduate
+					through a new <code>feature</code> change.
+				</li>
+				<li>
+					<strong><code>hotfix</code>:</strong> must spawn a follow-up <code>bugfix</code> or
+					<code>feature</code> change for the durable fix. <code>postmortem.md</code> links it.
+				</li>
+			</ul>
+
+			<div class="note">
+				<span class="label">De-escalate as readily as you escalate</span>
+				<p>
+					The router says so explicitly. When a <code>feature</code> brainstorm reveals bounded
+					work, recreate under <code>rapid</code>. When it reveals a question in disguise, recreate
+					under <code>spike</code>. One command against hours of ceremony.
+				</p>
+			</div>
+
+			<h2>Drill · route these</h2>
+
+			<p>
+				Twelve real-shaped requests, shuffled each time you load this page. Pick the schema, then
+				read the rule you should have used. Assume <code>advanced</code>.
+			</p>
+
+			<div
+				class="drill"
+				data-drill
+				data-choices="hotfix,setup,bugfix,upgrade,refactor,spike,feature,rapid"
+			>
+				<p class="drill-score" data-drill-score></p>
+				<ol class="drill-items">
+					<li
+						data-answer="hotfix"
+						data-rule="1"
+						data-why="Production is broken now and users are blocked. Rule 1 fires before anything else — this is also a bug, but hotfix wins on order."
+					>
+						"Checkout is returning 502s. Nobody can pay. What do we do?"
+					</li>
+					<li
+						data-answer="upgrade"
+						data-rule="4"
+						data-why="A platform version change. The constraints come from someone else's release notes, and success means behaviour is unchanged."
+					>
+						"Move the service to the current Node LTS before the old one goes EOL."
+					</li>
+					<li
+						data-answer="bugfix"
+						data-rule="3"
+						data-why="Behaviour deviates from intent. Reproduce with a failing test first; the root cause gates the fix."
+					>
+						"The CSV export drops the last row for accounts in Alaska."
+					</li>
+					<li
+						data-answer="refactor"
+						data-rule="5"
+						data-why="Structure changes, behaviour must not. If any test assertion has to change, stop — that is a feature."
+					>
+						"The date-parsing helper is copy-pasted in four files. Extract it."
+					</li>
+					<li
+						data-answer="feature"
+						data-rule="7"
+						data-why="A new capability. Ten artifacts, and the constraints artifact scales down for near-trivial cases."
+					>
+						"Let advisors export a student's degree plan as a PDF."
+					</li>
+					<li
+						data-answer="spike"
+						data-rule="6"
+						data-why="An open question answered by building. The code never merges; learnings graduate through a new feature change."
+					>
+						"Drizzle or Prisma for the new service? Build a slice of each and see."
+					</li>
+					<li
+						data-answer="rapid"
+						data-rule="8"
+						data-why="Trivial, no contract impact. Two artifacts. If it turns out to touch a URL or an analytics event, escalate to feature."
+					>
+						"There's a typo in the footer copyright line."
+					</li>
+					<li
+						data-answer="setup"
+						data-rule="2"
+						data-why="A bootstrap. No specs artifact, because no behaviour exists yet to spec — decisions and conventions come first."
+					>
+						"Start the admissions-dashboard repo from nothing."
+					</li>
+					<li
+						data-answer="bugfix"
+						data-rule="3"
+						data-why="Performance work is a bugfix. Measure a baseline and set a numeric target before changing any code."
+					>
+						"The search page takes nine seconds. Get it under two."
+					</li>
+					<li
+						data-answer="refactor"
+						data-rule="5"
+						data-why="Coverage backfill is a refactor, and characterization is the deliverable — pin behaviour before anything moves."
+					>
+						"Coverage on the billing module is 40%. Add tests."
+					</li>
+					<li
+						data-answer="feature"
+						data-rule="7"
+						data-why="Removals and deprecations are features: REMOVED delta specs plus a migration and sunset plan."
+					>
+						"Take out the legacy SAML login path."
+					</li>
+					<li
+						data-answer="upgrade"
+						data-rule="4"
+						data-why="A CVE patch is a dependency version change. Inventory the breaking changes from official release notes first."
+					>
+						"There's a CVE in the image library. Patch it."
+					</li>
+				</ol>
+				<noscript>
+					<p class="drill-noscript">
+						Answers, in the order written above: hotfix (1), upgrade (4), bugfix (3), refactor (5),
+						feature (7), spike (6), rapid (8), setup (2), bugfix (3), refactor (5), feature (7),
+						upgrade (4).
+					</p>
+				</noscript>
+			</div>
+
+			<h2>Recall check</h2>
+
+			<p data-quiz-tally class="drill-score"></p>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					A <code>rapid</code> change turns out to rename an analytics event. What now?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="A public contract is touched, so rapid escalates to feature."
+						>
+							Stop and recreate as feature
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Finishing inside rapid is what the guardrail exists to stop."
+						>
+							Note it, then finish rapid
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Splitting keeps the contract change inside a rapid chain."
+						>
+							Split into a rapid change
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					Mid-<code>refactor</code>, you find you must change a test assertion. What does that mean?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="A changed assertion means behaviour changed, so reclassify to feature."
+						>
+							This is a behaviour change
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="A wrong test is possible but is not what the guardrail assumes."
+						>
+							The test was wrong before
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Characterization pins behaviour; it does not license changing it."
+						>
+							The pinning was too tight
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					A schema is installed and validates, but no change ever uses it. Why?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Nothing in the precedence chain names it, so it is simply never selected."
+						>
+							Nothing has named it yet
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Lookup order decides where a named schema is found, not whether."
+						>
+							Its lookup order came last
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Auto-selection does not exist in OpenSpec, so nothing could route."
+						>
+							Its router entry is missing
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="appendix">
+				<span class="label">Appendix · when the work is bigger than one change</span>
+				<p>
+					A change is a single unit of work. For an epic, the router points at
+					<code>/wayfinder</code> (user-invoked, mattpocock pack) to map it as decision tickets, then
+					one OpenSpec change per resolved chunk. Similarly,
+					<code>/improve-codebase-architecture</code> is a codebase scan whose accepted opportunities
+					each become their own <code>refactor</code> change. Standing-doc upkeep — a
+					<code>CLAUDE.md</code> audit, a <code>TOOLS.md</code> refresh, glossary maintenance —
+					routes to <code>rapid</code> and invokes the owning skill.
+				</p>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Read this next</h2>
+				<p>
+					<strong
+						>Primary source:
+						<a href="../../payload/levels/advanced/openspec/ROUTING.md"
+							><code>ROUTING.md</code></a
+						></strong
+					>. Two pages, and the shortest high-value document in the whole plugin. Read the
+					"Escalation and guardrails" section twice — it is the part people skip and then regret.
+				</p>
+			</footer>
+
+			<footer class="lesson-foot">
+				<h2>Reference</h2>
+				<p>
+					<a href="../reference/router-card.html">Router card</a> — the tree, the prompt signals, and
+					the guardrails, on one printable page. Keep it next to you for a week and you will not need
+					it again.
+				</p>
+			</footer>
+
+			<div class="ask">
+				<p>
+					<strong>Bring your teacher a contested route.</strong> "Here is the request. Walk the
+					<code>ROUTING.md</code> tree out loud, tell me the first branch that matches, and tell me
+					which guardrail is most likely to fire later." Getting the reasoning, not just the answer,
+					is what makes the next one yours.
+				</p>
+			</div>
+
+			<nav class="nav">
+				<span
+					><a href="0005-the-five-things-setup-cannot-do.html"
+						>← Lesson 05 · What setup cannot do</a
+					></span
+				>
+				<span
+					><a href="0007-escape-hatches-and-their-costs.html">Lesson 07 · Escape hatches →</a></span
+				>
+			</nav>
+		</main>
+		<script src="../assets/quiz.js"></script>
+		<script src="../assets/router-drill.js"></script>
+	</body>
+</html>

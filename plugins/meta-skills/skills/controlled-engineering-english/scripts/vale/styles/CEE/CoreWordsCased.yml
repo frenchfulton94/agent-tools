@@ -1,0 +1,30 @@
+# Core word list, case-sensitive half.
+#
+# These words collide with the ALL-CAPS delta keywords that spec tools use as
+# structure: OpenSpec writes ADDED / MODIFIED / REMOVED / RENAMED Requirements,
+# and rewriting one of those headers breaks `openspec validate`.
+#
+# ignorecase is false and every form is listed explicitly, so "modified" and
+# "Modified" are flagged while "MODIFIED" passes untouched. RE2-safe: no
+# lookahead, which Vale's engine does not support.
+extends: substitution
+message: "Dictionary: use '%s' instead of '%s'."
+level: warning
+ignorecase: false
+swap:
+  modify: change
+  Modify: change
+  modifies: change
+  Modifies: change
+  modified: change
+  Modified: change
+  modifying: change
+  Modifying: change
+  remove: delete
+  Remove: delete
+  removes: delete
+  Removes: delete
+  removed: delete
+  Removed: delete
+  removing: delete
+  Removing: delete

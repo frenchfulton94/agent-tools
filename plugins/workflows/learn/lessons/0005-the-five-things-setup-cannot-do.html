@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>05 · The five things setup cannot do</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+		<link rel="stylesheet" href="../assets/quiz.css" />
+	</head>
+	<body>
+		<main class="page">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Lesson 05</span><span class="sep">·</span><span>Install and set up</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1>The five things setup cannot do</h1>
+				<p class="deck">
+					Setup finishes by telling you what is left. Four of those are interactive by nature — three
+					write something, and one is a preference only you can set. The fifth is a decision it
+					declines to make for you because it would affect every project on your machine.
+				</p>
+			</header>
+
+			<section class="objective">
+				<h2>By the end</h2>
+				<p>
+					Your repository is fully configured, including the parts no agent can do — and you have
+					made the machine-global profile decision knowingly, understanding which
+					<code>/opsx</code> commands it gives you.
+				</p>
+			</section>
+
+			<p class="prereq">
+				<strong>Prerequisites:</strong>
+				<a href="0003-read-the-plan-gate.html">Lesson 03</a> — setup has actually run and reported
+				its human steps.
+			</p>
+
+			<h2>Four interactive steps</h2>
+
+			<p>
+				These appear in the plan's <code>humanSteps</code>, conditionally — you only see the ones
+				your repository and level actually need.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Step</th>
+							<th>Appears when</th>
+							<th>Writes</th>
+							<th>Why an agent cannot</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>/mattpocock-skills:setup-matt-pocock-skills</code></td>
+							<td>
+								Level is <code>minimal</code> or <code>advanced</code>, and
+								<code>docs/agents/issue-tracker.md</code> is absent
+							</td>
+							<td><code>docs/agents/issue-tracker.md</code></td>
+							<td>
+								It is an interview whose value <em>is</em> your answers, and it is marked human-only
+								upstream
+							</td>
+						</tr>
+						<tr>
+							<td><code>/impeccable init</code></td>
+							<td>
+								A web project was detected and <code>PRODUCT.md</code> is absent
+							</td>
+							<td><code>PRODUCT.md</code>, <code>DESIGN.md</code></td>
+							<td>Interactive design-context gathering</td>
+						</tr>
+						<tr>
+							<td><code>/reload-plugins</code></td>
+							<td>The plan installed at least one plugin</td>
+							<td>Nothing on disk</td>
+							<td>
+								Activates, in the running session, plugins a shell command just installed
+							</td>
+						</tr>
+						<tr>
+							<td>Select <code>controlled-english</code> under <code>/config</code></td>
+							<td>
+								The plan installed <code>meta-skills</code> — i.e. you had not already decided that
+								plugin yourself
+							</td>
+							<td>Nothing in the repository</td>
+							<td>
+								Choosing an output style is a preference, and nothing can choose it for you
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					Conditions from <code>plugins/workflows/scripts/plan.mjs</code>, the
+					<code>humanSteps</code> block.
+				</caption>
+			</div>
+
+			<div class="note">
+				<span class="label">The last two are ordered, and the order is the point</span>
+				<p>
+					An output style ships <em>with its plugin</em> —
+					<code>controlled-english</code> lives in
+					<code>plugins/meta-skills/output-styles/</code> — so it does not appear in the
+					<code>/config</code> list until <code>meta-skills</code> is active. Reload first, then
+					select. Told the other way round, you go looking for a style that is not there yet and
+					conclude it was never installed.
+				</p>
+				<p>
+					It is also the only human step that changes nothing on disk and everything about the
+					register of the replies you get. Unlike the two interviews above, re-running
+					<code>/workflows:setup</code> afterwards has nothing to fold in.
+				</p>
+			</div>
+
+			<div class="note">
+				<span class="label">Re-run after the first two</span>
+				<p>
+					Both write files setup would have folded into <code>openspec/config.yaml</code>'s
+					<code>context:</code> if they had existed. So the sequence is: setup → do the interviews →
+					<code>/workflows:setup</code> again. The second run's <code>update</code> group picks up
+					what the interviews produced.
+				</p>
+			</div>
+
+			<h2>The fifth: the machine-global profile</h2>
+
+			<p>
+				This one is not in <code>humanSteps</code>. It arrives as a <em>warning</em> in the plan,
+				because setup refuses to run the command that would settle it.
+			</p>
+
+			<blockquote>
+				<p>
+					"<code>openspec config profile</code> is machine-wide: it changes the profile for every
+					project on this machine, not just this one, so setup never runs it for you."
+				</p>
+			</blockquote>
+			<span class="cite"><code>plugins/workflows/scripts/plan.mjs</code>, the profile warning</span>
+
+			<h3>What the profile actually controls</h3>
+
+			<p>
+				It controls which <code>/opsx:*</code> slash commands exist in your projects. There are two
+				presets.
+			</p>
+
+			<div class="scroll">
+				<table>
+					<thead>
+						<tr>
+							<th>Profile</th>
+							<th>Commands you get</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td><code>core</code> — the default</td>
+							<td>
+								<code>propose</code>, <code>explore</code>, <code>apply</code>,
+								<code>update</code>, <code>sync</code>, <code>archive</code>
+							</td>
+						</tr>
+						<tr>
+							<td><code>custom</code> — a selection you make</td>
+							<td>
+								The six above, plus whichever of <code>new</code>, <code>continue</code>,
+								<code>ff</code>, <code>verify</code>, <code>bulk-archive</code>,
+								<code>onboard</code> you select
+							</td>
+						</tr>
+					</tbody>
+				</table>
+				<caption>
+					<code>CORE_WORKFLOWS</code> in <code>plugins/workflows/scripts/detect.mjs</code>, mirroring
+					the OpenSpec CLI's own fixed list, cross-checked against
+					<a href="https://github.com/Fission-AI/OpenSpec/blob/main/docs/commands.md">OpenSpec's
+						commands doc</a>.
+				</caption>
+			</div>
+
+			<div class="drift">
+				<span class="label">Drift · there is no "expanded" preset</span>
+				<p>
+					OpenSpec's docs call <code>new</code>, <code>continue</code>, <code>ff</code>,
+					<code>verify</code>, <code>bulk-archive</code> and <code>onboard</code> the "expanded
+					workflow commands", and one README inside this plugin's payload
+					(<code>payload/levels/minimal/openspec/schemas/mattpocock-bridge/README.md</code>) tells
+					you to run <code>openspec config profile</code> and "choose: expanded". There is no
+					<code>expanded</code> option to choose. The CLI ships exactly one preset,
+					<code>core</code>; selecting extra workflows is what makes the profile
+					<code>custom</code>. <code>plan.mjs</code> is the precise account — trust it over that
+					README line.
+				</p>
+			</div>
+
+			<h3>Why you probably want the custom selection</h3>
+
+			<p>
+				Every level's documented flow builds artifacts <em>one at a time</em>, so each interactive
+				artifact gets its own step and its own approval. That is <code>/opsx:continue</code>, and
+				<code>continue</code> is not in <code>core</code>. Without it you are on
+				<code>/opsx:propose</code>, which generates all the planning artifacts in one step — fine for
+				a two-artifact <code>rapid</code> change, wrong for a ten-artifact <code>feature</code> chain
+				where the whole point is the gates between artifacts.
+			</p>
+
+			<h3>Making the decision</h3>
+
+			<ol class="steps">
+				<li>
+					<strong>See where you stand.</strong> Setup already reported this, but you can ask
+					directly:
+					<pre><code>openspec config list</code></pre>
+				</li>
+				<li>
+					<strong>Upgrade the CLI first.</strong> Instruction files are generated by the
+					<em>installed</em> CLI, so an outdated one reports everything up to date while never
+					writing the newer workflows.
+					<pre><code>npm install -g @fission-ai/openspec@latest</code></pre>
+				</li>
+				<li>
+					<strong>Choose the workflows.</strong> An interactive wizard — it starts with a
+					current-state summary. Select <code>new</code> and <code>continue</code> at minimum.
+					<pre><code>openspec config profile</code></pre>
+				</li>
+				<li>
+					<strong>Apply it to the project.</strong> The config change alone does nothing; this is
+					what regenerates the project's tool files.
+					<pre><code>openspec update</code></pre>
+				</li>
+			</ol>
+
+			<div class="stop" data-background="dark">
+				<span class="label">This is a team decision, not a repository one</span>
+				<p>
+					One profile serves every OpenSpec project on the machine. If your repositories
+					should all use the one-artifact-at-a-time flow, then everyone's machine needs the custom
+					selection, and that belongs in onboarding documentation rather than in a per-repository
+					step. Setup surfaces the gap and hands you the decision precisely because it cannot scope
+					the fix to one repository.
+				</p>
+			</div>
+
+			<h2>Confirm the whole thing landed</h2>
+
+			<pre><code>openspec --version          # exists, and is Node >= 20.19
+openspec schemas            # your level's schemas, and where each resolves from
+openspec schema which --all # project vs user vs package, per schema
+openspec validate --all --strict</code></pre>
+
+			<p>
+				<code>openspec schemas</code> should list exactly the set your level installs. If a schema is
+				missing, it did not survive validation — OpenSpec drops fields that fail and warns only to
+				stderr, which is why file presence proves nothing here.
+			</p>
+
+			<h2>Recall check</h2>
+
+			<p data-quiz-tally class="drill-score"></p>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					Why does setup refuse to run <code>openspec config profile</code>?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="It changes every OpenSpec project on that machine, not just this one."
+						>
+							Its scope is the whole machine
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Setup runs plenty of interactive-looking commands non-interactively."
+						>
+							Its wizard is a full interview
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Telemetry is handled: every invocation sets both opt-out vars."
+						>
+							Its telemetry can never be off
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					You selected extra workflows but <code>/opsx:continue</code> still does not appear. What
+					did you skip?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="The config change alone writes no project files; update regenerates them."
+						>
+							Applying it to the project
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Setup writes schemas, and schemas do not create slash commands."
+						>
+							Re-running setup in the repo
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Validation gates schemas reaching the model, not command generation."
+						>
+							Validating the new schema set
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					You finish <code>/impeccable init</code>. What is worth doing next?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="A re-run folds the new design docs into the injected context."
+						>
+							Re-run the setup command
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="Editing the config by hand loses on the next reconcile pass."
+						>
+							Hand-edit the config file
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="A schema fork is unrelated to design context arriving in prompts."
+						>
+							Fork the current schema
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Read this next</h2>
+				<p>
+					<strong
+						>Primary source:
+						<a href="https://github.com/Fission-AI/OpenSpec/blob/main/docs/commands.md"
+							>OpenSpec — Commands</a
+						></strong
+					>. The definitive list of what is in <code>core</code> and what needs a custom selection,
+					with one paragraph per command. Read the two lists and nothing else.
+				</p>
+			</footer>
+
+			<footer class="lesson-foot">
+				<h2>Reference</h2>
+				<p>
+					<a href="../reference/command-card.html">Command card</a> — the whole command surface on
+					one page, split by where you type it: chat or terminal. Typing an
+					<code>openspec</code> command into chat, or an <code>/opsx</code> command into a shell,
+					is the most common failure there is.
+				</p>
+			</footer>
+
+			<div class="ask">
+				<p>
+					<strong>Setup is done. Ask for the audit.</strong> "Confirm my OpenSpec setup: profile,
+					installed schemas, which resolve from the project, and whether
+					<code>validate --all --strict</code> is clean." Then move on to routing.
+				</p>
+			</div>
+
+			<nav class="nav">
+				<span
+					><a href="0004-check-dry-run-and-the-re-run-contract.html"
+						>← Lesson 04 · The re-run contract</a
+					></span
+				>
+				<span
+					><a href="0006-route-a-task-in-one-pass.html">Lesson 06 · Route a task in one pass →</a></span
+				>
+			</nav>
+		</main>
+		<script src="../assets/quiz.js"></script>
+	</body>
+</html>

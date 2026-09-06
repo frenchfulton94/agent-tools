@@ -1,0 +1,7 @@
+{
+  "name": "broken-plugin",
+  "version": "0.1.0",
+  "description": "Eval fixture: a plugin carrying the layout and manifest faults that authoring-plugins exists to catch.",
+  "keywords": "release, notes",
+  "agents": "/Users/example/plugins/broken-plugin/agents"
+}

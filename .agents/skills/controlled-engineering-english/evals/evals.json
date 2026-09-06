@@ -1,0 +1,104 @@
+{
+  "version": "1.0",
+  "standard": "controlled-engineering-english-design-v4.md (FROZEN 2026-08-20)",
+  "grading": "Each expected_behavior line is pass/fail on the rewritten document alone. A grader who has not read the design doc must be able to decide each line. Anti-expectations are failures even if every expected line passes.",
+  "baseline_note": "No-op lines were removed after the baseline pass; see evals/baselines/README.md. Do not re-add a line without checking the baseline fails it.",
+  "scenarios": [
+    {
+      "id": "r1e-readme",
+      "register": "R1-E",
+      "fixture": "fixtures/readme-bad.md",
+      "prompt": "Rewrite this README.",
+      "expected_behavior": [
+        "Cites rule IDs for its changes (at least G-C1, G-W1, E-3) in the report, not only in the document.",
+        "Removes the restated npm commands and points at package.json instead of publishing its own copy of the script list (G-C1). Naming a script by its package.json name is fine; restating its flags and port is not.",
+        "Does not silently correct the drifted commands to match package.json and leave them cached — a fixed cache is still a cache.",
+        "Collapses ledger / transaction log / money record / journal to one term used everywhere (G-W1).",
+        "States that the term is a glossary candidate and that no glossary was found at docs/GLOSSARY.md or via an AGENTS.md pointer, and offers setup — without writing a glossary file (§4.1 never-as-a-side-effect).",
+        "Flags 'SDR checks' as an undefined coined term and either defines it at first use or asks (G-W2). Does not invent an expansion.",
+        "Restructures Getting started for lookup: prerequisites, install, run, test, migrate as separately addressable items rather than one narrative paragraph (E-3).",
+        "Gives each deploy step an observable check — what you should see if it worked (E-2). 'Check that the deploy worked' is not a check.",
+        "No sentence in the rewrite exceeds 25 words (G-S1).",
+        "Deletes the Notes section's no-op sentences (G-P1).",
+        "Reports any rule it chose not to apply as a waiver with a reason and a date (G-X1), or reports no waivers."
+      ],
+      "anti_expectations": [
+        "Writes or edits docs/GLOSSARY.md, AGENTS.md, or any file other than the README.",
+        "Applies R1-S rules: inline stakeholder glosses, or a what-changed/why-it-matters section, in an engineer-facing README.",
+        "Strips stack terms (Node, npm, migration, bank feed) that R1-E permits (E-1)."
+      ]
+    },
+    {
+      "id": "r1s-release-note",
+      "register": "R1-S",
+      "fixture": "fixtures/release-note-bad.md",
+      "prompt": "Rewrite this release note for customers.",
+      "expected_behavior": [
+        "Classifies the document as R1-S and says so.",
+        "Reads the glossary named by the AGENTS.md pointer and uses Ledger and Settlement Window exactly, replacing journal / money record / batch window / nightly run (G-W1).",
+        "Glosses each glossary term inline at first use, using the gloss column rather than an improvised paraphrase (S-1).",
+        "Cuts or translates every stack term that reaches the reader: advisory lock, Postgres, cron, DLQ, consumer group, idempotency key, TTL, p99, covering index (S-1).",
+        "Orders the document what changed, why it matters to the reader, what happens next (S-2).",
+        "Reports the delay as problem, then impact on the customer, then next step — the lock-contention cause chain is cut or demoted below the impact (S-3).",
+        "Every number carries its comparison: latency stated against its previous value or its target, not as a bare 340ms (S-4). A number whose comparison is unavailable is removed or marked as needing the before value, not left bare.",
+        "Replaces 'customers who were affected may wish to reach out' with a concrete next step naming who acts and by when (S-2).",
+        "Drops the internal-only changes that do not change what the reader knows or does (G-P1).",
+        "No sentence in the rewrite exceeds 25 words (G-S1).",
+        "Cites rule IDs (at least S-1 through S-4) in the report."
+      ],
+      "anti_expectations": [
+        "A competent engineer-facing rewrite passes this rubric — if the output keeps the cause chain, keeps stack terms because 'the audience is technical', or omits glosses, it fails regardless of prose quality.",
+        "Invents a before value for a number that the fixture does not supply.",
+        "Adds a glossary entry or edits the glossary file."
+      ]
+    },
+    {
+      "id": "spec-prose",
+      "register": "spec prose",
+      "fixture": "fixtures/spec-bad.md",
+      "prompt": "Rewrite this spec.",
+      "expected_behavior": [
+        "Requirement 1 uses MUST for the absolute (G-N1).",
+        "Requirement 2's 'must probably' is resolved: either MUST with the condition stated, or SHOULD with the allowed exception stated — not both keywords in one clause (G-N1).",
+        "Requirement 4's 'it is intended that ... should' becomes one keyword with one meaning (G-N1).",
+        "Requirement 3 keeps only observable behavior; RefundService.apply, the advisory lock, the Drizzle client, and the two-row write move to a design section or are cut (E-4).",
+        "States the E-4 test when it moves something: the implementation can change without changing observable behavior.",
+        "Uses Ledger and Settlement Window from the glossary; transaction log, money record, journal, and cutoff are gone (G-W1).",
+        "Defines RRN at first use or flags it for the glossary (G-W2). Does not invent an expansion.",
+        "Rewrites each scenario as a sentence that can be read aloud: given, when, then — no arrow notation, no bare metric increments (spec prose is prose).",
+        "Deletes the Purpose section's no-op sentences (G-P1).",
+        "No sentence in the rewrite exceeds 25 words (G-S1).",
+        "Cites rule IDs (at least G-N1 and E-4) in the report."
+      ],
+      "anti_expectations": [
+        "Imposes skeleton grammar: four-hashtag scenario headings, '- [ ] X.Y' requirement IDs, RFC-2119 delta keywords, or a linter-enforced structure. That machinery is deferred (design Appendix A); rewriting prose is in scope, regrammaring the artifact is not.",
+        "Rejects the document for not matching a spec template.",
+        "Translates the spec for non-technical readers (wrong register — spec prose is R1-E plus G-N1 and E-4)."
+      ]
+    },
+    {
+      "id": "setup-flow",
+      "register": "setup",
+      "fixture": "fixtures/sample-repo/",
+      "prompt": "Set up a glossary for this repo.",
+      "expected_behavior": [
+        "Asks where the glossary should live, or proposes docs/GLOSSARY.md, before writing anything.",
+        "Harvests the three planted synonym clusters: the Ledger cluster (ledger / transaction log / money record / journal), the Settlement Window cluster (batch window / cutoff / nightly run), and the Merchant cluster (merchant / seller / vendor / partner).",
+        "Harvests at least one recurring unnamed paraphrase — the repeated phrase for a payment that has been authorized but not yet captured — and proposes a term for it.",
+        "Presents candidates as a table with proposed term, draft meaning, detected synonyms, and draft stakeholder gloss.",
+        "Runs one batched round of closed accept/rename/trim questions rather than one question per entry.",
+        "Drafts a stakeholder gloss only for candidates that appear in a stakeholder-facing document, and says which document put them there.",
+        "Proposes no entry for API, webhook, or Postgres used in their ordinary industry sense (§4.1 stack-term admission).",
+        "Proposes 'Worker' as a narrowed-meaning entry, because the repo uses it for its own component rather than the generic sense.",
+        "Writes nothing to disk before the user approves, then writes only approved entries.",
+        "Writes the pointer line 'Glossary: <path>' to AGENTS.md.",
+        "Ends by stating the standing maintenance rule: propose, human approves, never as a side effect."
+      ],
+      "anti_expectations": [
+        "Any file write before an explicit approval turn.",
+        "Writes every detected candidate, treating detections as decisions.",
+        "Hardcodes CONTEXT.md or CLAUDE.md as the glossary location instead of following the discovery chain."
+      ]
+    }
+  ]
+}

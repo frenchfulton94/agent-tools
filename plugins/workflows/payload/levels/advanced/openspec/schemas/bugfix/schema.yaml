@@ -1,0 +1,88 @@
+name: bugfix
+version: 1
+description: >
+  Workflow for defects, including performance regressions. Reproduce with a
+  failing test, find the root cause and its class, design the minimal fix,
+  implement test-first. Invokes superpowers:systematic-debugging across the
+  investigation artifacts (fallback chain: mattpocock-skills:diagnosing-bugs, then
+  agent-skills:debugging-and-error-recovery), with skill names written
+  pack:skill - confirm in the agent's skill list.
+
+artifacts:
+  - id: reproduction
+    generates: reproduction.md
+    description: Reproducible failure pinned by a failing automated test
+    template: reproduction.md
+    instruction: |
+      Invoke superpowers:systematic-debugging and record its Phase 1 output
+      here: read the error completely, reproduce consistently, pin observed
+      vs expected and the exact environment. Then invoke
+      superpowers:test-driven-development to write the failing test that
+      reproduces the defect - the artifact's core deliverable. Fallback
+      chain: mattpocock-skills:diagnosing-bugs (reproduce-hypothesise-instrument-
+      fix-regression-test loop), then agent-skills:debugging-and-error-recovery,
+      then the template manually.
+      If genuinely untestable, justify and provide a manual verification
+      script. Performance bugs: invoke agent-skills:performance-optimization
+      to establish the measured baseline and numeric target.
+    requires: []
+
+  - id: rootcause
+    generates: rootcause.md
+    description: Root cause, escape analysis, and same-class scan
+    template: rootcause.md
+    instruction: |
+      Continue superpowers:systematic-debugging through its investigation
+      phases, including the root-cause-tracing technique it contains: trace
+      from symptom to the faulty assumption, not just the faulty line. No
+      fix may be proposed before this completes - that is the skill's own
+      iron rule, and it holds in fallback mode too. Record why existing
+      tests and review missed it, then search for the same bug class
+      elsewhere and list hits or state none found.
+    requires: [reproduction]
+
+  - id: fix
+    generates: fix.md
+    description: Minimal fix design at the root cause
+    template: fix.md
+    instruction: |
+      Decide the fix layer openly - cause or symptom - with the reasoning.
+      A symptom fix under deadline or behind a migration is a legitimate
+      decision when written down: state what a proper cause fix requires,
+      so the next person inherits the choice rather than the surprise.
+      Design the smallest change at the chosen layer; note rejected
+      alternatives. Then compare the fault against the capability's spec:
+      spec covered the case and the code disagreed - no delta owed, the
+      regression test holds the line; spec was silent about the case that
+      broke - that silence is the bug behind the bug, so add the missing
+      case as an ADDED requirement whose scenario is the reproduction made
+      permanent, and expect this to be the common outcome; spec said
+      something the fault proves wrong - MODIFY it, copying the entire
+      requirement block header included, since archive replaces the block
+      by matching that header. State the regression guard: which tests turn
+      green and what new coverage closes the escape. For performance fixes,
+      the guard is the measured target from reproduction.md.
+    requires: [rootcause]
+
+  - id: tasks
+    generates: tasks.md
+    description: Implementation checklist including same-class cleanup
+    template: tasks.md
+    instruction: |
+      List the fix steps as checkboxes with acceptance criteria: make the
+      reproduction test pass, add escape-gap coverage, and address or
+      explicitly ticket each same-class hit from rootcause.md.
+    requires: [fix]
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Invoke superpowers:test-driven-development (fallback:
+    agent-skills:test-driven-development): the reproduction test stays red
+    until the fix lands, then turns green with no other test regressing.
+    Invoke superpowers:requesting-code-review on the diff, then
+    superpowers:verification-before-completion before claiming done. Every
+    same-class hit is fixed here or linked to a follow-up change. Commit
+    referencing the root cause. Prefer a fresh session per fix; compact at
+    artifact boundaries, never mid-task.
