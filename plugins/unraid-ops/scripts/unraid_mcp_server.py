@@ -20,6 +20,7 @@ import re
 import ssl
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 
 PROTOCOL_VERSION = "2024-11-05"
@@ -69,6 +70,8 @@ INTROSPECTION = """query {
     }
   }
 }"""
+
+REDIRECT_CODES = (301, 302, 303, 307, 308)
 
 MUTATION_RE = re.compile(r"(?:^|[\s{};])mutation\b", re.IGNORECASE)
 COMMENT_RE = re.compile(r"#[^\n]*")
@@ -141,12 +144,59 @@ TOOLS = [
 ]
 
 
+def _redirect_target(current, location):
+    """Absolute URL to re-POST to after a redirect, or None if unsafe to follow.
+
+    The API key travels in a header, so a redirect must not carry it anywhere
+    else: never to a different host, and never down from https to plain http.
+    Unraid's nginx upgrades http to https on the same host and path, which is
+    the one case worth following rather than reporting.
+    """
+    if not location:
+        return None
+    target = urllib.parse.urljoin(current, location)
+    here = urllib.parse.urlsplit(current)
+    there = urllib.parse.urlsplit(target)
+    if there.scheme not in ("http", "https"):
+        return None
+    if (here.hostname or "").lower() != (there.hostname or "").lower():
+        return None
+    if here.scheme == "https" and there.scheme == "http":
+        return None
+    if here.path != there.path:
+        return None
+    if target == current:
+        return None
+    return target
+
+
+def _unreachable_message(url, reason):
+    """Explain a transport failure, leading with the fix where there is one."""
+    detail = str(reason)
+    if "certificate verify failed" in detail.lower():
+        return (
+            f"TLS verification failed for {url}: {detail}\n\n"
+            "The server answered, so it is reachable — its certificate is what "
+            "was rejected. Unraid generates a self-signed certificate for local "
+            "access, which Python refuses by default.\n\n"
+            "Enable the plugin's insecure_tls option to accept it on a trusted "
+            "LAN, or point api_url at the myunraid.net address, whose "
+            "certificate validates: "
+            "https://<lan-ip-with-dashes>.<hash>.myunraid.net/graphql"
+        )
+    return (
+        f"Could not reach {url}: {detail}. Check the host is up and reachable, "
+        "and if it uses a self-signed certificate, enable the plugin's "
+        "insecure_tls option."
+    )
+
+
 def graphql(document, variables=None):
     """POST a GraphQL document. Returns (ok, text)."""
     if not API_URL:
         return False, (
             "No Unraid API endpoint configured. Set the plugin's api_url option "
-            "(for example http://tower.local/graphql)."
+            "(for example https://tower.local/graphql)."
         )
     if not API_KEY:
         return False, (
@@ -158,17 +208,7 @@ def graphql(document, variables=None):
     body = {"query": document}
     if variables:
         body["variables"] = variables
-
-    request = urllib.request.Request(
-        API_URL,
-        data=json.dumps(body).encode("utf-8"),
-        headers={
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "x-api-key": API_KEY,
-        },
-        method="POST",
-    )
+    data = json.dumps(body).encode("utf-8")
 
     context = None
     if INSECURE_TLS:
@@ -177,7 +217,8 @@ def graphql(document, variables=None):
         context.verify_mode = ssl.CERT_NONE
 
     # urllib downgrades POST to GET when it follows a 301/302/303, which turns a
-    # redirect into a confusing parse failure. Refuse to follow and report it.
+    # redirect into a confusing parse failure. Handle redirects here instead, so
+    # the method and body survive and the key is never sent to a new host.
     class NoRedirect(urllib.request.HTTPRedirectHandler):
         def redirect_request(self, *args, **kwargs):
             return None
@@ -187,49 +228,67 @@ def graphql(document, variables=None):
         handlers.append(urllib.request.HTTPSHandler(context=context))
     opener = urllib.request.build_opener(*handlers)
 
-    try:
-        with opener.open(request, timeout=TIMEOUT) as resp:
-            payload = json.loads(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:
-        if exc.code in (301, 302, 303, 307, 308):
-            location = exc.headers.get("Location", "") if exc.headers else ""
-            target = location or "the HTTPS address"
-            if location and not location.rstrip("/").endswith("/graphql"):
-                target = location.rstrip("/") + "/graphql"
-            return False, (
-                f"The server redirected ({exc.code}) to {location or 'another URL'} "
-                "instead of answering.\n\n"
-                "Unraid's nginx redirects HTTP to HTTPS whenever Use SSL/TLS is "
-                "set to Yes or Strict, and the redirect turns the POST into a GET, "
-                "so the API is never reached.\n\n"
-                f"Set the plugin's api_url option to: {target}\n\n"
-                "With a self-signed certificate, also enable insecure_tls. With a "
-                "myunraid.net certificate the host looks like "
-                "https://<lan-ip-with-dashes>.<hash>.myunraid.net/graphql. To use "
-                "plain HTTP instead, run `use_ssl no` on the server — but that "
-                "disables HTTPS for the whole WebGUI."
-            )
-        detail = exc.read().decode("utf-8", "replace")[:800]
-        hint = ""
-        if exc.code in (401, 403):
-            hint = (
-                " The API key was rejected. Check it, and that its role covers "
-                "this query."
-            )
-        elif exc.code == 404:
-            hint = (
-                " Endpoint not found. The GraphQL API ships with Unraid 7.2+; on "
-                "earlier releases it comes from the Unraid Connect plugin."
-            )
-        return False, f"HTTP {exc.code} from {API_URL}.{hint}\n{detail}"
-    except urllib.error.URLError as exc:
-        return False, (
-            f"Could not reach {API_URL}: {exc.reason}. Check the host is up and "
-            "reachable, and if it uses a self-signed certificate, enable the "
-            "plugin's insecure_tls option."
+    def post(target_url):
+        request = urllib.request.Request(
+            target_url,
+            data=data,
+            headers={
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "x-api-key": API_KEY,
+            },
+            method="POST",
         )
-    except (TimeoutError, json.JSONDecodeError, OSError) as exc:
-        return False, f"Request to {API_URL} failed: {exc}"
+        with opener.open(request, timeout=TIMEOUT) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+
+    url = API_URL
+    followed = False
+    while True:
+        try:
+            payload = post(url)
+            break
+        except urllib.error.HTTPError as exc:
+            if exc.code in REDIRECT_CODES:
+                location = exc.headers.get("Location", "") if exc.headers else ""
+                target = _redirect_target(url, location)
+                if target and not followed:
+                    url, followed = target, True
+                    continue
+                suggestion = location or "the HTTPS address"
+                if location and not location.rstrip("/").endswith("/graphql"):
+                    suggestion = location.rstrip("/") + "/graphql"
+                return False, (
+                    f"The server redirected ({exc.code}) to "
+                    f"{location or 'another URL'} instead of answering, and that "
+                    "redirect was not safe to follow: it leaves the host, "
+                    "downgrades to plain http, or points at a different path, "
+                    "any of which would send the API key where it does not "
+                    "belong.\n\n"
+                    f"Set the plugin's api_url option to: {suggestion}\n\n"
+                    "With a self-signed certificate, also enable insecure_tls. "
+                    "With a myunraid.net certificate the host looks like "
+                    "https://<lan-ip-with-dashes>.<hash>.myunraid.net/graphql. "
+                    "To use plain HTTP instead, run `use_ssl no` on the server — "
+                    "but that disables HTTPS for the whole WebGUI."
+                )
+            detail = exc.read().decode("utf-8", "replace")[:800]
+            hint = ""
+            if exc.code in (401, 403):
+                hint = (
+                    " The API key was rejected. Check it, and that its role covers "
+                    "this query."
+                )
+            elif exc.code == 404:
+                hint = (
+                    " Endpoint not found. The GraphQL API ships with Unraid 7.2+; "
+                    "on earlier releases it comes from the Unraid Connect plugin."
+                )
+            return False, f"HTTP {exc.code} from {url}.{hint}\n{detail}"
+        except urllib.error.URLError as exc:
+            return False, _unreachable_message(url, exc.reason)
+        except (TimeoutError, json.JSONDecodeError, OSError) as exc:
+            return False, f"Request to {url} failed: {exc}"
 
     if isinstance(payload, dict) and payload.get("errors"):
         errors = [e for e in payload["errors"] if isinstance(e, dict)]

@@ -54,15 +54,18 @@ On the server:
 unraid-api apikey --create --name claude -r admin
 ```
 
-Then configure the plugin's options: `api_url` (e.g. `http://tower.local/graphql`), `api_key` (stored as a sensitive value, not in plain settings), and optionally `insecure_tls` for a self-signed certificate on a trusted LAN.
+Then configure the plugin's options: `api_url` (e.g. `http://tower.local/graphql`), `api_key` (stored as a sensitive value, not in plain settings), and `insecure_tls` if the server uses the self-signed certificate Unraid generates for local access — which it does unless you have pointed `api_url` at a `myunraid.net` address.
+
+An `http` address is fine either way. Unraid redirects to HTTPS whenever *Use SSL/TLS* is on, and the server follows that upgrade itself, so the same setting works whether or not SSL is enabled.
 
 Tools appear under the scoped name `mcp__plugin_unraid-ops_unraid__<tool>`.
 
 ### When it cannot reach the server
 
-Two failures are common enough that the server answers them with the fix rather than the raw error:
+Three failures are common enough that the server answers them with the fix rather than the raw error:
 
-- **The request is redirected.** Unraid's nginx redirects HTTP to HTTPS whenever *Use SSL/TLS* is `Yes` or `Strict`, and the redirect turns the POST into a GET, so the API is never reached. The server refuses to follow the redirect and reports the HTTPS endpoint to put in `api_url` — with `insecure_tls` as well for a self-signed certificate.
+- **The request is redirected.** Unraid's nginx redirects HTTP to HTTPS whenever *Use SSL/TLS* is `Yes` or `Strict`, and `urllib` downgrades the POST to a GET when it follows one, so the API is never reached. The server handles redirects itself, re-sending the POST intact. Because the API key rides in a header, it follows only a redirect that stays on the same host and path and does not drop from HTTPS to plain HTTP; anything else is reported with the endpoint to put in `api_url`.
+- **The certificate is rejected.** Unraid generates a self-signed certificate for local access and Python refuses it by default. The error says so plainly rather than blaming reachability, and names `insecure_tls` and the `myunraid.net` alternative.
 - **`SANDBOX_DISABLED`.** Either the GraphQL sandbox is off on a build that gates the whole `/graphql` route behind it, or the request never authenticated and fell through to the playground route. The two need different fixes, so the error names both and gives a `curl` command that tells them apart. The sandbox is an interactive query console — turn it off again when you are done.
 
 `UNAUTHENTICATED` and `FORBIDDEN` point at the key and its role (`unraid-api apikey --list`).
