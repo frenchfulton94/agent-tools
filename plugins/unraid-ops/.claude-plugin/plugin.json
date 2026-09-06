@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "unraid-ops",
+  "displayName": "Unraid Ops",
+  "version": "1.0.0",
+  "description": "Unraid server administration: parity array, pools, shares, Docker, VMs, remote access, performance and failure recovery — with a guard against the documented data-loss command patterns.",
+  "author": {
+    "name": "Agent Tools",
+    "email": "michael@frenchfultonjr.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "unraid",
+    "nas",
+    "storage",
+    "zfs",
+    "btrfs",
+    "parity",
+    "homelab"
+  ]
+}
