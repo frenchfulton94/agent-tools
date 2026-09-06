@@ -12,7 +12,7 @@
 	},
 	"extraKnownMarketplaces": {
 		"agent-tools": {
-			"source": { "repo": "YOUR-GITHUB-OWNER/agent-tools", "source": "github" }
+			"source": { "repo": "frenchfulton94/agent-tools", "source": "github" }
 		},
 		"impeccable": {
 			"source": { "repo": "pbakaus/impeccable", "source": "github" }
