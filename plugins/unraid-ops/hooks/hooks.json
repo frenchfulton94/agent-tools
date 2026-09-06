@@ -1,0 +1,18 @@
+{
+  "description": "Guards against the documented Unraid data-loss command patterns before a Bash call runs.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/guard_destructive_storage.py"],
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
