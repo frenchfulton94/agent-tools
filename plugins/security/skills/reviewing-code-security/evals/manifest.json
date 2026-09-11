@@ -13,8 +13,13 @@
 		"improving-prompts",
 		"managing-project-memory"
 	],
-	"synthetic": ["code-review"],
+	"synthetic": [
+		"code-review"
+	],
 	"acknowledgedOmissions": [
+		"animating-interfaces",
+		"animation-vocabulary",
+		"apple-design",
 		"bem-css",
 		"bits-ui",
 		"bun",
@@ -25,14 +30,18 @@
 		"configuring-zed",
 		"containerizing-apps",
 		"controlled-engineering-english",
+		"design-engineering",
 		"drizzle-development",
 		"feature-sliced-design",
+		"finding-animation-opportunities",
+		"improving-animations",
 		"internationalized-date-time",
 		"layerchart",
 		"maintaining-plugin-marketplaces",
 		"managing-container-runtimes",
 		"managing-unraid-servers",
 		"mapping-project-tooling",
+		"reviewing-animations",
 		"sanitizing-untrusted-html",
 		"securing-container-supply-chain",
 		"setup",

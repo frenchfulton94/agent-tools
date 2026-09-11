@@ -43,7 +43,7 @@ const PUBLISH = ['index.html', 'lessons', 'reference', 'assets'];
  * so the local copy keeps working relative links and the published copy gets
  * working absolute ones. Change this if the repository moves.
  */
-const BLOB = 'https://github.com/YOUR-GITHUB-OWNER/agent-tools/blob/main/plugins/workflows';
+const BLOB = 'https://github.com/frenchfulton94/agent-tools/blob/main/plugins/workflows';
 
 const missing = PUBLISH.filter((entry) => !existsSync(join(workspace, entry)));
 if (missing.length > 0) {

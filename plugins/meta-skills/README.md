@@ -6,7 +6,7 @@ that keep a repository legible to the next agent that opens it.
 
 ## Install
 
-    claude plugin marketplace add YOUR-GITHUB-OWNER/agent-tools --scope project
+    claude plugin marketplace add frenchfulton94/agent-tools --scope project
     claude plugin install meta-skills@agent-tools --scope project
 
 `--scope project` writes to the repository's `.claude/settings.json`, which you commit so the

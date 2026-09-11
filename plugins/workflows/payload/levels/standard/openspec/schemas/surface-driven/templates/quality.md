@@ -6,6 +6,8 @@
 
 <!-- Dimension scores (a11y, performance, theming, responsive, code quality), detector findings, and fixes. -->
 
+<!-- Motion pass, when the change shipped any: findings table and PASS/BLOCK verdict, or "No motion in this change." -->
+
 ## Behavior Evidence
 
 <!-- Test-suite command, exit code, counts; each requirement -> proving test/behavior (file:line or command + output). Name uncovered scenarios plainly. -->

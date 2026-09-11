@@ -43,6 +43,11 @@ The dispatching prompt gives you the change directory path. Read, in order:
   any interaction, layout, or animation decision, and cite what it
   returned. If the command is unavailable, say so and flag the affected
   decisions as needing the check.
+- For an animation decision, that search says what the platform provides;
+  `animating-interfaces` says whether to use it. Invoke it and record the
+  frequency tier, the purpose, the curve and duration or spring config, and
+  the reduced-motion behavior — a decision to leave an element still is a
+  result worth writing down. Use `apple-design` for gesture-driven work.
 - Skill names vary by installation prefix; check the available skill list
   before concluding one is absent, and where one is absent apply the
   discipline manually and say so.

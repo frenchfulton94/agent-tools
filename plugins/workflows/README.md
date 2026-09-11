@@ -4,7 +4,7 @@ Sets up or reconciles a project's OpenSpec workflow in one command.
 
 ## Install
 
-    claude plugin marketplace add YOUR-GITHUB-OWNER/agent-tools --scope project
+    claude plugin marketplace add frenchfulton94/agent-tools --scope project
     claude plugin install workflows@agent-tools --scope project
 
 `--scope project` writes to the repository's `.claude/settings.json`, which you commit so the
@@ -132,7 +132,7 @@ the site; they are working files.
 
 The site is live at
 
-    https://YOUR-GITHUB-OWNER.github.io/agent-tools/
+    https://frenchfulton94.github.io/agent-tools/
 
 Pages was enabled on 2026-08-28 with **Source: GitHub Actions**. The organisation is on the
 Team plan, where a published site has **no access control** — anyone with the URL can read

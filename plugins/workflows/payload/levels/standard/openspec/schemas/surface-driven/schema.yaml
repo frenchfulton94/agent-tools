@@ -44,8 +44,10 @@ artifacts:
       and subagent/agent tools relevant to this surface work - impeccable
       itself, a design-tool MCP (e.g. Figma) when the direction has source
       artwork, browser automation for inspection rounds, image generation
-      for comps, framework skills for the stack. One line each on where it
-      earns its keep, marked as a session snapshot since availability
+      for comps, framework skills for the stack, and the motion skills
+      (`animating-interfaces`, `apple-design`, `reviewing-animations`) when
+      the surface has any interaction the user can feel. One line each on
+      where it earns its keep, marked as a session snapshot since availability
       differs across sessions; downstream steps re-check before relying on
       an entry.
     requires: []
@@ -133,6 +135,19 @@ artifacts:
         stop. When impeccable's detector or hook is available, add a step
         to run it on the edited files and fix findings before the commit.
 
+      Motion is the one surface dimension impeccable's detector does not
+      reach, so a task that animates anything settles its ingredients in
+      the plan rather than in the editor. Invoke `animating-interfaces` and
+      record, per animated element: the frequency tier and the named
+      purpose (the gate that legitimately returns "this should not
+      animate"), the exact curve and duration or spring config, and the
+      reduced-motion behavior. Add `apple-design` for anything
+      gesture-driven - drag, swipe, sheet, carousel - where velocity
+      handoff and interruptibility decide whether it feels native. Where
+      neither is installed, say so and carry the same four decisions in the
+      task by hand; a motion task with no stated duration or easing is a
+      placeholder like any other.
+
       Each task group starts with non-checkbox context lines: **Files**,
       **Interfaces** (exact names and signatures neighboring tasks rely
       on), **Tooling** (skills, MCP tools, or commands this task should
@@ -175,6 +190,13 @@ artifacts:
       2. Audit: impeccable's audit (accessibility, performance, theming,
          responsive, code quality) with dimension scores, or the same
          checks by hand. Record detector findings and what was fixed.
+         When the change shipped any motion, add a motion pass:
+         `reviewing-animations` over the surface diff, recorded with its
+         findings table and its PASS/BLOCK verdict. It covers what the
+         audit's dimensions do not - frequency, easing, duration,
+         interruptibility, and whether reduced motion is honored in a way
+         that actually reaches the animation. Without the skill, walk the
+         same axes by hand and label the pass manual.
       3. Behavior evidence: the test-suite command with exit code and
          counts, and a walk of each spec requirement to the test or
          observed behavior proving it - file:line or command plus output.

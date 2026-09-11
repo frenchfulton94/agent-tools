@@ -337,6 +337,15 @@ artifacts:
       validation, container queries, and scheduling all have native answers that
       models reliably under-reach for.
 
+      That search answers what the platform provides; `animating-interfaces`
+      answers whether to use it. For each element the brief moves, record the
+      frequency tier, the purpose, the curve and duration or spring config, and
+      the reduced-motion behavior — and treat "this should not animate" as a
+      legitimate outcome rather than a skipped decision, since a high-frequency
+      action is the one place motion reliably makes a product feel slower.
+      `apple-design` covers gesture-driven surfaces. Where neither is installed,
+      carry the same decisions by hand and say so.
+
       The interface work has a second authority too: DESIGN.md holds the project's
       tokens, and its frontmatter is normative while the prose gives context. Build against those tokens rather than literal
       values — the detector flags a font, colour, radius, or size that falls

@@ -2,6 +2,7 @@
 	"enabledPlugins": {
 		"browser-use@claude-plugins-official": true,
 		"chrome-devtools-mcp@claude-plugins-official": true,
+		"design-engineering@agent-tools": true,
 		"frontend@agent-tools": true,
 		"impeccable@impeccable": true,
 		"modern-web-guidance@claude-plugins-official": true,

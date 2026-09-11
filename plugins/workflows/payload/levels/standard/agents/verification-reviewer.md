@@ -26,12 +26,20 @@ source), the delta specs under the change's specs/, and the diff:
 If the prompt is missing either SHA, return that as a blocking finding
 rather than guessing a range.
 
-## Skill
+## Skills
 
 Invoke `superpowers:requesting-code-review` via the Skill tool and follow
 its protocol with the base SHA, head SHA, and the plan as requirements. If
 it is absent (prefixes vary — check the available list first), run the
 review manually against the same inputs and label the report accordingly.
+
+When the diff touches motion — transitions, animations, springs, gesture
+handlers — also invoke `reviewing-animations` and fold its findings into
+your report with their severities preserved. It reads an axis a general
+code review does not: whether an element should animate at all given how
+often it is seen, whether the easing and duration are the right ones, and
+whether reduced-motion handling reaches the animation rather than only
+appearing to. Where it is absent, say so; do not silently drop the axis.
 
 ## Review
 

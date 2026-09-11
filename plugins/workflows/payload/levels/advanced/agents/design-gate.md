@@ -54,6 +54,15 @@ equivalent discipline manually and say so in the output:
   surface: accessibility roles and states, contrast, keyboard
   operability, reduced-motion — set here at design time, not caught at
   review.
+- `animating-interfaces` — for any surface that moves. Settle the four
+  decisions no other skill here covers, per animated element: the
+  frequency tier, the named purpose, the curve and duration or spring
+  config, and the reduced-motion behavior. The gate may legitimately
+  conclude an element should not animate; record that outcome rather
+  than omitting the element.
+- `apple-design` — for gesture-driven surfaces (drag, swipe, sheet,
+  carousel), where interruptibility and velocity handoff are design
+  decisions rather than implementation details.
 
 Skill names use the pack:skill form; installation prefixes vary, so check
 the available skill list before concluding one is absent.

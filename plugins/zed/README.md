@@ -4,7 +4,7 @@ Configuring and customizing the Zed editor.
 
 ## Install
 
-    claude plugin marketplace add YOUR-GITHUB-OWNER/agent-tools --scope project
+    claude plugin marketplace add frenchfulton94/agent-tools --scope project
     claude plugin install zed@agent-tools --scope project
 
 Zed configuration is usually a workstation preference rather than a repository one, so `--scope

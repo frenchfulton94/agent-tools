@@ -264,6 +264,15 @@ artifacts:
       (when impeccable is installed) run its detector on the edited files
       and fix findings before the task's commit.
 
+      A task that animates anything carries its motion decisions in the
+      plan, since no detector catches them: invoke `animating-interfaces`
+      and record the frequency tier, the named purpose, the exact curve and
+      duration or spring config, and the reduced-motion behavior. The gate
+      is allowed to conclude the element should not animate, which is a
+      result, not a skipped step. Use `apple-design` for gesture-driven
+      work. Where the skills are absent, carry the same decisions by hand
+      and say so.
+
       Consult brainstorm.md's Relevant Capabilities when drawing tasks: when
       a task's work matches a surveyed skill, MCP tool, or command, name it
       in that task's **Tooling** line with the exact invocation. A plan may
@@ -333,7 +342,11 @@ artifacts:
          browser-automation tool against the running app when one is
          available in this session, since observed rendering outranks
          reasoning about source. If impeccable is not installed, note that
-         and record a manual pass against the brief instead.
+         and record a manual pass against the brief instead. When the
+         change shipped motion, add `reviewing-animations` over the surface
+         diff and record its findings table and verdict - it is the only
+         pass here that judges easing, duration, interruptibility, and
+         whether reduced motion reaches the animation at all.
       5. Verdict: ready-to-archive, or a list of what still blocks, each
          item naming the artifact or code that must change.
 

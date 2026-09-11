@@ -1,12 +1,12 @@
 # agent-tools
 
 Claude Code plugins for this catalog — agent tooling, the
-TypeScript and SvelteKit stacks, containers, OWASP-grounded security review, and OpenSpec
-workflow setup.
+TypeScript and SvelteKit stacks, interface craft and motion, containers, OWASP-grounded security
+review, and OpenSpec workflow setup.
 
 ## Install
 
-    claude plugin marketplace add YOUR-GITHUB-OWNER/agent-tools --scope project
+    claude plugin marketplace add frenchfulton94/agent-tools --scope project
     claude plugin install <plugin>@agent-tools --scope project
 
 `--scope project` writes to the repository's `.claude/settings.json`, which you commit so the
@@ -19,6 +19,7 @@ plugins travel with the repo instead of living on one workstation.
 | [meta-skills](plugins/meta-skills) | `authoring-hooks` `authoring-plugins` `authoring-skills` `authoring-subagents` `controlled-engineering-english` `improving-prompts` `maintaining-plugin-marketplaces` `managing-project-memory` `mapping-project-tooling` | Building and maintaining Claude Code's own extension surfaces, plus prompts, project memory, and documentation. Ships the `controlled-english` output style |
 | [typescript](plugins/typescript) | `bun` `configuring-biome` `debugging-type-errors` `drizzle-development` `refactoring-typescript` `vite` `vitest-testing` `writing-typescript` | The TypeScript toolchain — compiler settings, strictness migrations, tests, bundling, formatting, typed data access |
 | [frontend](plugins/frontend) | `bem-css` `bits-ui` `feature-sliced-design` `internationalized-date-time` `layerchart` `sanitizing-untrusted-html` `styling-with-tailwind` `using-paraglide-js` | The SvelteKit-leaning web application stack — components, charts, styling, layout, i18n, sanitization |
+| [design-engineering](plugins/design-engineering) | `animating-interfaces` `animation-vocabulary` `apple-design` `design-engineering` `finding-animation-opportunities` `improving-animations` `reviewing-animations` | Interface craft and motion on the Svelte stack — building, reviewing, auditing, and finding animation, plus the judgement and the Apple fluid-interface principles underneath it |
 | [docker-workbench](plugins/docker-workbench) | `configuring-dev-containers` `containerizing-apps` `managing-container-runtimes` `securing-container-supply-chain` | Docker and containers, from Dockerfiles to supply chain. Ships a `container-debugger` agent and a volume-loss guard hook |
 | [security](plugins/security) | `reviewing-code-security` | OWASP-grounded review with verifiable citations. Ships `/security:audit`, a `security-auditor` agent, and a credential-format hook |
 | [workflows](plugins/workflows) | `choosing-a-workflow` `configuring-openspec` `setup` | Setting up and routing OpenSpec workflows. Ships `/workflows:setup` and a self-paced learning package |
