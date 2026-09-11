@@ -13,7 +13,7 @@
   plan has **no access control**. That was a decision for a person in repo settings, and on
   2026-08-28 it was made: Pages is enabled with Source: GitHub Actions, and the site is live
   and world-readable at
-  <https://YOUR-GITHUB-OWNER.github.io/agent-tools/>. Anyone with the URL
+  <https://frenchfulton94.github.io/agent-tools/>. Anyone with the URL
   can read every lesson. Write accordingly — there is no longer a private-by-default
   backstop between a sentence in a lesson and the public internet.
 

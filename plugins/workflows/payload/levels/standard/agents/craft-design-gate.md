@@ -42,6 +42,14 @@ check the available list first. Relevant here: any installed
 codebase-design or architecture skill for module structure, and any
 ADR-writing skill for decision records.
 
+When design-brief.md exists and the brief's surfaces move, add
+`animating-interfaces` — motion is a design decision the brief rarely
+settles and the build otherwise improvises. Record per animated element:
+the frequency tier, the named purpose, the curve and duration or spring
+config, and the reduced-motion behavior. Add `apple-design` for
+gesture-driven surfaces. An element the frequency gate rules should not
+animate is recorded as that decision, with its reason.
+
 ## Deliverable
 
 Return two things, clearly separated:

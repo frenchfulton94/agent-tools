@@ -62,10 +62,30 @@ archive warning counts tracked checkboxes, not artifact files.
 
 Every schema invokes installed skills by name where one applies, drawn from
 obra/superpowers, addyosmani/agent-skills, mattpocock/skills, impeccable,
-taste-skill, and three user-installed skills (managing-project-memory,
-controlled-engineering-english, mapping-project-tooling). Pack skills are
+taste-skill, the design-engineering plugin, and three user-installed skills
+(managing-project-memory, controlled-engineering-english,
+mapping-project-tooling). Pack skills are
 written pack:skill; user-installed skills by bare name - confirm exact
 prefixes in your agent's skill list. Every invocation carries a fallback
 chain and degrades to the template when the skill is absent. Design credit
 for the bridge pattern: JiangWay's superpowers-bridge (prior art, reused
 not copied).
+
+Motion is split out because nothing else in the set covers it. Impeccable
+and taste-skill judge the static surface - tokens, contrast, palette, copy -
+and neither has an opinion on whether an element should animate, how long,
+or on what curve. `animating-interfaces` settles that at design time,
+`apple-design` covers gesture-driven surfaces, and `reviewing-animations`
+checks the result - at the design document in the pre-flight, and again at
+the diff and the running interaction in verification, because a still frame
+shows neither duration nor easing. They are installed only on web projects,
+so on a backend repo the motion clauses simply never fire.
+
+Two more ship with that plugin and are deliberately not wired into any
+artifact: `improving-animations` surveys a whole codebase's motion into
+plans, and `finding-animation-opportunities` sweeps for motion that is
+missing. Both produce work rather than living inside a change, so they run
+the way `/improve-codebase-architecture` does - ahead of the chain, with
+each accepted plan becoming its own change. They are model-invoked, so
+unlike that command they need no router line to be reachable; ask for a
+motion audit and they fire.

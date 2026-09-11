@@ -131,10 +131,15 @@ artifacts:
       DESIGN.md) plus agent-skills:frontend-ui-engineering for the
       engineering half - accessibility roles and states, contrast,
       keyboard operability, reduced-motion - set at design time rather
-      than caught at review. Add a Seams table: the public boundaries this
-      change is tested at, every spec scenario covered by exactly one seam
-      by name, and explicit regression rows for REMOVED requirements -
-      removals are where regressions hide because nothing points at them.
+      than caught at review. Where a named surface moves, add
+      animating-interfaces and record per animated element the frequency
+      tier, the purpose, the curve and duration or spring config, and the
+      reduced-motion behavior; a decision to leave an element still counts
+      as settling it. Add apple-design for gesture-driven surfaces. Add a
+      Seams table: the public boundaries this change is tested at, every
+      spec scenario covered by exactly one seam by name, and explicit
+      regression rows for REMOVED requirements - removals are where
+      regressions hide because nothing points at them.
       Follow existing patterns in existing code; no unrelated refactoring.
       Final fallback: template sections carry the same structure.
     requires: [specs]
@@ -176,10 +181,12 @@ artifacts:
       severity vocabulary; invoke agent-skills:security-and-hardening when
       the change touches input, auth, storage, or external integrations;
       invoke taste-skill for the UI pre-flight gate on user-facing
-      surfaces. Confirm every requirement has a testable scenario and
-      nothing on the never-change-silently list breaks without explicit
-      approval. Confirm the design Seams table covers every scenario by
-      name and carries a regression row for each removal. Final fallback:
+      surfaces, plus reviewing-animations against the design document when
+      it commits to motion. Confirm every requirement has a testable
+      scenario and nothing on the never-change-silently list breaks
+      without explicit approval. Confirm the design Seams table covers
+      every scenario by name and carries a regression row for each
+      removal. Final fallback:
       apply the template axes manually.
     requires: [migration]
 
@@ -247,9 +254,14 @@ artifacts:
       performative agreement wastes the review; for named surfaces, the
       anti-slop pre-flight against rendered state through a browser tool
       when one exists, because a rendered state is evidence and a
-      reasoned-about one is a guess; and a verdict. A ready-to-archive
-      verdict with a failing test or an unresolved critical finding
-      contradicts itself - the verdict follows the evidence.
+      reasoned-about one is a guess, plus reviewing-animations over the
+      diff and the running interaction when the change shipped motion,
+      since a still frame carries no duration, easing, or
+      interruptibility - the axis the rendered pre-flight structurally
+      cannot see and taste-preflight could only check on paper; and a
+      verdict. A ready-to-archive verdict with a failing test or an
+      unresolved critical finding contradicts itself - the verdict
+      follows the evidence.
     requires: [plan]
 
 apply:

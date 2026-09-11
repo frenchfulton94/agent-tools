@@ -15,7 +15,7 @@ Built from the official documentation at [docs.unraid.net](https://docs.unraid.n
 
 ## Install
 
-    claude plugin marketplace add YOUR-GITHUB-OWNER/agent-tools --scope project
+    claude plugin marketplace add frenchfulton94/agent-tools --scope project
     claude plugin install unraid-ops@agent-tools --scope project
 
 `--scope project` writes to the repository's `.claude/settings.json`, which you commit so the

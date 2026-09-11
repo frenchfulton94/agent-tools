@@ -22,6 +22,10 @@ reviewer is wrong. Label self-review as self-review. -->
 available). States from the specs - loading, empty, error, keyboard-only -
 confirmed rendering correctly. -->
 
+<!-- Motion pass over the diff and the running interaction, when the change
+shipped any: findings and verdict, or "No motion in this change." A still
+frame cannot show duration, easing, or interruptibility. -->
+
 ## Verdict
 
 <!-- ready-to-archive, or each blocker naming the artifact or code to change.
