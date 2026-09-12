@@ -1,0 +1,18 @@
+{
+  "description": "Blocks irreversible Dokploy removals — projects, databases, and volumes — and asks before disruptive but recoverable operations",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/dokploy-guard.sh"],
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
