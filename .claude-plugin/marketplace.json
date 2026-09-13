@@ -60,6 +60,12 @@
       "description": "Unraid server administration: parity array, pools, shares, Docker, VMs, remote access, performance and failure recovery — with a guard against the documented data-loss command patterns and read-only access to the Unraid GraphQL API."
     },
     {
+      "name": "dokploy",
+      "source": "./plugins/dokploy",
+      "category": "devops",
+      "description": "Self-hosted Dokploy PaaS: deploying applications through Nixpacks, Railpack, Dockerfile, Buildpack, and static builds with domains, certificates, and vault-backed environment variables; operating the host — installation, remote and dedicated build servers, cluster, panel and database backups with tested restores, and symptom-first troubleshooting; scripting the full CLI and API surface, which the published documentation covers only in part; hardening the panel, Traefik, and secrets against a 25-control checklist mapped to SOC 2 and ISO 27001; configuring enterprise SSO, SCIM, custom roles, and audit logs; and a guard against irreversible project, database, and volume removal."
+    },
+    {
       "name": "zed",
       "source": "./plugins/zed",
       "category": "development",
