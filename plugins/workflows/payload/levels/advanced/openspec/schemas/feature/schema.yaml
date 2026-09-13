@@ -170,11 +170,8 @@ artifacts:
       it runs the anti-slop UI pre-flight on a cheap model; pass it the
       change directory path. Then dispatch the review-gate subagent
       (.claude/agents/review-gate.md) - it is pinned to the top-tier model
-      at xhigh effort so this session can stay on the cheap tier. For
-      Apple-platform surfaces (per TOOLS.md), dispatch the
-      apple-design-gate subagent (.claude/agents/apple-design-gate.md)
-      instead - it is installed only in Apple-native app repos; skip when
-      absent. Its prompt must name the change directory path and include the
+      at xhigh effort so this session can stay on the cheap tier. Its
+      prompt must name the change directory path and include the
       taste-preflight findings verbatim when they exist; a subagent
       inherits nothing else. Write the review-gate's returned content here
       verbatim as review.md. On BLOCK: surface the [Critical] findings to
