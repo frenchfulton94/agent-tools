@@ -1152,8 +1152,9 @@ briefs, task reports, and captured logs, 391 files. Every `verified:` header and
 spec verification table in the plugin that cites a log cites one of these, so
 they stay reachable at this URL.
 
-Tags `v0.3.0` through `v0.8.0` hold the plugin tree as it stood at each phase.
-`git show v0.8.0:plugin/skills/<name>/SKILL.md` still works.
+Tags `v0.2.0` through `v0.8.0` hold the plugin tree as it stood at each phase.
+`git show v0.8.0:plugin/skills/<name>/SKILL.md` still works. The 0.8.0 tree is
+also reachable directly at commit `32797c9`, whether or not the tag survives.
 
 Phase 8 moved everything else. Its design spec is at
 `authoring/apple-studio/docs/specs/2026-09-12-phase8-catalog-migration-design.md`

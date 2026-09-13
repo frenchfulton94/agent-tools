@@ -606,6 +606,30 @@ block Phase 2; each has an explicit trigger for when to act.
     older, narrower and deliberately unrenewed, and folding it in here would have
     re-opened it on new grounds. Whoever picks up one should read the other.
 
+11. **52 validator warnings on the catalog, 40 of them apple-studio's — measured
+    2026-09-12, Phase 8 Task 6.** `bun run audit:strict` now reports `0 error(s), 52
+    warning(s)` for the whole catalog, up from the 12 the catalog carried before
+    this phase. All 40 new ones arrived with apple-studio: 16 `apple-frameworks`
+    primer files nested a level deeper than the validator expects and the same 16
+    not linked from that skill's `SKILL.md` (one warning line apiece, same file
+    set — `references/primers/*.md`), 37 reference files over 100 lines with no
+    table of contents in their first 30 lines, and one `swift-testing` description
+    missing a `Use when...` trigger clause. None are errors, and `bun run audit`
+    (non-strict) is unaffected — exit 0.
+
+    **Trigger: revisit if `audit:strict` is ever made a commit gate, or if a
+    reader reports trouble navigating a long reference.**
+
+12. **`~/Projects/StudioFixture` cited in a shipped reference (found 2026-09-12,
+    Phase 8 Task 6).** `xcode-loop/references/headless-commands.md:6-7` names the
+    fixture app by a path on one machine, inside a verified-against statement
+    ("Verified against a Multiplatform SwiftUI app fixture
+    (`~/Projects/StudioFixture`, scheme `StudioFixture`, ...)"). It is a
+    provenance citation, not an instruction, so it ships as it stands.
+
+    **Trigger: rewrite it the next time that reference is revised for any other
+    reason.**
+
 ## Accepted (no action)
 
 Phase 3 minors reviewed and accepted as-is — no follow-up action needed:
