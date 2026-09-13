@@ -151,6 +151,7 @@ export function buildPlan(detection, { level, payloadRoot = PAYLOAD }) {
 
 	const manifests = [readJson(join(payloadRoot, 'base', 'settings.base.json'))];
 	if (detection.web) manifests.push(readJson(join(payloadRoot, 'base', 'settings.base.web.json')));
+	if (detection.apple?.swift) manifests.push(readJson(join(payloadRoot, 'base', 'settings.base.apple.json')));
 	manifests.push(readJson(join(levelDir, 'settings.json')));
 
 	const merged = mergeManifests(manifests);
@@ -209,6 +210,7 @@ export function buildPlan(detection, { level, payloadRoot = PAYLOAD }) {
 		mode: detection.priorRun ? 'reconcile' : 'fresh',
 		level,
 		web: detection.web,
+		apple: { app: Boolean(detection.apple?.app), swift: Boolean(detection.apple?.swift) },
 		// I1/legacy-cleanup: `openspec init` over an existing directory has a legacy-cleanup path,
 		// so this is true only when openspec/ is genuinely absent — never inferred any other way.
 		openspecInit: !detection.openspec.present,

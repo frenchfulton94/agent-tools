@@ -1,0 +1,10 @@
+{
+	"enabledPlugins": {
+		"apple-studio@agent-tools": true
+	},
+	"extraKnownMarketplaces": {
+		"agent-tools": {
+			"source": { "repo": "frenchfulton94/agent-tools", "source": "github" }
+		}
+	}
+}
