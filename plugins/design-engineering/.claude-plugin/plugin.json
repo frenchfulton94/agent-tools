@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "design-engineering",
   "displayName": "Design Engineering",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Interface craft and motion on the Svelte stack — building an animation from the decisions that determine whether it feels right, reviewing motion against a strict bar, auditing a codebase's motion into executable plans, finding the places that should animate and rejecting the ones that should not, naming an effect you can only describe, the component-craft philosophy underneath all of it, and Apple's fluid-interface principles for gestures, springs, materials, and type.",
   "author": {
     "name": "Agent Tools",

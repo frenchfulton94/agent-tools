@@ -14,7 +14,7 @@ upstream text.
 
 The underlying design philosophy is documented at
 [emilkowal.ski](https://emilkowal.ski/) and taught at
-[animations.dev](https://animations.dev/). `apple-design` additionally draws on
+[animations.dev](https://animations.dev/). `fluid-interfaces` additionally draws on
 Apple's public WWDC design talks — chiefly *Designing Fluid Interfaces* (2018),
 *Designing Audio-Haptic Experiences*, *The Details of UI Typography* (2020), and
 *Principles of Great Design*.
@@ -29,7 +29,7 @@ Apple's public WWDC design talks — chiefly *Designing Fluid Interfaces* (2018)
 | `find-animation-opportunities` | `finding-animation-opportunities` |
 | `emil-design-eng` | `design-engineering` |
 | `animation-vocabulary` | `animation-vocabulary` |
-| `apple-design` | `apple-design` |
+| `apple-design` | `fluid-interfaces` |
 
 Renamed to this catalogue's descriptive/gerund convention, which every other
 plugin here follows. Upstream ships further skills — `animate-expo`,

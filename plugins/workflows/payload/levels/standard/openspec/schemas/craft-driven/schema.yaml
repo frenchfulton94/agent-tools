@@ -269,7 +269,7 @@ artifacts:
       and record the frequency tier, the named purpose, the exact curve and
       duration or spring config, and the reduced-motion behavior. The gate
       is allowed to conclude the element should not animate, which is a
-      result, not a skipped step. Use `apple-design` for gesture-driven
+      result, not a skipped step. Use `fluid-interfaces` for gesture-driven
       work. Where the skills are absent, carry the same decisions by hand
       and say so.
 

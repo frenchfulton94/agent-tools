@@ -64,7 +64,7 @@ works with you, but overriding it silently gets you generic output.
 **Motion is the one dimension impeccable does not cover**, and `animate` above changes how
 an animation looks rather than deciding whether it should exist. Before writing one, invoke
 `animating-interfaces` for the frequency tier, the purpose, the curve and duration or spring
-config, and the reduced-motion behavior; `apple-design` for drag, swipe, and sheets; and
+config, and the reduced-motion behavior; `fluid-interfaces` for drag, swipe, and sheets; and
 `reviewing-animations` on the diff afterwards. They do not collide with impeccable — the
 vocabularies sit on different axes, and the frequency gate is the part that will tell you
 to delete an animation impeccable would happily have polished.

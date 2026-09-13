@@ -135,7 +135,7 @@ artifacts:
       animating-interfaces and record per animated element the frequency
       tier, the purpose, the curve and duration or spring config, and the
       reduced-motion behavior; a decision to leave an element still counts
-      as settling it. Add apple-design for gesture-driven surfaces. Add a
+      as settling it. Add fluid-interfaces for gesture-driven surfaces. Add a
       Seams table: the public boundaries this change is tested at, every
       spec scenario covered by exactly one seam by name, and explicit
       regression rows for REMOVED requirements - removals are where

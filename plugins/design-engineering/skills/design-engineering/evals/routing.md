@@ -68,7 +68,7 @@ Judgement about a component as a whole — expect `design-engineering`:
 | R21 | "How many props should our Button expose?" |
 | R22 | "Is this detail worth the effort, or am I gold-plating?" |
 
-Gestures, physics, materials, type — expect `apple-design`:
+Gestures, physics, materials, type — expect `fluid-interfaces`:
 
 | # | Query |
 | --- | --- |

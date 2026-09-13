@@ -45,7 +45,7 @@ artifacts:
       itself, a design-tool MCP (e.g. Figma) when the direction has source
       artwork, browser automation for inspection rounds, image generation
       for comps, framework skills for the stack, and the motion skills
-      (`animating-interfaces`, `apple-design`, `reviewing-animations`) when
+      (`animating-interfaces`, `fluid-interfaces`, `reviewing-animations`) when
       the surface has any interaction the user can feel. One line each on
       where it earns its keep, marked as a session snapshot since availability
       differs across sessions; downstream steps re-check before relying on
@@ -141,7 +141,7 @@ artifacts:
       record, per animated element: the frequency tier and the named
       purpose (the gate that legitimately returns "this should not
       animate"), the exact curve and duration or spring config, and the
-      reduced-motion behavior. Add `apple-design` for anything
+      reduced-motion behavior. Add `fluid-interfaces` for anything
       gesture-driven - drag, swipe, sheet, carousel - where velocity
       handoff and interruptibility decide whether it feels native. Where
       neither is installed, say so and carry the same four decisions in the

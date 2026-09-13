@@ -1,5 +1,5 @@
 ---
-name: apple-design
+name: fluid-interfaces
 description: 'Apple''s approach to fluid, physical interface motion and design, translated to the web and the Svelte stack — response and latency, 1:1 direct manipulation, interruptibility, spring behaviour over scripted animation, velocity handoff, momentum projection, rubber-banding, translucent materials and depth, typography, and the design principles behind them. Use when building or reviewing a gesture-driven interface, a drag, swipe, sheet, or carousel, spring physics and momentum, an interaction that has to be grabbable mid-flight, translucent chrome and backdrop blur, type scales and tracking, or motion that should feel native and physical rather than merely animated. For the animation decision sequence and the everyday recipes use animating-interfaces.'
 license: MIT
 ---

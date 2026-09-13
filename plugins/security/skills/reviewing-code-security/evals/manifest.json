@@ -19,7 +19,6 @@
 	"acknowledgedOmissions": [
 		"animating-interfaces",
 		"animation-vocabulary",
-		"apple-design",
 		"bem-css",
 		"bits-ui",
 		"bun",
@@ -34,6 +33,7 @@
 		"drizzle-development",
 		"feature-sliced-design",
 		"finding-animation-opportunities",
+		"fluid-interfaces",
 		"improving-animations",
 		"internationalized-date-time",
 		"layerchart",
