@@ -1,4 +1,4 @@
-# The twelve chains
+# The twelve chains (thirteen in Apple-native app repos)
 
 Everything needed to fill in the chain, gate, and hatch lines of a routing answer, and to
 drive the chain afterwards. Read only the section for the schema you routed to.
@@ -10,6 +10,7 @@ Contents:
 - [`standard` — craft-driven, surface-driven](#standard)
 - [`advanced` — the everyday four](#advanced--the-everyday-four)
 - [`advanced` — the situational four](#advanced--the-situational-four)
+- [`advanced` — Apple app repos: app-release](#advanced--apple-app-repos)
 - [Rules that apply to every chain](#rules-that-apply-to-every-chain)
 
 ## How to read these
@@ -236,6 +237,26 @@ the task list.
 - Every task names the observable signal proving it worked.
 - **Mandatory:** `postmortem` is blameless, applies the full investigation rigour triage
   skipped, and **creates the linked follow-up change** for the durable fix.
+
+## `advanced` — Apple app repos
+
+### `app-release` — 4 artifacts, installed only where app signals were detected
+
+`release-scope → preflight → tasks → post-release`, then `apply` (after `tasks`).
+
+| Artifact | `requires` | Carries |
+|---|---|---|
+| `release-scope` | — | Version/build decision, contents since last release, rollout intent, go/no-go owner |
+| `preflight` | `release-scope` | Store checklist with named evidence per item — signing, privacy, metadata, review notes |
+| `tasks` | `preflight` | Archive → upload → TestFlight → submit, each step with its observable signal |
+| `post-release` | `tasks` | Monitoring thresholds that pause the rollout; linked follow-ups. Completed before archiving |
+
+**Gate:** a code defect discovered mid-release stops the release and spawns a
+bugfix change; the chain never absorbs code fixes.
+**Hatch:** an urgent fix already live in the store routes code work through
+`hotfix`; the expedited-review submission still goes through this chain.
+Skills: `apple-studio:app-release`, `apple-studio:xcode-loop` (fallback:
+follow the templates manually).
 
 ## Rules that apply to every chain
 

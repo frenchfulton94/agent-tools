@@ -4,7 +4,7 @@ Run per the description-only routing protocol: give a clean-context agent this s
 
 Useful distractors: **`configuring-openspec`** (the nearest sibling and the likeliest misroute in both directions), a generic project-planning skill, a debugging skill, and an incident-response runbook skill. The debugging and incident distractors matter because half the positives below are phrased as raw work — "prod is down", "this is dropping rows" — which a debugging skill will also claim.
 
-## Should trigger (10)
+## Should trigger (11)
 
 1. Checkout is returning 502s and nobody can pay. What do we do?
 2. The CSV export drops the last row for accounts in Alaska.
@@ -16,8 +16,9 @@ Useful distractors: **`configuring-openspec`** (the nearest sibling and the like
 8. Take out the legacy SAML login path.
 9. The search page takes nine seconds and it needs to be under two.
 10. What are all the workflows this repo has and when would I use each?
+11. The build's ready — get 1.4.0 out to TestFlight and then the App Store.
 
-Notes: 1, 2, 3, 6, 8, and 9 never mention a workflow, a schema, or OpenSpec — they are the raw-work positives, and they are the reason this skill exists, since nothing selects a schema automatically. 3 and 9 are the two rules people reliably get wrong (coverage backfill is a refactor; performance is a bugfix). 7 is the mid-flight reclassification case.
+Notes: 1, 2, 3, 6, 8, and 9 never mention a workflow, a schema, or OpenSpec — they are the raw-work positives, and they are the reason this skill exists, since nothing selects a schema automatically. 3 and 9 are the two rules people reliably get wrong (coverage backfill is a refactor; performance is a bugfix). 7 is the mid-flight reclassification case. 11 is the Apple release routing case (app-release, Apple-native repos only).
 
 ## Should not trigger (10)
 
