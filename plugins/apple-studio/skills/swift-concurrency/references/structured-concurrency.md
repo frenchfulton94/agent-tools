@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://developer.apple.com/documentation/swift/taskgroup, https://developer.apple.com/documentation/swift/task, https://developer.apple.com/documentation/swift/taskpriority, https://developer.apple.com/documentation/swift/asyncstream, https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/
+> verified: 2026-08 against https://developer.apple.com/documentation/swift/taskgroup.md, https://developer.apple.com/documentation/swift/task.md, https://developer.apple.com/documentation/swift/taskpriority.md, https://developer.apple.com/documentation/swift/asyncstream.md, https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/
 > sources: Modern Concurrency in Swift, Swift Concurrency by Example
 
 ## Ownership framing

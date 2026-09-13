@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://developer.apple.com/documentation/widgetkit, https://developer.apple.com/tutorials/data/documentation/widgetkit.json, https://developer.apple.com/tutorials/data/documentation/widgetkit/developing-a-widgetkit-strategy.json, https://developer.apple.com/tutorials/data/documentation/widgetkit/creating-a-widget-extension.json, https://developer.apple.com/tutorials/data/documentation/widgetkit/timelineprovider.json, https://developer.apple.com/tutorials/data/documentation/widgetkit/previewing-widgets-and-live-activities-in-xcode.json, https://developer.apple.com/tutorials/data/documentation/widgetkit/debugging-widgets.json, https://developer.apple.com/tutorials/data/documentation/widgetkit/widgetfamily.json, https://developer.apple.com/tutorials/data/documentation/swiftui/widgetbundle.json
+> verified: 2026-08 against https://developer.apple.com/documentation/widgetkit.md, https://developer.apple.com/tutorials/data/documentation/widgetkit.json, https://developer.apple.com/tutorials/data/documentation/widgetkit/developing-a-widgetkit-strategy.json, https://developer.apple.com/tutorials/data/documentation/widgetkit/creating-a-widget-extension.json, https://developer.apple.com/tutorials/data/documentation/widgetkit/timelineprovider.json, https://developer.apple.com/tutorials/data/documentation/widgetkit/previewing-widgets-and-live-activities-in-xcode.json, https://developer.apple.com/tutorials/data/documentation/widgetkit/debugging-widgets.json, https://developer.apple.com/tutorials/data/documentation/widgetkit/widgetfamily.json, https://developer.apple.com/tutorials/data/documentation/swiftui/widgetbundle.json
 > sources: live docs
 
 # WidgetKit
@@ -89,12 +89,12 @@ Practical reading for planning: the iOS/iPadOS/macOS floors (14.0/14.0/11.0) are
 
 Fetch these before implementing — this primer intentionally omits API shapes, method signatures, and configuration-type details that live here instead:
 
-- https://developer.apple.com/documentation/widgetkit
-- https://developer.apple.com/documentation/widgetkit/developing-a-widgetkit-strategy
-- https://developer.apple.com/documentation/widgetkit/creating-a-widget-extension
-- https://developer.apple.com/documentation/widgetkit/timelineprovider
-- https://developer.apple.com/documentation/widgetkit/widgetfamily
-- https://developer.apple.com/documentation/widgetkit/previewing-widgets-and-live-activities-in-xcode
-- https://developer.apple.com/documentation/widgetkit/debugging-widgets
-- https://developer.apple.com/documentation/widgetkit/widgets-and-complications-collection
-- https://developer.apple.com/documentation/activitykit (Live Activities — separate primer)
+- https://developer.apple.com/documentation/widgetkit.md
+- https://developer.apple.com/documentation/widgetkit/developing-a-widgetkit-strategy.md
+- https://developer.apple.com/documentation/widgetkit/creating-a-widget-extension.md
+- https://developer.apple.com/documentation/widgetkit/timelineprovider.md
+- https://developer.apple.com/documentation/widgetkit/widgetfamily.md
+- https://developer.apple.com/documentation/widgetkit/previewing-widgets-and-live-activities-in-xcode.md
+- https://developer.apple.com/documentation/widgetkit/debugging-widgets.md
+- https://developer.apple.com/documentation/widgetkit/widgets-and-complications-collection.md
+- https://developer.apple.com/documentation/activitykit.md (Live Activities — separate primer)

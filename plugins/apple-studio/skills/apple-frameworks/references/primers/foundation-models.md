@@ -1,4 +1,4 @@
-> verified: 2026-09 against https://developer.apple.com/documentation/foundationmodels, https://developer.apple.com/tutorials/data/documentation/foundationmodels.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/systemlanguagemodel.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/systemlanguagemodel/availability-swift.enum.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/systemlanguagemodel/availability-swift.enum/unavailablereason.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/generating-swift-data-structures-with-guided-generation.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/expanding-generation-with-tool-calling.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/improving-the-safety-of-generative-model-output.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/adding-intelligent-app-features-with-generative-models.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/adding-server-side-intelligence-with-private-cloud-compute.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/generating-content-and-performing-tasks-with-foundation-models.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/managing-the-context-window.json
+> verified: 2026-09 against https://developer.apple.com/documentation/foundationmodels.md, https://developer.apple.com/tutorials/data/documentation/foundationmodels.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/systemlanguagemodel.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/systemlanguagemodel/availability-swift.enum.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/systemlanguagemodel/availability-swift.enum/unavailablereason.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/generating-swift-data-structures-with-guided-generation.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/expanding-generation-with-tool-calling.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/improving-the-safety-of-generative-model-output.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/adding-intelligent-app-features-with-generative-models.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/adding-server-side-intelligence-with-private-cloud-compute.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/generating-content-and-performing-tasks-with-foundation-models.json, https://developer.apple.com/tutorials/data/documentation/foundationmodels/managing-the-context-window.json
 > sources: live docs
 
 # Foundation Models
@@ -203,12 +203,12 @@ reasoning) is a hard boundary, not hedging.
 
 ## Current docs
 
-- https://developer.apple.com/documentation/foundationmodels
-- https://developer.apple.com/documentation/foundationmodels/generating-content-and-performing-tasks-with-foundation-models
-- https://developer.apple.com/documentation/foundationmodels/systemlanguagemodel
-- https://developer.apple.com/documentation/foundationmodels/managing-the-context-window
-- https://developer.apple.com/documentation/foundationmodels/generating-swift-data-structures-with-guided-generation
-- https://developer.apple.com/documentation/foundationmodels/expanding-generation-with-tool-calling
-- https://developer.apple.com/documentation/foundationmodels/improving-the-safety-of-generative-model-output
-- https://developer.apple.com/documentation/foundationmodels/adding-server-side-intelligence-with-private-cloud-compute
-- https://developer.apple.com/documentation/foundationmodels/updating-prompts-for-new-model-versions
+- https://developer.apple.com/documentation/foundationmodels.md
+- https://developer.apple.com/documentation/foundationmodels/generating-content-and-performing-tasks-with-foundation-models.md
+- https://developer.apple.com/documentation/foundationmodels/systemlanguagemodel.md
+- https://developer.apple.com/documentation/foundationmodels/managing-the-context-window.md
+- https://developer.apple.com/documentation/foundationmodels/generating-swift-data-structures-with-guided-generation.md
+- https://developer.apple.com/documentation/foundationmodels/expanding-generation-with-tool-calling.md
+- https://developer.apple.com/documentation/foundationmodels/improving-the-safety-of-generative-model-output.md
+- https://developer.apple.com/documentation/foundationmodels/adding-server-side-intelligence-with-private-cloud-compute.md
+- https://developer.apple.com/documentation/foundationmodels/updating-prompts-for-new-model-versions.md

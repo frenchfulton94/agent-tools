@@ -5,8 +5,9 @@
 - **Teammates first, author second.** Lessons assume no OpenSpec knowledge. Author-level
   detail goes in a clearly marked `Appendix` block at the end of a lesson, never inline —
   a newcomer must be able to stop at the recall check and still have the win.
-- **Full coverage over brevity.** All thirteen lessons, all twelve schemas driven end to
-  end. Approved 2026-08-28 in preference to a ten- or eight-lesson trim.
+- **Full coverage over brevity.** All fourteen lessons, all twelve core schemas plus the
+  Apple-only thirteenth (conditional on the schema being installed) driven end to end.
+  Approved 2026-08-28 in preference to a ten- or eight-lesson trim.
 - **Nothing goes public without a deliberate act — and that act has now been taken.**
   The package was written on the assumption that Pages stayed disabled, because this
   repository is private, the org is on the Team plan, and a published Pages site on that

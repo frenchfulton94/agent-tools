@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://developer.apple.com/documentation/swiftui/uiviewrepresentable, https://developer.apple.com/documentation/swiftui/uiviewcontrollerrepresentable, https://developer.apple.com/documentation/swiftui/uihostingcontroller, https://developer.apple.com/documentation/swiftui/navigationstack
+> verified: 2026-08 against https://developer.apple.com/documentation/swiftui/uiviewrepresentable.md, https://developer.apple.com/documentation/swiftui/uiviewcontrollerrepresentable.md, https://developer.apple.com/documentation/swiftui/uihostingcontroller.md, https://developer.apple.com/documentation/swiftui/navigationstack.md
 > sources: Design Patterns by Tutorials (single mapped chapter — Adapter pattern; the rest of this file's scope is engineering judgment plus the live docs above, honestly not attributed to the book corpus)
 
 # Working safely in an existing shipped app

@@ -2,7 +2,8 @@
 
 ## Verification Suite
 
-<!-- Command, exit code, counts, pasted verbatim. -->
+<!-- Command, exit code, counts, pasted verbatim. Run the checks for the
+stack this change touches, as recorded in TOOLS.md. -->
 
 ## Behavioral Surface Walk
 

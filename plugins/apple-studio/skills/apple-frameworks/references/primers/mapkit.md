@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://developer.apple.com/documentation/mapkit, https://developer.apple.com/tutorials/data/documentation/mapkit.json, https://developer.apple.com/tutorials/data/documentation/mapkit/mapkit-for-swiftui.json, https://developer.apple.com/tutorials/data/documentation/mapkit/mapkit-for-appkit-and-uikit.json, https://developer.apple.com/tutorials/data/documentation/mapkit/preparing-your-app-to-be-the-default-navigation-app.json, https://developer.apple.com/tutorials/data/documentation/mapkit/enabling-maps-capability-in-xcode.json
+> verified: 2026-08 against https://developer.apple.com/documentation/mapkit.md, https://developer.apple.com/tutorials/data/documentation/mapkit.json, https://developer.apple.com/tutorials/data/documentation/mapkit/mapkit-for-swiftui.json, https://developer.apple.com/tutorials/data/documentation/mapkit/mapkit-for-appkit-and-uikit.json, https://developer.apple.com/tutorials/data/documentation/mapkit/preparing-your-app-to-be-the-default-navigation-app.json, https://developer.apple.com/tutorials/data/documentation/mapkit/enabling-maps-capability-in-xcode.json
 > sources: live docs
 
 # MapKit
@@ -107,11 +107,11 @@ above — the default-navigation-app entitlement/URL scheme — are gated to spe
 
 ## Current docs
 
-- https://developer.apple.com/documentation/mapkit
-- https://developer.apple.com/documentation/mapkit/mapkit-for-swiftui
-- https://developer.apple.com/documentation/mapkit/mapkit-for-appkit-and-uikit
-- https://developer.apple.com/documentation/mapkit/preparing-your-app-to-be-the-default-navigation-app
-- https://developer.apple.com/documentation/mapkit/enabling-maps-capability-in-xcode
-- https://developer.apple.com/documentation/mapkit/unified-map-urls
-- https://developer.apple.com/documentation/mapkit/interacting-with-nearby-points-of-interest
-- https://developer.apple.com/documentation/corelocation/requesting-authorization-to-use-location-services
+- https://developer.apple.com/documentation/mapkit.md
+- https://developer.apple.com/documentation/mapkit/mapkit-for-swiftui.md
+- https://developer.apple.com/documentation/mapkit/mapkit-for-appkit-and-uikit.md
+- https://developer.apple.com/documentation/mapkit/preparing-your-app-to-be-the-default-navigation-app.md
+- https://developer.apple.com/documentation/mapkit/enabling-maps-capability-in-xcode.md
+- https://developer.apple.com/documentation/mapkit/unified-map-urls.md
+- https://developer.apple.com/documentation/mapkit/interacting-with-nearby-points-of-interest.md
+- https://developer.apple.com/documentation/corelocation/requesting-authorization-to-use-location-services.md

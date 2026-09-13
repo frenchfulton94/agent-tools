@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://developer.apple.com/documentation/tipkit, https://developer.apple.com/tutorials/data/documentation/tipkit.json, https://developer.apple.com/tutorials/data/documentation/tipkit/highlightingappfeatureswithtipkit.json, https://developer.apple.com/tutorials/data/documentation/tipkit/tips/configurationoption/datastorelocation(_:).json, https://developer.apple.com/tutorials/data/documentation/tipkit/tips/rule.json, https://developer.apple.com/tutorials/data/documentation/tipkit/tips/configurationoption/cloudkitcontainer(_:).json
+> verified: 2026-08 against https://developer.apple.com/documentation/tipkit.md, https://developer.apple.com/tutorials/data/documentation/tipkit.json, https://developer.apple.com/tutorials/data/documentation/tipkit/highlightingappfeatureswithtipkit.json, https://developer.apple.com/tutorials/data/documentation/tipkit/tips/configurationoption/datastorelocation(_:).json, https://developer.apple.com/tutorials/data/documentation/tipkit/tips/rule.json, https://developer.apple.com/tutorials/data/documentation/tipkit/tips/configurationoption/cloudkitcontainer(_:).json
 > sources: live docs
 
 # TipKit
@@ -94,20 +94,20 @@ framework-level floor.
 
 ## Current docs
 
-- https://developer.apple.com/documentation/tipkit
-- https://developer.apple.com/documentation/tipkit/highlightingappfeatureswithtipkit
-- https://developer.apple.com/documentation/tipkit/tip
-- https://developer.apple.com/documentation/tipkit/tipgroup
-- https://developer.apple.com/documentation/tipkit/tips/configure(_:)
-- https://developer.apple.com/documentation/tipkit/tips/configurationoption/datastorelocation(_:)
-- https://developer.apple.com/documentation/tipkit/tips/configurationoption/cloudkitcontainer(_:)
-- https://developer.apple.com/documentation/tipkit/tips/configurationoption/displayfrequency(_:)
-- https://developer.apple.com/documentation/tipkit/tipview
-- https://developer.apple.com/documentation/swiftui/view/popovertip(_:arrowedge:action:)
-- https://developer.apple.com/documentation/tipkit/tips/rule
-- https://developer.apple.com/documentation/tipkit/tips/parameter
-- https://developer.apple.com/documentation/tipkit/tips/event
-- https://developer.apple.com/documentation/tipkit/tipviewstyle
-- https://developer.apple.com/documentation/tipkit/minitipviewstyle
-- https://developer.apple.com/documentation/tipkit/tips/showalltipsfortesting()
-- https://developer.apple.com/documentation/tipkit/tips/resetdatastore()
+- https://developer.apple.com/documentation/tipkit.md
+- https://developer.apple.com/documentation/tipkit/highlightingappfeatureswithtipkit.md
+- https://developer.apple.com/documentation/tipkit/tip.md
+- https://developer.apple.com/documentation/tipkit/tipgroup.md
+- https://developer.apple.com/documentation/tipkit/tips/configure(_:).md
+- https://developer.apple.com/documentation/tipkit/tips/configurationoption/datastorelocation(_:).md
+- https://developer.apple.com/documentation/tipkit/tips/configurationoption/cloudkitcontainer(_:).md
+- https://developer.apple.com/documentation/tipkit/tips/configurationoption/displayfrequency(_:).md
+- https://developer.apple.com/documentation/tipkit/tipview.md
+- https://developer.apple.com/documentation/swiftui/view/popovertip(_:arrowedge:action:).md
+- https://developer.apple.com/documentation/tipkit/tips/rule.md
+- https://developer.apple.com/documentation/tipkit/tips/parameter.md
+- https://developer.apple.com/documentation/tipkit/tips/event.md
+- https://developer.apple.com/documentation/tipkit/tipviewstyle.md
+- https://developer.apple.com/documentation/tipkit/minitipviewstyle.md
+- https://developer.apple.com/documentation/tipkit/tips/showalltipsfortesting().md
+- https://developer.apple.com/documentation/tipkit/tips/resetdatastore().md

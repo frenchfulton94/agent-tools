@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://developer.apple.com/documentation/testing (framework's UI-testing scope checked via its DocC topic index — no UI-testing page exists there)
+> verified: 2026-08 against https://developer.apple.com/documentation/testing.md (framework's UI-testing scope checked via its DocC topic index — no UI-testing page exists there)
 > sources: Testing Swift, iOS Test-Driven Development by Tutorials
 
 # What to Test: A Layered Strategy for SwiftUI Apps

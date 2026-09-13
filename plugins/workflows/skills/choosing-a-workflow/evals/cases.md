@@ -99,6 +99,20 @@ The `[baseline]` note records what an unaided agent typically produces, which is
 
 ---
 
+## Case 8 — Apple release routing (repo at `advanced`, Apple-native)
+
+**Prompt:** The build's ready — get 1.4.0 out to TestFlight and then the App Store.
+
+**Assertions:**
+
+1. Routes to `app-release`, not `feature` and not ad hoc release steps. *[baseline: starts archiving or writes a release checklist inline]*
+2. Names the chain as `release-scope → preflight → tasks → post-release`.
+3. Returns a filled-in chat command — `/opsx:new <the work>, using app-release` — with the schema named.
+4. Names the guardrail: a code defect discovered mid-release spawns a bugfix change; the release chain never absorbs code fixes.
+5. Does **not** create the change, archive a build, or touch App Store Connect.
+
+---
+
 ## Grading notes
 
-Cases 1, 2, and 4 test routing accuracy; case 3 tests that the preflight actually runs; case 5 tests the sibling boundary; case 6 tests the one-question rule; case 7 tests the model reference. Cases 1, 2, and 4 also each carry a "stops at the recommendation" assertion, because *recommends and stops* is the behaviour most likely to erode first — an agent that routes correctly and then starts the work has failed the case.
+Cases 1, 2, 4, and 8 test routing accuracy; case 3 tests that the preflight actually runs; case 5 tests the sibling boundary; case 6 tests the one-question rule; case 7 tests the model reference. Cases 1, 2, and 4 also each carry a "stops at the recommendation" assertion, because *recommends and stops* is the behaviour most likely to erode first — an agent that routes correctly and then starts the work has failed the case.

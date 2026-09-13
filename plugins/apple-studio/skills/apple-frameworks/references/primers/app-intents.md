@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://developer.apple.com/documentation/appintents, https://developer.apple.com/tutorials/data/documentation/appintents.json, https://developer.apple.com/tutorials/data/documentation/appintents/app-shortcuts.json, https://developer.apple.com/tutorials/data/documentation/appintents/apple-intelligence-and-siri-ai.json, https://developer.apple.com/tutorials/data/documentation/appintents/spotlight.json, https://developer.apple.com/tutorials/data/documentation/appintents/donations-and-discovery.json, https://developer.apple.com/tutorials/data/documentation/appintents/adopting-app-intents-to-support-system-experiences.json, https://developer.apple.com/tutorials/data/documentation/appintents/app-extension.json, https://developer.apple.com/tutorials/data/documentation/appintents/getting-started-with-the-app-intents-framework.json
+> verified: 2026-08 against https://developer.apple.com/documentation/appintents.md, https://developer.apple.com/tutorials/data/documentation/appintents.json, https://developer.apple.com/tutorials/data/documentation/appintents/app-shortcuts.json, https://developer.apple.com/tutorials/data/documentation/appintents/apple-intelligence-and-siri-ai.json, https://developer.apple.com/tutorials/data/documentation/appintents/spotlight.json, https://developer.apple.com/tutorials/data/documentation/appintents/donations-and-discovery.json, https://developer.apple.com/tutorials/data/documentation/appintents/adopting-app-intents-to-support-system-experiences.json, https://developer.apple.com/tutorials/data/documentation/appintents/app-extension.json, https://developer.apple.com/tutorials/data/documentation/appintents/getting-started-with-the-app-intents-framework.json
 > sources: live docs
 
 # App Intents
@@ -144,15 +144,15 @@ against it.
 
 ## Current docs
 
-- https://developer.apple.com/documentation/appintents
-- https://developer.apple.com/documentation/appintents/getting-started-with-the-app-intents-framework
-- https://developer.apple.com/documentation/appintents/app-shortcuts
-- https://developer.apple.com/documentation/appintents/apple-intelligence-and-siri-ai
-- https://developer.apple.com/documentation/appintents/spotlight
-- https://developer.apple.com/documentation/appintents/donations-and-discovery
-- https://developer.apple.com/documentation/appintents/donating-your-apps-data-and-actions-to-the-system
-- https://developer.apple.com/documentation/appintents/making-app-entities-available-in-spotlight
-- https://developer.apple.com/documentation/appintents/adopting-app-intents-to-support-system-experiences
-- https://developer.apple.com/documentation/appintents/app-extension
-- https://developer.apple.com/documentation/appintents/app-schema-domains
-- https://developer.apple.com/documentation/AppIntentsTesting
+- https://developer.apple.com/documentation/appintents.md
+- https://developer.apple.com/documentation/appintents/getting-started-with-the-app-intents-framework.md
+- https://developer.apple.com/documentation/appintents/app-shortcuts.md
+- https://developer.apple.com/documentation/appintents/apple-intelligence-and-siri-ai.md
+- https://developer.apple.com/documentation/appintents/spotlight.md
+- https://developer.apple.com/documentation/appintents/donations-and-discovery.md
+- https://developer.apple.com/documentation/appintents/donating-your-apps-data-and-actions-to-the-system.md
+- https://developer.apple.com/documentation/appintents/making-app-entities-available-in-spotlight.md
+- https://developer.apple.com/documentation/appintents/adopting-app-intents-to-support-system-experiences.md
+- https://developer.apple.com/documentation/appintents/app-extension.md
+- https://developer.apple.com/documentation/appintents/app-schema-domains.md
+- https://developer.apple.com/documentation/AppIntentsTesting.md

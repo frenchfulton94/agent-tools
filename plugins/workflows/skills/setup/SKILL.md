@@ -32,10 +32,11 @@ REPO="$(git rev-parse --show-toplevel)"
 node "${CLAUDE_PLUGIN_ROOT}/scripts/detect.mjs" "$REPO"
 ```
 
-Read the JSON and use it as given — whether this repo is a web project, which schemas
-already exist, which plugins the settings file has already decided, whether a previous
-run happened. Do not re-derive any of it by hand, and do not ask the user about anything
-already in it.
+Read the JSON and use it as given — whether this repo is a web or Apple-native project
+(and which Apple tier — a bare `Package.swift` is the plugin layer only; app signals ship
+workflow content at `advanced`), which schemas already exist, which plugins the settings
+file has already decided, whether a previous run happened. Do not re-derive any of it by
+hand, and do not ask the user about anything already in it.
 
 Capture the two tree hashes now, while nothing has touched them; step 9 needs this
 before-picture to prove setup left the user's specs and changes alone:
@@ -72,7 +73,9 @@ commits. Fold in what step 1 already detected: whether this is a web project, an
 - **Between `minimal` and `standard`** — does work here usually start from an unclear idea
   that needs interviewing, or from a surface someone can already picture? Interview →
   `minimal`. Surface → `standard`. A repo detected as web leans `standard`, but the history
-  outranks the detection: a web repo whose commits are mostly backend still interviews.
+  outranks the detection: a web repo whose commits are mostly backend still interviews. A
+  repo detected as an Apple-native app: say when recommending that the Apple workflow
+  content (`app-release`, the Apple design gate) ships only at `advanced`.
 - **Too little history to count** — a fresh or near-empty repo — recommend `minimal` and
   say plainly that it is a default rather than a reading of their work.
 
@@ -109,7 +112,8 @@ An unknown level exits non-zero with empty stdout: show its message and stop rat
 proceeding on a guess.
 
 Render the plan for a human — not as raw JSON. Cover the mode (`fresh` or `reconcile`),
-the detected web answer, every file that would be created or replaced, the `config.yaml`
+the detected web and Apple answers (both tiers), every file that would be created or
+replaced, the `config.yaml`
 backup path, which plugins install and which are skipped **with the reason**, the status
 line decision, the probe change verification will create and remove, the human steps that
 will remain, and every warning.
@@ -172,6 +176,11 @@ the user that **every** invocation this plugin makes sets them. Two of them are 
      "${CLAUDE_PLUGIN_ROOT}/payload/levels/$LEVEL/openspec/schemas" "$REPO/openspec/schemas" "$OVERWRITE_SCHEMAS"
    ```
 
+   When the plan's `apple.app` is true and the level is `advanced`, repeat the copy from
+   `${CLAUDE_PLUGIN_ROOT}/payload/levels/advanced/apple/openspec/schemas` into the same
+   destination, with the same `overwrite` rules — the plan's name lists already include
+   the apple names, so nothing else changes.
+
    Then validate each schema copied or updated, and report each result:
 
    ```bash
@@ -186,8 +195,15 @@ the user that **every** invocation this plugin makes sets them. Two of them are 
      "${CLAUDE_PLUGIN_ROOT}/scripts/lib/tree.mjs" \
      "${CLAUDE_PLUGIN_ROOT}/payload/levels/$LEVEL/agents" "$REPO/.claude/agents" "$OVERWRITE_AGENTS"
    ```
+
+   When the plan's `apple.app` is true and the level is `advanced`, repeat the copy from
+   `${CLAUDE_PLUGIN_ROOT}/payload/levels/advanced/apple/agents` into `$REPO/.claude/agents`,
+   with the same `overwrite` rules — the plan's name lists already include the apple names,
+   so nothing else changes.
 4. **TOOLS.md.** Invoke `mapping-project-tooling`. Do this before the config, because the
-   config text points at TOOLS.md and is worth less if it points at nothing.
+   config text points at TOOLS.md and is worth less if it points at nothing. In an
+   Apple-native repository, confirm the build, test, and simulator commands land in
+   TOOLS.md — the verification templates delegate to it.
 5. **`openspec/config.yaml`.** See section 5 — it is the one destructive step.
 6. **CLAUDE.md.** Invoke `managing-project-memory`. On `advanced`, let it decide where
    `ROUTING.md` belongs; the router only works from somewhere memory reliably loads it.
@@ -362,6 +378,10 @@ State plainly:
     answer; it writes `docs/agents/issue-tracker.md`. Re-running `/workflows:setup`
     afterwards folds that into `context:`.
   - `/impeccable init` on a web project — writes `PRODUCT.md` and `DESIGN.md`.
+  - **Connect Xcode's MCP bridge** on an Apple-native app repo (when the plan lists it):
+    enable "Allow external agents to use Xcode tools" in Xcode → Settings → Intelligence,
+    then `claude mcp add --transport stdio xcode -- xcrun mcpbridge`. The toggle is a user
+    act; nothing here can flip it.
   - `/reload-plugins` to activate newly installed plugins in this session.
   - **Switch the output style**, after that reload: select `controlled-english` under
     `/config`. It ships with the `meta-skills` plugin, so it does not appear in the list

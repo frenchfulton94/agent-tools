@@ -110,7 +110,10 @@ artifacts:
     instruction: |
       Dispatch the design-gate subagent (.claude/agents/design-gate.md) -
       it is pinned to the top-tier model at xhigh effort so this session
-      can stay on the cheap tier. Its prompt must name the change
+      can stay on the cheap tier. For Apple-platform surfaces (per
+      TOOLS.md), dispatch the apple-design-gate subagent
+      (.claude/agents/apple-design-gate.md) instead - it is installed
+      only in Apple-native app repos; skip when absent. Its prompt must name the change
       directory path and quote the proposal's Surfaces line verbatim; a
       subagent inherits nothing else. It returns the design.md draft plus
       open questions: write the draft here, resolve the questions with the

@@ -18,9 +18,11 @@ reviewer is wrong. Label self-review as self-review. -->
 
 ## Surface Quality (named surfaces only)
 
-<!-- Anti-slop pre-flight against RENDERED state (browser tool when
-available). States from the specs - loading, empty, error, keyboard-only -
-confirmed rendering correctly. -->
+<!-- Anti-slop pre-flight against RENDERED state, using the checks for the
+stack this change touches as recorded in TOOLS.md — browser tool for web
+surfaces, simulator screenshots via xcode-loop for Apple surfaces. States
+from the specs - loading, empty, error, keyboard-only - confirmed rendering
+correctly. -->
 
 <!-- Motion pass over the diff and the running interaction, when the change
 shipped any: findings and verdict, or "No motion in this change." A still

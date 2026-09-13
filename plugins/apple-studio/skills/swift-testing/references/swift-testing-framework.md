@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://developer.apple.com/documentation/testing (human page did not render usable prose in fetch tooling; content below resolved via the framework's DocC JSON data endpoints instead — see task report for the exact endpoint list), https://developer.apple.com/documentation/swift/clock, https://developer.apple.com/documentation/foundation/urlsession
+> verified: 2026-08 against https://developer.apple.com/documentation/testing.md (human page did not render usable prose in fetch tooling; content below resolved via the framework's DocC JSON data endpoints instead — see task report for the exact endpoint list), https://developer.apple.com/documentation/swift/clock.md, https://developer.apple.com/documentation/foundation/urlsession.md
 > sources: Testing Swift, iOS Test-Driven Development by Tutorials (both books predate or barely cover the Swift Testing framework itself; live docs are the primary authority for this file, books are cited only for XCTest-era material and testing judgment that still applies)
 
 # Swift Testing Framework

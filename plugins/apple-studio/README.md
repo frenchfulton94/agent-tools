@@ -16,6 +16,19 @@ claude --plugin-dir plugins/apple-studio
 claude plugin validate plugins/apple-studio --strict
 ```
 
+Or install inside Xcode (26+): Xcode → Settings → Intelligence → Plug-ins →
+Add Plug-in → Add from URL, using this repository's URL, then select the
+apple-studio components. Configuration for agents launched inside Xcode
+lives in `~/Library/Developer/Xcode/CodingAssistant/` and is machine-global.
+
+To let a terminal session drive Xcode itself, enable "Allow external agents
+to use Xcode tools" in Xcode → Settings → Intelligence, then:
+
+    claude mcp add --transport stdio xcode -- xcrun mcpbridge
+
+`xcode-loop` prefers the bridge when connected and falls back to headless
+`xcodebuild` — see its `references/mcpbridge.md`.
+
 ## Components
 
 | Component | Shape | Covers |

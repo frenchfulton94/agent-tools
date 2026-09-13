@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>14 · Apple-native repos</title>
+		<link rel="icon" href="../assets/mark.svg" type="image/svg+xml" />
+		<link rel="stylesheet" href="../assets/lesson.css" />
+		<link rel="stylesheet" href="../assets/quiz.css" />
+	</head>
+	<body>
+		<main class="page">
+			<header class="masthead">
+				<p class="eyebrow">
+					<span>Lesson 14</span><span class="sep">·</span><span>Apple-native repos</span
+					><span class="sep">·</span><a href="../index.html">workflows</a>
+				</p>
+				<h1>Apple-native repos</h1>
+				<p class="deck">
+					Detection does not treat a Swift package and an app the same way, and it should not:
+					a library has nothing to release. Two tiers, one conditional schema, one human step
+					no agent can complete for you.
+				</p>
+			</header>
+
+			<section class="objective">
+				<h2>By the end</h2>
+				<p>
+					You can say which detection tier a repo trips and what each one adds, walk the
+					<code>app-release</code> chain artifact by artifact, and connect Xcode's MCP bridge —
+					or explain, correctly, why xcode-loop fell back to headless commands instead.
+				</p>
+			</section>
+
+			<p class="prereq">
+				<strong>Prerequisites:</strong>
+				<a href="0002-install-and-pick-a-level.html">Lesson 02</a> — installing the plugin and
+				picking a level; everything below is layered on top of that choice. And
+				<a href="0011-advanced-the-situational-four.html">Lesson 11</a> — this chain's escape
+				hatch names <code>hotfix</code> by name.
+			</p>
+
+			<h2>Two tiers of detection</h2>
+
+			<p>
+				Setup scans a repository for two different kinds of Apple signal, and they gate two
+				different things.
+			</p>
+
+			<h3>Tier 1 — any Apple signal at all</h3>
+
+			<p>
+				A root <code>Package.swift</code> is enough on its own. So is anything from tier 2 below
+				— tier 2 is a subset of tier 1, not a separate check. Tripping tier 1 merges
+				<code>settings.base.apple.json</code> into the plugin manifest, which does exactly one
+				thing: enable the <code>apple-studio</code> plugin. That happens <strong>at every
+				level</strong> — <code>minimal</code>, <code>standard</code>, and <code>advanced</code> all
+				get it, because a Swift package still benefits from apple-studio's build, test, and
+				screenshot skills even when nothing about it ships as an app.
+			</p>
+
+			<h3>Tier 2 — a full app project</h3>
+
+			<p>
+				This is a narrower, stricter check: an <code>.xcodeproj</code> or <code>.xcworkspace</code>
+				bundle at the repo root or exactly one directory down — so a monorepo's
+				<code>ios/App.xcodeproj</code> counts, but nothing deeper does — or a Tuist
+				<code>Project.swift</code>/<code>Tuist</code> directory, or an XcodeGen
+				<code>project.yml</code>, each checked at the root. Tripping tier 2
+				<strong>additionally</strong> requires being on the <code>advanced</code> level before it
+				adds anything: only then does it install the <code>app-release</code> OpenSpec schema and
+				the <code>apple-design-gate</code> subagent from <code>payload/levels/advanced/apple/</code>.
+				The same repository on <code>minimal</code> or <code>standard</code> gets tier 1's plugin
+				layer and stops there — the schema and the gate agent do not exist on those levels at all.
+			</p>
+
+			<div class="note">
+				<span class="label">A bare package never reaches tier 2</span>
+				<p>
+					A repository with only <code>Package.swift</code> and no <code>.xcodeproj</code>,
+					<code>.xcworkspace</code>, <code>Tuist</code>, or <code>project.yml</code> anywhere
+					trips tier 1 and stops. It gets the plugin layer, full stop — there is no app to
+					release, so there is no <code>app-release</code> schema to install, on any level. The
+					scan's own comment says why the one-directory-deep walk exists at all: monorepos put
+					the app in <code>ios/</code> or <code>apps/</code>, and a full recursive walk would make
+					scanning a <code>node_modules</code>-sized tree unaffordable.
+				</p>
+			</div>
+
+			<p>
+				<span class="cite"
+					><code>scripts/detect.mjs</code>, <code>appleSignals</code></span
+				>
+			</p>
+
+			<h2>The app-release chain</h2>
+
+			<p>
+				Four artifacts, then an operation: <code>release-scope → preflight → tasks →
+				post-release</code>, with <code>apply</code> running after <code>tasks</code> — an
+				operation, not an artifact, so it never appears as a chain <code>id</code> of its own.
+			</p>
+
+			<h3><code>release-scope</code> — what ships, decided and owned</h3>
+
+			<p>
+				Marketing version against build number, decided explicitly and with a reason —
+				<code>CFBundleShortVersionString</code> is user-facing, <code>CFBundleVersion</code> only
+				ever increases. What merged since the last release, pulled from the archive and git
+				history as a decision record rather than a changelog dump. Phased-release intent, and a
+				go/no-go owner named by name.
+			</p>
+
+			<h3><code>preflight</code> — the evidence-per-item rule</h3>
+
+			<p>
+				Signing and provisioning, the privacy manifest and nutrition-label answers checked
+				against what the code actually does, screenshots and metadata, export compliance, review
+				notes with a working demo account. The rule that makes this artifact worth writing:
+				<strong>every item names the evidence checked</strong> — a command run, a screenshot, an
+				App Store Connect page state. A bare checkbox is not preflight.
+			</p>
+
+			<h3><code>tasks</code> — a signal per step, and the code-defect guardrail</h3>
+
+			<p>
+				Archive, upload, TestFlight, submit — in order, and each one carries its own
+				<code>— Verify:</code> line naming the observable proof it worked: the archive succeeds
+				with the release configuration, the build appears in App Store Connect processing, it
+				installs and launches on a physical device, the review state transitions to In Review.
+				"It uploaded" without the signal is how a release stalls silently.
+			</p>
+
+			<p>
+				One line in this artifact is a guardrail on the whole chain: <strong>a code defect
+				discovered here stops the release and spawns a bugfix change</strong> — the release chain
+				never absorbs code fixes. Fix nothing inline; link the bugfix and resume only when it
+				ships.
+			</p>
+
+			<h3>The tracked checkbox that closes the loop</h3>
+
+			<p>
+				<code>tasks.md</code>'s own checklist carries a last item most schemas would leave to the
+				dependency graph alone: "Complete <code>post-release.md</code> with the monitoring plan —
+				Verify: thresholds and watcher named in <code>post-release.md</code>." That checkbox
+				exists because the graph itself would not catch its absence —
+				<code>post-release</code> only <code>requires: [tasks]</code>, so a change can read
+				<code>tasks</code> as done with no monitoring plan ever written. The checkbox is what
+				keeps that promise honest without changing the dependency graph.
+			</p>
+
+			<h3><code>post-release</code> — completed before archiving</h3>
+
+			<p>
+				Crash-rate and key-metric thresholds that pause the rollout, who watches them and for how
+				long, and every follow-up change this release surfaced, linked. Completed after the
+				release ships and before the change archives — a release without a monitoring plan is a
+				release you learn about from reviews.
+			</p>
+
+			<div class="note">
+				<span class="label">The hatch</span>
+				<p>
+					An urgent fix already live in the store routes its code work through
+					<a href="0011-advanced-the-situational-four.html"><code>hotfix</code></a> — the
+					expedited-review submission still goes through this chain, referencing it. The two
+					schemas never merge into one; <code>hotfix</code> owns the code, <code>app-release</code>
+					owns the submission.
+				</p>
+			</div>
+
+			<h2>Connecting Xcode</h2>
+
+			<p>
+				Xcode 27 ships <code>xcrun mcpbridge</code>, a STDIO bridge between an MCP client and
+				Xcode's own MCP tool service. Wiring it up is a human step — setup's plan lists it, but
+				nothing in it can flip a toggle inside Xcode for you.
+			</p>
+
+			<ol>
+				<li>
+					In Xcode: <strong>Settings → Intelligence → "Allow external agents to use Xcode
+					tools"</strong>. Without this, the bridge has nothing to connect to even if the binary
+					works.
+				</li>
+				<li>
+					Register it for the agent:
+					<pre><code>claude mcp add --transport stdio xcode -- xcrun mcpbridge</code></pre>
+				</li>
+				<li>
+					Xcode must have the target project open for project-aware operations — edits, builds
+					tied to the open workspace — to work through the bridge at all.
+				</li>
+			</ol>
+
+			<div class="stop" data-background="dark">
+				<span class="label">Don't block on it</span>
+				<p>
+					Headless <code>xcodebuild</code> is the default and the only option in CI or whenever
+					Xcode is not running with the project open — no interactive session exists, the
+					<code>xcode</code> MCP server is not connected, or the Intelligence setting above is not
+					enabled. xcode-loop does not wait for a human to fix Xcode settings first: unavailable
+					or unconfigured, it falls straight through to headless commands.
+				</p>
+			</div>
+
+			<p>
+				Setup only surfaces the human step at all when an app was detected and
+				<code>.mcp.json</code> does not already list a configured <code>xcode</code> server — read,
+				never spawned, because a subprocess is too much machinery for a question one file answers.
+			</p>
+
+			<h2>Recall check</h2>
+
+			<p data-quiz-tally class="drill-score"></p>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					A repo has only a root Package.swift. What does setup add for it?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Package.swift alone trips tier 1, which merges in the apple-studio plugin at every level — not tier 2, so no app-release schema."
+						>
+							the plugin layer
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="App schemas need tier 2 — an .xcodeproj, .xcworkspace, Tuist, or XcodeGen project — which a bare Package.swift never trips."
+						>
+							the app schemas
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="apple-design-gate installs alongside app-release, gated on the same tier-2 signal a lone Package.swift doesn't reach."
+						>
+							the gate agents
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<div class="quiz" data-quiz>
+				<p class="quiz-prompt">
+					Which level installs the app-release schema when app signals fire?
+				</p>
+				<ol class="quiz-choices">
+					<li>
+						<button
+							type="button"
+							data-correct
+							data-feedback="Tier 2 requires both the app signal and this level specifically — the schema and its gate agent exist nowhere else."
+						>
+							advanced
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="This level never reads the apple/ overlay directory at all, regardless of which signals fired."
+						>
+							standard
+						</button>
+					</li>
+					<li>
+						<button
+							type="button"
+							data-feedback="The plugin layer installs everywhere, but the app-release schema is gated to one level specifically."
+						>
+							everyone
+						</button>
+					</li>
+				</ol>
+				<p class="quiz-result" role="status" aria-live="polite"></p>
+			</div>
+
+			<footer class="lesson-foot">
+				<h2>Read this next</h2>
+				<p>
+					<strong
+						>Primary sources: the manifest that adds the plugin layer —
+						<a href="../../payload/base/settings.base.apple.json"
+							><code>settings.base.apple.json</code></a
+						> — and the chain itself —
+						<a href="../../payload/levels/advanced/apple/openspec/schemas/app-release/schema.yaml"
+							><code>app-release/schema.yaml</code></a
+						></strong
+					>. Read the <code>instruction:</code> fields, not the descriptions — the instruction is
+					the prompt the agent actually receives.
+				</p>
+			</footer>
+
+			<footer class="lesson-foot">
+				<h2>Reference</h2>
+				<p>
+					<a href="../reference/workflow-atlas.html">Workflow atlas</a> — the
+					<code>app-release</code> card, beside the other twelve. ·
+					<a href="../reference/router-card.html">Router card</a> — the same chain in the
+					decision tree, at the position <code>hotfix</code> yields to it.
+				</p>
+			</footer>
+
+			<div class="ask">
+				<p>
+					<strong>Test it against a real repo.</strong> "Does this repository have an
+					<code>.xcodeproj</code> anywhere at the root or one level down? If not, would the
+					apple-studio plugin still install on this level, and why?" Answering both halves is the
+					whole lesson.
+				</p>
+			</div>
+
+			<nav class="nav">
+				<span
+					><a href="0013-prove-it-reached-the-model.html">← Lesson 13 · Prove it reached the model</a
+					></span
+				>
+				<span><a href="../index.html">All lessons →</a></span>
+			</nav>
+		</main>
+		<script src="../assets/quiz.js"></script>
+	</body>
+</html>

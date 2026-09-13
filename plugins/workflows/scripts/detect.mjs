@@ -47,6 +47,47 @@ function webSignals(repoRoot) {
 }
 
 /**
+ * Two tiers, consumed separately by plan.mjs: app signals gate the advanced-level
+ * Apple content; any signal at all gates the apple plugin manifest. The xcodeproj
+ * scan goes one directory deep (monorepos put the app in ios/ or apps/) and no
+ * deeper — node_modules alone makes a full walk unaffordable, and the skip list
+ * below is why a vendored fixture can never masquerade as the user's app.
+ */
+const APPLE_SCAN_SKIP = new Set(['node_modules']);
+
+function appleSignals(repoRoot) {
+	const signals = [];
+	const bundles = (dir) =>
+		dirNames(dir).filter((n) => n.endsWith('.xcodeproj') || n.endsWith('.xcworkspace'));
+	for (const name of bundles(repoRoot)) signals.push(`app:${name}`);
+	for (const sub of dirNames(repoRoot)) {
+		if (sub.startsWith('.') || APPLE_SCAN_SKIP.has(sub)) continue;
+		for (const name of bundles(join(repoRoot, sub))) signals.push(`app:${sub}/${name}`);
+	}
+	if (existsSync(join(repoRoot, 'Project.swift'))) signals.push('app:Project.swift');
+	if (existsSync(join(repoRoot, 'Tuist'))) signals.push('app:Tuist');
+	if (existsSync(join(repoRoot, 'project.yml'))) signals.push('app:project.yml');
+	if (existsSync(join(repoRoot, 'Package.swift'))) signals.push('swift:Package.swift');
+	return signals.sort();
+}
+
+/**
+ * Read, never spawn: `claude mcp list` would be a subprocess for a question one JSON
+ * read answers. An unparseable .mcp.json counts as "not configured" — the human step
+ * this feeds errs toward telling the user how to connect Xcode, which costs nothing
+ * when it turns out already done.
+ */
+function xcodeMcpConfigured(repoRoot) {
+	const p = join(repoRoot, '.mcp.json');
+	if (!existsSync(p)) return false;
+	try {
+		return Boolean(JSON.parse(readFileSync(p, 'utf8'))?.mcpServers?.xcode);
+	} catch {
+		return false;
+	}
+}
+
+/**
  * `existsSync` only needs traversal permission on the parents; `readdirSync` needs read
  * permission on the directory itself. A permission-restricted directory can pass the
  * `existsSync` gate and then throw here — guarded so a locked-down `openspec/schemas`
@@ -174,6 +215,7 @@ export function detect(repoRoot, { run = defaultRun } = {}) {
 	const configYaml = join(openspecDir, 'config.yaml');
 	const configYml = join(openspecDir, 'config.yml');
 	const signals = webSignals(repoRoot);
+	const appleSigs = appleSignals(repoRoot);
 	const bun = run('bun', ['--version']);
 	const schemas = dirNames(join(openspecDir, 'schemas'));
 	const agentFiles = fileNames(join(repoRoot, '.claude', 'agents'), '.md');
@@ -182,6 +224,12 @@ export function detect(repoRoot, { run = defaultRun } = {}) {
 		repoRoot,
 		web: signals.length > 0,
 		webSignals: signals,
+		apple: {
+			app: appleSigs.some((s) => s.startsWith('app:')),
+			swift: appleSigs.length > 0,
+			signals: appleSigs,
+			xcodeMcpConfigured: xcodeMcpConfigured(repoRoot),
+		},
 		openspec: {
 			present: existsSync(openspecDir),
 			hasSpecs: existsSync(join(openspecDir, 'specs')),

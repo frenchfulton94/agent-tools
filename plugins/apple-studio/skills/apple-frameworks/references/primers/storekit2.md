@@ -1,4 +1,4 @@
-> verified: 2026-09 against https://developer.apple.com/documentation/storekit, https://developer.apple.com/documentation/storekit/in-app-purchase, https://developer.apple.com/documentation/storekit/transaction, https://developer.apple.com/documentation/appstoreservernotifications, https://developer.apple.com/documentation/storekittest, https://developer.apple.com/documentation/storekit/external-purchase
+> verified: 2026-09 against https://developer.apple.com/documentation/storekit.md, https://developer.apple.com/documentation/storekit/in-app-purchase.md, https://developer.apple.com/documentation/storekit/transaction.md, https://developer.apple.com/documentation/appstoreservernotifications.md, https://developer.apple.com/documentation/storekittest.md, https://developer.apple.com/documentation/storekit/external-purchase.md
 > sources: live docs
 
 # StoreKit 2
@@ -92,9 +92,9 @@ Note the granularity: External Purchase's sub-features (base link, custom link, 
 
 Fetch these when actually implementing:
 
-- https://developer.apple.com/documentation/storekit — framework index and full topic map
-- https://developer.apple.com/documentation/storekit/in-app-purchase — the StoreKit 2 API surface: `Product`, `Transaction`, purchase flow, offers, promoted purchases
-- https://developer.apple.com/documentation/storekit/transaction — transaction lifecycle, `VerificationResult`, JWS/server verification detail
-- https://developer.apple.com/documentation/appstoreservernotifications — server-to-server event notifications (V2), setup and opt-in requirements
-- https://developer.apple.com/documentation/storekittest — `SKTestSession` and automated/CI testing of purchase flows
-- https://developer.apple.com/documentation/storekit/external-purchase — External Purchase entitlements, Info.plist keys, and regional compliance requirements
+- https://developer.apple.com/documentation/storekit.md — framework index and full topic map
+- https://developer.apple.com/documentation/storekit/in-app-purchase.md — the StoreKit 2 API surface: `Product`, `Transaction`, purchase flow, offers, promoted purchases
+- https://developer.apple.com/documentation/storekit/transaction.md — transaction lifecycle, `VerificationResult`, JWS/server verification detail
+- https://developer.apple.com/documentation/appstoreservernotifications.md — server-to-server event notifications (V2), setup and opt-in requirements
+- https://developer.apple.com/documentation/storekittest.md — `SKTestSession` and automated/CI testing of purchase flows
+- https://developer.apple.com/documentation/storekit/external-purchase.md — External Purchase entitlements, Info.plist keys, and regional compliance requirements

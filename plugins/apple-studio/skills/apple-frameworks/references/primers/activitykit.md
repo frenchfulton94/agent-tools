@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://developer.apple.com/documentation/activitykit, https://developer.apple.com/tutorials/data/documentation/activitykit.json, https://developer.apple.com/documentation/activitykit/starting-and-updating-live-activities-with-activitykit-push-notifications, https://developer.apple.com/tutorials/data/documentation/activitykit/starting-and-updating-live-activities-with-activitykit-push-notifications.json, https://developer.apple.com/tutorials/data/documentation/activitykit/displaying-live-data-with-live-activities.json, https://developer.apple.com/tutorials/data/documentation/activitykit/Activity.json
+> verified: 2026-08 against https://developer.apple.com/documentation/activitykit.md, https://developer.apple.com/tutorials/data/documentation/activitykit.json, https://developer.apple.com/documentation/activitykit/starting-and-updating-live-activities-with-activitykit-push-notifications.md, https://developer.apple.com/tutorials/data/documentation/activitykit/starting-and-updating-live-activities-with-activitykit-push-notifications.json, https://developer.apple.com/tutorials/data/documentation/activitykit/displaying-live-data-with-live-activities.json, https://developer.apple.com/tutorials/data/documentation/activitykit/Activity.json
 > sources: live docs
 
 # ActivityKit
@@ -90,11 +90,11 @@ automatically from the 16.1+ framework baseline.
 
 ## Current docs
 
-- https://developer.apple.com/documentation/activitykit
-- https://developer.apple.com/documentation/activitykit/activity
-- https://developer.apple.com/documentation/activitykit/displaying-live-data-with-live-activities
-- https://developer.apple.com/documentation/activitykit/starting-and-updating-live-activities-with-activitykit-push-notifications
-- https://developer.apple.com/documentation/activitykit/creating-custom-views-for-live-activities
-- https://developer.apple.com/documentation/activitykit/launching-your-app-from-a-live-activity
-- https://developer.apple.com/documentation/bundleresources/information-property-list/nssupportsliveactivities
-- https://developer.apple.com/documentation/bundleresources/information-property-list/nssupportsliveactivitiesfrequentupdates
+- https://developer.apple.com/documentation/activitykit.md
+- https://developer.apple.com/documentation/activitykit/activity.md
+- https://developer.apple.com/documentation/activitykit/displaying-live-data-with-live-activities.md
+- https://developer.apple.com/documentation/activitykit/starting-and-updating-live-activities-with-activitykit-push-notifications.md
+- https://developer.apple.com/documentation/activitykit/creating-custom-views-for-live-activities.md
+- https://developer.apple.com/documentation/activitykit/launching-your-app-from-a-live-activity.md
+- https://developer.apple.com/documentation/bundleresources/information-property-list/nssupportsliveactivities.md
+- https://developer.apple.com/documentation/bundleresources/information-property-list/nssupportsliveactivitiesfrequentupdates.md

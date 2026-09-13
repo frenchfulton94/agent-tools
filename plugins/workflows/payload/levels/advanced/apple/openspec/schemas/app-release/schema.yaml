@@ -1,0 +1,82 @@
+name: app-release
+version: 1
+description: >
+  Workflow for shipping an Apple-platform build to TestFlight or the App
+  Store. Release work is checklist-and-evidence work, not code work: the
+  chain gates submission on preflight evidence and closes with a monitored
+  rollout. Without this schema, releases ride ad hoc checklists and the
+  steps the App Store punishes get skipped. Sources: the apple-studio
+  app-release skill (mechanics); the hotfix schema (verification-signal
+  discipline).
+
+artifacts:
+  - id: release-scope
+    generates: release-scope.md
+    description: What ships, as what version and build, decided and owned
+    template: release-scope.md
+    instruction: |
+      Record what this release contains and what number it ships as.
+      Decide marketing version against build number explicitly and say
+      why. List what merged since the last release from the archive and
+      git history — a decision record, not a changelog dump. Name the
+      phased-release intent and the go/no-go owner. Invoke the
+      apple-studio app-release skill for versioning rules (fallback:
+      CFBundleShortVersionString is user-facing, CFBundleVersion only
+      ever increases).
+    requires: []
+
+  - id: preflight
+    generates: preflight.md
+    description: Pre-submission checklist with named evidence per item
+    template: preflight.md
+    instruction: |
+      Work the checklist the App Store punishes you for skipping: signing
+      and provisioning, privacy manifest and nutrition-label answers
+      checked against what the code actually does, screenshots and
+      metadata, export compliance, review notes with a working demo
+      account. Every item names the evidence checked — a command run, a
+      screenshot, an App Store Connect page state — never a bare
+      checkbox. Invoke the apple-studio app-release skill for the current
+      requirements (fallback: the template lists the stable core).
+    requires: [release-scope]
+
+  - id: tasks
+    generates: tasks.md
+    description: Submission steps, each with its verification signal
+    template: tasks.md
+    instruction: |
+      List the archive, upload, TestFlight, and submission steps in
+      order. Every step names the observable signal proving it worked —
+      the build appears in App Store Connect processing, TestFlight
+      installs on a physical device, the review state transitions.
+      "It uploaded" without the signal is how releases stall silently. A
+      code defect discovered here stops the release: create a bugfix
+      change, link it, and resume only when it ships. The release chain
+      never absorbs code fixes.
+    requires: [preflight]
+
+  - id: post-release
+    generates: post-release.md
+    description: Phased-release monitoring plan, completed before archiving
+    template: post-release.md
+    instruction: |
+      Complete after the release ships and before archiving. Record the
+      monitoring plan: the crash-rate and key-metric thresholds that
+      pause the rollout, who watches them, and for how long. Link every
+      follow-up change this release surfaced. A release without a
+      monitoring plan is a release you learn about from reviews.
+    requires: [tasks]
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Execute the submission steps now, verifying each step's signal before
+    the next. Drive builds and uploads with the apple-studio xcode-loop
+    and app-release skills (fallback: xcodebuild archive, then upload via
+    Xcode's Organizer). A code defect stops the release and spawns a
+    bugfix change — fix nothing inline. Once released: complete
+    post-release.md with the monitoring plan before archiving. An urgent
+    fix already live in the store routes its code work through hotfix;
+    the expedited-review submission still goes through this chain,
+    referencing it.

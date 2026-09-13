@@ -1,4 +1,4 @@
-> verified: 2026-09 against https://developer.apple.com/documentation/corelocation, https://developer.apple.com/tutorials/data/documentation/corelocation.json, https://developer.apple.com/tutorials/data/documentation/corelocation/requesting-authorization-to-use-location-services.json, https://developer.apple.com/tutorials/data/documentation/corelocation/configuring-your-app-to-use-location-services.json, https://developer.apple.com/tutorials/data/documentation/corelocation/handling-location-updates-in-the-background.json
+> verified: 2026-09 against https://developer.apple.com/documentation/corelocation.md, https://developer.apple.com/tutorials/data/documentation/corelocation.json, https://developer.apple.com/tutorials/data/documentation/corelocation/requesting-authorization-to-use-location-services.json, https://developer.apple.com/tutorials/data/documentation/corelocation/configuring-your-app-to-use-location-services.json, https://developer.apple.com/tutorials/data/documentation/corelocation/handling-location-updates-in-the-background.json
 > sources: live docs
 
 # Core Location
@@ -106,13 +106,13 @@ rather than assuming it inherits the framework-level 2.0/10.6 floor. `CLGeocoder
 
 ## Current docs
 
-- https://developer.apple.com/documentation/corelocation
-- https://developer.apple.com/documentation/corelocation/requesting-authorization-to-use-location-services
-- https://developer.apple.com/documentation/corelocation/configuring-your-app-to-use-location-services
-- https://developer.apple.com/documentation/corelocation/handling-location-updates-in-the-background
-- https://developer.apple.com/documentation/corelocation/cllocationmanager
-- https://developer.apple.com/documentation/corelocation/clauthorizationstatus
-- https://developer.apple.com/documentation/corelocation/claccuracyauthorization
-- https://developer.apple.com/documentation/corelocation/clservicesession-pt7n
+- https://developer.apple.com/documentation/corelocation.md
+- https://developer.apple.com/documentation/corelocation/requesting-authorization-to-use-location-services.md
+- https://developer.apple.com/documentation/corelocation/configuring-your-app-to-use-location-services.md
+- https://developer.apple.com/documentation/corelocation/handling-location-updates-in-the-background.md
+- https://developer.apple.com/documentation/corelocation/cllocationmanager.md
+- https://developer.apple.com/documentation/corelocation/clauthorizationstatus.md
+- https://developer.apple.com/documentation/corelocation/claccuracyauthorization.md
+- https://developer.apple.com/documentation/corelocation/clservicesession-pt7n.md
 - https://developer.apple.com/documentation/corelocation/clbackgroundactivitysession
-- https://developer.apple.com/documentation/corelocation/cllocationupdate
+- https://developer.apple.com/documentation/corelocation/cllocationupdate.md

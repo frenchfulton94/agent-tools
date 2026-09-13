@@ -3,403 +3,403 @@
 > generated: 2026-09-02 from the developer.apple.com Technologies index
 > regenerate: authoring/apple-studio/pipeline/generate_catalog.sh (rerun each phase and after WWDC)
 
-- **Accelerate** — Make large-scale mathematical computations and image calculations, optimized for high performance and low energy consumption. — https://developer.apple.com/documentation/accelerate
-- **Accessibility** — Make your apps accessible to everyone who uses Apple devices. — https://developer.apple.com/documentation/accessibility
-- **Accessory Access** — Manage access to connected USB accessories. — https://developer.apple.com/documentation/accessoryaccess
-- **Accessory Live Activities** — Forward Live Activity alerts from iPhone to an accessory you develop. — https://developer.apple.com/documentation/accessoryliveactivities
-- **Accessory Notifications** — Receive forwarded iOS system notifications on an accessory that you develop. — https://developer.apple.com/documentation/accessorynotifications
-- **Accessory Transport Extension** — Transfer data securely to connected accessories that you develop. — https://developer.apple.com/documentation/accessorytransportextension
-- **AccessorySetupKit** — Enable privacy-preserving discovery and configuration of accessories. — https://developer.apple.com/documentation/accessorysetupkit
-- **Account & Organizational Data Sharing** — Provide people with the ability to authorize your apps and websites that access information about them on Apple REST services, like Roster API. — https://developer.apple.com/documentation/accountorganizationaldatasharing
-- **Account Data Transfer** — Download App Store information, app install, and push notification activity on behalf of people who use your app. — https://developer.apple.com/documentation/accountdatatransfer
-- **Accounts** — Help users access and manage their external accounts from within your app, without requiring them to enter login credentials. — https://developer.apple.com/documentation/accounts
-- **ActivityKit** — Share live updates from your app as Live Activities on iPhone, iPad, Apple Watch, and the Mac. — https://developer.apple.com/documentation/activitykit
-- **AdAttributionKit** — Present, process, and register postbacks for in-app ads in the App Store and alternative app marketplaces. — https://developer.apple.com/documentation/adattributionkit
-- **Address Book UI** — Access users’ contacts and display them in a graphical interface. — https://developer.apple.com/documentation/addressbookui
-- **Address Book** — Access the centralized database for storing users’ contacts. — https://developer.apple.com/documentation/addressbook
-- **AdServices** — Attribute app-download campaigns that originate from the App Store on iOS devices. — https://developer.apple.com/documentation/adservices
-- **AdSupport** — Provide apps with access to an advertising identifier. — https://developer.apple.com/documentation/adsupport
-- **Advanced Commerce API** — Support In-App Purchases through the App Store for exceptionally large catalogs of custom one-time purchases, subscriptions, and subscriptions with optional add-ons. — https://developer.apple.com/documentation/advancedcommerceapi
-- **AlarmKit** — Schedule prominent alarms and countdowns to help people manage their time. — https://developer.apple.com/documentation/alarmkit
-- **Analytics Reports** — A list of app development reports, their field descriptions, and glossaries. — https://developer.apple.com/documentation/analytics-reports
-- **App Clips** — Create a lightweight, in-the-moment experience or demo version for your app that’s instantly available. — https://developer.apple.com/documentation/appclip
-- **App Data Transfer** — Download App Store information and app-install activity about your app. — https://developer.apple.com/documentation/appdatatransfer
-- **App Intents Testing** — Test your app intents, entities, queries, and integration with system features like Siri or Spotlight. — https://developer.apple.com/documentation/appintentstesting
-- **App Intents** — Make content and actions discoverable by Apple Intelligence and support system experiences like Siri, Spotlight, Shortcuts, and widgets. — https://developer.apple.com/documentation/appintents
-- **App License Delivery SDK** — Secure the installation of alternative distribution apps on iOS or iPadOS devices by vending licenses from your web server. — https://developer.apple.com/documentation/applicensedeliverysdk
-- **App Store Connect API** — The data structure that represents an app store connect api resource. — https://developer.apple.com/documentation/appstoreconnectapi
-- **App Store Receipts** — Validate app and In-App Purchase receipts with the App Store. — https://developer.apple.com/documentation/appstorereceipts
-- **App Store Server API** — Manage your customers’ App Store transactions from your server. — https://developer.apple.com/documentation/appstoreserverapi
-- **App Store Server Notifications** — Monitor In-App Purchase events in real time and learn of unreported external purchase tokens, with server notifications from the App Store. — https://developer.apple.com/documentation/appstoreservernotifications
-- **App Tracking Transparency** — Request user authorization to access app-related data for tracking the user or the device. — https://developer.apple.com/documentation/apptrackingtransparency
-- **AppKit** — Construct and manage a graphical, event-driven user interface for your macOS app. — https://developer.apple.com/documentation/appkit
-- **Apple Ads Platform API** — Programmatically manage App Store and Apple Maps advertising campaigns through a single RESTful API. — https://developer.apple.com/documentation/apple-ads-platform-api
-- **Apple Ads** —  — https://developer.apple.com/documentation/apple_ads
-- **Apple Archive** — Perform multithreaded lossless compression of directories, files, and data. — https://developer.apple.com/documentation/applearchive
-- **Apple CryptoKit** — Perform cryptographic operations securely and efficiently. — https://developer.apple.com/documentation/cryptokit
-- **Apple Maps Server API** — Reduce API calls and conserve device power by streamlining your app’s georelated searches. — https://developer.apple.com/documentation/applemapsserverapi
-- **Apple Music API** — Integrate streaming music with catalog and personal content. — https://developer.apple.com/documentation/applemusicapi
-- **Apple Music Feed** — Access the content of the Apple Music Catalog in bulk. — https://developer.apple.com/documentation/applemusicfeed
-- **Apple News** — Design, create, and publish signature content for Apple News. — https://developer.apple.com/documentation/applenews
-- **Apple Pay Merchant Token Management API** — Retrieve and manage payment life-cycle events for your Apple Pay merchant tokens. — https://developer.apple.com/documentation/merchanttokennotificationservices
-- **Apple Pay Merchant Token Usage Information API** — Add details about your merchant token usage information package. — https://developer.apple.com/documentation/applepaymerchanttokenusageinformation
-- **Apple Pay on the Web** — Support Apple Pay on your website with JavaScript-based APIs. — https://developer.apple.com/documentation/applepayontheweb
-- **Apple Pay Web Merchant Registration API** — Manage merchant registration through your web platform. — https://developer.apple.com/documentation/applepaywebmerchantregistrationapi
-- **Apple Pencil** — Enhance your iPad app’s user experience by supporting drawing, handwriting, and other features of Apple Pencil. — https://developer.apple.com/documentation/applepencil
-- **Apple School Manager and Apple Business APIs** — Automate device management actions and access data about devices that enroll using Automated Device Enrollment with the Apple School Manager and Apple Business APIs. — https://developer.apple.com/documentation/apple-school-and-business-manager-api
-- **Apple silicon** — Get the resources you need to create software for Macs with Apple silicon. — https://developer.apple.com/documentation/apple-silicon
-- **Apple TV Feed** — Access the content of the Apple TV Catalog in bulk. — https://developer.apple.com/documentation/appletvfeed
+- **Accelerate** — Make large-scale mathematical computations and image calculations, optimized for high performance and low energy consumption. — https://developer.apple.com/documentation/accelerate.md
+- **Accessibility** — Make your apps accessible to everyone who uses Apple devices. — https://developer.apple.com/documentation/accessibility.md
+- **Accessory Access** — Manage access to connected USB accessories. — https://developer.apple.com/documentation/accessoryaccess.md
+- **Accessory Live Activities** — Forward Live Activity alerts from iPhone to an accessory you develop. — https://developer.apple.com/documentation/accessoryliveactivities.md
+- **Accessory Notifications** — Receive forwarded iOS system notifications on an accessory that you develop. — https://developer.apple.com/documentation/accessorynotifications.md
+- **Accessory Transport Extension** — Transfer data securely to connected accessories that you develop. — https://developer.apple.com/documentation/accessorytransportextension.md
+- **AccessorySetupKit** — Enable privacy-preserving discovery and configuration of accessories. — https://developer.apple.com/documentation/accessorysetupkit.md
+- **Account & Organizational Data Sharing** — Provide people with the ability to authorize your apps and websites that access information about them on Apple REST services, like Roster API. — https://developer.apple.com/documentation/accountorganizationaldatasharing.md
+- **Account Data Transfer** — Download App Store information, app install, and push notification activity on behalf of people who use your app. — https://developer.apple.com/documentation/accountdatatransfer.md
+- **Accounts** — Help users access and manage their external accounts from within your app, without requiring them to enter login credentials. — https://developer.apple.com/documentation/accounts.md
+- **ActivityKit** — Share live updates from your app as Live Activities on iPhone, iPad, Apple Watch, and the Mac. — https://developer.apple.com/documentation/activitykit.md
+- **AdAttributionKit** — Present, process, and register postbacks for in-app ads in the App Store and alternative app marketplaces. — https://developer.apple.com/documentation/adattributionkit.md
+- **Address Book UI** — Access users’ contacts and display them in a graphical interface. — https://developer.apple.com/documentation/addressbookui.md
+- **Address Book** — Access the centralized database for storing users’ contacts. — https://developer.apple.com/documentation/addressbook.md
+- **AdServices** — Attribute app-download campaigns that originate from the App Store on iOS devices. — https://developer.apple.com/documentation/adservices.md
+- **AdSupport** — Provide apps with access to an advertising identifier. — https://developer.apple.com/documentation/adsupport.md
+- **Advanced Commerce API** — Support In-App Purchases through the App Store for exceptionally large catalogs of custom one-time purchases, subscriptions, and subscriptions with optional add-ons. — https://developer.apple.com/documentation/advancedcommerceapi.md
+- **AlarmKit** — Schedule prominent alarms and countdowns to help people manage their time. — https://developer.apple.com/documentation/alarmkit.md
+- **Analytics Reports** — A list of app development reports, their field descriptions, and glossaries. — https://developer.apple.com/documentation/analytics-reports.md
+- **App Clips** — Create a lightweight, in-the-moment experience or demo version for your app that’s instantly available. — https://developer.apple.com/documentation/appclip.md
+- **App Data Transfer** — Download App Store information and app-install activity about your app. — https://developer.apple.com/documentation/appdatatransfer.md
+- **App Intents Testing** — Test your app intents, entities, queries, and integration with system features like Siri or Spotlight. — https://developer.apple.com/documentation/appintentstesting.md
+- **App Intents** — Make content and actions discoverable by Apple Intelligence and support system experiences like Siri, Spotlight, Shortcuts, and widgets. — https://developer.apple.com/documentation/appintents.md
+- **App License Delivery SDK** — Secure the installation of alternative distribution apps on iOS or iPadOS devices by vending licenses from your web server. — https://developer.apple.com/documentation/applicensedeliverysdk.md
+- **App Store Connect API** — The data structure that represents an app store connect api resource. — https://developer.apple.com/documentation/appstoreconnectapi.md
+- **App Store Receipts** — Validate app and In-App Purchase receipts with the App Store. — https://developer.apple.com/documentation/appstorereceipts.md
+- **App Store Server API** — Manage your customers’ App Store transactions from your server. — https://developer.apple.com/documentation/appstoreserverapi.md
+- **App Store Server Notifications** — Monitor In-App Purchase events in real time and learn of unreported external purchase tokens, with server notifications from the App Store. — https://developer.apple.com/documentation/appstoreservernotifications.md
+- **App Tracking Transparency** — Request user authorization to access app-related data for tracking the user or the device. — https://developer.apple.com/documentation/apptrackingtransparency.md
+- **AppKit** — Construct and manage a graphical, event-driven user interface for your macOS app. — https://developer.apple.com/documentation/appkit.md
+- **Apple Ads Platform API** — Programmatically manage App Store and Apple Maps advertising campaigns through a single RESTful API. — https://developer.apple.com/documentation/apple-ads-platform-api.md
+- **Apple Ads** —  — https://developer.apple.com/documentation/apple_ads.md
+- **Apple Archive** — Perform multithreaded lossless compression of directories, files, and data. — https://developer.apple.com/documentation/applearchive.md
+- **Apple CryptoKit** — Perform cryptographic operations securely and efficiently. — https://developer.apple.com/documentation/cryptokit.md
+- **Apple Maps Server API** — Reduce API calls and conserve device power by streamlining your app’s georelated searches. — https://developer.apple.com/documentation/applemapsserverapi.md
+- **Apple Music API** — Integrate streaming music with catalog and personal content. — https://developer.apple.com/documentation/applemusicapi.md
+- **Apple Music Feed** — Access the content of the Apple Music Catalog in bulk. — https://developer.apple.com/documentation/applemusicfeed.md
+- **Apple News** — Design, create, and publish signature content for Apple News. — https://developer.apple.com/documentation/applenews.md
+- **Apple Pay Merchant Token Management API** — Retrieve and manage payment life-cycle events for your Apple Pay merchant tokens. — https://developer.apple.com/documentation/merchanttokennotificationservices.md
+- **Apple Pay Merchant Token Usage Information API** — Add details about your merchant token usage information package. — https://developer.apple.com/documentation/applepaymerchanttokenusageinformation.md
+- **Apple Pay on the Web** — Support Apple Pay on your website with JavaScript-based APIs. — https://developer.apple.com/documentation/applepayontheweb.md
+- **Apple Pay Web Merchant Registration API** — Manage merchant registration through your web platform. — https://developer.apple.com/documentation/applepaywebmerchantregistrationapi.md
+- **Apple Pencil** — Enhance your iPad app’s user experience by supporting drawing, handwriting, and other features of Apple Pencil. — https://developer.apple.com/documentation/applepencil.md
+- **Apple School Manager and Apple Business APIs** — Automate device management actions and access data about devices that enroll using Automated Device Enrollment with the Apple School Manager and Apple Business APIs. — https://developer.apple.com/documentation/apple-school-and-business-manager-api.md
+- **Apple silicon** — Get the resources you need to create software for Macs with Apple silicon. — https://developer.apple.com/documentation/apple-silicon.md
+- **Apple TV Feed** — Access the content of the Apple TV Catalog in bulk. — https://developer.apple.com/documentation/appletvfeed.md
 - **Application Services** — Perform common application tasks. — https://developer.apple.com/documentation/applicationservices
-- **AppMigrationKit** — Perform a one-time transfer of your app’s on-device data to or from a device running another platform. — https://developer.apple.com/documentation/appmigrationkit
-- **ARKit** — Integrate hardware sensing features to produce augmented reality apps and games. — https://developer.apple.com/documentation/arkit
-- **Assets Library** — Access the assets in a user’s media library. — https://developer.apple.com/documentation/assetslibrary
-- **Assignables** — A framework that contains wrappers for a PDF to allow creation of an assessment and student work on that assessment. — https://developer.apple.com/documentation/assignables
-- **Audio Toolbox** — Record or play audio, convert formats, parse audio streams, and configure your audio session. — https://developer.apple.com/documentation/audiotoolbox
-- **Audio Unit** — Add sophisticated audio manipulation and processing capabilities to your app. — https://developer.apple.com/documentation/audiounit
-- **AudioAccessoryKit** — Support audio features like automatic audio switching. — https://developer.apple.com/documentation/audioaccessorykit
-- **AudioDriverKit** — Develop drivers for audio devices. — https://developer.apple.com/documentation/audiodriverkit
-- **Authentication Services** — Make it easy for users to log into apps and services. — https://developer.apple.com/documentation/authenticationservices
-- **Automated Device Enrollment** — Allow users of third-party MDM apps to add macOS and iOS devices to their organization. — https://developer.apple.com/documentation/automateddeviceenrollment
-- **Automatic Assessment Configuration** — Enter single-app mode and prevent students from accessing specific system features while taking an exam. — https://developer.apple.com/documentation/automaticassessmentconfiguration
-- **Automatic Sign-In API** — Manage sign-in tokens from your web server that facilitate single sign-on across the devices of your media-streaming service customers. — https://developer.apple.com/documentation/automaticsigninapi
-- **Automator** — Develop actions that the Automator app can load and run. View, edit, and run Automator workflows in your app. — https://developer.apple.com/documentation/automator
-- **AVFAudio** — Play, record, and process audio; configure your app’s system audio behavior. — https://developer.apple.com/documentation/avfaudio
-- **AVFoundation** — Work with audiovisual assets, control device cameras, process audio, and configure system audio interactions. — https://developer.apple.com/documentation/avfoundation
-- **AVKit** — Create user interfaces for media playback, complete with transport controls, chapter navigation, picture-in-picture support, and display of subtitles and closed captions. — https://developer.apple.com/documentation/avkit
-- **AVRouting** — Display custom destinations to stream media in the system route picker. — https://developer.apple.com/documentation/avrouting
-- **AVSystemRouting** — Send media from your app to a TV, speaker, or other device through a media device extension. — https://developer.apple.com/documentation/avsystemrouting
-- **Background Assets** — Improve or eliminate the time people wait while your app downloads assets. — https://developer.apple.com/documentation/backgroundassets
-- **Background Tasks** — Support background processing in your app by wrapping your app’s most critical work in framework-provided tasks. — https://developer.apple.com/documentation/backgroundtasks
-- **BlockStorageDeviceDriverKit** — Develop drivers for custom storage devices that communicate with the driver using custom protocols. — https://developer.apple.com/documentation/blockstoragedevicedriverkit
-- **BrowserEngineCore** — Integrate an alternative browser engine into your web browser app. — https://developer.apple.com/documentation/browserenginecore
-- **BrowserEngineKit** — Create a browser that renders content using an alternative browser engine. — https://developer.apple.com/documentation/browserenginekit
-- **BrowserKit** — Transfer browser data to another browser or check a device’s eligibility to use an alternative browser engine. — https://developer.apple.com/documentation/browserkit
-- **Bundle Resources** — Resources located in an app, framework, or plugin bundle. — https://developer.apple.com/documentation/bundleresources
-- **CallKit** — Display the system-calling UI for your app’s VoIP services, and coordinate your calling services with other apps and the system. — https://developer.apple.com/documentation/callkit
-- **CarKey** — Access the remote keyless features of configured vehicles in the Wallet app. — https://developer.apple.com/documentation/carkey
-- **CarPlay** — Integrate CarPlay in apps related to audio, communication, navigation, parking, EV charging, food ordering, and more. — https://developer.apple.com/documentation/carplay
-- **CFNetwork** — Access network services and handle changes in network configurations. Build on abstractions of network protocols to simplify tasks such as working with BSD sockets, administering HTTP and FTP servers, and managing Bonjour services. — https://developer.apple.com/documentation/cfnetwork
-- **Cinematic** — Integrate playback and editing of assets captured in Cinematic mode into your app. — https://developer.apple.com/documentation/cinematic
-- **CKTool JS** — Manage your CloudKit containers and databases from JavaScript. — https://developer.apple.com/documentation/cktooljs
-- **ClassKit Catalog API** — Declare the activities supported by your educational app through a web interface. — https://developer.apple.com/documentation/classkitcatalogapi
-- **ClassKit UI** — Display views that enable students to submit and withdraw assigned documents in your app. — https://developer.apple.com/documentation/classkitui
-- **ClassKit** — Enable teachers to assign activities from your app’s content and to view student progress. — https://developer.apple.com/documentation/classkit
-- **ClockKit** — Display app-specific data on the clock face. — https://developer.apple.com/documentation/clockkit
-- **CloudKit JS** — Provide access from your web app to your CloudKit app’s containers and databases. — https://developer.apple.com/documentation/cloudkitjs
-- **CloudKit** — Store structured app and user data in iCloud containers that all users of your app can share. — https://developer.apple.com/documentation/cloudkit
-- **Collaboration** — Find and access identities, that is, users and groups. Display the Identity Picker, which lets users create and select identities. — https://developer.apple.com/documentation/collaboration
-- **ColorSync** — Reproduce colors accurately across a range of input, output, and display devices. — https://developer.apple.com/documentation/colorsync
-- **Combine** — Customize handling of asynchronous events by combining event-processing operators. — https://developer.apple.com/documentation/combine
-- **Compositor Services** — Take control of the drawing environment and render your own content using Metal. — https://developer.apple.com/documentation/compositorservices
-- **Compression** — Leverage compression algorithms for lossless data compression. — https://developer.apple.com/documentation/compression
-- **Compute Graph** — Build and run custom particle effects and compute simulations for RealityKit using a programmable node graph. — https://developer.apple.com/documentation/computegraph
-- **ContactProvider** — Provide contacts managed by your app to the system-wide Contacts ecosystem. — https://developer.apple.com/documentation/contactprovider
-- **Contacts UI** — Provide an interface that allows people to display information about their contacts. — https://developer.apple.com/documentation/contactsui
-- **Contacts** — Access the user’s contacts, and format and localize contact information. — https://developer.apple.com/documentation/contacts
-- **Core AI** — Run AI models in your app on Apple silicon. — https://developer.apple.com/documentation/coreai
-- **Core Animation** — Render, compose, and animate visual elements. — https://developer.apple.com/documentation/quartzcore
-- **Core Audio Types** — Use specialized data types to interact with audio streams, complex buffers, and audiovisual timestamps. — https://developer.apple.com/documentation/coreaudiotypes
-- **Core Audio** — Use the Core Audio framework to interact with device’s audio hardware. — https://developer.apple.com/documentation/coreaudio
-- **Core Bluetooth** — Communicate with Bluetooth low energy and BR/EDR (“Classic”) Devices. — https://developer.apple.com/documentation/corebluetooth
-- **Core Data** — Persist or cache data on a single device, or sync data to multiple devices with CloudKit. — https://developer.apple.com/documentation/coredata
-- **Core Foundation** — Access low-level functions, primitive data types, and various collection types that are bridged seamlessly with the Foundation framework. — https://developer.apple.com/documentation/corefoundation
-- **Core Graphics** — Harness the power of Quartz technology to perform lightweight 2D rendering with high-fidelity output. Handle path-based drawing, antialiased rendering, gradients, images, color management, PDF documents, and more. — https://developer.apple.com/documentation/coregraphics
-- **Core Haptics** — Compose and play haptic patterns to customize your iOS app’s haptic feedback. — https://developer.apple.com/documentation/corehaptics
-- **Core HID** — Interact with keyboards, mice, and other human interface devices. — https://developer.apple.com/documentation/corehid
-- **Core Image** — Use built-in or custom filters to process still and video images. — https://developer.apple.com/documentation/coreimage
-- **Core Location** — Obtain the geographic location and orientation of a device. — https://developer.apple.com/documentation/corelocation
-- **Core Media I/O** — Securely support custom camera devices in macOS. — https://developer.apple.com/documentation/coremediaio
-- **Core Media** — Represent time-based audio-visual assets with essential data types. — https://developer.apple.com/documentation/coremedia
-- **Core MIDI** — Communicate with MIDI devices such as hardware keyboards and synthesizers. — https://developer.apple.com/documentation/coremidi
-- **Core ML** — Integrate machine learning models into your app. — https://developer.apple.com/documentation/coreml
-- **Core Motion** — Process accelerometer, gyroscope, pedometer, and environment-related events. — https://developer.apple.com/documentation/coremotion
-- **Core NFC** — Detect NFC tags, read messages that contain NDEF data, and save data to writable tags. — https://developer.apple.com/documentation/corenfc
+- **AppMigrationKit** — Perform a one-time transfer of your app’s on-device data to or from a device running another platform. — https://developer.apple.com/documentation/appmigrationkit.md
+- **ARKit** — Integrate hardware sensing features to produce augmented reality apps and games. — https://developer.apple.com/documentation/arkit.md
+- **Assets Library** — Access the assets in a user’s media library. — https://developer.apple.com/documentation/assetslibrary.md
+- **Assignables** — A framework that contains wrappers for a PDF to allow creation of an assessment and student work on that assessment. — https://developer.apple.com/documentation/assignables.md
+- **Audio Toolbox** — Record or play audio, convert formats, parse audio streams, and configure your audio session. — https://developer.apple.com/documentation/audiotoolbox.md
+- **Audio Unit** — Add sophisticated audio manipulation and processing capabilities to your app. — https://developer.apple.com/documentation/audiounit.md
+- **AudioAccessoryKit** — Support audio features like automatic audio switching. — https://developer.apple.com/documentation/audioaccessorykit.md
+- **AudioDriverKit** — Develop drivers for audio devices. — https://developer.apple.com/documentation/audiodriverkit.md
+- **Authentication Services** — Make it easy for users to log into apps and services. — https://developer.apple.com/documentation/authenticationservices.md
+- **Automated Device Enrollment** — Allow users of third-party MDM apps to add macOS and iOS devices to their organization. — https://developer.apple.com/documentation/automateddeviceenrollment.md
+- **Automatic Assessment Configuration** — Enter single-app mode and prevent students from accessing specific system features while taking an exam. — https://developer.apple.com/documentation/automaticassessmentconfiguration.md
+- **Automatic Sign-In API** — Manage sign-in tokens from your web server that facilitate single sign-on across the devices of your media-streaming service customers. — https://developer.apple.com/documentation/automaticsigninapi.md
+- **Automator** — Develop actions that the Automator app can load and run. View, edit, and run Automator workflows in your app. — https://developer.apple.com/documentation/automator.md
+- **AVFAudio** — Play, record, and process audio; configure your app’s system audio behavior. — https://developer.apple.com/documentation/avfaudio.md
+- **AVFoundation** — Work with audiovisual assets, control device cameras, process audio, and configure system audio interactions. — https://developer.apple.com/documentation/avfoundation.md
+- **AVKit** — Create user interfaces for media playback, complete with transport controls, chapter navigation, picture-in-picture support, and display of subtitles and closed captions. — https://developer.apple.com/documentation/avkit.md
+- **AVRouting** — Display custom destinations to stream media in the system route picker. — https://developer.apple.com/documentation/avrouting.md
+- **AVSystemRouting** — Send media from your app to a TV, speaker, or other device through a media device extension. — https://developer.apple.com/documentation/avsystemrouting.md
+- **Background Assets** — Improve or eliminate the time people wait while your app downloads assets. — https://developer.apple.com/documentation/backgroundassets.md
+- **Background Tasks** — Support background processing in your app by wrapping your app’s most critical work in framework-provided tasks. — https://developer.apple.com/documentation/backgroundtasks.md
+- **BlockStorageDeviceDriverKit** — Develop drivers for custom storage devices that communicate with the driver using custom protocols. — https://developer.apple.com/documentation/blockstoragedevicedriverkit.md
+- **BrowserEngineCore** — Integrate an alternative browser engine into your web browser app. — https://developer.apple.com/documentation/browserenginecore.md
+- **BrowserEngineKit** — Create a browser that renders content using an alternative browser engine. — https://developer.apple.com/documentation/browserenginekit.md
+- **BrowserKit** — Transfer browser data to another browser or check a device’s eligibility to use an alternative browser engine. — https://developer.apple.com/documentation/browserkit.md
+- **Bundle Resources** — Resources located in an app, framework, or plugin bundle. — https://developer.apple.com/documentation/bundleresources.md
+- **CallKit** — Display the system-calling UI for your app’s VoIP services, and coordinate your calling services with other apps and the system. — https://developer.apple.com/documentation/callkit.md
+- **CarKey** — Access the remote keyless features of configured vehicles in the Wallet app. — https://developer.apple.com/documentation/carkey.md
+- **CarPlay** — Integrate CarPlay in apps related to audio, communication, navigation, parking, EV charging, food ordering, and more. — https://developer.apple.com/documentation/carplay.md
+- **CFNetwork** — Access network services and handle changes in network configurations. Build on abstractions of network protocols to simplify tasks such as working with BSD sockets, administering HTTP and FTP servers, and managing Bonjour services. — https://developer.apple.com/documentation/cfnetwork.md
+- **Cinematic** — Integrate playback and editing of assets captured in Cinematic mode into your app. — https://developer.apple.com/documentation/cinematic.md
+- **CKTool JS** — Manage your CloudKit containers and databases from JavaScript. — https://developer.apple.com/documentation/cktooljs.md
+- **ClassKit Catalog API** — Declare the activities supported by your educational app through a web interface. — https://developer.apple.com/documentation/classkitcatalogapi.md
+- **ClassKit UI** — Display views that enable students to submit and withdraw assigned documents in your app. — https://developer.apple.com/documentation/classkitui.md
+- **ClassKit** — Enable teachers to assign activities from your app’s content and to view student progress. — https://developer.apple.com/documentation/classkit.md
+- **ClockKit** — Display app-specific data on the clock face. — https://developer.apple.com/documentation/clockkit.md
+- **CloudKit JS** — Provide access from your web app to your CloudKit app’s containers and databases. — https://developer.apple.com/documentation/cloudkitjs.md
+- **CloudKit** — Store structured app and user data in iCloud containers that all users of your app can share. — https://developer.apple.com/documentation/cloudkit.md
+- **Collaboration** — Find and access identities, that is, users and groups. Display the Identity Picker, which lets users create and select identities. — https://developer.apple.com/documentation/collaboration.md
+- **ColorSync** — Reproduce colors accurately across a range of input, output, and display devices. — https://developer.apple.com/documentation/colorsync.md
+- **Combine** — Customize handling of asynchronous events by combining event-processing operators. — https://developer.apple.com/documentation/combine.md
+- **Compositor Services** — Take control of the drawing environment and render your own content using Metal. — https://developer.apple.com/documentation/compositorservices.md
+- **Compression** — Leverage compression algorithms for lossless data compression. — https://developer.apple.com/documentation/compression.md
+- **Compute Graph** — Build and run custom particle effects and compute simulations for RealityKit using a programmable node graph. — https://developer.apple.com/documentation/computegraph.md
+- **ContactProvider** — Provide contacts managed by your app to the system-wide Contacts ecosystem. — https://developer.apple.com/documentation/contactprovider.md
+- **Contacts UI** — Provide an interface that allows people to display information about their contacts. — https://developer.apple.com/documentation/contactsui.md
+- **Contacts** — Access the user’s contacts, and format and localize contact information. — https://developer.apple.com/documentation/contacts.md
+- **Core AI** — Run AI models in your app on Apple silicon. — https://developer.apple.com/documentation/coreai.md
+- **Core Animation** — Render, compose, and animate visual elements. — https://developer.apple.com/documentation/quartzcore.md
+- **Core Audio Types** — Use specialized data types to interact with audio streams, complex buffers, and audiovisual timestamps. — https://developer.apple.com/documentation/coreaudiotypes.md
+- **Core Audio** — Use the Core Audio framework to interact with device’s audio hardware. — https://developer.apple.com/documentation/coreaudio.md
+- **Core Bluetooth** — Communicate with Bluetooth low energy and BR/EDR (“Classic”) Devices. — https://developer.apple.com/documentation/corebluetooth.md
+- **Core Data** — Persist or cache data on a single device, or sync data to multiple devices with CloudKit. — https://developer.apple.com/documentation/coredata.md
+- **Core Foundation** — Access low-level functions, primitive data types, and various collection types that are bridged seamlessly with the Foundation framework. — https://developer.apple.com/documentation/corefoundation.md
+- **Core Graphics** — Harness the power of Quartz technology to perform lightweight 2D rendering with high-fidelity output. Handle path-based drawing, antialiased rendering, gradients, images, color management, PDF documents, and more. — https://developer.apple.com/documentation/coregraphics.md
+- **Core Haptics** — Compose and play haptic patterns to customize your iOS app’s haptic feedback. — https://developer.apple.com/documentation/corehaptics.md
+- **Core HID** — Interact with keyboards, mice, and other human interface devices. — https://developer.apple.com/documentation/corehid.md
+- **Core Image** — Use built-in or custom filters to process still and video images. — https://developer.apple.com/documentation/coreimage.md
+- **Core Location** — Obtain the geographic location and orientation of a device. — https://developer.apple.com/documentation/corelocation.md
+- **Core Media I/O** — Securely support custom camera devices in macOS. — https://developer.apple.com/documentation/coremediaio.md
+- **Core Media** — Represent time-based audio-visual assets with essential data types. — https://developer.apple.com/documentation/coremedia.md
+- **Core MIDI** — Communicate with MIDI devices such as hardware keyboards and synthesizers. — https://developer.apple.com/documentation/coremidi.md
+- **Core ML** — Integrate machine learning models into your app. — https://developer.apple.com/documentation/coreml.md
+- **Core Motion** — Process accelerometer, gyroscope, pedometer, and environment-related events. — https://developer.apple.com/documentation/coremotion.md
+- **Core NFC** — Detect NFC tags, read messages that contain NDEF data, and save data to writable tags. — https://developer.apple.com/documentation/corenfc.md
 - **Core Services** — Access and manage key operating system services, such as launch and identity services. — https://developer.apple.com/documentation/coreservices
-- **Core Spotlight** — Add search capabilities to your app, and index your content so people can find it from Spotlight and Safari. — https://developer.apple.com/documentation/corespotlight
-- **Core Telephony** — Access information about a user’s cellular service provider, such as its unique identifier and whether the carrier allows VoIP. — https://developer.apple.com/documentation/coretelephony
-- **Core Text** — Create text layouts, optimize font handling, and access font metrics and glyph data. — https://developer.apple.com/documentation/coretext
-- **Core Transferable** — Declare a transfer representation for your model types to participate in system sharing and data transfer operations. — https://developer.apple.com/documentation/coretransferable
-- **Core Video** — Process digital video, including manipulation of individual frames, using a pipeline-based API and support for both Metal and OpenGL. — https://developer.apple.com/documentation/corevideo
-- **Core WLAN** — Query AirPort interfaces and choose wireless networks. — https://developer.apple.com/documentation/corewlan
-- **CoreAudioKit** — Add user interfaces to audio units. — https://developer.apple.com/documentation/coreaudiokit
-- **CoreLocationUI** — Streamline access to users’ location data through a standard, secure UI. — https://developer.apple.com/documentation/corelocationui
-- **CrashReportExtension** — Inspect crashed processes to create crash reports. — https://developer.apple.com/documentation/crashreportextension
-- **Create ML Components** — Create more customizable machine learning models in your app. — https://developer.apple.com/documentation/createmlcomponents
-- **Create ML** — Create machine learning models for use in your app. — https://developer.apple.com/documentation/createml
-- **CryptoTokenKit** — Access security tokens and the cryptographic assets they store. — https://developer.apple.com/documentation/cryptotokenkit
-- **Darwin Notify** — Send and receive Darwin notifications. — https://developer.apple.com/documentation/darwinnotify
-- **DataDetection** — Access and utilize common types of data that the data detection system matches. — https://developer.apple.com/documentation/datadetection
-- **Declared Age Range** — Create age-appropriate experiences in your app by asking people to share their age range. — https://developer.apple.com/documentation/declaredagerange
-- **DeveloperToolsSupport** — Expose custom views and modifiers in the Xcode library. — https://developer.apple.com/documentation/developertoolssupport
-- **Device Activity** — Monitor device activity with your app extension while maintaining privacy. — https://developer.apple.com/documentation/deviceactivity
-- **Device Management** — Manage your organization’s devices remotely. — https://developer.apple.com/documentation/devicemanagement
-- **DeviceCheck** — Reduce fraudulent use of your services by managing device state and asserting app integrity. — https://developer.apple.com/documentation/devicecheck
-- **DeviceDiscoveryExtension** — Stream media to a third-party device that a user selects in a system menu. — https://developer.apple.com/documentation/devicediscoveryextension
-- **DeviceDiscoveryUI** — Display an interface that lets people connect iOS, iPadOS, tvOS, watchOS, and Mac Catalyst apps over peer-to-peer networks. — https://developer.apple.com/documentation/devicediscoveryui
-- **Disk Arbitration** — Provides mechanisms to register and block disk mount or unmount events. — https://developer.apple.com/documentation/diskarbitration
-- **DiskImageKit** — Create, open, and manage disk images. — https://developer.apple.com/documentation/diskimagekit
-- **Dispatch** — Execute code concurrently on multicore hardware by submitting work to dispatch queues managed by the system. — https://developer.apple.com/documentation/dispatch
-- **Distributed** — Build systems that run distributed code across multiple processes and devices. — https://developer.apple.com/documentation/distributed
-- **dnssd** — Discover, publish, and resolve network services on a local area or wide area network. — https://developer.apple.com/documentation/dnssd
-- **DockKit** — Interact with accessories that track subjects on camera as they move around. — https://developer.apple.com/documentation/dockkit
-- **DriverKit** — Develop device drivers that run in user space. — https://developer.apple.com/documentation/driverkit
-- **Endpoint Security** — Develop system extensions that enhance user security. — https://developer.apple.com/documentation/endpointsecurity
-- **EnergyKit** — Provide grid forecasts and energy insights to help people optimize their electricity usage. — https://developer.apple.com/documentation/energykit
-- **Enterprise Program API** — Automate the tasks you perform on the Apple Developer website. — https://developer.apple.com/documentation/enterpriseprogramapi
-- **Evaluations** — Measure the quality of your app’s intelligence-powered features. — https://developer.apple.com/documentation/evaluations
-- **EventKit UI** — Display an interface for viewing, selecting, and editing calendar events and reminders. — https://developer.apple.com/documentation/eventkitui
-- **EventKit** — Create, view, and edit calendar and reminder events. — https://developer.apple.com/documentation/eventkit
-- **Exception Handling** — Monitor and debug exceptional conditions in code. — https://developer.apple.com/documentation/exceptionhandling
-- **Execution Policy** — Provide functionality so developer tools can manage execution policy exceptions. — https://developer.apple.com/documentation/executionpolicy
-- **Exposure Notification** — Implement a COVID-19 exposure notification system that protects user privacy. — https://developer.apple.com/documentation/exposurenotification
-- **ExtensionFoundation** — Create executable bundles to extend the functionality of other apps. — https://developer.apple.com/documentation/extensionfoundation
-- **ExtensionKit** — Make custom UI from an app extension available in a host app, and manage the list of enabled and disabled app extensions. — https://developer.apple.com/documentation/extensionkit
-- **External Accessory** — Communicate with accessories that connect to a device with the Apple Lightning connector, or with Bluetooth wireless technology. — https://developer.apple.com/documentation/externalaccessory
-- **External Purchase Server API** — Send and manage reports you send to Apple for tokens you receive when your app provides external purchases for digital goods and services. — https://developer.apple.com/documentation/externalpurchaseserverapi
-- **Family Controls** — Authorize your app to provide parental controls on a device. — https://developer.apple.com/documentation/familycontrols
-- **File Provider UI** — Add actions to the document browser’s context menu. — https://developer.apple.com/documentation/fileproviderui
-- **File Provider** — An extension other apps use to access files and folders managed by your app and synced with a remote storage. — https://developer.apple.com/documentation/fileprovider
-- **FinanceKit** — Access financial data and interact with Apple Card, Apple Cash, and orders in Wallet. — https://developer.apple.com/documentation/financekit
-- **FinanceKitUI** — Add orders to Apple Wallet. — https://developer.apple.com/documentation/financekitui
-- **Finder Sync** — Modify the Finder’s user interface to express file synchronization and control. — https://developer.apple.com/documentation/findersync
-- **Force Feedback** — Control force feedback devices attached to the system. Develop plug-ins that enable communication with force feedback hardware. — https://developer.apple.com/documentation/forcefeedback
-- **Foundation Models** — Perform tasks with models that specialize in language understanding, structured output, and tool calling. — https://developer.apple.com/documentation/foundationmodels
-- **Foundation** — Access essential data types, collections, and operating-system services to define the base layer of functionality for your app. — https://developer.apple.com/documentation/foundation
-- **Foveated Streaming** — Foveated Streaming enables visionOS apps to display high-resolution, low-latency immersive content from streaming endpoints. — https://developer.apple.com/documentation/foveatedstreaming
-- **FSKit** — Implement a file system that runs in user space. — https://developer.apple.com/documentation/fskit
-- **Game Controller** — Support hardware game controllers in your game. — https://developer.apple.com/documentation/gamecontroller
-- **GameKit** — Enable players to interact with friends, compare leaderboard ranks, earn achievements, and participate in multiplayer games. — https://developer.apple.com/documentation/gamekit
-- **GameplayKit** — Architect and organize your game logic. Incorporate common gameplay behaviors such as random number generation, artificial intelligence, pathfinding, and agent behavior. — https://developer.apple.com/documentation/gameplaykit
-- **GameSave** — Store and sync your application’s save files in iCloud. — https://developer.apple.com/documentation/gamesave
-- **GeoToolbox** — Determine place descriptor information for map coordinates. — https://developer.apple.com/documentation/geotoolbox
-- **GLKit** — Speed up OpenGL ES or OpenGL app development. Use math libraries, background texture loading, pre-created shader effects, and a standard view and view controller to implement your rendering loop. — https://developer.apple.com/documentation/glkit
-- **Group Activities** — Create app-specific activities your users can share and experience together. — https://developer.apple.com/documentation/groupactivities
-- **GSS** — Conduct secure, authenticated network transactions. — https://developer.apple.com/documentation/gss
-- **HealthKit** — Access and share health and fitness data while maintaining the user’s privacy and control. — https://developer.apple.com/documentation/healthkit
-- **HIDDriverKit** — Develop drivers for human-interface devices, such as keyboards, pointing devices, and digitizers like pens and touch pads. — https://developer.apple.com/documentation/hiddriverkit
-- **HomeKit** — Configure, control, and communicate with home automation accessories. — https://developer.apple.com/documentation/homekit
-- **HTTP Live Streaming** — Send audio and video to iOS, tvOS, and macOS devices. — https://developer.apple.com/documentation/http-live-streaming
+- **Core Spotlight** — Add search capabilities to your app, and index your content so people can find it from Spotlight and Safari. — https://developer.apple.com/documentation/corespotlight.md
+- **Core Telephony** — Access information about a user’s cellular service provider, such as its unique identifier and whether the carrier allows VoIP. — https://developer.apple.com/documentation/coretelephony.md
+- **Core Text** — Create text layouts, optimize font handling, and access font metrics and glyph data. — https://developer.apple.com/documentation/coretext.md
+- **Core Transferable** — Declare a transfer representation for your model types to participate in system sharing and data transfer operations. — https://developer.apple.com/documentation/coretransferable.md
+- **Core Video** — Process digital video, including manipulation of individual frames, using a pipeline-based API and support for both Metal and OpenGL. — https://developer.apple.com/documentation/corevideo.md
+- **Core WLAN** — Query AirPort interfaces and choose wireless networks. — https://developer.apple.com/documentation/corewlan.md
+- **CoreAudioKit** — Add user interfaces to audio units. — https://developer.apple.com/documentation/coreaudiokit.md
+- **CoreLocationUI** — Streamline access to users’ location data through a standard, secure UI. — https://developer.apple.com/documentation/corelocationui.md
+- **CrashReportExtension** — Inspect crashed processes to create crash reports. — https://developer.apple.com/documentation/crashreportextension.md
+- **Create ML Components** — Create more customizable machine learning models in your app. — https://developer.apple.com/documentation/createmlcomponents.md
+- **Create ML** — Create machine learning models for use in your app. — https://developer.apple.com/documentation/createml.md
+- **CryptoTokenKit** — Access security tokens and the cryptographic assets they store. — https://developer.apple.com/documentation/cryptotokenkit.md
+- **Darwin Notify** — Send and receive Darwin notifications. — https://developer.apple.com/documentation/darwinnotify.md
+- **DataDetection** — Access and utilize common types of data that the data detection system matches. — https://developer.apple.com/documentation/datadetection.md
+- **Declared Age Range** — Create age-appropriate experiences in your app by asking people to share their age range. — https://developer.apple.com/documentation/declaredagerange.md
+- **DeveloperToolsSupport** — Expose custom views and modifiers in the Xcode library. — https://developer.apple.com/documentation/developertoolssupport.md
+- **Device Activity** — Monitor device activity with your app extension while maintaining privacy. — https://developer.apple.com/documentation/deviceactivity.md
+- **Device Management** — Manage your organization’s devices remotely. — https://developer.apple.com/documentation/devicemanagement.md
+- **DeviceCheck** — Reduce fraudulent use of your services by managing device state and asserting app integrity. — https://developer.apple.com/documentation/devicecheck.md
+- **DeviceDiscoveryExtension** — Stream media to a third-party device that a user selects in a system menu. — https://developer.apple.com/documentation/devicediscoveryextension.md
+- **DeviceDiscoveryUI** — Display an interface that lets people connect iOS, iPadOS, tvOS, watchOS, and Mac Catalyst apps over peer-to-peer networks. — https://developer.apple.com/documentation/devicediscoveryui.md
+- **Disk Arbitration** — Provides mechanisms to register and block disk mount or unmount events. — https://developer.apple.com/documentation/diskarbitration.md
+- **DiskImageKit** — Create, open, and manage disk images. — https://developer.apple.com/documentation/diskimagekit.md
+- **Dispatch** — Execute code concurrently on multicore hardware by submitting work to dispatch queues managed by the system. — https://developer.apple.com/documentation/dispatch.md
+- **Distributed** — Build systems that run distributed code across multiple processes and devices. — https://developer.apple.com/documentation/distributed.md
+- **dnssd** — Discover, publish, and resolve network services on a local area or wide area network. — https://developer.apple.com/documentation/dnssd.md
+- **DockKit** — Interact with accessories that track subjects on camera as they move around. — https://developer.apple.com/documentation/dockkit.md
+- **DriverKit** — Develop device drivers that run in user space. — https://developer.apple.com/documentation/driverkit.md
+- **Endpoint Security** — Develop system extensions that enhance user security. — https://developer.apple.com/documentation/endpointsecurity.md
+- **EnergyKit** — Provide grid forecasts and energy insights to help people optimize their electricity usage. — https://developer.apple.com/documentation/energykit.md
+- **Enterprise Program API** — Automate the tasks you perform on the Apple Developer website. — https://developer.apple.com/documentation/enterpriseprogramapi.md
+- **Evaluations** — Measure the quality of your app’s intelligence-powered features. — https://developer.apple.com/documentation/evaluations.md
+- **EventKit UI** — Display an interface for viewing, selecting, and editing calendar events and reminders. — https://developer.apple.com/documentation/eventkitui.md
+- **EventKit** — Create, view, and edit calendar and reminder events. — https://developer.apple.com/documentation/eventkit.md
+- **Exception Handling** — Monitor and debug exceptional conditions in code. — https://developer.apple.com/documentation/exceptionhandling.md
+- **Execution Policy** — Provide functionality so developer tools can manage execution policy exceptions. — https://developer.apple.com/documentation/executionpolicy.md
+- **Exposure Notification** — Implement a COVID-19 exposure notification system that protects user privacy. — https://developer.apple.com/documentation/exposurenotification.md
+- **ExtensionFoundation** — Create executable bundles to extend the functionality of other apps. — https://developer.apple.com/documentation/extensionfoundation.md
+- **ExtensionKit** — Make custom UI from an app extension available in a host app, and manage the list of enabled and disabled app extensions. — https://developer.apple.com/documentation/extensionkit.md
+- **External Accessory** — Communicate with accessories that connect to a device with the Apple Lightning connector, or with Bluetooth wireless technology. — https://developer.apple.com/documentation/externalaccessory.md
+- **External Purchase Server API** — Send and manage reports you send to Apple for tokens you receive when your app provides external purchases for digital goods and services. — https://developer.apple.com/documentation/externalpurchaseserverapi.md
+- **Family Controls** — Authorize your app to provide parental controls on a device. — https://developer.apple.com/documentation/familycontrols.md
+- **File Provider UI** — Add actions to the document browser’s context menu. — https://developer.apple.com/documentation/fileproviderui.md
+- **File Provider** — An extension other apps use to access files and folders managed by your app and synced with a remote storage. — https://developer.apple.com/documentation/fileprovider.md
+- **FinanceKit** — Access financial data and interact with Apple Card, Apple Cash, and orders in Wallet. — https://developer.apple.com/documentation/financekit.md
+- **FinanceKitUI** — Add orders to Apple Wallet. — https://developer.apple.com/documentation/financekitui.md
+- **Finder Sync** — Modify the Finder’s user interface to express file synchronization and control. — https://developer.apple.com/documentation/findersync.md
+- **Force Feedback** — Control force feedback devices attached to the system. Develop plug-ins that enable communication with force feedback hardware. — https://developer.apple.com/documentation/forcefeedback.md
+- **Foundation Models** — Perform tasks with models that specialize in language understanding, structured output, and tool calling. — https://developer.apple.com/documentation/foundationmodels.md
+- **Foundation** — Access essential data types, collections, and operating-system services to define the base layer of functionality for your app. — https://developer.apple.com/documentation/foundation.md
+- **Foveated Streaming** — Foveated Streaming enables visionOS apps to display high-resolution, low-latency immersive content from streaming endpoints. — https://developer.apple.com/documentation/foveatedstreaming.md
+- **FSKit** — Implement a file system that runs in user space. — https://developer.apple.com/documentation/fskit.md
+- **Game Controller** — Support hardware game controllers in your game. — https://developer.apple.com/documentation/gamecontroller.md
+- **GameKit** — Enable players to interact with friends, compare leaderboard ranks, earn achievements, and participate in multiplayer games. — https://developer.apple.com/documentation/gamekit.md
+- **GameplayKit** — Architect and organize your game logic. Incorporate common gameplay behaviors such as random number generation, artificial intelligence, pathfinding, and agent behavior. — https://developer.apple.com/documentation/gameplaykit.md
+- **GameSave** — Store and sync your application’s save files in iCloud. — https://developer.apple.com/documentation/gamesave.md
+- **GeoToolbox** — Determine place descriptor information for map coordinates. — https://developer.apple.com/documentation/geotoolbox.md
+- **GLKit** — Speed up OpenGL ES or OpenGL app development. Use math libraries, background texture loading, pre-created shader effects, and a standard view and view controller to implement your rendering loop. — https://developer.apple.com/documentation/glkit.md
+- **Group Activities** — Create app-specific activities your users can share and experience together. — https://developer.apple.com/documentation/groupactivities.md
+- **GSS** — Conduct secure, authenticated network transactions. — https://developer.apple.com/documentation/gss.md
+- **HealthKit** — Access and share health and fitness data while maintaining the user’s privacy and control. — https://developer.apple.com/documentation/healthkit.md
+- **HIDDriverKit** — Develop drivers for human-interface devices, such as keyboards, pointing devices, and digitizers like pens and touch pads. — https://developer.apple.com/documentation/hiddriverkit.md
+- **HomeKit** — Configure, control, and communicate with home automation accessories. — https://developer.apple.com/documentation/homekit.md
+- **HTTP Live Streaming** — Send audio and video to iOS, tvOS, and macOS devices. — https://developer.apple.com/documentation/http-live-streaming.md
 - **Human Interface Guidelines** — The HIG contains guidance and best practices that can help you design a great experience for any Apple platform. — https://developer.apple.com/design/human-interface-guidelines
-- **hvf** — Render Hierarchical Variable Font (HVF) glyph outlines, and support font editors and related tools. — https://developer.apple.com/documentation/hvf
-- **Hypervisor** — Build virtualization solutions on top of a lightweight hypervisor, without third-party kernel extensions. — https://developer.apple.com/documentation/hypervisor
-- **iAd** — The Apple Search Ads iAd Attribution API is a legacy framework for attributing app data that originates from Apple Search Ads campaigns on iOS devices. — https://developer.apple.com/documentation/iad
-- **IdentityDocumentServices** — Share mobile documents using the Digital Credentials API. — https://developer.apple.com/documentation/identitydocumentservices
-- **IdentityDocumentServicesUI** — Provide an interface so people can present mobile documents. — https://developer.apple.com/documentation/identitydocumentservicesui
-- **Image I/O** — Read and write most image file formats, and access an image’s metadata. — https://developer.apple.com/documentation/imageio
-- **Image Playground** — Present a system interface to generate images based on descriptive information. — https://developer.apple.com/documentation/imageplayground
-- **ImageCaptureCore** — Browse for media devices and control them programmatically from your app. — https://developer.apple.com/documentation/imagecapturecore
-- **Immersive Media Support** — Read and write essential Apple Immersive Video metadata. — https://developer.apple.com/documentation/immersivemediasupport
-- **InputMethodKit** — Develop input methods and manage communication with client applications, candidates windows, and input method modes. — https://developer.apple.com/documentation/inputmethodkit
+- **hvf** — Render Hierarchical Variable Font (HVF) glyph outlines, and support font editors and related tools. — https://developer.apple.com/documentation/hvf.md
+- **Hypervisor** — Build virtualization solutions on top of a lightweight hypervisor, without third-party kernel extensions. — https://developer.apple.com/documentation/hypervisor.md
+- **iAd** — The Apple Search Ads iAd Attribution API is a legacy framework for attributing app data that originates from Apple Search Ads campaigns on iOS devices. — https://developer.apple.com/documentation/iad.md
+- **IdentityDocumentServices** — Share mobile documents using the Digital Credentials API. — https://developer.apple.com/documentation/identitydocumentservices.md
+- **IdentityDocumentServicesUI** — Provide an interface so people can present mobile documents. — https://developer.apple.com/documentation/identitydocumentservicesui.md
+- **Image I/O** — Read and write most image file formats, and access an image’s metadata. — https://developer.apple.com/documentation/imageio.md
+- **Image Playground** — Present a system interface to generate images based on descriptive information. — https://developer.apple.com/documentation/imageplayground.md
+- **ImageCaptureCore** — Browse for media devices and control them programmatically from your app. — https://developer.apple.com/documentation/imagecapturecore.md
+- **Immersive Media Support** — Read and write essential Apple Immersive Video metadata. — https://developer.apple.com/documentation/immersivemediasupport.md
+- **InputMethodKit** — Develop input methods and manage communication with client applications, candidates windows, and input method modes. — https://developer.apple.com/documentation/inputmethodkit.md
 - **Installer JS** — Manage and customize the installation and distribution experience. — https://developer.apple.com/documentation/installer_js
-- **IOBluetooth UI** — Present an interface through which users can pair their devices with other Bluetooth devices. — https://developer.apple.com/documentation/iobluetoothui
-- **IOBluetooth** — Gain user-space access to Bluetooth devices. — https://developer.apple.com/documentation/iobluetooth
+- **IOBluetooth UI** — Present an interface through which users can pair their devices with other Bluetooth devices. — https://developer.apple.com/documentation/iobluetoothui.md
+- **IOBluetooth** — Gain user-space access to Bluetooth devices. — https://developer.apple.com/documentation/iobluetooth.md
 - **IOKit** — Access hardware devices and drivers from your apps and services. — https://developer.apple.com/documentation/iokit
-- **iOS & iPadOS Release Notes** — Learn about changes to the iOS & iPadOS SDK. — https://developer.apple.com/documentation/ios-ipados-release-notes
-- **IOSurface** — Share hardware-accelerated buffer data (framebuffers and textures) across multiple processes. Manage image memory more efficiently. — https://developer.apple.com/documentation/iosurface
-- **IOUSBHost** — Create host-mode user space drivers for USB devices. — https://developer.apple.com/documentation/iousbhost
-- **iTunes Library** — Retrieve the properties of the media in the user’s iTunes library. — https://developer.apple.com/documentation/ituneslibrary
-- **iWork Document Exporting API** — Convert iWork documents to Portable Document Format (PDF) files using a web API. — https://developer.apple.com/documentation/iworkdocumentexportingapi
-- **JavaScriptCore** — Evaluate JavaScript programs from within an app, and support JavaScript scripting of your app. — https://developer.apple.com/documentation/javascriptcore
-- **Journaling Suggestions** — Display a set of recent, personal events that inspire someone to contribute to your app’s creative workflow. — https://developer.apple.com/documentation/journalingsuggestions
+- **iOS & iPadOS Release Notes** — Learn about changes to the iOS & iPadOS SDK. — https://developer.apple.com/documentation/ios-ipados-release-notes.md
+- **IOSurface** — Share hardware-accelerated buffer data (framebuffers and textures) across multiple processes. Manage image memory more efficiently. — https://developer.apple.com/documentation/iosurface.md
+- **IOUSBHost** — Create host-mode user space drivers for USB devices. — https://developer.apple.com/documentation/iousbhost.md
+- **iTunes Library** — Retrieve the properties of the media in the user’s iTunes library. — https://developer.apple.com/documentation/ituneslibrary.md
+- **iWork Document Exporting API** — Convert iWork documents to Portable Document Format (PDF) files using a web API. — https://developer.apple.com/documentation/iworkdocumentexportingapi.md
+- **JavaScriptCore** — Evaluate JavaScript programs from within an app, and support JavaScript scripting of your app. — https://developer.apple.com/documentation/javascriptcore.md
+- **Journaling Suggestions** — Display a set of recent, personal events that inspire someone to contribute to your app’s creative workflow. — https://developer.apple.com/documentation/journalingsuggestions.md
 - **Kernel** — Develop kernel-resident device drivers and kernel extensions. — https://developer.apple.com/documentation/kernel
-- **Latent Semantic Mapping** — Classify text and other token-based content into developer-defined categories. — https://developer.apple.com/documentation/latentsemanticmapping
-- **LightweightCodeRequirements** — Test the identity of executable code on disk and in running processes. — https://developer.apple.com/documentation/lightweightcoderequirements
-- **Link Presentation** — Fetch, provide, and present rich links in your app. — https://developer.apple.com/documentation/linkpresentation
-- **LiveCommunicationKit** — Initiate and handle VoIP and cellular conversations, coordinate them with other communication apps and the system, and get ready to be a default calling or dialer app. — https://developer.apple.com/documentation/livecommunicationkit
-- **LivePhotosKit JS** — Play Live Photos on the web. — https://developer.apple.com/documentation/livephotoskitjs
-- **Local Authentication Embedded UI** — Present a standard local authentication view icon in a custom authentication view. — https://developer.apple.com/documentation/localauthenticationembeddedui
-- **Local Authentication** — Authenticate users biometrically or with a passphrase they already know. — https://developer.apple.com/documentation/localauthentication
-- **LockedCameraCapture** — Capture content with your app’s camera experience when the device is locked. — https://developer.apple.com/documentation/lockedcameracapture
-- **Mac Catalyst** — Create a version of your iPad app that users can run on a Mac device. — https://developer.apple.com/documentation/uikit/mac-catalyst
-- **macOS Release Notes** — Learn about changes to the macOS SDK. — https://developer.apple.com/documentation/macos-release-notes
-- **MailKit** — Secure, customize, and act on email messages that users send and receive. — https://developer.apple.com/documentation/mailkit
-- **Managed Settings UI** — Define and configure the appearance of shielding views. — https://developer.apple.com/documentation/managedsettingsui
-- **Managed Settings** — Access and change settings with your app while maintaining user privacy and control. — https://developer.apple.com/documentation/managedsettings
-- **ManagedApp** — Customize your app for managed deployments by providing configurable features that rely on secure access to secrets and data that an administrator provisions. — https://developer.apple.com/documentation/managedapp
-- **ManagedAppDistribution** — Manage the distribution of apps within an organization. — https://developer.apple.com/documentation/managedappdistribution
-- **MapKit JS** — Embed interactive Apple Maps on your website, annotate points of interest, and perform georelated searches. — https://developer.apple.com/documentation/mapkitjs
-- **MapKit** — Display map or satellite imagery within your app, call out points of interest, and determine placemark information for map coordinates. — https://developer.apple.com/documentation/mapkit
-- **Maps Web Snapshots** — Create a static image of a map from a URL. — https://developer.apple.com/documentation/snapshots
-- **MarketplaceKit** — Create an alternative app marketplace, distribute your app on an alternative app marketplace, or distribute your app from your website. — https://developer.apple.com/documentation/marketplacekit
-- **Matter** — Communicate with and control smart home devices from a variety of manufacturers. — https://developer.apple.com/documentation/matter
-- **MatterSupport** — Coordinate and control compatible smart home accessories. — https://developer.apple.com/documentation/mattersupport
-- **Media Accessibility** — Make your app’s media more accessible by supporting people’s systemwide preferences for video and audio content. — https://developer.apple.com/documentation/mediaaccessibility
-- **Media Device** — Let people stream media from any iOS app to your playback hardware through the media device picker. — https://developer.apple.com/documentation/mediadevice
-- **Media Intelligence** — Analyze video content and group faces in images using on-device machine learning. — https://developer.apple.com/documentation/mediaintelligence
-- **Media Intents** — Enable people to use Siri to find and play media from your app. — https://developer.apple.com/documentation/mediaintents
-- **Media Library** — Access read-only collections of the user’s multimedia content. — https://developer.apple.com/documentation/medialibrary
-- **Media Player** — Find and play songs, audio podcasts, audio books, and more from within your app. — https://developer.apple.com/documentation/mediaplayer
-- **Media Setup** — Enable users to configure HomePod speakers to stream music directly from your media service. — https://developer.apple.com/documentation/mediasetup
-- **Media Toolbox** — Enable support for media format readers; tap and process audio from an audio mix. — https://developer.apple.com/documentation/mediatoolbox
-- **MediaExtension** — This framework provides a means for developers to create format readers, video decoders, and RAW processors for media that the system doesn’t natively support. — https://developer.apple.com/documentation/mediaextension
-- **Message UI** — Create a user interface for composing email and text messages, so users can edit and send messages without leaving your app. — https://developer.apple.com/documentation/messageui
-- **Messages** — Create app extensions that allow users to send text, stickers, media files, and interactive messages. — https://developer.apple.com/documentation/messages
-- **Metal Performance Shaders Graph** — Build, compile, and execute compute graphs utilizing all the different compute devices on the platform, including GPU, CPU, and Neural Engine. — https://developer.apple.com/documentation/metalperformanceshadersgraph
-- **Metal Performance Shaders** — Optimize graphics and compute performance with kernels that are fine-tuned for the unique characteristics of each Metal GPU family. — https://developer.apple.com/documentation/metalperformanceshaders
-- **Metal** — Render advanced 3D graphics and compute data in parallel with graphics processors. — https://developer.apple.com/documentation/metal
-- **MetalFX** — Boost your Metal app’s performance by upscaling lower-resolution content to save GPU time. — https://developer.apple.com/documentation/metalfx
-- **MetalKit** — Build Metal apps quicker and easier using a common set of utility classes. — https://developer.apple.com/documentation/metalkit
-- **MetricKit** — Measure your app’s performance using daily metric and diagnostic reports from real users. — https://developer.apple.com/documentation/metrickit
-- **MIDIDriverKit** — Develop drivers for MIDI devices. — https://developer.apple.com/documentation/mididriverkit
-- **ML Compute** — Accelerate training and validation of neural networks across the CPU and one or more GPUs. — https://developer.apple.com/documentation/mlcompute
-- **Model I/O** — Import, export, and manipulate 3D models using a common infrastructure that integrates MetalKit, GLKit, and SceneKit. — https://developer.apple.com/documentation/modelio
-- **Multipeer Connectivity** — Support peer-to-peer connectivity and the discovery of nearby devices. — https://developer.apple.com/documentation/multipeerconnectivity
-- **Music Understanding** — Analyze audio content and extract music information. — https://developer.apple.com/documentation/musicunderstanding
-- **MusicKit** — Integrate your app with Apple Music. — https://developer.apple.com/documentation/musickit
-- **Natural Language** — Analyze natural language text and deduce its language-specific metadata. — https://developer.apple.com/documentation/naturallanguage
-- **Nearby Interaction** — Locate and interact with nearby devices using identifiers, distance, and direction. — https://developer.apple.com/documentation/nearbyinteraction
-- **Network Extension** — Customize and extend core networking features. — https://developer.apple.com/documentation/networkextension
-- **Network** — Create network connections to send and receive data using transport and security protocols. — https://developer.apple.com/documentation/network
-- **NetworkingDriverKit** — Develop drivers for Ethernet networking devices. — https://developer.apple.com/documentation/networkingdriverkit
-- **Notary API** — Submit your macOS software for notarization through a web interface. — https://developer.apple.com/documentation/notaryapi
-- **Notification Center** — Create and manage widgets for the Today view. — https://developer.apple.com/documentation/notificationcenter
-- **Now Playing** — Make your app’s media playback controls available on the Lock Screen, Control Center, and connected accessories. — https://developer.apple.com/documentation/nowplaying
-- **Objective-C Runtime** — Gain low-level access to the Objective-C runtime and the Objective-C root types. — https://developer.apple.com/documentation/objectivec
-- **Observation** — Make responsive apps that update the presentation when underlying data changes. — https://developer.apple.com/documentation/observation
-- **Open Directory** — Authenticate users, and search for contact information in Open Directory and LDAP directories. — https://developer.apple.com/documentation/opendirectory
-- **OpenGL ES** — Create 3D and 2D graphics effects with this compact, efficient subset of OpenGL. — https://developer.apple.com/documentation/opengles
-- **os** — Coordinate the scheduling and synchronization of your app’s tasks, and log information to the console to diagnose issues. — https://developer.apple.com/documentation/os
-- **OSLog** — A unified logging system for the reading of historical data. — https://developer.apple.com/documentation/oslog
-- **PackageDescription** — Create reusable code, organize it in a lightweight way, and share it across your projects and with other developers. — https://developer.apple.com/documentation/packagedescription
-- **PaperKit** — Add drawings, shapes, and a consistent markup experience to your app. — https://developer.apple.com/documentation/paperkit
-- **Paravirtualized Graphics** — Add graphics acceleration to your guest driver stack. — https://developer.apple.com/documentation/paravirtualizedgraphics
-- **PassKit (Apple Pay and Wallet)** — Process Apple Pay payments in your app, and create and distribute passes for the Wallet app. — https://developer.apple.com/documentation/passkit
-- **PCIDriverKit** — Develop device drivers for Peripheral Component Interconnect (PCI) accessories. — https://developer.apple.com/documentation/pcidriverkit
-- **PDFKit** — Display and manipulate PDF documents in your apps. — https://developer.apple.com/documentation/pdfkit
-- **PencilKit** — Capture touch and Apple Pencil input as a drawing, and display that content from your app. — https://developer.apple.com/documentation/pencilkit
-- **PermissionKit** — Create communication experiences between a child and their parent or guardian. — https://developer.apple.com/documentation/permissionkit
-- **PHASE** — Create dynamic audio experiences in your game or app that react to events and cues in the environment. — https://developer.apple.com/documentation/phase
-- **PhotoKit** — Work with image and video assets that the Photos app manages, including those from iCloud Photos and Live Photos. — https://developer.apple.com/documentation/photokit
+- **Latent Semantic Mapping** — Classify text and other token-based content into developer-defined categories. — https://developer.apple.com/documentation/latentsemanticmapping.md
+- **LightweightCodeRequirements** — Test the identity of executable code on disk and in running processes. — https://developer.apple.com/documentation/lightweightcoderequirements.md
+- **Link Presentation** — Fetch, provide, and present rich links in your app. — https://developer.apple.com/documentation/linkpresentation.md
+- **LiveCommunicationKit** — Initiate and handle VoIP and cellular conversations, coordinate them with other communication apps and the system, and get ready to be a default calling or dialer app. — https://developer.apple.com/documentation/livecommunicationkit.md
+- **LivePhotosKit JS** — Play Live Photos on the web. — https://developer.apple.com/documentation/livephotoskitjs.md
+- **Local Authentication Embedded UI** — Present a standard local authentication view icon in a custom authentication view. — https://developer.apple.com/documentation/localauthenticationembeddedui.md
+- **Local Authentication** — Authenticate users biometrically or with a passphrase they already know. — https://developer.apple.com/documentation/localauthentication.md
+- **LockedCameraCapture** — Capture content with your app’s camera experience when the device is locked. — https://developer.apple.com/documentation/lockedcameracapture.md
+- **Mac Catalyst** — Create a version of your iPad app that users can run on a Mac device. — https://developer.apple.com/documentation/uikit/mac-catalyst.md
+- **macOS Release Notes** — Learn about changes to the macOS SDK. — https://developer.apple.com/documentation/macos-release-notes.md
+- **MailKit** — Secure, customize, and act on email messages that users send and receive. — https://developer.apple.com/documentation/mailkit.md
+- **Managed Settings UI** — Define and configure the appearance of shielding views. — https://developer.apple.com/documentation/managedsettingsui.md
+- **Managed Settings** — Access and change settings with your app while maintaining user privacy and control. — https://developer.apple.com/documentation/managedsettings.md
+- **ManagedApp** — Customize your app for managed deployments by providing configurable features that rely on secure access to secrets and data that an administrator provisions. — https://developer.apple.com/documentation/managedapp.md
+- **ManagedAppDistribution** — Manage the distribution of apps within an organization. — https://developer.apple.com/documentation/managedappdistribution.md
+- **MapKit JS** — Embed interactive Apple Maps on your website, annotate points of interest, and perform georelated searches. — https://developer.apple.com/documentation/mapkitjs.md
+- **MapKit** — Display map or satellite imagery within your app, call out points of interest, and determine placemark information for map coordinates. — https://developer.apple.com/documentation/mapkit.md
+- **Maps Web Snapshots** — Create a static image of a map from a URL. — https://developer.apple.com/documentation/snapshots.md
+- **MarketplaceKit** — Create an alternative app marketplace, distribute your app on an alternative app marketplace, or distribute your app from your website. — https://developer.apple.com/documentation/marketplacekit.md
+- **Matter** — Communicate with and control smart home devices from a variety of manufacturers. — https://developer.apple.com/documentation/matter.md
+- **MatterSupport** — Coordinate and control compatible smart home accessories. — https://developer.apple.com/documentation/mattersupport.md
+- **Media Accessibility** — Make your app’s media more accessible by supporting people’s systemwide preferences for video and audio content. — https://developer.apple.com/documentation/mediaaccessibility.md
+- **Media Device** — Let people stream media from any iOS app to your playback hardware through the media device picker. — https://developer.apple.com/documentation/mediadevice.md
+- **Media Intelligence** — Analyze video content and group faces in images using on-device machine learning. — https://developer.apple.com/documentation/mediaintelligence.md
+- **Media Intents** — Enable people to use Siri to find and play media from your app. — https://developer.apple.com/documentation/mediaintents.md
+- **Media Library** — Access read-only collections of the user’s multimedia content. — https://developer.apple.com/documentation/medialibrary.md
+- **Media Player** — Find and play songs, audio podcasts, audio books, and more from within your app. — https://developer.apple.com/documentation/mediaplayer.md
+- **Media Setup** — Enable users to configure HomePod speakers to stream music directly from your media service. — https://developer.apple.com/documentation/mediasetup.md
+- **Media Toolbox** — Enable support for media format readers; tap and process audio from an audio mix. — https://developer.apple.com/documentation/mediatoolbox.md
+- **MediaExtension** — This framework provides a means for developers to create format readers, video decoders, and RAW processors for media that the system doesn’t natively support. — https://developer.apple.com/documentation/mediaextension.md
+- **Message UI** — Create a user interface for composing email and text messages, so users can edit and send messages without leaving your app. — https://developer.apple.com/documentation/messageui.md
+- **Messages** — Create app extensions that allow users to send text, stickers, media files, and interactive messages. — https://developer.apple.com/documentation/messages.md
+- **Metal Performance Shaders Graph** — Build, compile, and execute compute graphs utilizing all the different compute devices on the platform, including GPU, CPU, and Neural Engine. — https://developer.apple.com/documentation/metalperformanceshadersgraph.md
+- **Metal Performance Shaders** — Optimize graphics and compute performance with kernels that are fine-tuned for the unique characteristics of each Metal GPU family. — https://developer.apple.com/documentation/metalperformanceshaders.md
+- **Metal** — Render advanced 3D graphics and compute data in parallel with graphics processors. — https://developer.apple.com/documentation/metal.md
+- **MetalFX** — Boost your Metal app’s performance by upscaling lower-resolution content to save GPU time. — https://developer.apple.com/documentation/metalfx.md
+- **MetalKit** — Build Metal apps quicker and easier using a common set of utility classes. — https://developer.apple.com/documentation/metalkit.md
+- **MetricKit** — Measure your app’s performance using daily metric and diagnostic reports from real users. — https://developer.apple.com/documentation/metrickit.md
+- **MIDIDriverKit** — Develop drivers for MIDI devices. — https://developer.apple.com/documentation/mididriverkit.md
+- **ML Compute** — Accelerate training and validation of neural networks across the CPU and one or more GPUs. — https://developer.apple.com/documentation/mlcompute.md
+- **Model I/O** — Import, export, and manipulate 3D models using a common infrastructure that integrates MetalKit, GLKit, and SceneKit. — https://developer.apple.com/documentation/modelio.md
+- **Multipeer Connectivity** — Support peer-to-peer connectivity and the discovery of nearby devices. — https://developer.apple.com/documentation/multipeerconnectivity.md
+- **Music Understanding** — Analyze audio content and extract music information. — https://developer.apple.com/documentation/musicunderstanding.md
+- **MusicKit** — Integrate your app with Apple Music. — https://developer.apple.com/documentation/musickit.md
+- **Natural Language** — Analyze natural language text and deduce its language-specific metadata. — https://developer.apple.com/documentation/naturallanguage.md
+- **Nearby Interaction** — Locate and interact with nearby devices using identifiers, distance, and direction. — https://developer.apple.com/documentation/nearbyinteraction.md
+- **Network Extension** — Customize and extend core networking features. — https://developer.apple.com/documentation/networkextension.md
+- **Network** — Create network connections to send and receive data using transport and security protocols. — https://developer.apple.com/documentation/network.md
+- **NetworkingDriverKit** — Develop drivers for Ethernet networking devices. — https://developer.apple.com/documentation/networkingdriverkit.md
+- **Notary API** — Submit your macOS software for notarization through a web interface. — https://developer.apple.com/documentation/notaryapi.md
+- **Notification Center** — Create and manage widgets for the Today view. — https://developer.apple.com/documentation/notificationcenter.md
+- **Now Playing** — Make your app’s media playback controls available on the Lock Screen, Control Center, and connected accessories. — https://developer.apple.com/documentation/nowplaying.md
+- **Objective-C Runtime** — Gain low-level access to the Objective-C runtime and the Objective-C root types. — https://developer.apple.com/documentation/objectivec.md
+- **Observation** — Make responsive apps that update the presentation when underlying data changes. — https://developer.apple.com/documentation/observation.md
+- **Open Directory** — Authenticate users, and search for contact information in Open Directory and LDAP directories. — https://developer.apple.com/documentation/opendirectory.md
+- **OpenGL ES** — Create 3D and 2D graphics effects with this compact, efficient subset of OpenGL. — https://developer.apple.com/documentation/opengles.md
+- **os** — Coordinate the scheduling and synchronization of your app’s tasks, and log information to the console to diagnose issues. — https://developer.apple.com/documentation/os.md
+- **OSLog** — A unified logging system for the reading of historical data. — https://developer.apple.com/documentation/oslog.md
+- **PackageDescription** — Create reusable code, organize it in a lightweight way, and share it across your projects and with other developers. — https://developer.apple.com/documentation/packagedescription.md
+- **PaperKit** — Add drawings, shapes, and a consistent markup experience to your app. — https://developer.apple.com/documentation/paperkit.md
+- **Paravirtualized Graphics** — Add graphics acceleration to your guest driver stack. — https://developer.apple.com/documentation/paravirtualizedgraphics.md
+- **PassKit (Apple Pay and Wallet)** — Process Apple Pay payments in your app, and create and distribute passes for the Wallet app. — https://developer.apple.com/documentation/passkit.md
+- **PCIDriverKit** — Develop device drivers for Peripheral Component Interconnect (PCI) accessories. — https://developer.apple.com/documentation/pcidriverkit.md
+- **PDFKit** — Display and manipulate PDF documents in your apps. — https://developer.apple.com/documentation/pdfkit.md
+- **PencilKit** — Capture touch and Apple Pencil input as a drawing, and display that content from your app. — https://developer.apple.com/documentation/pencilkit.md
+- **PermissionKit** — Create communication experiences between a child and their parent or guardian. — https://developer.apple.com/documentation/permissionkit.md
+- **PHASE** — Create dynamic audio experiences in your game or app that react to events and cues in the environment. — https://developer.apple.com/documentation/phase.md
+- **PhotoKit** — Work with image and video assets that the Photos app manages, including those from iCloud Photos and Live Photos. — https://developer.apple.com/documentation/photokit.md
 - **Playground Bluetooth** — Display and manage connections to Bluetooth peripherals in Swift Playgrounds. — https://developer.apple.com/documentation/playgroundbluetooth
 - **Playground Support** — Share playground data, manage live views, and control the execution of a playground. — https://developer.apple.com/documentation/playgroundsupport
-- **Preference Panes** — Integrate your app’s custom preferences into the System Preferences app. — https://developer.apple.com/documentation/preferencepanes
-- **Professional Video Applications** — Exchange data with Final Cut Pro, and create effects plug-ins for Final Cut Pro and Motion. — https://developer.apple.com/documentation/professional_video_applications
-- **ProximityReader** — Read contactless physical and digital wallet cards using your iPhone. — https://developer.apple.com/documentation/proximityreader
-- **Push to Talk** — Display the system user interface for your app’s Push to Talk services. — https://developer.apple.com/documentation/pushtotalk
-- **PushKit** — Respond to push notifications related to your app’s complications, file providers, and VoIP services. — https://developer.apple.com/documentation/pushkit
-- **Quartz** — Allow users to browse, edit, and save images, using slideshows and Core Image filters. — https://developer.apple.com/documentation/quartz
-- **Quick Look Thumbnailing** — Generate thumbnails for common file types and add a Thumbnail Extension to your app to enable others to create thumbnails of your custom files. — https://developer.apple.com/documentation/quicklookthumbnailing
-- **Quick Look UI** — Create previews of files to use inside your macOS app. — https://developer.apple.com/documentation/quicklookui
-- **Quick Look** — Create previews of files to use inside your app, or perform simple edits on previews. — https://developer.apple.com/documentation/quicklook
-- **QuickTime File Format** — An object-oriented file format for the storage and exchange of digital media between devices, applications, and operating systems. — https://developer.apple.com/documentation/quicktime-file-format
-- **Reality Composer Pro** — Build, design, and orchestrate 3D content for your RealityKit apps. — https://developer.apple.com/documentation/realitycomposerpro
-- **RealityKit** — Simulate and render 3D content for use in your augmented reality apps. — https://developer.apple.com/documentation/realitykit
-- **RegexBuilder** — Use an expressive domain-specific language to build regular expressions, for operations like searching and replacing in text. — https://developer.apple.com/documentation/regexbuilder
-- **RelevanceKit** — Provide on-device intelligence with contextual clues that increase your widget’s visibility on Apple Watch. — https://developer.apple.com/documentation/relevancekit
-- **ReplayKit** — Record or stream video from the screen, and audio from the app and microphone. — https://developer.apple.com/documentation/replaykit
-- **Retention Messaging API** — Provide a reason for customers to stay subscribed with a preconfigured message that you can choose in real time, appropriate to the product and locale. — https://developer.apple.com/documentation/retentionmessaging
-- **RoomPlan** — Create a 3D model of a room by interactively guiding people to scan their physical environment using a device’s camera. — https://developer.apple.com/documentation/roomplan
-- **Roster API** — Read information about people and classes from an Apple School Manager organization. — https://developer.apple.com/documentation/rosterapi
-- **Safari app extensions** — Learn how Safari app extensions extend the web-browsing experience in Safari by leveraging web technologies and native code. — https://developer.apple.com/documentation/safariservices/safari-app-extensions
-- **Safari Developer Features** — Inspect, debug, and test web content in Safari, in other apps, and on other devices including iPhone and iPad. — https://developer.apple.com/documentation/safari-developer-tools
-- **Safari Release Notes** — Learn about changes for Safari and Safari View Controller for iOS, iPadOS, macOS, and in visionOS; WKWebView for iOS, iPadOS, macOS, watchOS, and in visionOS; and Web Inspector on macOS. — https://developer.apple.com/documentation/safari-release-notes
-- **Safari Services** — Enable web views and services in your app. — https://developer.apple.com/documentation/safariservices
-- **SafetyKit** — Detect and respond to car crash events in your app. — https://developer.apple.com/documentation/safetykit
-- **Sample Code Library** — Enhance and expand your knowledge of Apple technologies by exploring the full library of sample code projects. — https://developer.apple.com/documentation/samplecode
-- **SceneKit** — Create 3D games and add 3D content to apps using high-level scene descriptions, and easily add animations, physics simulation, particle effects, and realistic physically based rendering. — https://developer.apple.com/documentation/scenekit
-- **Screen Saver** — Animate screen savers, and interact with the screen saver infrastructure. — https://developer.apple.com/documentation/screensaver
-- **Screen Time** — Share and manage web-usage data, and observe changes made by a parent or guardian. — https://developer.apple.com/documentation/screentime
-- **ScreenCaptureKit** — Stream screen content and audio to your app with fine-grained control over what you capture. — https://developer.apple.com/documentation/screencapturekit
-- **Scripting Bridge** — Automate scriptable apps by sending and receiving Apple events. — https://developer.apple.com/documentation/scriptingbridge
-- **SCSIControllerDriverKit** — Develop drivers for SCSI protocol-based devices. — https://developer.apple.com/documentation/scsicontrollerdriverkit
-- **SCSIPeripheralsDriverKit** — Develop drivers for peripherals that use SCSI Block Command and Multimedia Command protocols. — https://developer.apple.com/documentation/scsiperipheralsdriverkit
-- **SecureElementCredential** — Allow access to credentials inside the Secure Element on device. — https://developer.apple.com/documentation/secureelementcredential
-- **Security Foundation** — Restrict a user’s access to particular features in your Mac app or daemon. — https://developer.apple.com/documentation/securityfoundation
-- **Security Interface** — Provide user interface elements for security features such as authorization, access to digital certificates, and access to items in keychains. — https://developer.apple.com/documentation/securityinterface
-- **Security** — Secure the data your app manages, and control access to your app. — https://developer.apple.com/documentation/security
-- **Sensitive Content Analysis** — Provide a safer experience in your app by detecting and alerting people to sensitive content in images and videos before displaying them. — https://developer.apple.com/documentation/sensitivecontentanalysis
-- **SensorKit** — Retrieve data and derived metrics from sensors on an iPhone, or paired Apple Watch. — https://developer.apple.com/documentation/sensorkit
-- **SerialDriverKit** — Develop drivers for serial I/O devices connected to your Mac. — https://developer.apple.com/documentation/serialdriverkit
-- **Service Management** — Manage startup items, launch agents, and launch daemons from within an app. — https://developer.apple.com/documentation/servicemanagement
-- **ServicesAccountLinking** — Link reseller accounts with Apple Media & Purchases accounts. — https://developer.apple.com/documentation/servicesaccountlinking
-- **ShaderGraph** — Create custom materials and effects for 3D content in Reality Composer Pro. — https://developer.apple.com/documentation/shadergraph
-- **Shared with You** — Surface shared content and collaborate in your app. — https://developer.apple.com/documentation/sharedwithyou
-- **ShazamKit** — Find information about a specific audio recording when a segment of it’s part of captured sound in the Shazam catalog or your custom catalog. — https://developer.apple.com/documentation/shazamkit
-- **Sign in with Apple** — Provide users the ability to sign in to your apps and websites using their Apple Account. — https://developer.apple.com/documentation/signinwithapple
-- **simd** — Perform computations on small vectors and matrices. — https://developer.apple.com/documentation/accelerate/simd-library
-- **Siri Event Suggestions Markup** — Update users’ calendars and inform suggestions from Siri with reservation data embedded in email and webpages. — https://developer.apple.com/documentation/sirieventsuggestionsmarkup
-- **SiriKit Cloud Media** — Stream music directly to HomePod speakers from your media service. — https://developer.apple.com/documentation/sirikitcloudmedia
-- **SiriKit** — Empower users to interact with their devices through voice, intelligent suggestions, and personalized workflows. — https://developer.apple.com/documentation/sirikit
-- **SKAdNetwork for Web Ads** — Attribute app-install campaigns that originate on the web. — https://developer.apple.com/documentation/skadnetworkforwebads
-- **SMS and Call Reporting** — Create app extensions to manage and report unwanted SMS messages and spam calls. — https://developer.apple.com/documentation/identitylookup
-- **Social** — Post content to supported social networking services, using standard system interfaces. — https://developer.apple.com/documentation/social
-- **Sound Analysis** — Classify various sounds by analyzing audio files or streams. — https://developer.apple.com/documentation/soundanalysis
-- **Spatial Preview** — Preview spatial content from a macOS app on a connected visionOS device. — https://developer.apple.com/documentation/spatialpreview
-- **Spatial** — Create and manipulate 3D mathematical primitives. — https://developer.apple.com/documentation/spatial
-- **Speech** — Perform speech recognition on live or prerecorded audio, and receive transcriptions, alternative interpretations, and confidence levels of the results. — https://developer.apple.com/documentation/speech
-- **SpriteKit** — Add high-performance 2D content with smooth animations to your app, or create a game with a high-level set of 2D game-based tools. — https://developer.apple.com/documentation/spritekit
-- **StateReporting** — Communicate your app’s state to the system to improve diagnostic actionability. — https://developer.apple.com/documentation/statereporting
-- **StoreKit Test** — Create and automate tests in Xcode for your app’s subscription and in-app purchase transactions, and SKAdNetwork implementations. — https://developer.apple.com/documentation/storekittest
-- **StoreKit** — Support In-App Purchases and interactions with the App Store. — https://developer.apple.com/documentation/storekit
-- **Suggested Actions** — Offer quick actions next to messages in your messaging app, based on context you provide. — https://developer.apple.com/documentation/suggestedactions
-- **Swift Charts** — Construct and customize charts on every Apple platform. — https://developer.apple.com/documentation/charts
-- **Swift packages** — Create reusable code, organize it in a lightweight way, and share it across Xcode projects and with other developers. — https://developer.apple.com/documentation/xcode/swift-packages
-- **Swift Playgrounds** — Learn to write apps, repurpose sample code, create, and share learning experiences in Swift Playgrounds. — https://developer.apple.com/documentation/swift-playgrounds
-- **Swift Testing** — Create and run tests for your Swift packages and Xcode projects. — https://developer.apple.com/documentation/testing
-- **Swift** — Build apps using a powerful open language. — https://developer.apple.com/documentation/swift
-- **SwiftData** — Write your model code declaratively to add managed persistence and efficient model fetching. — https://developer.apple.com/documentation/swiftdata
-- **SwiftUI** — Declare the user interface and behavior for your app on every platform. — https://developer.apple.com/documentation/swiftui
-- **Symbols** — Apply universal animations to symbol-based images. — https://developer.apple.com/documentation/symbols
-- **Synchronization** — Build synchronization constructs using low-level, primitive operations. — https://developer.apple.com/documentation/synchronization
-- **System Configuration** — Allow applications to access a device’s network configuration settings. Determine the reachability of the device, such as whether Wi-Fi or cell connectivity are active. — https://developer.apple.com/documentation/systemconfiguration
-- **System Extensions** — Install and manage user space code that extends the capabilities of macOS. — https://developer.apple.com/documentation/systemextensions
-- **System** — Perform low-level file operations using type-safe APIs. — https://developer.apple.com/documentation/system
-- **TabletopKit** — Create multiplayer spatial games on a virtual table surface and use FaceTime to invite players. — https://developer.apple.com/documentation/tabletopkit
-- **TabularData** — Import, organize, and prepare a table of data to train a machine learning model. — https://developer.apple.com/documentation/tabulardata
-- **Technology Overviews** — Learn about the wide range of technologies you use to develop software for Apple platforms. — https://developer.apple.com/documentation/technologyoverviews
-- **Technotes** — Learn about specific development topics through these in-depth technical articles. — https://developer.apple.com/documentation/technotes
-- **TelephonyMessagingKit** — Send and receive standards-based messages over cellular networks. — https://developer.apple.com/documentation/telephonymessagingkit
-- **ThreadNetwork** — Create robust, smart device networks using Thread Border Routers. — https://developer.apple.com/documentation/threadnetwork
-- **TipKit** — Display tips that help people discover features in your app. — https://developer.apple.com/documentation/tipkit
-- **Touch Controller** — Integrate onscreen touch controls into your Metal-based games. — https://developer.apple.com/documentation/touchcontroller
-- **Translation** — Translate text in your app from one language to another. — https://developer.apple.com/documentation/translation
-- **TranslationUIProvider** — Provide UI for translations of text people select. — https://developer.apple.com/documentation/translationuiprovider
-- **Trust Insights** — Evaluate transactions for potential coercive activity while preserving people’s privacy. — https://developer.apple.com/documentation/trustinsights
-- **TV Services** — Display content and descriptions, provide channel guides, and support multiple users on Apple TV. — https://developer.apple.com/documentation/tvservices
-- **TVML** — Use Apple TV Markup Language to create individual pages inside of a client-server app. — https://developer.apple.com/documentation/tvml
+- **Preference Panes** — Integrate your app’s custom preferences into the System Preferences app. — https://developer.apple.com/documentation/preferencepanes.md
+- **Professional Video Applications** — Exchange data with Final Cut Pro, and create effects plug-ins for Final Cut Pro and Motion. — https://developer.apple.com/documentation/professional_video_applications.md
+- **ProximityReader** — Read contactless physical and digital wallet cards using your iPhone. — https://developer.apple.com/documentation/proximityreader.md
+- **Push to Talk** — Display the system user interface for your app’s Push to Talk services. — https://developer.apple.com/documentation/pushtotalk.md
+- **PushKit** — Respond to push notifications related to your app’s complications, file providers, and VoIP services. — https://developer.apple.com/documentation/pushkit.md
+- **Quartz** — Allow users to browse, edit, and save images, using slideshows and Core Image filters. — https://developer.apple.com/documentation/quartz.md
+- **Quick Look Thumbnailing** — Generate thumbnails for common file types and add a Thumbnail Extension to your app to enable others to create thumbnails of your custom files. — https://developer.apple.com/documentation/quicklookthumbnailing.md
+- **Quick Look UI** — Create previews of files to use inside your macOS app. — https://developer.apple.com/documentation/quicklookui.md
+- **Quick Look** — Create previews of files to use inside your app, or perform simple edits on previews. — https://developer.apple.com/documentation/quicklook.md
+- **QuickTime File Format** — An object-oriented file format for the storage and exchange of digital media between devices, applications, and operating systems. — https://developer.apple.com/documentation/quicktime-file-format.md
+- **Reality Composer Pro** — Build, design, and orchestrate 3D content for your RealityKit apps. — https://developer.apple.com/documentation/realitycomposerpro.md
+- **RealityKit** — Simulate and render 3D content for use in your augmented reality apps. — https://developer.apple.com/documentation/realitykit.md
+- **RegexBuilder** — Use an expressive domain-specific language to build regular expressions, for operations like searching and replacing in text. — https://developer.apple.com/documentation/regexbuilder.md
+- **RelevanceKit** — Provide on-device intelligence with contextual clues that increase your widget’s visibility on Apple Watch. — https://developer.apple.com/documentation/relevancekit.md
+- **ReplayKit** — Record or stream video from the screen, and audio from the app and microphone. — https://developer.apple.com/documentation/replaykit.md
+- **Retention Messaging API** — Provide a reason for customers to stay subscribed with a preconfigured message that you can choose in real time, appropriate to the product and locale. — https://developer.apple.com/documentation/retentionmessaging.md
+- **RoomPlan** — Create a 3D model of a room by interactively guiding people to scan their physical environment using a device’s camera. — https://developer.apple.com/documentation/roomplan.md
+- **Roster API** — Read information about people and classes from an Apple School Manager organization. — https://developer.apple.com/documentation/rosterapi.md
+- **Safari app extensions** — Learn how Safari app extensions extend the web-browsing experience in Safari by leveraging web technologies and native code. — https://developer.apple.com/documentation/safariservices/safari-app-extensions.md
+- **Safari Developer Features** — Inspect, debug, and test web content in Safari, in other apps, and on other devices including iPhone and iPad. — https://developer.apple.com/documentation/safari-developer-tools.md
+- **Safari Release Notes** — Learn about changes for Safari and Safari View Controller for iOS, iPadOS, macOS, and in visionOS; WKWebView for iOS, iPadOS, macOS, watchOS, and in visionOS; and Web Inspector on macOS. — https://developer.apple.com/documentation/safari-release-notes.md
+- **Safari Services** — Enable web views and services in your app. — https://developer.apple.com/documentation/safariservices.md
+- **SafetyKit** — Detect and respond to car crash events in your app. — https://developer.apple.com/documentation/safetykit.md
+- **Sample Code Library** — Enhance and expand your knowledge of Apple technologies by exploring the full library of sample code projects. — https://developer.apple.com/documentation/samplecode.md
+- **SceneKit** — Create 3D games and add 3D content to apps using high-level scene descriptions, and easily add animations, physics simulation, particle effects, and realistic physically based rendering. — https://developer.apple.com/documentation/scenekit.md
+- **Screen Saver** — Animate screen savers, and interact with the screen saver infrastructure. — https://developer.apple.com/documentation/screensaver.md
+- **Screen Time** — Share and manage web-usage data, and observe changes made by a parent or guardian. — https://developer.apple.com/documentation/screentime.md
+- **ScreenCaptureKit** — Stream screen content and audio to your app with fine-grained control over what you capture. — https://developer.apple.com/documentation/screencapturekit.md
+- **Scripting Bridge** — Automate scriptable apps by sending and receiving Apple events. — https://developer.apple.com/documentation/scriptingbridge.md
+- **SCSIControllerDriverKit** — Develop drivers for SCSI protocol-based devices. — https://developer.apple.com/documentation/scsicontrollerdriverkit.md
+- **SCSIPeripheralsDriverKit** — Develop drivers for peripherals that use SCSI Block Command and Multimedia Command protocols. — https://developer.apple.com/documentation/scsiperipheralsdriverkit.md
+- **SecureElementCredential** — Allow access to credentials inside the Secure Element on device. — https://developer.apple.com/documentation/secureelementcredential.md
+- **Security Foundation** — Restrict a user’s access to particular features in your Mac app or daemon. — https://developer.apple.com/documentation/securityfoundation.md
+- **Security Interface** — Provide user interface elements for security features such as authorization, access to digital certificates, and access to items in keychains. — https://developer.apple.com/documentation/securityinterface.md
+- **Security** — Secure the data your app manages, and control access to your app. — https://developer.apple.com/documentation/security.md
+- **Sensitive Content Analysis** — Provide a safer experience in your app by detecting and alerting people to sensitive content in images and videos before displaying them. — https://developer.apple.com/documentation/sensitivecontentanalysis.md
+- **SensorKit** — Retrieve data and derived metrics from sensors on an iPhone, or paired Apple Watch. — https://developer.apple.com/documentation/sensorkit.md
+- **SerialDriverKit** — Develop drivers for serial I/O devices connected to your Mac. — https://developer.apple.com/documentation/serialdriverkit.md
+- **Service Management** — Manage startup items, launch agents, and launch daemons from within an app. — https://developer.apple.com/documentation/servicemanagement.md
+- **ServicesAccountLinking** — Link reseller accounts with Apple Media & Purchases accounts. — https://developer.apple.com/documentation/servicesaccountlinking.md
+- **ShaderGraph** — Create custom materials and effects for 3D content in Reality Composer Pro. — https://developer.apple.com/documentation/shadergraph.md
+- **Shared with You** — Surface shared content and collaborate in your app. — https://developer.apple.com/documentation/sharedwithyou.md
+- **ShazamKit** — Find information about a specific audio recording when a segment of it’s part of captured sound in the Shazam catalog or your custom catalog. — https://developer.apple.com/documentation/shazamkit.md
+- **Sign in with Apple** — Provide users the ability to sign in to your apps and websites using their Apple Account. — https://developer.apple.com/documentation/signinwithapple.md
+- **simd** — Perform computations on small vectors and matrices. — https://developer.apple.com/documentation/accelerate/simd-library.md
+- **Siri Event Suggestions Markup** — Update users’ calendars and inform suggestions from Siri with reservation data embedded in email and webpages. — https://developer.apple.com/documentation/sirieventsuggestionsmarkup.md
+- **SiriKit Cloud Media** — Stream music directly to HomePod speakers from your media service. — https://developer.apple.com/documentation/sirikitcloudmedia.md
+- **SiriKit** — Empower users to interact with their devices through voice, intelligent suggestions, and personalized workflows. — https://developer.apple.com/documentation/sirikit.md
+- **SKAdNetwork for Web Ads** — Attribute app-install campaigns that originate on the web. — https://developer.apple.com/documentation/skadnetworkforwebads.md
+- **SMS and Call Reporting** — Create app extensions to manage and report unwanted SMS messages and spam calls. — https://developer.apple.com/documentation/identitylookup.md
+- **Social** — Post content to supported social networking services, using standard system interfaces. — https://developer.apple.com/documentation/social.md
+- **Sound Analysis** — Classify various sounds by analyzing audio files or streams. — https://developer.apple.com/documentation/soundanalysis.md
+- **Spatial Preview** — Preview spatial content from a macOS app on a connected visionOS device. — https://developer.apple.com/documentation/spatialpreview.md
+- **Spatial** — Create and manipulate 3D mathematical primitives. — https://developer.apple.com/documentation/spatial.md
+- **Speech** — Perform speech recognition on live or prerecorded audio, and receive transcriptions, alternative interpretations, and confidence levels of the results. — https://developer.apple.com/documentation/speech.md
+- **SpriteKit** — Add high-performance 2D content with smooth animations to your app, or create a game with a high-level set of 2D game-based tools. — https://developer.apple.com/documentation/spritekit.md
+- **StateReporting** — Communicate your app’s state to the system to improve diagnostic actionability. — https://developer.apple.com/documentation/statereporting.md
+- **StoreKit Test** — Create and automate tests in Xcode for your app’s subscription and in-app purchase transactions, and SKAdNetwork implementations. — https://developer.apple.com/documentation/storekittest.md
+- **StoreKit** — Support In-App Purchases and interactions with the App Store. — https://developer.apple.com/documentation/storekit.md
+- **Suggested Actions** — Offer quick actions next to messages in your messaging app, based on context you provide. — https://developer.apple.com/documentation/suggestedactions.md
+- **Swift Charts** — Construct and customize charts on every Apple platform. — https://developer.apple.com/documentation/charts.md
+- **Swift packages** — Create reusable code, organize it in a lightweight way, and share it across Xcode projects and with other developers. — https://developer.apple.com/documentation/xcode/swift-packages.md
+- **Swift Playgrounds** — Learn to write apps, repurpose sample code, create, and share learning experiences in Swift Playgrounds. — https://developer.apple.com/documentation/swift-playgrounds.md
+- **Swift Testing** — Create and run tests for your Swift packages and Xcode projects. — https://developer.apple.com/documentation/testing.md
+- **Swift** — Build apps using a powerful open language. — https://developer.apple.com/documentation/swift.md
+- **SwiftData** — Write your model code declaratively to add managed persistence and efficient model fetching. — https://developer.apple.com/documentation/swiftdata.md
+- **SwiftUI** — Declare the user interface and behavior for your app on every platform. — https://developer.apple.com/documentation/swiftui.md
+- **Symbols** — Apply universal animations to symbol-based images. — https://developer.apple.com/documentation/symbols.md
+- **Synchronization** — Build synchronization constructs using low-level, primitive operations. — https://developer.apple.com/documentation/synchronization.md
+- **System Configuration** — Allow applications to access a device’s network configuration settings. Determine the reachability of the device, such as whether Wi-Fi or cell connectivity are active. — https://developer.apple.com/documentation/systemconfiguration.md
+- **System Extensions** — Install and manage user space code that extends the capabilities of macOS. — https://developer.apple.com/documentation/systemextensions.md
+- **System** — Perform low-level file operations using type-safe APIs. — https://developer.apple.com/documentation/system.md
+- **TabletopKit** — Create multiplayer spatial games on a virtual table surface and use FaceTime to invite players. — https://developer.apple.com/documentation/tabletopkit.md
+- **TabularData** — Import, organize, and prepare a table of data to train a machine learning model. — https://developer.apple.com/documentation/tabulardata.md
+- **Technology Overviews** — Learn about the wide range of technologies you use to develop software for Apple platforms. — https://developer.apple.com/documentation/technologyoverviews.md
+- **Technotes** — Learn about specific development topics through these in-depth technical articles. — https://developer.apple.com/documentation/technotes.md
+- **TelephonyMessagingKit** — Send and receive standards-based messages over cellular networks. — https://developer.apple.com/documentation/telephonymessagingkit.md
+- **ThreadNetwork** — Create robust, smart device networks using Thread Border Routers. — https://developer.apple.com/documentation/threadnetwork.md
+- **TipKit** — Display tips that help people discover features in your app. — https://developer.apple.com/documentation/tipkit.md
+- **Touch Controller** — Integrate onscreen touch controls into your Metal-based games. — https://developer.apple.com/documentation/touchcontroller.md
+- **Translation** — Translate text in your app from one language to another. — https://developer.apple.com/documentation/translation.md
+- **TranslationUIProvider** — Provide UI for translations of text people select. — https://developer.apple.com/documentation/translationuiprovider.md
+- **Trust Insights** — Evaluate transactions for potential coercive activity while preserving people’s privacy. — https://developer.apple.com/documentation/trustinsights.md
+- **TV Services** — Display content and descriptions, provide channel guides, and support multiple users on Apple TV. — https://developer.apple.com/documentation/tvservices.md
+- **TVML** — Use Apple TV Markup Language to create individual pages inside of a client-server app. — https://developer.apple.com/documentation/tvml.md
 - **TVMLKit JS** — Create tvOS client-server apps using web technologies to stream media and respond to events. — https://developer.apple.com/documentation/tvmljs
-- **TVMLKit** — Create client-server apps by incorporating JavaScript and TVML files in your binary app. — https://developer.apple.com/documentation/tvmlkit
-- **tvOS Release Notes** — Learn about changes to the tvOS SDK. — https://developer.apple.com/documentation/tvos-release-notes
-- **TVUIKit** — Show common user interface elements from Apple TV in your native app. — https://developer.apple.com/documentation/tvuikit
-- **UIKit** — Construct and manage a graphical, event-driven user interface for your iOS, iPadOS, or tvOS app. — https://developer.apple.com/documentation/uikit
-- **Uniform Type Identifiers** — Provide uniform type identifiers that describe file types for storage or transfer. — https://developer.apple.com/documentation/uniformtypeidentifiers
-- **Updates** — Latest additions to documentation and platform release notes. — https://developer.apple.com/documentation/updates
-- **USBDriverKit** — Develop drivers for USB-based devices. — https://developer.apple.com/documentation/usbdriverkit
-- **USBSerialDriverKit** — Develop drivers for serial USB devices connected to your Mac. — https://developer.apple.com/documentation/usbserialdriverkit
-- **USD** — An efficient and scalable way to represent 3D scenes. — https://developer.apple.com/documentation/usd
-- **USDKit** — Author, compose, and manipulate Universal Scene Description content from Swift. — https://developer.apple.com/documentation/usdkit
-- **User Notifications UI** — Customize the interface that displays local and remote notifications. — https://developer.apple.com/documentation/usernotificationsui
-- **User Notifications** — Push user-facing notifications to the user’s device from a server, or generate them locally from your app. — https://developer.apple.com/documentation/usernotifications
-- **Video Subscriber Account** — Support TV provider and Apple TV app functionality. — https://developer.apple.com/documentation/videosubscriberaccount
-- **Video Toolbox** — Work directly with hardware-accelerated video encoding and decoding capabilities. — https://developer.apple.com/documentation/videotoolbox
-- **VideoDriverKit** — Develop drivers for video capture and playback devices. — https://developer.apple.com/documentation/videodriverkit
-- **Virtualization** — Create virtual machines and run macOS and Linux-based operating systems. — https://developer.apple.com/documentation/virtualization
-- **Vision** — Analyze image and video content in your app using computer vision algorithms for object detection, text recognition, and image segmentation. — https://developer.apple.com/documentation/vision
-- **VisionKit** — Identify and extract information in the environment using the device’s camera, or in images that your app displays. — https://developer.apple.com/documentation/visionkit
-- **visionOS Release Notes** — Learn about changes to the visionOS SDK. — https://developer.apple.com/documentation/visionos-release-notes
-- **visionOS** — Create a new universe of apps and games for Apple Vision Pro. — https://developer.apple.com/documentation/visionos
-- **Visual Intelligence** — Include your app’s content in search results that visual intelligence provides. — https://developer.apple.com/documentation/visualintelligence
-- **vmnet** — Connect with network interfaces to read and write packets on guest operating systems. — https://developer.apple.com/documentation/vmnet
-- **Wallet Orders** — Create, distribute, and update orders in Wallet. — https://developer.apple.com/documentation/walletorders
-- **Wallet Passes** — Create, distribute, and update passes for the Wallet app. — https://developer.apple.com/documentation/walletpasses
-- **Watch Connectivity** — Implement two-way communication between an iOS app and its paired watchOS app. — https://developer.apple.com/documentation/watchconnectivity
-- **WatchKit** — Build watchOS apps that use features the app delegate monitors or controls, such as background tasks and extended runtime sessions. — https://developer.apple.com/documentation/watchkit
-- **watchOS apps** — Build watchOS apps that combine complications, notifications, and Siri to create a personal experience on Apple Watch. — https://developer.apple.com/documentation/watchos-apps
-- **watchOS Release Notes** — Learn about changes to the watchOS SDK. — https://developer.apple.com/documentation/watchos-release-notes
-- **WeatherKit REST API** — Obtain historical, current, and predictive weather for your app or service. — https://developer.apple.com/documentation/weatherkitrestapi
-- **WeatherKit** — Deliver weather conditions and alerts to your users. — https://developer.apple.com/documentation/weatherkit
+- **TVMLKit** — Create client-server apps by incorporating JavaScript and TVML files in your binary app. — https://developer.apple.com/documentation/tvmlkit.md
+- **tvOS Release Notes** — Learn about changes to the tvOS SDK. — https://developer.apple.com/documentation/tvos-release-notes.md
+- **TVUIKit** — Show common user interface elements from Apple TV in your native app. — https://developer.apple.com/documentation/tvuikit.md
+- **UIKit** — Construct and manage a graphical, event-driven user interface for your iOS, iPadOS, or tvOS app. — https://developer.apple.com/documentation/uikit.md
+- **Uniform Type Identifiers** — Provide uniform type identifiers that describe file types for storage or transfer. — https://developer.apple.com/documentation/uniformtypeidentifiers.md
+- **Updates** — Latest additions to documentation and platform release notes. — https://developer.apple.com/documentation/updates.md
+- **USBDriverKit** — Develop drivers for USB-based devices. — https://developer.apple.com/documentation/usbdriverkit.md
+- **USBSerialDriverKit** — Develop drivers for serial USB devices connected to your Mac. — https://developer.apple.com/documentation/usbserialdriverkit.md
+- **USD** — An efficient and scalable way to represent 3D scenes. — https://developer.apple.com/documentation/usd.md
+- **USDKit** — Author, compose, and manipulate Universal Scene Description content from Swift. — https://developer.apple.com/documentation/usdkit.md
+- **User Notifications UI** — Customize the interface that displays local and remote notifications. — https://developer.apple.com/documentation/usernotificationsui.md
+- **User Notifications** — Push user-facing notifications to the user’s device from a server, or generate them locally from your app. — https://developer.apple.com/documentation/usernotifications.md
+- **Video Subscriber Account** — Support TV provider and Apple TV app functionality. — https://developer.apple.com/documentation/videosubscriberaccount.md
+- **Video Toolbox** — Work directly with hardware-accelerated video encoding and decoding capabilities. — https://developer.apple.com/documentation/videotoolbox.md
+- **VideoDriverKit** — Develop drivers for video capture and playback devices. — https://developer.apple.com/documentation/videodriverkit.md
+- **Virtualization** — Create virtual machines and run macOS and Linux-based operating systems. — https://developer.apple.com/documentation/virtualization.md
+- **Vision** — Analyze image and video content in your app using computer vision algorithms for object detection, text recognition, and image segmentation. — https://developer.apple.com/documentation/vision.md
+- **VisionKit** — Identify and extract information in the environment using the device’s camera, or in images that your app displays. — https://developer.apple.com/documentation/visionkit.md
+- **visionOS Release Notes** — Learn about changes to the visionOS SDK. — https://developer.apple.com/documentation/visionos-release-notes.md
+- **visionOS** — Create a new universe of apps and games for Apple Vision Pro. — https://developer.apple.com/documentation/visionos.md
+- **Visual Intelligence** — Include your app’s content in search results that visual intelligence provides. — https://developer.apple.com/documentation/visualintelligence.md
+- **vmnet** — Connect with network interfaces to read and write packets on guest operating systems. — https://developer.apple.com/documentation/vmnet.md
+- **Wallet Orders** — Create, distribute, and update orders in Wallet. — https://developer.apple.com/documentation/walletorders.md
+- **Wallet Passes** — Create, distribute, and update passes for the Wallet app. — https://developer.apple.com/documentation/walletpasses.md
+- **Watch Connectivity** — Implement two-way communication between an iOS app and its paired watchOS app. — https://developer.apple.com/documentation/watchconnectivity.md
+- **WatchKit** — Build watchOS apps that use features the app delegate monitors or controls, such as background tasks and extended runtime sessions. — https://developer.apple.com/documentation/watchkit.md
+- **watchOS apps** — Build watchOS apps that combine complications, notifications, and Siri to create a personal experience on Apple Watch. — https://developer.apple.com/documentation/watchos-apps.md
+- **watchOS Release Notes** — Learn about changes to the watchOS SDK. — https://developer.apple.com/documentation/watchos-release-notes.md
+- **WeatherKit REST API** — Obtain historical, current, and predictive weather for your app or service. — https://developer.apple.com/documentation/weatherkitrestapi.md
+- **WeatherKit** — Deliver weather conditions and alerts to your users. — https://developer.apple.com/documentation/weatherkit.md
 - **WebKit JS** — Access and modify DOM elements within a webpage, including touch events and visual effects. — https://developer.apple.com/documentation/webkitjs
-- **WebKit** — Integrate web content seamlessly into your app, and customize content interactions to meet your app’s needs. — https://developer.apple.com/documentation/webkit
-- **Wi-Fi Aware** — Securely pair and connect to external devices over peer-to-peer Wi-Fi. — https://developer.apple.com/documentation/wifiaware
-- **Wi-Fi Infrastructure** — Share Wi-Fi network credentials securely between devices and connected accessories. — https://developer.apple.com/documentation/wifiinfrastructure
-- **WidgetKit** — Extend the reach of your app by creating widgets, watch complications, Live Activities, and controls. — https://developer.apple.com/documentation/widgetkit
-- **WirelessInsights** — Receive notifications for anticipated changes in cellular data service conditions. — https://developer.apple.com/documentation/wirelessinsights
-- **WorkoutKit** — Create, preview, and sync workout compositions to the Workout app. — https://developer.apple.com/documentation/workoutkit
-- **Xcode Cloud** — Automatically build, test, and distribute your apps with Xcode Cloud to verify changes and create high-quality apps. — https://developer.apple.com/documentation/xcode/xcode-cloud
-- **Xcode Release Notes** — Learn about changes to Xcode. — https://developer.apple.com/documentation/xcode-release-notes
-- **Xcode** — Build, test, and submit your app with Apple’s integrated development environment. — https://developer.apple.com/documentation/xcode
-- **XcodeKit** — Create extensions to add commands to the Xcode source editor. — https://developer.apple.com/documentation/xcodekit
-- **xcselect** — Access the path of the macOS SDK available on the host system. — https://developer.apple.com/documentation/xcselect
-- **XCTest** — Create and run unit tests, performance tests, and UI tests for your Xcode project. — https://developer.apple.com/documentation/xctest
-- **XCUIAutomation** — Replicate sequences of interactions and make sure that your app’s user interface behaves as intended. — https://developer.apple.com/documentation/xcuiautomation
-- **XPC** — Access a low-level interprocess communication mechanism. — https://developer.apple.com/documentation/xpc
+- **WebKit** — Integrate web content seamlessly into your app, and customize content interactions to meet your app’s needs. — https://developer.apple.com/documentation/webkit.md
+- **Wi-Fi Aware** — Securely pair and connect to external devices over peer-to-peer Wi-Fi. — https://developer.apple.com/documentation/wifiaware.md
+- **Wi-Fi Infrastructure** — Share Wi-Fi network credentials securely between devices and connected accessories. — https://developer.apple.com/documentation/wifiinfrastructure.md
+- **WidgetKit** — Extend the reach of your app by creating widgets, watch complications, Live Activities, and controls. — https://developer.apple.com/documentation/widgetkit.md
+- **WirelessInsights** — Receive notifications for anticipated changes in cellular data service conditions. — https://developer.apple.com/documentation/wirelessinsights.md
+- **WorkoutKit** — Create, preview, and sync workout compositions to the Workout app. — https://developer.apple.com/documentation/workoutkit.md
+- **Xcode Cloud** — Automatically build, test, and distribute your apps with Xcode Cloud to verify changes and create high-quality apps. — https://developer.apple.com/documentation/xcode/xcode-cloud.md
+- **Xcode Release Notes** — Learn about changes to Xcode. — https://developer.apple.com/documentation/xcode-release-notes.md
+- **Xcode** — Build, test, and submit your app with Apple’s integrated development environment. — https://developer.apple.com/documentation/xcode.md
+- **XcodeKit** — Create extensions to add commands to the Xcode source editor. — https://developer.apple.com/documentation/xcodekit.md
+- **xcselect** — Access the path of the macOS SDK available on the host system. — https://developer.apple.com/documentation/xcselect.md
+- **XCTest** — Create and run unit tests, performance tests, and UI tests for your Xcode project. — https://developer.apple.com/documentation/xctest.md
+- **XCUIAutomation** — Replicate sequences of interactions and make sure that your app’s user interface behaves as intended. — https://developer.apple.com/documentation/xcuiautomation.md
+- **XPC** — Access a low-level interprocess communication mechanism. — https://developer.apple.com/documentation/xpc.md

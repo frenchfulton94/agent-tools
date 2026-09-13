@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://github.com/swiftlang/swift-evolution/blob/main/proposals/0395-observability.md, https://developer.apple.com/documentation/observation, https://developer.apple.com/documentation/swiftui/navigationstack, https://developer.apple.com/documentation/swiftui/navigationpath, https://developer.apple.com/forums/thread/731822
+> verified: 2026-08 against https://github.com/swiftlang/swift-evolution/blob/main/proposals/0395-observability.md, https://developer.apple.com/documentation/observation.md, https://developer.apple.com/documentation/swiftui/navigationstack.md, https://developer.apple.com/documentation/swiftui/navigationpath.md, https://developer.apple.com/forums/thread/731822
 > sources: Advanced iOS App Architecture, App Architecture, Design Patterns by Tutorials, Thinking in SwiftUI
 > note: TCA currency claim (line ~64) sourced via web search 2026-08, not Apple docs
 
