@@ -343,7 +343,7 @@ artifacts:
       the reduced-motion behavior — and treat "this should not animate" as a
       legitimate outcome rather than a skipped decision, since a high-frequency
       action is the one place motion reliably makes a product feel slower.
-      `apple-design` covers gesture-driven surfaces. Where neither is installed,
+      `fluid-interfaces` covers gesture-driven surfaces. Where neither is installed,
       carry the same decisions by hand and say so.
 
       The interface work has a second authority too: DESIGN.md holds the project's

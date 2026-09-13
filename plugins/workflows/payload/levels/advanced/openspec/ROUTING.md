@@ -20,20 +20,23 @@ because clearing removes what apply would otherwise infer it from.
 ## Decision tree (first match wins)
 
 1. Production is broken **now** (incident, outage, users blocked) → **hotfix**
-2. New repository or project bootstrap ("init", "set up the project", "scaffold") → **setup**
-3. Something behaves wrong vs. intent (bug, error, crash, regression, "too slow") → **bugfix**
+2. Shipping a build to TestFlight or the App Store → **app-release**
+   (installed only in Apple-native app repos; if the schema is absent, this entry does not apply)
+3. New repository or project bootstrap ("init", "set up the project", "scaffold") → **setup**
+4. Something behaves wrong vs. intent (bug, error, crash, regression, "too slow") → **bugfix**
    - Performance work is a bugfix: measure a baseline and set a numeric target before changing code.
-4. Dependency/framework/platform version change (bump, EOL, CVE, "migrate to vN") → **upgrade**
-5. Structure changes but behavior must not ("clean up", extract, rename, de-dupe, tech debt) → **refactor**
+5. Dependency/framework/platform version change (bump, EOL, CVE, "migrate to vN") → **upgrade**
+6. Structure changes but behavior must not ("clean up", extract, rename, de-dupe, tech debt) → **refactor**
    - Coverage backfill ("add tests", "improve coverage", no behavior change) is a refactor: characterization is the deliverable.
-6. An open question answered by building ("try", "compare", "POC", "feasibility", "which library") → **spike**
-7. New capability or intentional behavior change, including removals and deprecations → **feature**
-8. Trivial, low-risk, no contract impact (typo, copy, config value, docs) → **rapid**
+7. An open question answered by building ("try", "compare", "POC", "feasibility", "which library") → **spike**
+8. New capability or intentional behavior change, including removals and deprecations → **feature**
+9. Trivial, low-risk, no contract impact (typo, copy, config value, docs) → **rapid**
 
 ## Prompt signals
 
 - "X is broken / throws / returns the wrong thing" → bugfix
 - "prod is down / urgent / do we roll back?" → hotfix
+- "cut a release / submit to the App Store / push to TestFlight" → app-release
 - "upgrade to <framework> vN / Node LTS / patch the CVE" → upgrade
 - "no behavior change" stated or implied → refactor
 - "prototype / spike / see if / which of A or B" → spike
@@ -50,6 +53,10 @@ because clearing removes what apply would otherwise infer it from.
   feature change.
 - **hotfix**: must spawn a follow-up bugfix (durable root-cause fix) or feature
   change; postmortem.md links it.
+- **app-release**: a code defect discovered mid-release stops the release and
+  spawns a bugfix change — the release chain never absorbs code fixes. An
+  urgent fix already live in the store routes its code work through hotfix;
+  the expedited-review submission still goes through app-release, referencing it.
 - **refactor → feature**: if any test assertion has to change, behavior is
   changing — stop and reclassify.
 - Work too big for one change (an epic)? If the mattpocock pack is installed,

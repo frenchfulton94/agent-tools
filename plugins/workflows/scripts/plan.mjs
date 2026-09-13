@@ -133,6 +133,18 @@ export function buildPlan(detection, { level, payloadRoot = PAYLOAD }) {
 	if (!existsSync(levelDir)) {
 		throw new Error(`payloadRoot ${JSON.stringify(payloadRoot)} has no levels/${level} directory — refusing to build an empty-but-plausible plan.`);
 	}
+
+	// Ruling 48's lesson applies here too: a payload missing content the detection says
+	// this plan must ship is a defect, and the empty-but-plausible plan it would produce
+	// is the exact failure the level guard above exists to prevent.
+	const appleActive = level === 'advanced' && Boolean(detection.apple?.app);
+	const appleDir = join(levelDir, 'apple');
+	if (appleActive && !existsSync(appleDir)) {
+		throw new Error(
+			`payloadRoot ${JSON.stringify(payloadRoot)} has no levels/advanced/apple directory — refusing to build a plan that omits the Apple content it claims to ship.`,
+		);
+	}
+
 	const warnings = [];
 
 	// I3, and Ruling 47: a settings file we could not parse is not a settings file with no
@@ -151,6 +163,7 @@ export function buildPlan(detection, { level, payloadRoot = PAYLOAD }) {
 
 	const manifests = [readJson(join(payloadRoot, 'base', 'settings.base.json'))];
 	if (detection.web) manifests.push(readJson(join(payloadRoot, 'base', 'settings.base.web.json')));
+	if (detection.apple?.swift) manifests.push(readJson(join(payloadRoot, 'base', 'settings.base.apple.json')));
 	manifests.push(readJson(join(levelDir, 'settings.json')));
 
 	const merged = mergeManifests(manifests);
@@ -162,12 +175,18 @@ export function buildPlan(detection, { level, payloadRoot = PAYLOAD }) {
 	// every shipped name looked like a user's own file on the second run. Everything else is
 	// `collide`: a file the user wrote, or one of ours they have since changed, and neither is
 	// ever replaced without being named in the plan and approved individually.
-	const shippedSchemas = subdirs(join(levelDir, 'openspec', 'schemas'));
+	const shippedSchemas = [
+		...subdirs(join(levelDir, 'openspec', 'schemas')),
+		...(appleActive ? subdirs(join(appleDir, 'openspec', 'schemas')) : []),
+	].sort();
 	const schemas = classify(shippedSchemas, detection.openspec.schemas, detection.openspec.schemaHashes, detection.prior?.schemas);
 
-	const shippedAgents = existsSync(join(levelDir, 'agents'))
-		? readdirSync(join(levelDir, 'agents')).filter((f) => f.endsWith('.md')).sort()
-		: [];
+	const agentFilesIn = (dir) =>
+		existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith('.md')) : [];
+	const shippedAgents = [
+		...agentFilesIn(join(levelDir, 'agents')),
+		...(appleActive ? agentFilesIn(join(appleDir, 'agents')) : []),
+	].sort();
 	const agents = classify(shippedAgents, detection.agents?.files, detection.agents?.hashes, detection.prior?.agents);
 
 	const configExists = Boolean(detection.openspec.configPath);
@@ -194,6 +213,13 @@ export function buildPlan(detection, { level, payloadRoot = PAYLOAD }) {
 	if (detection.web && !detection.humanArtifacts.product) {
 		humanSteps.push('Run `/impeccable init` — gathers design context and writes PRODUCT.md and DESIGN.md.');
 	}
+	if (detection.apple?.app && !detection.apple.xcodeMcpConfigured) {
+		humanSteps.push(
+			'Enable "Allow external agents to use Xcode tools" in Xcode → Settings → Intelligence, then run ' +
+				'`claude mcp add --transport stdio xcode -- xcrun mcpbridge`. Verification then drives Xcode ' +
+				'directly; without it, xcode-loop falls back to headless xcodebuild.',
+		);
+	}
 	if (plugins.install.length > 0) {
 		humanSteps.push('Run `/reload-plugins` to activate the newly installed plugins in this session.');
 	}
@@ -209,6 +235,7 @@ export function buildPlan(detection, { level, payloadRoot = PAYLOAD }) {
 		mode: detection.priorRun ? 'reconcile' : 'fresh',
 		level,
 		web: detection.web,
+		apple: { app: Boolean(detection.apple?.app), swift: Boolean(detection.apple?.swift) },
 		// I1/legacy-cleanup: `openspec init` over an existing directory has a legacy-cleanup path,
 		// so this is true only when openspec/ is genuinely absent — never inferred any other way.
 		openspecInit: !detection.openspec.present,

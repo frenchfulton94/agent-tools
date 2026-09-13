@@ -22,7 +22,7 @@ The split is scope, not difficulty. Those skills each own one artifact; this one
 
 ## What the tests already guarantee
 
-In a marketplace with a test suite, read the suite before auditing anything by hand. This repository's `tests/marketplace-integrity.test.ts` pins registration in both directions, `name` matching directory, version agreement between `plugin.json` and the marketplace entry, `SKILL.md` presence and frontmatter match, skill-name uniqueness, README links, and identical descriptions across all three files. `tests/marketplace-audit.test.ts` runs the sweep below and gates on its catalog findings, leaving the delegated validator findings advisory.
+In a marketplace with a test suite, read the suite before auditing anything by hand. This repository's `tests/marketplace-integrity.test.ts` pins registration in both directions, `name` matching directory, a semver version in each `plugin.json`, `SKILL.md` presence and frontmatter match, skill-name uniqueness, README rows and their links, and the same description in `plugin.json` and the marketplace entry. `tests/marketplace-audit.test.ts` runs the sweep below and gates on its catalog findings, leaving the delegated validator findings advisory.
 
 So an audit does not re-derive those — it runs `bun test` and reads the failures. Restating a suite's invariants as a manual checklist produces a second, weaker copy that disagrees with the first the next time either changes. Check what the suite cannot see, and treat a warning the gate deliberately lets through as a judgement someone made, not as something nobody noticed.
 

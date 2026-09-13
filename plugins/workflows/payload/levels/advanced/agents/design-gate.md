@@ -60,7 +60,7 @@ equivalent discipline manually and say so in the output:
   config, and the reduced-motion behavior. The gate may legitimately
   conclude an element should not animate; record that outcome rather
   than omitting the element.
-- `apple-design` — for gesture-driven surfaces (drag, swipe, sheet,
+- `fluid-interfaces` — for gesture-driven surfaces (drag, swipe, sheet,
   carousel), where interruptibility and velocity handoff are design
   decisions rather than implementation details.
 

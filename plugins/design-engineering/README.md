@@ -30,7 +30,7 @@ claude plugin validate plugins/design-engineering --strict
 | `finding-animation-opportunities` | Skill | Sweeping for motion that is missing, and rejecting most of what it finds |
 | `animation-vocabulary` | Skill | Reverse-lookup glossary: a description of an effect in, the exact term out |
 | `design-engineering` | Skill | The judgement layer — taste, which details are worth it, defaults over options, cohesion, when to stop |
-| `apple-design` | Skill | Gestures and spring physics, velocity handoff and momentum projection, translucent materials, typography, Apple's eight principles |
+| `fluid-interfaces` | Skill | Gestures and spring physics, velocity handoff and momentum projection, translucent materials, typography, Apple's eight principles |
 
 ## Which one fires
 
@@ -44,7 +44,7 @@ All seven sit in one domain, so the boundaries are worth knowing:
 - A request to **name** an effect goes to `animation-vocabulary`.
 - A request about a component or interface **as a whole** goes to
   `design-engineering`.
-- Anything **gesture-driven, physical, or translucent** goes to `apple-design`.
+- Anything **gesture-driven, physical, or translucent** goes to `fluid-interfaces`.
 
 `skills/design-engineering/evals/` holds a routing battery covering all seven,
 plus the behaviour cases used while adapting them. Rerun it after editing any of
@@ -110,7 +110,7 @@ Adapted from [emilkowalski/skills](https://github.com/emilkowalski/skills) by
 Emil Kowalski, MIT licensed. See `NOTICE.md` for the mapping from upstream skill
 names to the ones here, and what was changed. The underlying philosophy is
 documented at [emilkowal.ski](https://emilkowal.ski/) and
-[animations.dev](https://animations.dev/); `apple-design` additionally draws on
+[animations.dev](https://animations.dev/); `fluid-interfaces` additionally draws on
 Apple's public WWDC design talks.
 
 ## License

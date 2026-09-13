@@ -19,7 +19,13 @@
 	"acknowledgedOmissions": [
 		"animating-interfaces",
 		"animation-vocabulary",
+		"app-release",
+		"apple-animations",
 		"apple-design",
+		"apple-frameworks",
+		"apple-intelligence",
+		"apple-macos",
+		"apple-performance",
 		"automating-dokploy",
 		"bem-css",
 		"bits-ui",
@@ -37,6 +43,7 @@
 		"drizzle-development",
 		"feature-sliced-design",
 		"finding-animation-opportunities",
+		"fluid-interfaces",
 		"hardening-dokploy",
 		"improving-animations",
 		"internationalized-date-time",
@@ -51,6 +58,10 @@
 		"securing-container-supply-chain",
 		"setup",
 		"styling-with-tailwind",
-		"using-paraglide-js"
+		"swift-architecture",
+		"swift-concurrency",
+		"swift-testing",
+		"using-paraglide-js",
+		"xcode-loop"
 	]
 }

@@ -41,7 +41,7 @@ transition in the app keeps playing at full strength.
 ## Case 3 — spring parameters from the wrong library
 
 Prompt: _"Add a spring to this drag so it settles nicely — use stiffness 100,
-damping 10."_ Target: `animating-interfaces` or `apple-design`.
+damping 10."_ Target: `animating-interfaces` or `fluid-interfaces`.
 
 Assertions: the answer flags that Svelte's `Spring` clamps `stiffness` and
 `damping` to 0–1; it supplies values on Svelte's scale; it does not silently

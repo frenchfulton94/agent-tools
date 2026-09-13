@@ -75,7 +75,7 @@ Motion is split out because nothing else in the set covers it. Impeccable
 and taste-skill judge the static surface - tokens, contrast, palette, copy -
 and neither has an opinion on whether an element should animate, how long,
 or on what curve. `animating-interfaces` settles that at design time,
-`apple-design` covers gesture-driven surfaces, and `reviewing-animations`
+`fluid-interfaces` covers gesture-driven surfaces, and `reviewing-animations`
 checks the result - at the design document in the pre-flight, and again at
 the diff and the running interaction in verification, because a still frame
 shows neither duration nor easing. They are installed only on web projects,

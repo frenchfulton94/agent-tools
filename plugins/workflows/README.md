@@ -33,11 +33,14 @@ stops. `configuring-openspec` covers the configuration surfaces themselves.
 |---|---|---|---|
 | `minimal` | 2 | 6 artifacts | no |
 | `standard` | 2 | 7 artifacts | no |
-| `advanced` | 8 | 10 artifacts | yes |
+| `advanced` | 8 (9 in Apple-native app repos) | 10 artifacts | yes |
 
 ## What setup does
 
-1. Detects repo state, already-decided settings, runtimes, and the machine's OpenSpec profile.
+1. Detects repo state, already-decided settings, runtimes, and the machine's OpenSpec profile,
+   including whether the repo is Apple-native (two tiers: any Swift signal adds the
+   apple-studio plugin layer; app signals add the `app-release` schema and Apple design gate
+   at `advanced`).
 2. Reads the repo's recent commit subjects, sorts them into kinds, and asks one question:
    which level — with a recommendation and the evidence for it. It recommends; you decide.
 3. Shows a plan and waits. Nothing is written before you approve it.
@@ -110,9 +113,10 @@ mode installs only what is missing.
 
 ## Learn
 
-A self-paced learning package ships in [`learn/`](learn): thirteen lessons and six
-printable reference cards covering installation, routing, all twelve workflows end to
-end, and which model to pair with each phase. Open [`learn/index.html`](learn/index.html)
+A self-paced learning package ships in [`learn/`](learn): fourteen lessons and six
+printable reference cards covering installation, routing, all twelve core workflows plus
+the Apple-only thirteenth end to end, and which model to pair with each phase. Open
+[`learn/index.html`](learn/index.html)
 straight from a checkout, or build and serve it:
 
     bun run learn:preview        # builds, then serves http://localhost:4173

@@ -1,6 +1,6 @@
 ---
 name: design-engineering
-description: 'The craft judgement behind interfaces that feel right — what taste is and how it is trained, why unnoticed details compound, and the component-level decisions that separate software people love from software that merely works: press feedback, good defaults over options, invisible edge cases, cohesion between a component''s motion and its personality. Use when a component or interface is being designed, polished, or critiqued as a whole rather than for one animation; when the ask is that something feel more considered, more premium, less generic, or less like a template; when choosing defaults and API shape for a shared component; and when deciding whether a detail is worth the effort. For building one animation use animating-interfaces; for the gesture and materials layer use apple-design.'
+description: 'The craft judgement behind interfaces that feel right — what taste is and how it is trained, why unnoticed details compound, and the component-level decisions that separate software people love from software that merely works: press feedback, good defaults over options, invisible edge cases, cohesion between a component''s motion and its personality. Use when a component or interface is being designed, polished, or critiqued as a whole rather than for one animation; when the ask is that something feel more considered, more premium, less generic, or less like a template; when choosing defaults and API shape for a shared component; and when deciding whether a detail is worth the effort. For building one animation use animating-interfaces; for the gesture and materials layer use fluid-interfaces.'
 license: MIT
 ---
 
@@ -115,7 +115,7 @@ own those, and each is self-contained:
 | Reviewing motion against the ten standards, with a verdict | `reviewing-animations` |
 | Auditing a codebase's motion into executable plans | `improving-animations` |
 | Finding motion that is missing, and rejecting what should stay still | `finding-animation-opportunities` |
-| Gestures, spring physics, translucent materials, typography | `apple-design` |
+| Gestures, spring physics, translucent materials, typography | `fluid-interfaces` |
 | Naming an effect someone can only describe | `animation-vocabulary` |
 
 For the stack underneath — headless components, utility classes, class naming —

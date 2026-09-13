@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "apple-studio",
+  "displayName": "Apple Studio",
+  "version": "0.9.1",
+  "description": "Native Apple app development for SwiftUI and Swift 6 — architecture and state, strict concurrency, Swift Testing, Human Interface Guidelines conformance and accessibility, SwiftUI motion, native macOS apps, the first-party framework map, on-device generative AI with Foundation Models, performance diagnosis with Instruments, App Store release engineering, and the build-test-screenshot loop. Ships a build gate that blocks a session ending on a failed build after Swift edits.",
+  "author": {
+    "name": "Agent Tools",
+    "email": "michael@frenchfultonjr.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "swift",
+    "swiftui",
+    "ios",
+    "macos",
+    "xcode",
+    "apple",
+    "concurrency",
+    "accessibility"
+  ]
+}

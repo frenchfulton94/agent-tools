@@ -16,8 +16,10 @@
 				</p>
 				<h1>Workflow atlas</h1>
 				<p class="deck">
-					All twelve schemas: level, chain, the one gate that is the reason it exists, and its escape
-					hatches. Counted and quoted from the twelve <code>schema.yaml</code> files.
+					All twelve schemas (thirteen in Apple-native app repos): level, chain, the one gate that
+					is the reason it exists, and its escape hatches. Counted and quoted from the twelve
+					<code>schema.yaml</code> files — thirteen where <code>app-release</code> is also
+					installed.
 				</p>
 			</header>
 
@@ -54,8 +56,8 @@
 						</tr>
 						<tr>
 							<td><code>advanced</code></td>
-							<td>8</td>
-							<td>32</td>
+							<td>8 (9 in Apple-native app repos)</td>
+							<td>32 (36 in Apple-native app repos)</td>
 							<td>10</td>
 							<td>yes</td>
 							<td><code>agent-skills</code>, <code>mattpocock-skills</code>, <code>superpowers</code></td>
@@ -64,7 +66,9 @@
 				</table>
 				<caption>
 					Impeccable and taste-skill arrive with the web overlay, independently of level, when a web
-					project is detected.
+					project is detected. The ninth <code>advanced</code> schema, <code>app-release</code>, is
+					conditional the same way — installed only where app signals were detected, adding its
+					four artifacts on top of the everyday and situational eight.
 				</caption>
 			</div>
 
@@ -423,6 +427,39 @@
 						<dd>Rollback over forward-fix when both are viable. Every step names its observable signal</dd>
 						<dt>Mandatory</dt>
 						<dd>A linked follow-up change for the durable fix</dd>
+					</dl>
+				</section>
+
+				<section class="card">
+					<h3><code>app-release</code> · 4</h3>
+					<p>Apple app repos · advanced only</p>
+					<ul class="chain">
+						<li>release-scope</li>
+						<li class="arrow">→</li>
+						<li>preflight</li>
+						<li class="arrow">→</li>
+						<li data-gate>tasks</li>
+						<li class="arrow">→</li>
+						<li>apply</li>
+						<li class="arrow">→</li>
+						<li data-gate>post-release</li>
+					</ul>
+					<dl class="kv">
+						<dt>Gate</dt>
+						<dd>
+							A code defect discovered mid-release stops the release and spawns a bugfix change —
+							the chain never absorbs code fixes
+						</dd>
+						<dt>Hatch</dt>
+						<dd>
+							An urgent fix already live in the store routes its code work through <code>hotfix</code>;
+							the expedited-review submission still goes through this chain, referencing it
+						</dd>
+						<dt>Skills</dt>
+						<dd>
+							<code>apple-studio:app-release</code>, <code>apple-studio:xcode-loop</code> (fallback:
+							follow the templates manually)
+						</dd>
 					</dl>
 				</section>
 			</div>

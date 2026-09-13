@@ -421,7 +421,7 @@ on a parent recalculates styles for every child on every frame.
 
 The complete implementation — grab offset, hysteresis, rubber-banding at
 boundaries, a velocity history, momentum projection to snap points, and listener
-cleanup — is in the `apple-design` skill's
+cleanup — is in the `fluid-interfaces` skill's
 `references/gestures-and-springs.md`. Start from that rather than rebuilding it.
 
 ## Number ticker

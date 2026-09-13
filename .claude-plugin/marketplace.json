@@ -51,7 +51,7 @@
       "name": "workflows",
       "source": "./plugins/workflows",
       "category": "workflow",
-      "description": "Sets up or reconciles a project's OpenSpec workflow in one command: schemas and subagents for a chosen complexity level, a rewritten openspec/config.yaml that carries forward what you wrote, and guarded plugin installation. Re-runnable, with --check for read-only drift reporting. Also routes a piece of work to the right schema among the twelve it installs, and ships a self-paced learning package covering installation, routing, and every workflow end to end."
+      "description": "Sets up or reconciles a project's OpenSpec workflow in one command: schemas and subagents for a chosen complexity level, a rewritten openspec/config.yaml that carries forward what you wrote, and guarded plugin installation. Re-runnable, with --check for read-only drift reporting. Also routes a piece of work to the right schema among the twelve it installs, detects Apple-native repos and adds the apple-studio layer plus an app-release workflow at the advanced level, and ships a self-paced learning package covering installation, routing, and every workflow end to end."
     },
     {
       "name": "unraid-ops",
@@ -70,6 +70,12 @@
       "source": "./plugins/zed",
       "category": "development",
       "description": "Configures and customizes the Zed editor — settings.json and keymap.json, themes and fonts, per-language and LSP options, formatters, tasks, snippets, extensions, and AI and agent configuration."
+    },
+    {
+      "name": "apple-studio",
+      "source": "./plugins/apple-studio",
+      "category": "development",
+      "description": "Native Apple app development for SwiftUI and Swift 6 — architecture and state, strict concurrency, Swift Testing, Human Interface Guidelines conformance and accessibility, SwiftUI motion, native macOS apps, the first-party framework map, on-device generative AI with Foundation Models, performance diagnosis with Instruments, App Store release engineering, and the build-test-screenshot loop. Ships a build gate that blocks a session ending on a failed build after Swift edits."
     }
   ]
 }
