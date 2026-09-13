@@ -2,8 +2,8 @@
 name: apple-design-gate
 description: Design gate for Apple-platform surfaces — reviews a change's UI
   against the HIG and platform idioms, then verifies on a built, running app
-  before approving. Delegate to it before archiving any advanced-level change
-  that touches SwiftUI, AppKit, or UIKit surfaces.
+  before approving. Use proactively whenever an advanced-level change touches
+  SwiftUI, AppKit, or UIKit surfaces, before it is archived.
 tools: Read, Grep, Glob, Bash, Skill
 model: opus
 effort: xhigh
