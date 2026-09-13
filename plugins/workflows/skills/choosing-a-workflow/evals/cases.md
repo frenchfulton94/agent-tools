@@ -115,4 +115,4 @@ The `[baseline]` note records what an unaided agent typically produces, which is
 
 ## Grading notes
 
-Cases 1, 2, and 4 test routing accuracy; case 3 tests that the preflight actually runs; case 5 tests the sibling boundary; case 6 tests the one-question rule; case 7 tests the model reference. Cases 1, 2, and 4 also each carry a "stops at the recommendation" assertion, because *recommends and stops* is the behaviour most likely to erode first — an agent that routes correctly and then starts the work has failed the case.
+Cases 1, 2, 4, and 8 test routing accuracy; case 3 tests that the preflight actually runs; case 5 tests the sibling boundary; case 6 tests the one-question rule; case 7 tests the model reference. Cases 1, 2, and 4 also each carry a "stops at the recommendation" assertion, because *recommends and stops* is the behaviour most likely to erode first — an agent that routes correctly and then starts the work has failed the case.

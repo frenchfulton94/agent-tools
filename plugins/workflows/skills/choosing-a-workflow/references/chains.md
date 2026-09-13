@@ -251,12 +251,12 @@ the task list.
 | `tasks` | `preflight` | Archive → upload → TestFlight → submit, each step with its observable signal |
 | `post-release` | `tasks` | Monitoring thresholds that pause the rollout; linked follow-ups. Completed before archiving |
 
-**Gate:** a code defect discovered mid-release stops the release and spawns a
-bugfix change; the chain never absorbs code fixes.
-**Hatch:** an urgent fix already live in the store routes code work through
-`hotfix`; the expedited-review submission still goes through this chain.
-Skills: `apple-studio:app-release`, `apple-studio:xcode-loop` (fallback:
-follow the templates manually).
+- **Gate:** a code defect discovered mid-release stops the release and spawns a
+  bugfix change; the chain never absorbs code fixes.
+- **Hatch:** an urgent fix already live in the store routes code work through
+  `hotfix`; the expedited-review submission still goes through this chain.
+- **Skills:** `apple-studio:app-release`, `apple-studio:xcode-loop` (fallback:
+  follow the templates manually).
 
 ## Rules that apply to every chain
 
