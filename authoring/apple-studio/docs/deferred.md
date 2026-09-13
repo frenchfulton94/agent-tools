@@ -630,6 +630,31 @@ block Phase 2; each has an explicit trigger for when to act.
     **Trigger: rewrite it the next time that reference is revised for any other
     reason.**
 
+13. **`apple-design`'s trigger evals fail in both directions (found 2026-09-12,
+    Phase 8 final fix wave).** A sweep of the skill's own
+    `evals/triggers.md` prompts scored 9/14. Four of seven should-fire rows
+    reached no skill at all: the session explored the fixture with file-reading
+    tools first, concluded there was nothing to review, and answered directly
+    without ever considering routing (`stop_reason: end_turn`, no `Skill` call).
+    One should-not-fire row — "Design our brand color palette" — wrongly reached
+    `apple-design`, which its own description disclaims in as many words.
+
+    The sweep ran while a candidate description edit was in place, and that edit
+    was reverted for want of evidence. But the three rows probing the edit's own
+    content all passed, and the failures are independent of it, so this is
+    pre-existing rather than anything Phase 8 introduced. Two reviewers reached
+    that conclusion separately. Part of the should-fire failure is the known
+    `--allowedTools` leak that lets `Bash` run regardless, but not all of it:
+    `Read` alone would reach the same "nothing here to review" conclusion on a
+    stock-template fixture, so a harness fix would not settle it.
+
+    Evidence: `.superpowers/sdd/2026-09-12-phase8-catalog-migration/final-fix-evals/`
+    in the archived `apple-studio` repository — the TSV, `results.tsv`, and all
+    14 session logs.
+
+    **Trigger: before any phase that edits `apple-design`'s description, and
+    before trusting a trigger-eval pass rate on a fixture with no real UI in it.**
+
 ## Accepted (no action)
 
 Phase 3 minors reviewed and accepted as-is — no follow-up action needed:
