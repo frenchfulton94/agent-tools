@@ -10,8 +10,8 @@ found, by compiling and not by reading:
   - SystemLanguageModel.variant is documented ("macOS 27.0 BETA") and absent
   - two of Apple's own documentation samples do not compile at all
 
-USAGE
-    python3 pipeline/typecheck_snippets.py plugin/skills/<skill>/references/*.md
+USAGE (from the catalog root)
+    python3 authoring/apple-studio/pipeline/typecheck_snippets.py plugins/apple-studio/skills/<skill>/references/*.md
 
 Exit code 0 only if every snippet compiles.
 

@@ -15,10 +15,12 @@ through `.claude-plugin/marketplace.json`.
 Both must pass before any commit that touches `plugins/`:
 
 - `bun test` — registration both ways, name against directory, skill-name
-  uniqueness across the catalog, the README skills column, the security eval
-  roster.
+  uniqueness across the catalog, that every plugin has a README row linking to
+  a real directory, the security eval roster.
 - `bun run audit` — the vendored validators over every skill, plugin, agent,
-  and hook. Exits non-zero on errors only.
+  and hook, plus the README's skills column (that each plugin's shipped skills
+  are all listed in its row — `bun test` checks the row exists and links
+  correctly, not its contents). Exits non-zero on errors only.
 
 `bun run audit:strict` also fails on warnings. It does not currently pass and
 is not a gate — run it to compare warning counts, not to gate a commit.
@@ -58,6 +60,11 @@ Three things from it that are easy to get wrong:
   tree.
 
 Work happens in numbered phases — see `authoring/apple-studio/CONVENTIONS.md`
-and `authoring/apple-studio/docs/`. Phase records go to
-`authoring/apple-studio/records/<date>-phaseN-<slug>/`. Tags are namespaced:
-`apple-studio-v0.9.0`, never a bare version.
+and `authoring/apple-studio/docs/`. **A phase working in the catalog writes its
+record to `authoring/apple-studio/records/<date>-phaseN-<slug>/`, not to
+`.superpowers/`** — the catalog's `.superpowers/sdd/.gitignore` is a single
+`*` inherited from this repo's own tooling and silently drops anything written
+there. Phase 8 itself is the one exception: its record predates this rule and
+lives in the archived repository, at
+`apple-studio/.superpowers/sdd/2026-09-12-phase8-catalog-migration/`. Tags are
+namespaced: `apple-studio-v0.9.0`, never a bare version.

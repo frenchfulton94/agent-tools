@@ -134,6 +134,13 @@ ruling.)
 ## Verification records
 
 - Spec verification tables point at evidence as `<file>:<line-range>`, not bare filenames.
+- A phase working in the catalog writes its task briefs, reports, and captured
+  logs to `authoring/apple-studio/records/<date>-phaseN-<slug>/` — not to
+  `.superpowers/`. The catalog's `.superpowers/sdd/.gitignore` is a single `*`
+  inherited from this repository's own tooling; anything committed under
+  `.superpowers/` here is silently dropped. (Phase 8's own record predates
+  this rule and lives in the archived `apple-studio` repository instead, at
+  `.superpowers/sdd/2026-09-12-phase8-catalog-migration/`.)
 
 ## Subagents
 

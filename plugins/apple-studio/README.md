@@ -37,9 +37,12 @@ claude plugin validate plugins/apple-studio --strict
 ## The Stop hook
 
 This is the only plugin in the catalog that can block a session from ending.
-If Swift files were edited and an Xcode project sits within three parent
-directories of the working directory, `stop_gate.sh` builds the first scheme
-and blocks on failure, reporting up to five compiler errors.
+Detection is scoped to the `Edit`, `Write`, and `MultiEdit` tools: a Swift file
+touched through `Bash` — `sed -i`, a heredoc, `git apply` — sets no marker, and
+the gate passes silently. Within that scope, if a Swift file was edited and an
+Xcode project sits in the working directory or one of its two parent
+directories (three directories checked in total), `stop_gate.sh` builds the
+first scheme and blocks on failure, reporting up to five compiler errors.
 
 It fails open everywhere it can: no `jq`, no project, no scheme, or a
 destination that does not apply to the project all let the session end

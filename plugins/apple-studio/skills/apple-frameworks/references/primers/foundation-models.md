@@ -133,7 +133,9 @@ version-dependent. That makes any hardcoded constant a latent bug in both
 directions — budgeting to 4096 wastes half the window on this OS, and
 budgeting to 8192 breaks on a device where the doc's figure is the real one.
 Call `SystemLanguageModel.contextSize` and `tokenCount(for:)` and budget
-against what the device reports. Evidence:
+against what the device reports. Evidence: `task-0-contextwindow.md` in the
+`2026-09-02-phase6-intelligence-performance` record, in the archived authoring
+repository (`apple-studio`, not this catalog) at
 `.superpowers/sdd/2026-09-02-phase6-intelligence-performance/task-0-contextwindow.md`.
 
 ## What's on the surface now (refreshed 2026-09)
