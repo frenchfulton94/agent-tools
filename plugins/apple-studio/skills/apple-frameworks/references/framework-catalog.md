@@ -1,7 +1,7 @@
 # Apple framework catalog
 
 > generated: 2026-09-02 from the developer.apple.com Technologies index
-> regenerate: pipeline/generate_catalog.sh (rerun each phase and after WWDC)
+> regenerate: authoring/apple-studio/pipeline/generate_catalog.sh (rerun each phase and after WWDC)
 
 - **Accelerate** — Make large-scale mathematical computations and image calculations, optimized for high performance and low energy consumption. — https://developer.apple.com/documentation/accelerate
 - **Accessibility** — Make your apps accessible to everyone who uses Apple devices. — https://developer.apple.com/documentation/accessibility

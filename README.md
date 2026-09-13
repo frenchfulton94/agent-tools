@@ -36,8 +36,8 @@ Each plugin's own README covers its components, its limits, and how to run it lo
     bun run audit:strict    # the same, failing on warnings too
     claude plugin validate  # authoritative marketplace check
 
-`bun test` pins registration in both directions, `name` matching directory, version agreement
-between `plugin.json` and the marketplace entry, `SKILL.md` presence and frontmatter match,
+`bun test` pins registration in both directions, `name` matching directory, version presence
+in each `plugin.json`, `SKILL.md` presence and frontmatter match,
 skill-name uniqueness across the catalog, and the README links above. `bun run audit` runs the
 four vendored validators over every skill, plugin, agent, and hook, then checks the plugin-level
 READMEs, this README's skills column, and the marketplace-level schema. The two are deliberately
@@ -56,11 +56,11 @@ To validate one plugin, or to load it without installing:
 
 ## Releasing
 
-A version has to move in **both** places that record it — `plugins/<plugin>/.claude-plugin/plugin.json`
-and this repository's `.claude-plugin/marketplace.json`. An unbumped plugin ships nothing:
-`/plugin update` reports "already at the latest version" and users keep the old copy indefinitely.
-`bun test` fails when the two disagree, and `bun run audit --since <ref>` reports a plugin directory
-that changed without a bump.
+A version lives in `plugins/<plugin>/.claude-plugin/plugin.json` and nowhere
+else — marketplace entries carry no version field. An unbumped plugin ships
+nothing: `/plugin update` reports "already at the latest version" and users keep
+the old copy indefinitely. `bun run audit --since <ref>` reports a plugin
+directory that changed without a bump.
 
 `name` is an install-breaking identifier — users carry it in `enabledPlugins` and every install
 command. To change only the label, set `displayName` and leave `name` alone. When a `name` genuinely

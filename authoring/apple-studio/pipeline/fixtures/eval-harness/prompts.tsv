@@ -1,0 +1,4 @@
+a	apple-design	FIRE	USE apple-design please
+b	apple-design	NOFIRE	USE swift-concurrency instead
+c	apple-performance	FIRE	USE apple-performance and WRITE a file
+d	swift-testing	FIRE	SILENT and EXHAUST
