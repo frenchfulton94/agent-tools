@@ -1,4 +1,4 @@
-> verified: 2026-09 against https://developer.apple.com/documentation/photokit, https://developer.apple.com/tutorials/data/documentation/photokit.json, https://developer.apple.com/tutorials/data/documentation/photokit/delivering-an-enhanced-privacy-experience-in-your-photos-app.json, https://developer.apple.com/tutorials/data/documentation/photosui.json, https://developer.apple.com/tutorials/data/documentation/photosui/phpickerviewcontroller.json
+> verified: 2026-09 against https://developer.apple.com/documentation/photokit.md, https://developer.apple.com/tutorials/data/documentation/photokit.json, https://developer.apple.com/tutorials/data/documentation/photokit/delivering-an-enhanced-privacy-experience-in-your-photos-app.json, https://developer.apple.com/tutorials/data/documentation/photosui.json, https://developer.apple.com/tutorials/data/documentation/photosui/phpickerviewcontroller.json
 > sources: live docs
 
 # PhotoKit
@@ -107,10 +107,10 @@ just because the framework's own floor is old — check the specific type/method
 
 ## Current docs
 
-- https://developer.apple.com/documentation/photokit
-- https://developer.apple.com/documentation/photos
-- https://developer.apple.com/documentation/photosui
-- https://developer.apple.com/documentation/photokit/delivering-an-enhanced-privacy-experience-in-your-photos-app
-- https://developer.apple.com/documentation/photosui/phpickerviewcontroller
-- https://developer.apple.com/documentation/photosui/phpickerconfiguration-swift.struct
-- https://developer.apple.com/documentation/photokit/bringing-photos-picker-to-your-swiftui-app
+- https://developer.apple.com/documentation/photokit.md
+- https://developer.apple.com/documentation/photos.md
+- https://developer.apple.com/documentation/photosui.md
+- https://developer.apple.com/documentation/photokit/delivering-an-enhanced-privacy-experience-in-your-photos-app.md
+- https://developer.apple.com/documentation/photosui/phpickerviewcontroller.md
+- https://developer.apple.com/documentation/photosui/phpickerconfiguration-swift.struct.md
+- https://developer.apple.com/documentation/photokit/bringing-photos-picker-to-your-swiftui-app.md

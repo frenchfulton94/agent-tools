@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://developer.apple.com/documentation/swiftdata, https://developer.apple.com/tutorials/data/documentation/swiftdata.json, https://developer.apple.com/tutorials/data/documentation/swiftdata/syncing-model-data-across-a-persons-devices.json, https://developer.apple.com/tutorials/data/documentation/CoreData/adopting-swiftdata-for-a-core-data-app.json
+> verified: 2026-08 against https://developer.apple.com/documentation/swiftdata.md, https://developer.apple.com/tutorials/data/documentation/swiftdata.json, https://developer.apple.com/tutorials/data/documentation/swiftdata/syncing-model-data-across-a-persons-devices.json, https://developer.apple.com/tutorials/data/documentation/CoreData/adopting-swiftdata-for-a-core-data-app.json
 > sources: live docs
 
 # SwiftData
@@ -127,11 +127,11 @@ rules it out entirely (fall back to Core Data).
 
 ## Current docs
 
-- https://developer.apple.com/documentation/swiftdata
-- https://developer.apple.com/documentation/swiftdata/preserving-your-apps-model-data-across-launches
-- https://developer.apple.com/documentation/swiftdata/adding-and-editing-persistent-data-in-your-app
-- https://developer.apple.com/documentation/swiftdata/syncing-model-data-across-a-persons-devices
-- https://developer.apple.com/documentation/coredata/adopting-swiftdata-for-a-core-data-app
-- https://developer.apple.com/documentation/swiftdata/modelcontainer
-- https://developer.apple.com/documentation/swiftdata/modelcontext
-- https://developer.apple.com/documentation/swiftdata/adopting-inheritance-in-swiftdata
+- https://developer.apple.com/documentation/swiftdata.md
+- https://developer.apple.com/documentation/swiftdata/preserving-your-apps-model-data-across-launches.md
+- https://developer.apple.com/documentation/swiftdata/adding-and-editing-persistent-data-in-your-app.md
+- https://developer.apple.com/documentation/swiftdata/syncing-model-data-across-a-persons-devices.md
+- https://developer.apple.com/documentation/coredata/adopting-swiftdata-for-a-core-data-app.md
+- https://developer.apple.com/documentation/swiftdata/modelcontainer.md
+- https://developer.apple.com/documentation/swiftdata/modelcontext.md
+- https://developer.apple.com/documentation/swiftdata/adopting-inheritance-in-swiftdata.md

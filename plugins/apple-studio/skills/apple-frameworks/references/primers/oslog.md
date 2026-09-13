@@ -138,10 +138,10 @@ deployment floor — this file only reflects what was fetched this session.
 
 ## Current docs
 
-- https://developer.apple.com/documentation/os/logging
-- https://developer.apple.com/documentation/os/generating-log-messages-from-your-code
-- https://developer.apple.com/documentation/os/viewing-log-messages
-- https://developer.apple.com/documentation/os/logger
-- https://developer.apple.com/documentation/os/oslogtype
-- https://developer.apple.com/documentation/os/customizing-logging-behavior-while-debugging
-- https://developer.apple.com/documentation/os/recording-performance-data
+- https://developer.apple.com/documentation/os/logging.md
+- https://developer.apple.com/documentation/os/generating-log-messages-from-your-code.md
+- https://developer.apple.com/documentation/os/viewing-log-messages.md
+- https://developer.apple.com/documentation/os/logger.md
+- https://developer.apple.com/documentation/os/oslogtype.md
+- https://developer.apple.com/documentation/os/customizing-logging-behavior-while-debugging.md
+- https://developer.apple.com/documentation/os/recording-performance-data.md

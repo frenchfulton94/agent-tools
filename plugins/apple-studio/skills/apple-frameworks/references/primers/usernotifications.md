@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://developer.apple.com/documentation/usernotifications, https://developer.apple.com/tutorials/data/documentation/usernotifications.json, https://developer.apple.com/tutorials/data/documentation/usernotifications/asking-permission-to-use-notifications.json, https://developer.apple.com/tutorials/data/documentation/usernotificationsui.json, https://developer.apple.com/tutorials/data/documentation/usernotifications/unauthorizationoptions.json, https://developer.apple.com/tutorials/data/documentation/bundleresources/entitlements/com.apple.developer.usernotifications.critical-alerts.json, https://developer.apple.com/tutorials/data/documentation/usernotifications/unnotificationserviceextension.json
+> verified: 2026-08 against https://developer.apple.com/documentation/usernotifications.md, https://developer.apple.com/tutorials/data/documentation/usernotifications.json, https://developer.apple.com/tutorials/data/documentation/usernotifications/asking-permission-to-use-notifications.json, https://developer.apple.com/tutorials/data/documentation/usernotificationsui.json, https://developer.apple.com/tutorials/data/documentation/usernotifications/unauthorizationoptions.json, https://developer.apple.com/tutorials/data/documentation/bundleresources/entitlements/com.apple.developer.usernotifications.critical-alerts.json, https://developer.apple.com/tutorials/data/documentation/usernotifications/unnotificationserviceextension.json
 > sources: live docs
 
 # UserNotifications
@@ -141,12 +141,12 @@ using rather than assuming the umbrella floor applies everywhere, and re-verify 
 
 ## Current docs
 
-- https://developer.apple.com/documentation/usernotifications
-- https://developer.apple.com/documentation/usernotifications/asking-permission-to-use-notifications
-- https://developer.apple.com/documentation/usernotifications/unauthorizationoptions
-- https://developer.apple.com/documentation/usernotifications/unusernotificationcenter
-- https://developer.apple.com/documentation/usernotifications/unnotificationserviceextension
-- https://developer.apple.com/documentation/usernotificationsui
-- https://developer.apple.com/documentation/usernotificationsui/customizing-the-appearance-of-notifications
-- https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.usernotifications.critical-alerts
-- https://developer.apple.com/documentation/usernotifications/setting-up-a-remote-notification-server
+- https://developer.apple.com/documentation/usernotifications.md
+- https://developer.apple.com/documentation/usernotifications/asking-permission-to-use-notifications.md
+- https://developer.apple.com/documentation/usernotifications/unauthorizationoptions.md
+- https://developer.apple.com/documentation/usernotifications/unusernotificationcenter.md
+- https://developer.apple.com/documentation/usernotifications/unnotificationserviceextension.md
+- https://developer.apple.com/documentation/usernotificationsui.md
+- https://developer.apple.com/documentation/usernotificationsui/customizing-the-appearance-of-notifications.md
+- https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.usernotifications.critical-alerts.md
+- https://developer.apple.com/documentation/usernotifications/setting-up-a-remote-notification-server.md

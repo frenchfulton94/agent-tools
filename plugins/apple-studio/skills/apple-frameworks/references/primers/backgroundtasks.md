@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://developer.apple.com/documentation/backgroundtasks, https://developer.apple.com/tutorials/data/documentation/backgroundtasks.json, https://developer.apple.com/tutorials/data/documentation/backgroundtasks/choosing-background-strategies-for-your-app.json, https://developer.apple.com/tutorials/data/documentation/backgroundtasks/starting-and-terminating-tasks-during-development.json, https://developer.apple.com/tutorials/data/documentation/backgroundtasks/bgtaskscheduler.json, https://developer.apple.com/tutorials/data/documentation/backgroundtasks/bgapprefreshtask.json, https://developer.apple.com/tutorials/data/documentation/backgroundtasks/bgprocessingtask.json, https://developer.apple.com/tutorials/data/documentation/backgroundtasks/bgtaskscheduler/register(fortaskwithidentifier:using:launchhandler:).json, https://developer.apple.com/tutorials/data/documentation/backgroundtasks/bgtaskscheduler/submittaskrequest(_:completionhandler:).json
+> verified: 2026-08 against https://developer.apple.com/documentation/backgroundtasks.md, https://developer.apple.com/tutorials/data/documentation/backgroundtasks.json, https://developer.apple.com/tutorials/data/documentation/backgroundtasks/choosing-background-strategies-for-your-app.json, https://developer.apple.com/tutorials/data/documentation/backgroundtasks/starting-and-terminating-tasks-during-development.json, https://developer.apple.com/tutorials/data/documentation/backgroundtasks/bgtaskscheduler.json, https://developer.apple.com/tutorials/data/documentation/backgroundtasks/bgapprefreshtask.json, https://developer.apple.com/tutorials/data/documentation/backgroundtasks/bgprocessingtask.json, https://developer.apple.com/tutorials/data/documentation/backgroundtasks/bgtaskscheduler/register(fortaskwithidentifier:using:launchhandler:).json, https://developer.apple.com/tutorials/data/documentation/backgroundtasks/bgtaskscheduler/submittaskrequest(_:completionhandler:).json
 > sources: live docs
 
 # BackgroundTasks
@@ -130,13 +130,13 @@ rather than assuming it matches the framework-level 13.0+.
 
 ## Current docs
 
-- https://developer.apple.com/documentation/backgroundtasks
-- https://developer.apple.com/documentation/backgroundtasks/choosing-background-strategies-for-your-app
-- https://developer.apple.com/documentation/backgroundtasks/starting-and-terminating-tasks-during-development
-- https://developer.apple.com/documentation/backgroundtasks/bgtaskscheduler
-- https://developer.apple.com/documentation/backgroundtasks/bgtaskscheduler/register(fortaskwithidentifier:using:launchhandler:)
-- https://developer.apple.com/documentation/backgroundtasks/bgtaskscheduler/submittaskrequest(_:completionhandler:)
-- https://developer.apple.com/documentation/backgroundtasks/bgapprefreshtask
-- https://developer.apple.com/documentation/backgroundtasks/bgapprefreshtaskrequest
-- https://developer.apple.com/documentation/backgroundtasks/bgprocessingtask
-- https://developer.apple.com/documentation/backgroundtasks/bgprocessingtaskrequest
+- https://developer.apple.com/documentation/backgroundtasks.md
+- https://developer.apple.com/documentation/backgroundtasks/choosing-background-strategies-for-your-app.md
+- https://developer.apple.com/documentation/backgroundtasks/starting-and-terminating-tasks-during-development.md
+- https://developer.apple.com/documentation/backgroundtasks/bgtaskscheduler.md
+- https://developer.apple.com/documentation/backgroundtasks/bgtaskscheduler/register(fortaskwithidentifier:using:launchhandler:).md
+- https://developer.apple.com/documentation/backgroundtasks/bgtaskscheduler/submittaskrequest(_:completionhandler:).md
+- https://developer.apple.com/documentation/backgroundtasks/bgapprefreshtask.md
+- https://developer.apple.com/documentation/backgroundtasks/bgapprefreshtaskrequest.md
+- https://developer.apple.com/documentation/backgroundtasks/bgprocessingtask.md
+- https://developer.apple.com/documentation/backgroundtasks/bgprocessingtaskrequest.md

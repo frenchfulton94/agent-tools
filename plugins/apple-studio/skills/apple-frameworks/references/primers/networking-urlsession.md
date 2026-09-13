@@ -139,12 +139,12 @@ continuation).
 
 ## Current docs
 
-- https://developer.apple.com/documentation/foundation/urlsession
-- https://developer.apple.com/documentation/foundation/urlsession/data(for:delegate:)
-- https://developer.apple.com/documentation/foundation/urlsession/bytes(for:delegate:)
-- https://developer.apple.com/documentation/foundation/fetching-website-data-into-memory
-- https://developer.apple.com/documentation/foundation/downloading-files-in-the-background
-- https://developer.apple.com/documentation/foundation/downloading-files-from-websites
-- https://developer.apple.com/documentation/foundation/uploading-data-to-a-website
-- https://developer.apple.com/documentation/foundation/urlprotocol
-- https://developer.apple.com/documentation/bundleresources/information-property-list/nsapptransportsecurity
+- https://developer.apple.com/documentation/foundation/urlsession.md
+- https://developer.apple.com/documentation/foundation/urlsession/data(for:delegate:).md
+- https://developer.apple.com/documentation/foundation/urlsession/bytes(for:delegate:).md
+- https://developer.apple.com/documentation/foundation/fetching-website-data-into-memory.md
+- https://developer.apple.com/documentation/foundation/downloading-files-in-the-background.md
+- https://developer.apple.com/documentation/foundation/downloading-files-from-websites.md
+- https://developer.apple.com/documentation/foundation/uploading-data-to-a-website.md
+- https://developer.apple.com/documentation/foundation/urlprotocol.md
+- https://developer.apple.com/documentation/bundleresources/information-property-list/nsapptransportsecurity.md

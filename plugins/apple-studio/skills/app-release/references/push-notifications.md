@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://developer.apple.com/documentation/usernotifications/sending-notification-requests-to-apns, https://developer.apple.com/documentation/usernotifications/establishing-a-token-based-connection-to-apns, https://developer.apple.com/documentation/usernotifications/establishing-a-certificate-based-connection-to-apns, https://developer.apple.com/documentation/bundleresources/entitlements/aps-environment, https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.aps-environment, https://developer.apple.com/documentation/usernotifications/pushing-background-updates-to-your-app, https://developer.apple.com/documentation/usernotifications/registering-your-app-with-apns, https://developer.apple.com/documentation/usernotifications/modifying-content-in-newly-delivered-notifications, https://developer.apple.com/documentation/usernotifications/unnotificationserviceextension, https://developer.apple.com/documentation/usernotifications/testing-notifications-using-the-push-notification-console, https://developer.apple.com/documentation/usernotifications/sending-push-notifications-using-command-line-tools, https://developer.apple.com/documentation/usernotifications/scheduling-a-notification-locally-from-your-app, `xcrun simctl help push` (local toolchain, empirical), https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/RevisionHistory.html
+> verified: 2026-08 against https://developer.apple.com/documentation/usernotifications/sending-notification-requests-to-apns.md, https://developer.apple.com/documentation/usernotifications/establishing-a-token-based-connection-to-apns.md, https://developer.apple.com/documentation/usernotifications/establishing-a-certificate-based-connection-to-apns.md, https://developer.apple.com/documentation/bundleresources/entitlements/aps-environment.md, https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.aps-environment.md, https://developer.apple.com/documentation/usernotifications/pushing-background-updates-to-your-app.md, https://developer.apple.com/documentation/usernotifications/registering-your-app-with-apns.md, https://developer.apple.com/documentation/usernotifications/modifying-content-in-newly-delivered-notifications.md, https://developer.apple.com/documentation/usernotifications/unnotificationserviceextension.md, https://developer.apple.com/documentation/usernotifications/testing-notifications-using-the-push-notification-console.md, https://developer.apple.com/documentation/usernotifications/sending-push-notifications-using-command-line-tools.md, https://developer.apple.com/documentation/usernotifications/scheduling-a-notification-locally-from-your-app.md, `xcrun simctl help push` (local toolchain, empirical), https://developer.apple.com/library/archive/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/RevisionHistory.html
 > sources: Push Notifications by Tutorials v4.0.0 (judgment only), live Apple docs
 
 # Push Notifications: APNs Operations
@@ -20,7 +20,7 @@ clearly won:
 - **`.p12` certificates** (PKCS#12): still per-app — sending to multiple apps means one certificate
   and one managed connection per app — and still expire annually, forcing yearly renewal tracked
   per app (Establishing a certificate-based connection to APNs,
-  https://developer.apple.com/documentation/usernotifications/establishing-a-certificate-based-connection-to-apns).
+  https://developer.apple.com/documentation/usernotifications/establishing-a-certificate-based-connection-to-apns.md).
   One thing the book gets wrong for the current day: certificates are no longer split per
   environment. The certificate type Apple issues today is explicitly "Apple Push Notification
   service SSL (**Sandbox & Production**)" — a single certificate authenticates both environments,
@@ -31,7 +31,7 @@ clearly won:
   a hard cap of two keys per environment; **topic-specific keys** are scoped to specific topics
   within a single environment (up to 400 topics per key), with a cap of 200 keys per environment
   (Establishing a token-based connection to APNs,
-  https://developer.apple.com/documentation/usernotifications/establishing-a-token-based-connection-to-apns).
+  https://developer.apple.com/documentation/usernotifications/establishing-a-token-based-connection-to-apns.md).
   So a `.p8` key still saves you from certificate-style per-app issuance — one team-scoped key can
   authenticate an entire app portfolio — but it is environment-scoped like a certificate, not a
   universal all-apps-all-environments credential. Tokens must also be refreshed (re-signed) every
@@ -40,7 +40,7 @@ clearly won:
 Live docs confirm the resulting capability gap directly: token-based (JWT bearer) auth supports
 every `apns-push-type`, while certificate-based auth supports only a subset — Live Activities'
 broadcast push and a few other newer push types are JWT-only (Sending notification requests to
-APNs, https://developer.apple.com/documentation/usernotifications/sending-notification-requests-to-apns).
+APNs, https://developer.apple.com/documentation/usernotifications/sending-notification-requests-to-apns.md).
 Combined with the per-app certificate-management overhead, this is why `.p8` keys are the current
 default recommendation — reach for a certificate only when integrating with legacy provider
 tooling that hasn't moved off it.
@@ -62,8 +62,8 @@ as an app-side bug at all.
 Which environment an installed app registers into is controlled by the `aps-environment`
 entitlement (`com.apple.developer.aps-environment` on macOS), a string valued `development` or
 `production` (APS Environment Entitlement,
-https://developer.apple.com/documentation/bundleresources/entitlements/aps-environment; macOS
-variant, https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.aps-environment).
+https://developer.apple.com/documentation/bundleresources/entitlements/aps-environment.md; macOS
+variant, https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.aps-environment.md).
 Xcode sets this automatically from whichever provisioning profile signed the build — a development
 profile yields `development`, and any distribution profile (Ad Hoc, App Store, TestFlight) yields
 `production` — so a build's push environment is a direct, mechanical consequence of how it's
@@ -86,7 +86,7 @@ Two capability toggles matter for APNs ops, at a judgment level rather than a cl
   app. In the Signing and Capability tab, add the Background Modes capability, then select the
   Remote notification checkbox" (watchOS: add it to the WatchKit Extension instead) (Pushing
   background updates to your app,
-  https://developer.apple.com/documentation/usernotifications/pushing-background-updates-to-your-app).
+  https://developer.apple.com/documentation/usernotifications/pushing-background-updates-to-your-app.md).
   A payload with `content-available: 1` but no Background Modes capability is a classic "silent
   push does nothing" bug that looks like a payload problem but is a capability gap.
 
@@ -105,7 +105,7 @@ Treat the device token as an opaque, size-unstable address scoped to one app-dev
   backup, installs the app on a new device, or reinstalls the OS — and a token is never shared
   across two different apps on the same device, even from the same developer (Registering your app
   with APNs,
-  https://developer.apple.com/documentation/usernotifications/registering-your-app-with-apns).
+  https://developer.apple.com/documentation/usernotifications/registering-your-app-with-apns.md).
   Every `didRegisterForRemoteNotificationsWithDeviceToken` call should be treated as "here is the
   current token for this app on this device" and upserted server-side, never assumed stable across
   app launches, and never cached to local storage as if it were permanent.
@@ -122,7 +122,7 @@ Treat the device token as an opaque, size-unstable address scoped to one app-dev
 
 Silent (background) push is data-refresh plumbing, not a notification the user sees, and it comes
 with hard pairing rules and no delivery guarantee (Pushing background updates to your app,
-https://developer.apple.com/documentation/usernotifications/pushing-background-updates-to-your-app,
+https://developer.apple.com/documentation/usernotifications/pushing-background-updates-to-your-app.md,
 unless noted otherwise below):
 
 - The payload's `aps` dictionary must contain only `content-available: 1` — no `alert`, `sound`, or
@@ -130,7 +130,7 @@ unless noted otherwise below):
 - The `apns-priority` header must be `5`; pairing `content-available` with priority `10` is an
   explicit, documented APNs error, not merely discouraged — confirmed directly in the push-type
   reference: "Always use priority 5. Using priority 10 is an error" (Sending notification requests
-  to APNs, https://developer.apple.com/documentation/usernotifications/sending-notification-requests-to-apns).
+  to APNs, https://developer.apple.com/documentation/usernotifications/sending-notification-requests-to-apns.md).
 - `apns-push-type` must be set to `background` — required outright on watchOS 6+, and recommended
   (treat as required) on every other platform.
 - Requires the Background Modes → Remote notifications capability (above) — without it, background
@@ -169,7 +169,7 @@ invoke it," and the time-budget pitfall) — don't re-derive that here. What's n
   notification. Apple's own stated motivating cases are exactly what the book names: decrypting
   data sent in an encrypted format, and downloading images or other media attachments whose size
   would exceed the payload's 4 KB limit (Modifying content in newly delivered notifications,
-  https://developer.apple.com/documentation/usernotifications/modifying-content-in-newly-delivered-notifications).
+  https://developer.apple.com/documentation/usernotifications/modifying-content-in-newly-delivered-notifications.md).
   For the payload-shape trigger condition (`mutable-content: 1` + non-silent/non-sound-only/
   non-badge-only) and the "assuming it intercepts all notifications" pitfall, see the primer's
   "Conflating local and remote notification handling" entry — not restated here.
@@ -208,11 +208,11 @@ choosing a debugging tool:
   development environment**, for up to 7 days after sending; there is no equivalent delivery-log
   visibility for production sends through the console (Testing notifications using the Push
   Notification Console,
-  https://developer.apple.com/documentation/usernotifications/testing-notifications-using-the-push-notification-console).
+  https://developer.apple.com/documentation/usernotifications/testing-notifications-using-the-push-notification-console.md).
 - **Command-line testing against real sandbox APNs** — Apple documents `curl`-based recipes (via a
   certificate, or via a JWT built with `openssl`) for posting a single test payload straight to
   `api.sandbox.push.apple.com` (Sending push notifications using command-line tools,
-  https://developer.apple.com/documentation/usernotifications/sending-push-notifications-using-command-line-tools).
+  https://developer.apple.com/documentation/usernotifications/sending-push-notifications-using-command-line-tools.md).
   Useful only as an ops sanity check — "does this auth key/cert plus this device token actually
   reach this device" — before or instead of standing up provider code; constructing that flow as
   part of a real provider is server work and out of scope here.
@@ -227,7 +227,7 @@ choosing a debugging tool:
 Local notifications (interval, calendar, or location triggers) sidestep the entire APNs ops path.
 Confirmation by omission is as clear as a live doc gets here: Apple's own guide to scheduling a
 local notification (Scheduling a notification locally from your app,
-https://developer.apple.com/documentation/usernotifications/scheduling-a-notification-locally-from-your-app)
+https://developer.apple.com/documentation/usernotifications/scheduling-a-notification-locally-from-your-app.md)
 never mentions a device token, a provider server, or an environment entitlement anywhere — content
 and delivery conditions are built entirely from local Swift objects (content object, a
 calendar/interval/location trigger object, and a request object handed to

@@ -1,4 +1,4 @@
-> verified: 2026-09 against https://developer.apple.com/documentation/charts, https://developer.apple.com/tutorials/data/documentation/charts.json, https://developer.apple.com/tutorials/data/documentation/charts/visualizing-your-app-s-data.json, https://developer.apple.com/tutorials/data/documentation/charts/chart.json, https://developer.apple.com/tutorials/data/documentation/charts/creating-a-chart-using-swift-charts.json, https://developer.apple.com/tutorials/data/documentation/charts/chartcontent/accessibilitylabel(_:)-28985.json, https://developer.apple.com/tutorials/data/documentation/swiftui/view/accessibilitychartdescriptor(_:).json, https://developer.apple.com/tutorials/data/documentation/charts/creating-a-data-visualization-dashboard-with-swift-charts.json
+> verified: 2026-09 against https://developer.apple.com/documentation/charts.md, https://developer.apple.com/tutorials/data/documentation/charts.json, https://developer.apple.com/tutorials/data/documentation/charts/visualizing-your-app-s-data.json, https://developer.apple.com/tutorials/data/documentation/charts/chart.json, https://developer.apple.com/tutorials/data/documentation/charts/creating-a-chart-using-swift-charts.json, https://developer.apple.com/tutorials/data/documentation/charts/chartcontent/accessibilitylabel(_:)-28985.json, https://developer.apple.com/tutorials/data/documentation/swiftui/view/accessibilitychartdescriptor(_:).json, https://developer.apple.com/tutorials/data/documentation/charts/creating-a-data-visualization-dashboard-with-swift-charts.json
 > sources: live docs
 
 # Swift Charts
@@ -137,12 +137,12 @@ the framework page's headline floor.
 
 ## Current docs
 
-- https://developer.apple.com/documentation/charts
-- https://developer.apple.com/documentation/charts/chart
-- https://developer.apple.com/documentation/charts/creating-a-chart-using-swift-charts
-- https://developer.apple.com/documentation/charts/visualizing-your-app-s-data
-- https://developer.apple.com/documentation/charts/creating-a-data-visualization-dashboard-with-swift-charts
-- https://developer.apple.com/documentation/charts/customizing-axes-in-swift-charts
-- https://developer.apple.com/documentation/charts/chartcontent
-- https://developer.apple.com/documentation/swiftui/view/accessibilitychartdescriptor(_:)
-- https://developer.apple.com/documentation/accessibility/axchartdescriptor
+- https://developer.apple.com/documentation/charts.md
+- https://developer.apple.com/documentation/charts/chart.md
+- https://developer.apple.com/documentation/charts/creating-a-chart-using-swift-charts.md
+- https://developer.apple.com/documentation/charts/visualizing-your-app-s-data.md
+- https://developer.apple.com/documentation/charts/creating-a-data-visualization-dashboard-with-swift-charts.md
+- https://developer.apple.com/documentation/charts/customizing-axes-in-swift-charts.md
+- https://developer.apple.com/documentation/charts/chartcontent.md
+- https://developer.apple.com/documentation/swiftui/view/accessibilitychartdescriptor(_:).md
+- https://developer.apple.com/documentation/accessibility/axchartdescriptor.md

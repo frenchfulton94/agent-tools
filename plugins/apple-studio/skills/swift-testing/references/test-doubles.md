@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://developer.apple.com/documentation/swift/clock, https://developer.apple.com/documentation/foundation/urlsession/data(for:delegate:)
+> verified: 2026-08 against https://developer.apple.com/documentation/swift/clock.md, https://developer.apple.com/documentation/foundation/urlsession/data(for:delegate:).md
 > sources: iOS Test-Driven Development by Tutorials, Testing Swift
 
 # Test Doubles: Fakes, Stubs, and Spies (No Mocking Frameworks)

@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://developer.apple.com/documentation/cloudkit, https://developer.apple.com/tutorials/data/documentation/cloudkit.json, https://developer.apple.com/tutorials/data/documentation/cloudkit/deciding-whether-cloudkit-is-right-for-your-app.json, https://developer.apple.com/tutorials/data/documentation/cloudkit/enabling-cloudkit-in-your-app.json, https://developer.apple.com/tutorials/data/documentation/cloudkit/local-records.json, https://developer.apple.com/tutorials/data/documentation/cloudkit/responding-to-requests-to-delete-data.json
+> verified: 2026-08 against https://developer.apple.com/documentation/cloudkit.md, https://developer.apple.com/tutorials/data/documentation/cloudkit.json, https://developer.apple.com/tutorials/data/documentation/cloudkit/deciding-whether-cloudkit-is-right-for-your-app.json, https://developer.apple.com/tutorials/data/documentation/cloudkit/enabling-cloudkit-in-your-app.json, https://developer.apple.com/tutorials/data/documentation/cloudkit/local-records.json, https://developer.apple.com/tutorials/data/documentation/cloudkit/responding-to-requests-to-delete-data.json
 > sources: live docs
 
 # CloudKit
@@ -86,15 +86,15 @@ For anything touching record zones, sharing, subscriptions, or `CKSyncEngine` sp
 
 Fetch these before implementing — this primer intentionally omits API shapes, method signatures, and version-specific minutiae that live here instead:
 
-- https://developer.apple.com/documentation/cloudkit
-- https://developer.apple.com/documentation/cloudkit/deciding-whether-cloudkit-is-right-for-your-app
-- https://developer.apple.com/documentation/cloudkit/enabling-cloudkit-in-your-app
-- https://developer.apple.com/documentation/cloudkit/designing-and-creating-a-cloudkit-database
-- https://developer.apple.com/documentation/cloudkit/local-records
-- https://developer.apple.com/documentation/cloudkit/remote-records
-- https://developer.apple.com/documentation/cloudkit/shared-records
-- https://developer.apple.com/documentation/cloudkit/encrypting-user-data
-- https://developer.apple.com/documentation/cloudkit/providing-user-access-to-cloudkit-data
-- https://developer.apple.com/documentation/cloudkit/changing-access-controls-on-user-data
-- https://developer.apple.com/documentation/cloudkit/responding-to-requests-to-delete-data
-- https://developer.apple.com/documentation/cloudkit/identifying-an-app-s-containers
+- https://developer.apple.com/documentation/cloudkit.md
+- https://developer.apple.com/documentation/cloudkit/deciding-whether-cloudkit-is-right-for-your-app.md
+- https://developer.apple.com/documentation/cloudkit/enabling-cloudkit-in-your-app.md
+- https://developer.apple.com/documentation/cloudkit/designing-and-creating-a-cloudkit-database.md
+- https://developer.apple.com/documentation/cloudkit/local-records.md
+- https://developer.apple.com/documentation/cloudkit/remote-records.md
+- https://developer.apple.com/documentation/cloudkit/shared-records.md
+- https://developer.apple.com/documentation/cloudkit/encrypting-user-data.md
+- https://developer.apple.com/documentation/cloudkit/providing-user-access-to-cloudkit-data.md
+- https://developer.apple.com/documentation/cloudkit/changing-access-controls-on-user-data.md
+- https://developer.apple.com/documentation/cloudkit/responding-to-requests-to-delete-data.md
+- https://developer.apple.com/documentation/cloudkit/identifying-an-app-s-containers.md
