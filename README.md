@@ -36,13 +36,14 @@ Each plugin's own README covers its components, its limits, and how to run it lo
     bun run audit:strict    # the same, failing on warnings too
     claude plugin validate  # authoritative marketplace check
 
-`bun test` pins registration in both directions, `name` matching directory, version presence
-in each `plugin.json`, `SKILL.md` presence and frontmatter match,
-skill-name uniqueness across the catalog, and the README links above. `bun run audit` runs the
-four vendored validators over every skill, plugin, agent, and hook, then checks the plugin-level
-READMEs, this README's skills column, and the marketplace-level schema. The two are deliberately
-disjoint — a second implementation of one invariant disagrees with the first the next time either
-changes.
+`bun test` pins registration in both directions, `name` matching directory, a semver version in
+each `plugin.json`, the same description in `plugin.json` and the marketplace entry, `SKILL.md`
+presence and frontmatter match, skill-name uniqueness across the catalog, the README links above,
+and the vendored `.agents/skills/` copies against their sources under `plugins/`. `bun run audit`
+runs the four vendored validators over every skill, plugin, agent, and hook, then checks the
+plugin-level READMEs, this README's skills column, and the marketplace-level schema. The two are
+deliberately disjoint — a second implementation of one invariant disagrees with the first the next
+time either changes.
 
 `bun run audit` exits non-zero on errors only. The validator warnings it prints — body length, a
 reference file with no table of contents — are judgement calls an author may have made
