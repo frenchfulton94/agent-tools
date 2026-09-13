@@ -75,12 +75,22 @@
 						</tr>
 						<tr>
 							<td>2</td>
+							<td>
+								Shipping a build to TestFlight or the App Store —
+								<strong>installed only in Apple-native app repos</strong>; if the schema is
+								absent, this entry does not apply
+							</td>
+							<td><code>app-release</code></td>
+							<td>release-scope → preflight → tasks → post-release</td>
+						</tr>
+						<tr>
+							<td>3</td>
 							<td>New repository or project bootstrap — init, scaffold, set up the project</td>
 							<td><code>setup</code></td>
 							<td>decisions → conventions → tasks</td>
 						</tr>
 						<tr>
-							<td>3</td>
+							<td>4</td>
 							<td>
 								Behaves wrong versus intent — bug, error, crash, regression, "too slow".
 								<strong>Performance is a bugfix</strong>
@@ -89,13 +99,13 @@
 							<td>reproduction → rootcause → fix → tasks</td>
 						</tr>
 						<tr>
-							<td>4</td>
+							<td>5</td>
 							<td>Dependency, framework, platform version change — bump, EOL, CVE, migrate to vN</td>
 							<td><code>upgrade</code></td>
 							<td>inventory → surfaces → migration → tasks → verification</td>
 						</tr>
 						<tr>
-							<td>5</td>
+							<td>6</td>
 							<td>
 								Structure changes, behaviour must not — clean up, extract, rename, de-dupe.
 								<strong>Coverage backfill is a refactor</strong>
@@ -104,13 +114,13 @@
 							<td>characterization → strategy → tasks</td>
 						</tr>
 						<tr>
-							<td>6</td>
+							<td>7</td>
 							<td>An open question answered by building — try, compare, POC, feasibility</td>
 							<td><code>spike</code></td>
 							<td>question → apply → findings</td>
 						</tr>
 						<tr>
-							<td>7</td>
+							<td>8</td>
 							<td>
 								New capability or intentional behaviour change — <strong>including removals and
 								deprecations</strong>
@@ -122,7 +132,7 @@
 							</td>
 						</tr>
 						<tr>
-							<td>8</td>
+							<td>9</td>
 							<td>Trivial, low-risk, no contract impact — typo, copy, config value, docs</td>
 							<td><code>rapid</code></td>
 							<td>proposal → tasks</td>

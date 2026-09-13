@@ -425,6 +425,39 @@
 						<dd>A linked follow-up change for the durable fix</dd>
 					</dl>
 				</section>
+
+				<section class="card">
+					<h3><code>app-release</code> · 4</h3>
+					<p>Apple app repos · advanced only</p>
+					<ul class="chain">
+						<li>release-scope</li>
+						<li class="arrow">→</li>
+						<li>preflight</li>
+						<li class="arrow">→</li>
+						<li data-gate>tasks</li>
+						<li class="arrow">→</li>
+						<li>apply</li>
+						<li class="arrow">→</li>
+						<li data-gate>post-release</li>
+					</ul>
+					<dl class="kv">
+						<dt>Gate</dt>
+						<dd>
+							A code defect discovered mid-release stops the release and spawns a bugfix change —
+							the chain never absorbs code fixes
+						</dd>
+						<dt>Hatch</dt>
+						<dd>
+							An urgent fix already live in the store routes its code work through <code>hotfix</code>;
+							the expedited-review submission still goes through this chain, referencing it
+						</dd>
+						<dt>Skills</dt>
+						<dd>
+							<code>apple-studio:app-release</code>, <code>apple-studio:xcode-loop</code> (fallback:
+							follow the templates manually)
+						</dd>
+					</dl>
+				</section>
 			</div>
 
 			<h2>Standing documents, and which skill owns each</h2>
