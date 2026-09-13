@@ -1,0 +1,21 @@
+# Converted book text — copyrighted material, never committed
+authoring/*/corpus/
+
+# Source books, if ever copied here
+*.epub
+*.pdf
+
+# macOS
+.DS_Store
+
+# Python bytecode — plugins/unraid-ops/scripts/ generates it on import
+__pycache__/
+*.pyc
+
+# Pipeline scratch
+authoring/*/pipeline/tmp/
+
+# Instruments traces — hundreds of MB of binary bundles, and re-recordable from
+# the run sheet beside them. Kept locally next to the report that cites them;
+# a report citing a .trace means "on the machine that recorded it".
+*.trace/

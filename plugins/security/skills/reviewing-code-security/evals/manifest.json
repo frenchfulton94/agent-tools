@@ -19,6 +19,13 @@
 	"acknowledgedOmissions": [
 		"animating-interfaces",
 		"animation-vocabulary",
+		"app-release",
+		"apple-animations",
+		"apple-design",
+		"apple-frameworks",
+		"apple-intelligence",
+		"apple-macos",
+		"apple-performance",
 		"bem-css",
 		"bits-ui",
 		"bun",
@@ -46,6 +53,10 @@
 		"securing-container-supply-chain",
 		"setup",
 		"styling-with-tailwind",
-		"using-paraglide-js"
+		"swift-architecture",
+		"swift-concurrency",
+		"swift-testing",
+		"using-paraglide-js",
+		"xcode-loop"
 	]
 }
