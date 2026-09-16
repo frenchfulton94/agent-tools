@@ -125,6 +125,16 @@ class Apply(unittest.TestCase):
             self.assertFalse((root / "0-Inbox" / "a (2).pdf").exists())
             self.assertEqual(result["moved"], 0)
 
+    def test_does_not_rename_when_the_destination_differs_only_by_case(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            (root / "0-Inbox").mkdir()
+            (root / "0-Inbox" / "a.pdf").write_text("x")
+            result = ap.apply_plan(plan_with([group(["0-Inbox/a.pdf"], "0-INBOX")], root), root)
+            self.assertEqual(result["moved"], 0)
+            self.assertFalse((root / "0-Inbox" / "a (2).pdf").exists())
+            self.assertEqual((root / "0-Inbox" / "a.pdf").read_text(), "x")
+
 
 if __name__ == "__main__":
     unittest.main()

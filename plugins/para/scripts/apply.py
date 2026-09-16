@@ -98,7 +98,17 @@ def apply_plan(plan, root):
                 target_dir = root / group["destination"]
                 target_dir.mkdir(parents=True, exist_ok=True)
                 planned = target_dir / source.name
-                if planned == source:
+                # Identity, not string equality: APFS is case-insensitive, so
+                # "0-INBOX" and "0-Inbox" name the same directory and the file
+                # would otherwise collide with itself and be renamed. lstat
+                # rather than samefile, so a symlink is compared as the link
+                # itself -- which is what shutil.move would relocate.
+                try:
+                    here, there = source.lstat(), planned.lstat()
+                    already_there = (here.st_ino, here.st_dev) == (there.st_ino, there.st_dev)
+                except OSError:
+                    already_there = False
+                if already_there:
                     skipped.append({"file": rel, "reason": "already at destination"})
                     continue
                 target = pp.safe_destination(planned)
