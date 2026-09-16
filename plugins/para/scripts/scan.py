@@ -16,6 +16,7 @@ import os
 import pathlib
 import plistlib
 import re
+import stat
 import subprocess
 import sys
 
@@ -78,17 +79,22 @@ def peek(path, limit_bytes):
 
     O_NOFOLLOW closes the window between peek_candidates vetting the path and
     this open: a file swapped for a symlink in between is refused rather than
-    followed.
+    followed. closefd=False plus the finally keeps ownership of the descriptor
+    here, so a directory -- a package is one -- cannot leak it.
     """
     try:
         handle = os.open(str(path), os.O_RDONLY | os.O_NOFOLLOW)
     except OSError:
         return ""
     try:
-        with os.fdopen(handle, "rb") as stream:
+        if stat.S_ISDIR(os.fstat(handle).st_mode):
+            return ""
+        with os.fdopen(handle, "rb", closefd=False) as stream:
             chunk = stream.read(limit_bytes)
     except OSError:
         return ""
+    finally:
+        os.close(handle)
     if b"\x00" in chunk:
         return ""
     return chunk.decode("utf-8", errors="replace")

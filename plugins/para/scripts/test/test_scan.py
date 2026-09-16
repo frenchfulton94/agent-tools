@@ -179,6 +179,17 @@ class TierTwo(unittest.TestCase):
             link.symlink_to(secret)
             self.assertEqual(scan.peek(link, 4096), "")
 
+    def test_peek_on_a_package_directory_leaks_no_descriptors(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            bundle = root / "Notes.rtfd"
+            bundle.mkdir()
+            (bundle / "TXT.rtf").write_text("x")
+            before = len(os.listdir("/dev/fd"))
+            for _ in range(50):
+                self.assertEqual(scan.peek(bundle, 64), "")
+            self.assertLessEqual(len(os.listdir("/dev/fd")) - before, 1)
+
     def test_denylist_is_enforced_regardless_of_budget(self):
         with tempfile.TemporaryDirectory() as d:
             root = pathlib.Path(d)
