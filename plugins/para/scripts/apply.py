@@ -60,7 +60,15 @@ def validate_plan(plan, root):
     root_resolved = root.resolve()
 
     for group in plan.get("groups", []):
+        # Whole-group, before any of its files are checked. apply_plan reads
+        # group["destination"] directly, so a group missing the key that
+        # reached execution would raise mid-run -- after earlier groups had
+        # already moved, which is exactly the partial apply this function
+        # exists to prevent.
         destination = group.get("destination", "")
+        if not str(destination).strip():
+            errors.append(f"group {group.get('id')}: missing a destination")
+            continue
         for rel in group.get("files", []):
             if pathlib.PurePath(rel).is_absolute() or ".." in pathlib.PurePath(rel).parts:
                 errors.append(f"{rel}: source path must be relative to the root")

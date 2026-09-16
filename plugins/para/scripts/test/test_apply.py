@@ -62,6 +62,35 @@ class Validate(unittest.TestCase):
             self.assertTrue(errors)
             self.assertTrue(victim.exists())
 
+    def test_rejects_a_group_with_no_destination(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            (root / "a.txt").write_text("x")
+            (root / "b.txt").write_text("x")
+            headless = group(["b.txt"], "0-Inbox", "g2")
+            del headless["destination"]
+            plan = plan_with([group(["a.txt"], "4-Archives", "g1"), headless], root)
+
+            errors = ap.validate_plan(plan, root)
+            self.assertTrue(any("missing a destination" in e for e in errors))
+
+            # The whole point: the bad group is caught up front, so the good
+            # group that precedes it never moves.
+            with self.assertRaises(ap.InvalidPlan):
+                ap.apply_plan(plan, root)
+            self.assertTrue((root / "a.txt").exists())
+            self.assertTrue((root / "b.txt").exists())
+            self.assertFalse((root / "4-Archives").exists())
+
+    def test_rejects_a_group_whose_destination_is_blank(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            (root / "a.txt").write_text("x")
+            plan = plan_with([group(["a.txt"], "   ")], root)
+            self.assertTrue(
+                any("missing a destination" in e for e in ap.validate_plan(plan, root))
+            )
+
     def test_rejects_a_traversing_source_path(self):
         with tempfile.TemporaryDirectory() as outer:
             o = pathlib.Path(outer)

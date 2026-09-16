@@ -12,6 +12,7 @@ adds macOS signals and a bounded content peek.
 import argparse
 import datetime as dt
 import json
+import os
 import pathlib
 import plistlib
 import re
@@ -22,6 +23,10 @@ import para_paths as pp
 from para_index import Index, parse_index
 
 SAMPLE_CAP = 5
+# The plugin's own output, at the top level of a root it has organized: the
+# user's index and previous runs' undo manifests. Both are input to a later
+# run, never subjects of one.
+PLUGIN_ARTIFACTS = (".para", "PARA.md")
 MONTH_SECONDS = 30.44 * 86400
 
 
@@ -69,10 +74,19 @@ def spotlight(path):
 
 
 def peek(path, limit_bytes):
-    """Decode a bounded prefix. Returns '' for binary or unreadable files."""
+    """Decode a bounded prefix. Returns '' for binary or unreadable files.
+
+    O_NOFOLLOW closes the window between peek_candidates vetting the path and
+    this open: a file swapped for a symlink in between is refused rather than
+    followed.
+    """
     try:
-        with open(path, "rb") as handle:
-            chunk = handle.read(limit_bytes)
+        handle = os.open(str(path), os.O_RDONLY | os.O_NOFOLLOW)
+    except OSError:
+        return ""
+    try:
+        with os.fdopen(handle, "rb") as stream:
+            chunk = stream.read(limit_bytes)
     except OSError:
         return ""
     if b"\x00" in chunk:
@@ -164,6 +178,11 @@ def walk(root, index, *, metadata_only=False):
         # The skeleton is output, not input. A re-run works 0-Inbox only, which
         # the maintaining-para-systems skill drives.
         if child.name in pp.SKELETON:
+            continue
+        # So are PARA.md and .para/ -- the plugin's own output. Filing the
+        # index away makes every later scan match nothing; filing .para/ away
+        # leaves undo.py unable to infer the root from a manifest.
+        if child.name in PLUGIN_ARTIFACTS:
             continue
         if child.is_symlink() or pp.is_package(child) or not child.is_dir():
             record(child)

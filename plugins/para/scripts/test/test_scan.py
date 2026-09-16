@@ -59,6 +59,19 @@ class Walk(unittest.TestCase):
             entries, _ = scan.walk(root, pi.Index())
             self.assertEqual([e["rel"] for e in entries], ["loose.pdf"])
 
+    def test_does_not_collect_the_plugins_own_artifacts(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            touch(root / "PARA.md", content="## Projects\n- thing\n")
+            touch(root / ".para" / "undo-20260915T120000.jsonl", content="{}\n")
+            touch(root / ".para" / "plan-20260915T120000.json", content="{}\n")
+            touch(root / "loose.pdf")
+            entries, _ = scan.walk(root, pi.Index())
+            rels = [e["rel"] for e in entries]
+            self.assertEqual(rels, ["loose.pdf"])
+            self.assertNotIn("PARA.md", rels)
+            self.assertFalse(any(r.startswith(".para") for r in rels))
+
 
 class Cluster(unittest.TestCase):
     def test_groups_old_files_by_year_of_last_use(self):
@@ -155,6 +168,16 @@ class TierTwo(unittest.TestCase):
             f = pathlib.Path(d) / "blob.bin"
             f.write_bytes(b"\x00\x01\x02\xff" * 64)
             self.assertEqual(scan.peek(f, 128), "")
+
+    def test_peek_refuses_a_symlink_at_open_time(self):
+        # peek_candidates already refuses symlinks, but it vets a path and
+        # peek reopens it by string. A swap in between must not be followed.
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            secret = touch(root / "secret.txt", content="PRIVATE-MUST-NOT-BE-READ")
+            link = root / "notes.txt"
+            link.symlink_to(secret)
+            self.assertEqual(scan.peek(link, 4096), "")
 
     def test_denylist_is_enforced_regardless_of_budget(self):
         with tempfile.TemporaryDirectory() as d:
