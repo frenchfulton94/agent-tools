@@ -117,6 +117,30 @@ class Evaluate(unittest.TestCase):
     def test_a_real_git_clean_is_still_denied(self):
         self.assertEqual(guard.evaluate("git clean -fdx /Users/me/Documents", ROOTS)[0], "deny")
 
+    def test_unknown_wrapper_flags_do_not_hide_the_verb(self):
+        for cmd in ("sudo -D /tmp rm -rf /Users/me/Documents/x",
+                    "sudo -R /var/tmp rm -rf /Users/me/Documents/x",
+                    "sudo --close-from 3 rm -rf /Users/me/Documents/x",
+                    "time -o /tmp/out rm -rf /Users/me/Documents/x"):
+            with self.subTest(cmd=cmd):
+                self.assertEqual(guard.evaluate(cmd, ROOTS)[0], "deny")
+
+    def test_an_apostrophe_in_a_sibling_name_is_not_the_root(self):
+        self.assertIsNone(guard.evaluate("rm -rf \"/Users/me/Documents'/x\"", ROOTS))
+
+    def test_a_relative_cd_away_leaves_the_root(self):
+        for cmd in ("cd /Users/me/Documents && cd ../elsewhere && rm -rf x",
+                    "cd /Users/me/Documents && cd .. && rm -rf x"):
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(guard.evaluate(cmd, ROOTS))
+
+    def test_reading_a_file_that_mentions_rm_is_allowed(self):
+        for cmd in ("grep rm /Users/me/Documents/notes.txt",
+                    "cat /Users/me/Documents/how-to-rm.txt",
+                    'echo "rm -rf /Users/me/Documents/x"'):
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(guard.evaluate(cmd, ROOTS))
+
 
 class Cli(unittest.TestCase):
     def _run(self, payload, roots_file):

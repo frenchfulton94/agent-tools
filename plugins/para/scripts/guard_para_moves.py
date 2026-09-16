@@ -25,6 +25,7 @@ import json
 import os
 import pathlib
 import re
+import shlex
 import sys
 
 DESTRUCTIVE = ("rm", "rmdir", "unlink", "shred", "trash")
@@ -32,6 +33,20 @@ RELOCATING = ("mv", "rename")
 WRAPPERS = {"sudo", "doas", "env", "nohup", "time", "command", "exec", "builtin", "xargs"}
 VALUE_FLAGS = {"-u", "-g", "-p", "-C", "-h", "--user", "--group", "--prompt"}
 CWD_CHANGING = {"cd", "pushd"}
+
+# Commands that only read. A destructive-looking token inside one of these
+# (a grep pattern, a filename, an echoed string) is not an action — deletion
+# is judged by finding the verb ANYWHERE in the token list once the leading
+# word clears this exemption, so a read-only leader keeps that scan from
+# ever firing. Deliberately NOT here: `find`, because `find -delete`
+# deletes — _deletes_by_flag catches that case and runs before this
+# exemption is even consulted.
+READ_ONLY = {
+    "echo", "grep", "egrep", "fgrep", "rg", "cat", "less", "more", "head",
+    "tail", "ls", "stat", "du", "df", "file", "wc", "test", "[", "printf",
+    "diff", "cmp", "shasum", "md5sum", "sha256sum", "tree", "open", "bat",
+    "awk", "sed", "wc", "sort", "uniq", "cut",
+}
 
 
 def registry_path():
@@ -77,15 +92,23 @@ def leading_word(segment):
     return ""
 
 
-def touches_root(segment, roots):
-    """Return the root a segment's path tokens actually fall inside.
+def _tokens_of(segment):
+    """Shell-aware tokens, so quoting is interpreted the way bash would.
 
-    Boundary matching, never a substring test: a root of /Users/me/Documents
-    must not match the unmanaged sibling /Users/me/Documents-backup.
+    shlex understands that "/a/Documents'/x" is a path containing an
+    apostrophe, while /a/"Documents"/x is just /a/Documents/x. Blanket
+    quote-stripping got the first case wrong. Unbalanced quotes raise, so
+    fall back to a crude split rather than having no opinion at all.
     """
-    tokens = re.findall(r"'[^']*'|\"[^\"]*\"|[^\s;|&]+", segment)
-    for raw in tokens:
-        token = raw.replace('"', "").replace("'", "")
+    try:
+        return shlex.split(segment, posix=True)
+    except ValueError:
+        return [t.strip("'\"") for t in re.findall(r"'[^']*'|\"[^\"]*\"|[^\s;|&]+", segment)]
+
+
+def touches_root(segment, roots):
+    """Return the root a segment's path tokens actually fall inside."""
+    for token in _tokens_of(segment):
         for root in roots:
             base = root.rstrip("/")
             if token == base or token.startswith(base + "/"):
@@ -95,10 +118,9 @@ def touches_root(segment, roots):
 
 def _cd_argument(segment):
     """First non-flag argument to a cd/pushd, or '' if there is none."""
-    parts = segment.strip().split()
-    for part in parts[1:]:
+    for part in _tokens_of(segment)[1:]:
         if not part.startswith("-"):
-            return part.replace('"', "").replace("'", "")
+            return part
     return ""
 
 
@@ -136,7 +158,11 @@ def evaluate(command, roots):
                 cwd_root = target
             else:
                 argument = _cd_argument(segment)
-                if argument.startswith("/") or argument.startswith("~"):
+                # An absolute or `~` move leaves the root outright; so does any
+                # `..`, whose destination we cannot resolve lexically. Only a
+                # plain relative `cd sub` is still inside the root we were in.
+                if (argument.startswith("/") or argument.startswith("~")
+                        or argument.startswith("..")):
                     cwd_root = None
             continue
 
@@ -144,14 +170,25 @@ def evaluate(command, roots):
         if not root:
             continue
 
-        if lead in DESTRUCTIVE or _deletes_by_flag(segment, lead):
+        # The verb's position does not matter: a wrapper flag we failed to
+        # recognize as value-taking must not hide it. Scan every token once
+        # the leading word clears the read-only exemption.
+        tokens = _tokens_of(segment)
+        deletes = lead in DESTRUCTIVE or (
+            lead not in READ_ONLY and any(t in DESTRUCTIVE for t in tokens)
+        )
+        relocates = lead in RELOCATING or (
+            lead not in READ_ONLY and any(t in RELOCATING for t in tokens)
+        )
+
+        if _deletes_by_flag(segment, lead) or deletes:
             return (
                 "deny",
                 f"This deletes inside the PARA root {root}. Deletion is not part of "
                 "this plugin's vocabulary — archiving is a move. If something must "
                 "go, move it to 4-Archives instead.",
             )
-        if lead in RELOCATING:
+        if relocates:
             return (
                 "deny",
                 f"This moves files inside the PARA root {root} without going through "
