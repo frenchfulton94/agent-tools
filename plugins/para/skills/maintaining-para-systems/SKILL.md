@@ -6,10 +6,34 @@ license: MIT
 
 # Maintaining PARA systems
 
-An organized tree drifts: projects finish without being archived, the inbox
-fills, and `PARA.md` stops describing what you are actually working on. This
-skill is the recurring pass over a root that `organizing-files-with-para`
-already set up.
+An organized tree drifts. Projects finish without being archived, `0-Inbox`
+fills, and `PARA.md` stops describing what the user is actually working on.
+
+This skill assumes a root that already has `PARA.md` and the `0`–`4` skeleton.
+If it does not, use `organizing-files-with-para` instead.
+
+## The upkeep pass
+
+1. **Reconcile `PARA.md` against reality.** Ask which projects have finished.
+   A finished project moves to `4-Archives` whole — folder and all.
+2. **Sweep `0-Inbox`.** Re-scan it as a root of its own; everything there was
+   previously undecidable, and the project list may have grown since.
+3. **Report drift, do not fix it silently.** A folder under `1-Projects` with
+   no `PARA.md` entry, or an entry with no folder, is a question for the user.
+4. **Mine before archiving.** Ask whether anything in a finishing project is
+   reusable elsewhere before it goes cold.
+
+Every move still goes through an approved plan and `apply.py`. Maintenance is
+not a licence to skip the gate.
+
+## When the tree is past repair
+
+Digital bankruptcy is a supported outcome, not a failure: move everything into
+`4-Archives/<today>` and re-run the setup. Nothing is deleted and everything
+stays searchable. Offer it when the inbox has grown faster than the sweep for
+several passes running.
+
+See `references/upkeep.md` and `references/starting-over.md`.
 
 PARA is Tiago Forte's method, from *The PARA Method: Simplify, Organize, and
 Master Your Digital Life*. This plugin is an independent implementation, not
