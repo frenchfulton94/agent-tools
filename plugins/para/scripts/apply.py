@@ -35,7 +35,9 @@ def register_root(root):
         existing = [l.strip() for l in registry.read_text(encoding="utf-8").splitlines() if l.strip()]
     if str(root) not in existing:
         existing.append(str(root))
-        registry.write_text("\n".join(existing) + "\n", encoding="utf-8")
+        tmp = registry.with_name(registry.name + ".tmp")
+        tmp.write_text("\n".join(existing) + "\n", encoding="utf-8")
+        os.replace(tmp, registry)
 
 
 def _resolve_destination(root, destination, name):

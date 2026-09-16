@@ -39,6 +39,50 @@ class Evaluate(unittest.TestCase):
     def test_no_registry_means_no_opinion(self):
         self.assertIsNone(guard.evaluate("rm -rf /Users/me/Documents/x", []))
 
+    def test_a_comment_mentioning_apply_does_not_bypass(self):
+        self.assertEqual(
+            guard.evaluate("rm -rf /Users/me/Documents/x  # see apply.py", ROOTS)[0], "deny")
+
+    def test_a_file_named_apply_py_does_not_bypass(self):
+        self.assertEqual(
+            guard.evaluate("rm -rf /Users/me/Documents/apply.py.bak", ROOTS)[0], "deny")
+
+    def test_a_sibling_directory_is_not_treated_as_the_root(self):
+        self.assertIsNone(guard.evaluate("rm -rf /Users/me/Documents-backup/x", ROOTS))
+        self.assertIsNone(guard.evaluate("rm -rf /Users/me/Documents.old/y", ROOTS))
+
+    def test_relative_deletion_after_cd_into_the_root(self):
+        self.assertEqual(guard.evaluate("cd /Users/me/Documents && rm -rf x", ROOTS)[0], "deny")
+
+    def test_cd_elsewhere_then_delete_is_allowed(self):
+        self.assertIsNone(guard.evaluate("cd /tmp/scratch && rm -rf x", ROOTS))
+
+    def test_wrappers_do_not_hide_the_verb(self):
+        for cmd in ("sudo rm -rf /Users/me/Documents/x",
+                    "env FOO=bar rm -rf /Users/me/Documents/x",
+                    "nohup rm -rf /Users/me/Documents/x",
+                    "time rm -rf /Users/me/Documents/x",
+                    "(rm -rf /Users/me/Documents/x)"):
+            with self.subTest(cmd=cmd):
+                self.assertEqual(guard.evaluate(cmd, ROOTS)[0], "deny")
+
+    def test_deletion_without_a_destructive_verb(self):
+        for cmd in ("find /Users/me/Documents -name '*.tmp' -delete",
+                    "rsync -a --remove-source-files /Users/me/Documents/a/ /tmp/b/",
+                    "git clean -fdx /Users/me/Documents"):
+            with self.subTest(cmd=cmd):
+                self.assertEqual(guard.evaluate(cmd, ROOTS)[0], "deny")
+
+    def test_a_real_apply_invocation_is_still_allowed(self):
+        self.assertIsNone(
+            guard.evaluate("python3 apply.py /Users/me/Documents/.para/plan.json", ROOTS))
+
+    def test_reads_inside_the_root_are_still_allowed(self):
+        for cmd in ("ls -la /Users/me/Documents", "grep -r todo /Users/me/Documents",
+                    "cat /Users/me/Documents/notes.md"):
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(guard.evaluate(cmd, ROOTS))
+
 
 class Cli(unittest.TestCase):
     def _run(self, payload, roots_file):
