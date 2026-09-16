@@ -68,16 +68,23 @@ def is_package(path):
 
 
 def matches_any(path, root, patterns):
-    """Glob-match a path against patterns, testing both absolute and relative."""
+    """Glob-match a path against patterns, testing both absolute and relative.
+
+    Matching is case-insensitive. APFS is case-insensitive by default, so a
+    denylist that matched exact case only would miss `.ENV.LOCAL`. fnmatch's
+    own case handling is platform-dependent (os.path.normcase is a no-op on
+    POSIX), so both sides are casefolded and fnmatchcase gives a deterministic
+    result.
+    """
     absolute = str(path)
     try:
         relative = str(path.relative_to(root))
     except ValueError:
         relative = absolute
     for pattern in patterns:
-        expanded = os.path.expanduser(pattern)
+        expanded = os.path.expanduser(pattern).casefold()
         for candidate in (absolute, relative, f"/{relative}"):
-            if fnmatch.fnmatch(candidate, expanded):
+            if fnmatch.fnmatchcase(candidate.casefold(), expanded):
                 return True
     return False
 

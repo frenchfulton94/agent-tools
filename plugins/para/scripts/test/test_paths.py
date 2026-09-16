@@ -41,6 +41,11 @@ class Globs(unittest.TestCase):
         root = pathlib.Path("/r")
         self.assertFalse(pp.matches_any(root / "notes.md", root, ["**/.env*"]))
 
+    def test_matches_case_insensitively(self):
+        root = pathlib.Path("/r")
+        self.assertTrue(pp.matches_any(root / ".ENV.LOCAL", root, ["**/.env*"]))
+        self.assertTrue(pp.matches_any(root / "Key.PEM", root, ["**/*.pem"]))
+
 
 class SafeDestination(unittest.TestCase):
     def test_returns_original_when_free(self):

@@ -190,6 +190,26 @@ class TierTwo(unittest.TestCase):
             self.assertIn("indexed", signals)
             self.assertIsInstance(signals["tags"], list)
 
+    def test_never_reads_through_a_symlink(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            secret = root / "_outside_secret"
+            secret.write_text("PRIVATE-MUST-NOT-BE-READ")
+            inner = root / "tree"
+            inner.mkdir()
+            (inner / "notes.txt").symlink_to(secret)
+            opened = scan.peek_candidates(
+                [{"rel": "notes.txt"}], inner, pi.Index(), peek_files=999)
+            self.assertEqual(opened, [])
+
+    def test_denylist_matches_case_insensitively(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            touch(root / ".ENV.LOCAL", content="TOKEN=leaked")
+            opened = scan.peek_candidates(
+                [{"rel": ".ENV.LOCAL"}], root, pi.Index(), peek_files=999)
+            self.assertEqual(opened, [])
+
 
 if __name__ == "__main__":
     unittest.main()

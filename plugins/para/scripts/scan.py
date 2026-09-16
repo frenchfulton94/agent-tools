@@ -83,14 +83,30 @@ def peek(path, limit_bytes):
 def peek_candidates(entries, root, index, *, peek_files=200):
     """Relative paths eligible for a content read, denylist first, then budget.
 
-    The denylist is checked before the budget, so a never-read path can never
-    be opened by raising the budget.
+    The denylist is checked before the budget, so a never-read path cannot be
+    opened by raising the budget. Three guards, because path identity — not the
+    budget — is where this actually fails:
+      - a symlink is never read, since open() would follow it to a target the
+        denylist never saw;
+      - the resolved path is checked as well as the literal one;
+      - a candidate resolving outside the root is refused.
     """
     never_read = tuple(pp.DEFAULT_NEVER_READ) + tuple(index.never_read)
+    root_resolved = root.resolve()
     eligible = []
     for entry in entries:
         candidate = root / entry["rel"]
+        if candidate.is_symlink():
+            continue
+        try:
+            resolved = candidate.resolve()
+        except OSError:
+            continue
+        if resolved != root_resolved and root_resolved not in resolved.parents:
+            continue
         if pp.matches_any(candidate, root, never_read):
+            continue
+        if pp.matches_any(resolved, root_resolved, never_read):
             continue
         eligible.append(entry["rel"])
         if len(eligible) >= peek_files:
