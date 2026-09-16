@@ -23,7 +23,10 @@ DEFAULT_NEVER_READ = (
 )
 
 DEFAULT_NEVER_MOVE = (
-    "**/*.app", "**/node_modules/**", "**/.git/**", "**/Library/**",
+    "**/*.app",
+    "**/node_modules", "**/node_modules/**",
+    "**/.git", "**/.git/**",
+    "**/Library", "**/Library/**",
 )
 
 SKELETON = ("0-Inbox", "1-Projects", "2-Areas", "3-Resources", "4-Archives")

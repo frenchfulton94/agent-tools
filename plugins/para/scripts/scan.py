@@ -53,18 +53,7 @@ def walk(root, index):
                 record(child)
 
     def record(path):
-        # A package (an .app bundle, a node_modules tree, ...) is one item:
-        # whether it falls inside a never-move zone is a question about its
-        # container ("**/node_modules/**" protects what is *inside* one),
-        # not about the package's own name ("**/*.app" would otherwise catch
-        # every bundle purely by suffix, via matches_any's leading-"/"
-        # candidate, even one that isn't inside anything protected). Probe
-        # with a synthetic child so only the container-style patterns can
-        # fire for a package boundary.
-        check_path = path
-        if pp.is_package(path) and path.is_dir():
-            check_path = path / "__scan_probe__"
-        if pp.matches_any(check_path, root, never_move):
+        if pp.matches_any(path, root, never_move):
             stats["skipped_never_move"] += 1
             return
         try:

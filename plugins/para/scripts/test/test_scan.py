@@ -27,11 +27,20 @@ class Walk(unittest.TestCase):
     def test_treats_a_package_as_one_item(self):
         with tempfile.TemporaryDirectory() as d:
             root = pathlib.Path(d)
-            touch(root / "Thing.app" / "Contents" / "Info.plist")
+            touch(root / "Thing.rtfd" / "Contents" / "Info.plist")
             entries, _ = scan.walk(root, pi.Index())
             rels = [e["rel"] for e in entries]
-            self.assertIn("Thing.app", rels)
-            self.assertNotIn("Thing.app/Contents/Info.plist", rels)
+            self.assertIn("Thing.rtfd", rels)
+            self.assertNotIn("Thing.rtfd/Contents/Info.plist", rels)
+
+    def test_skips_an_app_bundle_as_never_move(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            touch(root / "Thing.app" / "Contents" / "Info.plist")
+            touch(root / "keep.txt")
+            entries, stats = scan.walk(root, pi.Index())
+            self.assertEqual([e["rel"] for e in entries], ["keep.txt"])
+            self.assertEqual(stats["skipped_never_move"], 1)
 
     def test_skips_never_move_entries(self):
         with tempfile.TemporaryDirectory() as d:
