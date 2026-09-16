@@ -83,6 +83,40 @@ class Evaluate(unittest.TestCase):
             with self.subTest(cmd=cmd):
                 self.assertIsNone(guard.evaluate(cmd, ROOTS))
 
+    def test_a_quote_split_path_does_not_bypass(self):
+        self.assertEqual(guard.evaluate('rm -rf /Users/me/"Documents"/x', ROOTS)[0], "deny")
+
+    def test_a_wrapper_flag_with_a_value_does_not_bypass(self):
+        for cmd in ("sudo -u root rm -rf /Users/me/Documents/x",
+                    "sudo -u root -g wheel rm -rf /Users/me/Documents/x"):
+            with self.subTest(cmd=cmd):
+                self.assertEqual(guard.evaluate(cmd, ROOTS)[0], "deny")
+
+    def test_pushd_is_tracked_like_cd(self):
+        self.assertEqual(guard.evaluate("pushd /Users/me/Documents && rm -rf x", ROOTS)[0], "deny")
+
+    def test_a_relative_cd_stays_inside_the_root(self):
+        self.assertEqual(
+            guard.evaluate("cd /Users/me/Documents && cd sub && rm -rf x", ROOTS)[0], "deny")
+
+    def test_an_absolute_cd_away_leaves_the_root(self):
+        self.assertIsNone(
+            guard.evaluate("cd /Users/me/Documents && cd /tmp && rm -rf x", ROOTS))
+
+    def test_deep_wrapper_stacking_does_not_fail_open(self):
+        self.assertEqual(
+            guard.evaluate("sudo sudo sudo sudo sudo sudo sudo sudo rm -rf /Users/me/Documents/x",
+                           ROOTS)[0], "deny")
+
+    def test_a_git_clean_dry_run_is_allowed(self):
+        for cmd in ("git clean --dry-run -fdx /Users/me/Documents",
+                    "git clean -n /Users/me/Documents"):
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(guard.evaluate(cmd, ROOTS))
+
+    def test_a_real_git_clean_is_still_denied(self):
+        self.assertEqual(guard.evaluate("git clean -fdx /Users/me/Documents", ROOTS)[0], "deny")
+
 
 class Cli(unittest.TestCase):
     def _run(self, payload, roots_file):

@@ -16,8 +16,9 @@ because a sibling module has a problem.
 
 Accepted limitations: this is a lexical guard over the literal command text.
 It cannot see through backticks or $(...) command substitution, $HOME/~
-expansion, or an interpreter one-liner like `python3 -c "shutil.rmtree(...)"`.
-Those are out of scope for a PreToolUse text match.
+expansion, an interpreter one-liner like `python3 -c "shutil.rmtree(...)"`,
+a bare `cd` with no argument, `cd -`, or a bare relative path with no
+preceding cd/pushd. Those are out of scope for a PreToolUse text match.
 """
 
 import json
@@ -29,6 +30,8 @@ import sys
 DESTRUCTIVE = ("rm", "rmdir", "unlink", "shred", "trash")
 RELOCATING = ("mv", "rename")
 WRAPPERS = {"sudo", "doas", "env", "nohup", "time", "command", "exec", "builtin", "xargs"}
+VALUE_FLAGS = {"-u", "-g", "-p", "-C", "-h", "--user", "--group", "--prompt"}
+CWD_CHANGING = {"cd", "pushd"}
 
 
 def registry_path():
@@ -53,7 +56,7 @@ def segments(command):
 
 def leading_word(segment):
     stripped = segment.strip().lstrip("({ \t")
-    for _ in range(8):  # bounded: sudo env nohup ... nests only so far
+    while stripped:
         while re.match(r"^\w+=\S*\s+", stripped):
             stripped = re.sub(r"^\w+=\S*\s+", "", stripped)
         match = re.match(r"^([\w./-]+)", stripped)
@@ -64,7 +67,13 @@ def leading_word(segment):
             return word
         stripped = stripped[match.end():].strip()
         while stripped.startswith("-"):
+            flag_match = re.match(r"^(\S+)", stripped)
+            if not flag_match:
+                break
+            flag = flag_match.group(1)
             stripped = re.sub(r"^\S+\s*", "", stripped)
+            if flag in VALUE_FLAGS and stripped and not stripped.startswith("-"):
+                stripped = re.sub(r"^\S+\s*", "", stripped)
     return ""
 
 
@@ -76,12 +85,21 @@ def touches_root(segment, roots):
     """
     tokens = re.findall(r"'[^']*'|\"[^\"]*\"|[^\s;|&]+", segment)
     for raw in tokens:
-        token = raw.strip("'\"")
+        token = raw.replace('"', "").replace("'", "")
         for root in roots:
             base = root.rstrip("/")
             if token == base or token.startswith(base + "/"):
                 return root
     return None
+
+
+def _cd_argument(segment):
+    """First non-flag argument to a cd/pushd, or '' if there is none."""
+    parts = segment.strip().split()
+    for part in parts[1:]:
+        if not part.startswith("-"):
+            return part.replace('"', "").replace("'", "")
+    return ""
 
 
 def _deletes_by_flag(segment, lead):
@@ -91,6 +109,10 @@ def _deletes_by_flag(segment, lead):
     if lead == "rsync" and "--remove-source-files" in segment:
         return True
     if lead == "git" and re.search(r"^\s*git\s+clean\b", segment):
+        # -n / --dry-run only previews. Denying a read-only command is how a
+        # hook earns being switched off.
+        if re.search(r"(?:^|\s)--dry-run(?:\s|$)|(?:^|\s)-[a-zA-Z]*n[a-zA-Z]*(?:\s|$)", segment):
+            return False
         return True
     return False
 
@@ -105,9 +127,17 @@ def evaluate(command, roots):
         lead = leading_word(segment)
 
         # `cd <root> && rm -rf x` is an ordinary shape: after the cd, a bare
-        # relative path is still inside the managed root.
-        if lead == "cd":
-            cwd_root = touches_root(segment, roots)
+        # relative path is still inside the managed root. A relative `cd`
+        # (no leading / or ~) refines the current root rather than clearing
+        # it, so `cd <root> && cd sub && rm -rf x` still denies.
+        if lead in CWD_CHANGING:
+            target = touches_root(segment, roots)
+            if target:
+                cwd_root = target
+            else:
+                argument = _cd_argument(segment)
+                if argument.startswith("/") or argument.startswith("~"):
+                    cwd_root = None
             continue
 
         root = touches_root(segment, roots) or cwd_root
