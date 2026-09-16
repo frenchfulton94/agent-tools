@@ -50,6 +50,28 @@ class Validate(unittest.TestCase):
             (root / "a.pdf").write_text("x")
             self.assertEqual(ap.validate_plan(plan_with([group(["a.pdf"], "0-Inbox")], root), root), [])
 
+    def test_rejects_an_absolute_source_path(self):
+        with tempfile.TemporaryDirectory() as outer:
+            o = pathlib.Path(outer)
+            victim = o / "victim.txt"
+            victim.write_text("SECRET")
+            root = o / "root"
+            root.mkdir()
+            errors = ap.validate_plan(plan_with([group([str(victim)], "0-Inbox")], root), root)
+            self.assertTrue(errors)
+            self.assertTrue(victim.exists())
+
+    def test_rejects_a_traversing_source_path(self):
+        with tempfile.TemporaryDirectory() as outer:
+            o = pathlib.Path(outer)
+            victim = o / "victim.txt"
+            victim.write_text("SECRET")
+            root = o / "root"
+            root.mkdir()
+            errors = ap.validate_plan(plan_with([group(["../victim.txt"], "0-Inbox")], root), root)
+            self.assertTrue(errors)
+            self.assertTrue(victim.exists())
+
 
 class Apply(unittest.TestCase):
     def test_moves_files_and_writes_a_manifest(self):
@@ -92,6 +114,16 @@ class Apply(unittest.TestCase):
             with self.assertRaises(ap.InvalidPlan):
                 ap.apply_plan(plan, root)
             self.assertTrue((root / "a.pdf").exists())
+
+    def test_does_not_rename_a_file_already_at_its_destination(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            (root / "0-Inbox").mkdir()
+            (root / "0-Inbox" / "a.pdf").write_text("x")
+            result = ap.apply_plan(plan_with([group(["0-Inbox/a.pdf"], "0-Inbox")], root), root)
+            self.assertTrue((root / "0-Inbox" / "a.pdf").exists())
+            self.assertFalse((root / "0-Inbox" / "a (2).pdf").exists())
+            self.assertEqual(result["moved"], 0)
 
 
 if __name__ == "__main__":

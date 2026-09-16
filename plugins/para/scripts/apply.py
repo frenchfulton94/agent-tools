@@ -39,13 +39,25 @@ def validate_plan(plan, root):
     errors = []
     seen = {}
     root_volume = pp.volume_of(root)
+    root_resolved = root.resolve()
 
     for group in plan.get("groups", []):
         destination = group.get("destination", "")
         for rel in group.get("files", []):
+            if pathlib.PurePath(rel).is_absolute() or ".." in pathlib.PurePath(rel).parts:
+                errors.append(f"{rel}: source path must be relative to the root")
+                continue
             source = root / rel
             if not source.exists() and not source.is_symlink():
                 errors.append(f"{rel}: source no longer exists")
+                continue
+            try:
+                parent_resolved = source.parent.resolve()
+            except OSError:
+                errors.append(f"{rel}: source directory is unreadable")
+                continue
+            if parent_resolved != root_resolved and root_resolved not in parent_resolved.parents:
+                errors.append(f"{rel}: source is outside the root")
                 continue
             if rel in seen:
                 errors.append(f"{rel}: claimed by two groups ({seen[rel]} and {group.get('id')})")
@@ -85,14 +97,20 @@ def apply_plan(plan, root):
                 source = root / rel
                 target_dir = root / group["destination"]
                 target_dir.mkdir(parents=True, exist_ok=True)
-                target = pp.safe_destination(target_dir / source.name)
+                planned = target_dir / source.name
+                if planned == source:
+                    skipped.append({"file": rel, "reason": "already at destination"})
+                    continue
+                target = pp.safe_destination(planned)
                 try:
                     info = source.lstat()
                 except OSError:
                     skipped.append({"file": rel, "reason": "unreadable"})
                     continue
 
-                # Written before the move: an interrupted run stays reversible.
+                # Written before the move, so an interrupted run stays reversible.
+                # A failed move therefore leaves a line whose `to` never appeared:
+                # undo.py treats a missing `to` as "already restored" and skips it.
                 log.write(json.dumps({
                     "from": rel,
                     "to": str(target.relative_to(root)),
