@@ -88,7 +88,7 @@ in the tree, write `**/taxes.pdf`.
     ## Never move
     - **/CurrentProjectAssets/**
 
-This parses to three projects (`client-redesign`, `q4-taxes`) with `finances`
+This parses to two projects (`client-redesign`, `q4-taxes`) with `finances`
 and `health` as areas, `cooking` as a resource, plus two extra never-read
 patterns and one extra never-move pattern layered on top of the plugin's
 defaults. `render_index` writes this same shape back out, so a round trip
