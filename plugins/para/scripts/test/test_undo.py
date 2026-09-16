@@ -214,6 +214,31 @@ class Undo(unittest.TestCase):
             self.assertFalse(root.parent.joinpath(f"{root.name} (2)").exists())
             self.assertTrue((root / "4-Archives" / "a.pdf").exists())
 
+    def test_pathological_unicode_costs_only_itself(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            (root / "a.pdf").write_text("alpha")
+            (root / "b.pdf").write_text("beta")
+            plan = {
+                "version": 1, "root": str(root),
+                "groups": [{
+                    "id": "g1", "rule": "r", "reason": "w", "destination": "4-Archives",
+                    "count": 2, "samples": [], "files": ["a.pdf", "b.pdf"],
+                }],
+            }
+            manifest = pathlib.Path(ap.apply_plan(plan, root)["manifest"])
+            archived = root / "4-Archives" / "a.pdf"
+            info = archived.lstat()
+            for hostile in ("\ud800", "a\x00b"):
+                manifest.write_text(manifest.read_text() + json.dumps({
+                    "from": hostile, "to": "4-Archives/a.pdf",
+                    "size": info.st_size, "mtime_ns": info.st_mtime_ns, "inode": info.st_ino,
+                }) + "\n")
+            result = un.undo(manifest, root)
+            self.assertEqual(result["restored"], 2)
+            self.assertEqual((root / "a.pdf").read_text(), "alpha")
+            self.assertEqual((root / "b.pdf").read_text(), "beta")
+
 
 if __name__ == "__main__":
     unittest.main()

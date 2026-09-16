@@ -19,6 +19,48 @@ import sys
 import para_paths as pp
 
 
+def _restore_one(line, root):
+    """Restore a single manifest line.
+
+    Returns (True, None) when a file was restored, or (False, reason) when it
+    was deliberately skipped. It may raise anything at all: the caller's
+    blanket handler is the backstop. Three rounds of bounding the failure
+    surface by exception type proved that approach does not hold.
+    """
+    record = json.loads(line)
+    origin_rel = record["from"]
+    target_rel = record["to"]
+    size = record["size"]
+    mtime_ns = record["mtime_ns"]
+    inode = record["inode"]
+
+    if not isinstance(origin_rel, str) or not isinstance(target_rel, str):
+        raise TypeError("manifest paths must be strings")
+
+    for rel in (origin_rel, target_rel):
+        candidate = pathlib.PurePath(rel)
+        if candidate.is_absolute() or ".." in candidate.parts:
+            return False, "manifest path escapes the root"
+
+    # `root / ""` is `root` itself, which would move the root into its own child.
+    if not pathlib.PurePath(origin_rel).parts or not pathlib.PurePath(target_rel).parts:
+        return False, "unreadable manifest line"
+
+    current = root / target_rel
+    origin = root / origin_rel
+
+    if not current.exists() and not current.is_symlink():
+        return False, "already restored"
+
+    info = current.lstat()
+    if (info.st_size, info.st_mtime_ns, info.st_ino) != (size, mtime_ns, inode):
+        return False, "modified since the move"
+
+    origin.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(str(current), str(pp.safe_destination(origin)))
+    return True, None
+
+
 def undo(manifest_path, root):
     restored, skipped = 0, []
     lines = pathlib.Path(manifest_path).read_text(encoding="utf-8").splitlines()
@@ -28,65 +70,15 @@ def undo(manifest_path, root):
         if not line.strip():
             continue
         try:
-            record = json.loads(line)
-            origin_rel = record["from"]
-            target_rel = record["to"]
-            size = record["size"]
-            mtime_ns = record["mtime_ns"]
-            inode = record["inode"]
-            # Guard the types here, inside the try: a non-string path would
-            # otherwise survive the escaping check (str(42) looks harmless) and
-            # then raise uncaught at `root / target_rel`, aborting the whole run.
-            if not isinstance(origin_rel, str) or not isinstance(target_rel, str):
-                raise TypeError("manifest paths must be strings")
-        except (json.JSONDecodeError, ValueError, KeyError, TypeError):
-            # A run killed mid-write leaves a truncated final line. It must cost
-            # only itself: every other line is still a recoverable file.
-            skipped.append({"file": line.strip()[:60], "reason": "unreadable manifest line"})
-            continue
-
-        escaping = False
-        for rel in (origin_rel, target_rel):
-            candidate = pathlib.PurePath(str(rel))
-            if candidate.is_absolute() or ".." in candidate.parts:
-                escaping = True
-        if escaping:
-            skipped.append({"file": str(target_rel), "reason": "manifest path escapes the root"})
-            continue
-
-        # `root / ""` is `root` itself, so an empty path would move the root into
-        # its own child. A path with no parts is equally meaningless here.
-        if not pathlib.PurePath(origin_rel).parts or not pathlib.PurePath(target_rel).parts:
-            skipped.append({"file": str(target_rel), "reason": "unreadable manifest line"})
-            continue
-
-        current = root / target_rel
-        origin = root / origin_rel
-
-        if not current.exists() and not current.is_symlink():
-            skipped.append({"file": target_rel, "reason": "already restored"})
-            continue
-
-        info = current.lstat()
-        unchanged = (
-            info.st_size == size
-            and info.st_mtime_ns == mtime_ns
-            and info.st_ino == inode
-        )
-        if not unchanged:
-            skipped.append({"file": target_rel, "reason": "modified since the move"})
-            continue
-
-        try:
-            origin.parent.mkdir(parents=True, exist_ok=True)
-            shutil.move(str(current), str(pp.safe_destination(origin)))
-        except OSError as error:
-            # Whatever a hand-edited manifest line does to shutil, it must cost
-            # only itself. `shutil.Error` and `SameFileError` both subclass
-            # OSError, so this covers the move's whole failure surface.
-            skipped.append({"file": str(target_rel), "reason": f"could not restore: {error}"})
-            continue
-        restored += 1
+            ok, reason = _restore_one(line, root)
+        except Exception:
+            # The backstop. A hand-edited or truncated manifest line must cost
+            # only itself, no matter which exception it provokes.
+            ok, reason = False, "unreadable manifest line"
+        if ok:
+            restored += 1
+        else:
+            skipped.append({"file": line.strip()[:60], "reason": reason})
 
     return {"restored": restored, "skipped": skipped}
 
