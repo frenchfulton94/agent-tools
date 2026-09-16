@@ -155,7 +155,11 @@ def apply_plan(plan, root):
                     moved += 1
                 except OSError as error:
                     print(f"Stopped at {rel}: {error}", file=sys.stderr)
-                    print(f"Reverse with: python3 undo.py {manifest}", file=sys.stderr)
+                    print(
+                        f'Reverse with: python3 '
+                        f'"${{CLAUDE_PLUGIN_ROOT}}/scripts/undo.py" "{manifest}"',
+                        file=sys.stderr,
+                    )
                     return {"moved": moved, "skipped": skipped, "manifest": str(manifest)}
 
     return {"moved": moved, "skipped": skipped, "manifest": str(manifest)}
