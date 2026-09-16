@@ -27,6 +27,7 @@ plugins travel with the repo instead of living on one workstation.
 | [dokploy](plugins/dokploy) | `automating-dokploy` `configuring-dokploy-enterprise` `deploying-apps-to-dokploy` `hardening-dokploy` `operating-dokploy-servers` | Self-hosted Dokploy PaaS — deploying apps, operating the host, scripting the CLI/API, hardening against a compliance-mapped checklist, and configuring the licensed SSO/SCIM tier. Ships a guard hook against irreversible project, database, and volume removal |
 | [zed](plugins/zed) | `configuring-zed` | Configuring the Zed editor |
 | [apple-studio](plugins/apple-studio) | `app-release` `apple-animations` `apple-design` `apple-frameworks` `apple-intelligence` `apple-macos` `apple-performance` `swift-architecture` `swift-concurrency` `swift-testing` `xcode-loop` | Native Apple app development — architecture, strict concurrency, testing, HIG conformance, motion, macOS, frameworks, on-device AI, performance, release. Ships a PostToolUse edit tracker and a Stop build gate |
+| [para](plugins/para) | `maintaining-para-systems` `organizing-files-with-para` | Organizing a directory into PARA — Projects, Areas, Resources, Archives — with an approve-before-move plan. Ships `/para:organize`, an undo trail, and a guard hook against deletion and unplanned moves |
 
 Each plugin's own README covers its components, its limits, and how to run it locally.
 

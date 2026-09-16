@@ -76,6 +76,12 @@
       "source": "./plugins/apple-studio",
       "category": "development",
       "description": "Native Apple app development for SwiftUI and Swift 6 — architecture and state, strict concurrency, Swift Testing, Human Interface Guidelines conformance and accessibility, SwiftUI motion, native macOS apps, the first-party framework map, on-device generative AI with Foundation Models, performance diagnosis with Instruments, App Store release engineering, and the build-test-screenshot loop. Ships a build gate that blocks a session ending on a failed build after Swift edits."
+    },
+    {
+      "name": "para",
+      "source": "./plugins/para",
+      "category": "productivity",
+      "description": "Organizes a directory into Tiago Forte's PARA structure — Projects, Areas, Resources, Archives — through an approve-before-move workflow: a plan grouped by decision rather than by file, classification from metadata and macOS Spotlight signals with a bounded content peek, a project list you own and correct, and an undo manifest for every move. Ships /para:organize and a guard hook that blocks deletion and unplanned moves inside a managed root."
     }
   ]
 }
