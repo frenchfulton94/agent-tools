@@ -24,6 +24,7 @@ preceding cd/pushd. Those are out of scope for a PreToolUse text match.
 import json
 import os
 import pathlib
+import posixpath
 import re
 import shlex
 import sys
@@ -38,14 +39,16 @@ CWD_CHANGING = {"cd", "pushd"}
 # (a grep pattern, a filename, an echoed string) is not an action — deletion
 # is judged by finding the verb ANYWHERE in the token list once the leading
 # word clears this exemption, so a read-only leader keeps that scan from
-# ever firing. Deliberately NOT here: `find`, because `find -delete`
-# deletes — _deletes_by_flag catches that case and runs before this
-# exemption is even consulted.
+# ever firing. `find` belongs here: `-name rm` puts an arbitrary value in as
+# a standalone token, and denying `find <root> -name rm` is how a guard gets
+# switched off. It costs nothing, because `find <root> -delete` is caught by
+# _deletes_by_flag, which is evaluated before and independently of this
+# exemption.
 READ_ONLY = {
     "echo", "grep", "egrep", "fgrep", "rg", "cat", "less", "more", "head",
     "tail", "ls", "stat", "du", "df", "file", "wc", "test", "[", "printf",
     "diff", "cmp", "shasum", "md5sum", "sha256sum", "tree", "open", "bat",
-    "awk", "sed", "wc", "sort", "uniq", "cut",
+    "awk", "sed", "wc", "sort", "uniq", "cut", "find",
 }
 
 
@@ -139,34 +142,49 @@ def _deletes_by_flag(segment, lead):
     return False
 
 
+def _resolve_cd(cwd, argument):
+    """Apply a cd/pushd argument lexically. None means 'no longer knowable'.
+
+    Tracking the PATH rather than which-root-we-are-in is what lets `cd ..`
+    from <root>/sub resolve back to <root>, while `cd ..` from <root> leaves.
+    """
+    if not argument or argument.startswith("-") or argument.startswith("~"):
+        return None
+    if argument.startswith("/"):
+        return posixpath.normpath(argument)
+    if cwd is None:
+        return None
+    return posixpath.normpath(posixpath.join(cwd, argument))
+
+
+def _root_of(path, roots):
+    """The registered root containing an absolute path, if any."""
+    if not path:
+        return None
+    for root in roots:
+        base = root.rstrip("/")
+        if path == base or path.startswith(base + "/"):
+            return root
+    return None
+
+
 def evaluate(command, roots):
     """Return (decision, reason), or None when the guard has no opinion."""
     if not roots:
         return None
 
-    cwd_root = None
+    cwd = None
     for segment in segments(command):
         lead = leading_word(segment)
 
         # `cd <root> && rm -rf x` is an ordinary shape: after the cd, a bare
-        # relative path is still inside the managed root. A relative `cd`
-        # (no leading / or ~) refines the current root rather than clearing
-        # it, so `cd <root> && cd sub && rm -rf x` still denies.
+        # relative path is still inside the managed root. Track where we are,
+        # not which root we are in, so `cd ..` resolves rather than guesses.
         if lead in CWD_CHANGING:
-            target = touches_root(segment, roots)
-            if target:
-                cwd_root = target
-            else:
-                argument = _cd_argument(segment)
-                # An absolute or `~` move leaves the root outright; so does any
-                # `..`, whose destination we cannot resolve lexically. Only a
-                # plain relative `cd sub` is still inside the root we were in.
-                if (argument.startswith("/") or argument.startswith("~")
-                        or argument.startswith("..")):
-                    cwd_root = None
+            cwd = _resolve_cd(cwd, _cd_argument(segment))
             continue
 
-        root = touches_root(segment, roots) or cwd_root
+        root = touches_root(segment, roots) or _root_of(cwd, roots)
         if not root:
             continue
 

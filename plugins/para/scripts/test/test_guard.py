@@ -141,6 +141,30 @@ class Evaluate(unittest.TestCase):
             with self.subTest(cmd=cmd):
                 self.assertIsNone(guard.evaluate(cmd, ROOTS))
 
+    def test_cd_dotdot_back_into_the_root_is_still_guarded(self):
+        self.assertEqual(
+            guard.evaluate("cd /Users/me/Documents/sub && cd .. && rm -rf x", ROOTS)[0], "deny")
+
+    def test_cd_dotdot_out_of_the_root_is_allowed(self):
+        self.assertIsNone(guard.evaluate("cd /Users/me/Documents && cd .. && rm -rf x", ROOTS))
+
+    def test_nested_cd_and_dotdot_resolve_lexically(self):
+        self.assertEqual(
+            guard.evaluate("cd /Users/me/Documents && cd sub/deeper && cd ../.. && rm -rf x",
+                           ROOTS)[0], "deny")
+        self.assertIsNone(
+            guard.evaluate("cd /Users/me/Documents/sub && cd ../../elsewhere && rm -rf x", ROOTS))
+
+    def test_find_searching_for_a_file_named_rm_is_allowed(self):
+        for cmd in ("find /Users/me/Documents -name rm -type f",
+                    "find /Users/me/Documents -name mv -type f"):
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(guard.evaluate(cmd, ROOTS))
+
+    def test_find_delete_is_still_denied(self):
+        self.assertEqual(
+            guard.evaluate("find /Users/me/Documents -name '*.tmp' -delete", ROOTS)[0], "deny")
+
 
 class Cli(unittest.TestCase):
     def _run(self, payload, roots_file):
