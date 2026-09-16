@@ -180,7 +180,11 @@ def main():
         sys.exit(1)
 
     print(json.dumps(result, indent=2))
-    print(f"\nReverse this run with:\n  python3 undo.py {result['manifest']}", file=sys.stderr)
+    print(
+        f'\nReverse this run with:\n'
+        f'  python3 "${{CLAUDE_PLUGIN_ROOT}}/scripts/undo.py" "{result["manifest"]}"',
+        file=sys.stderr,
+    )
 
 
 if __name__ == "__main__":

@@ -27,7 +27,10 @@ PARA sorts files by **how actionable they are**, not by subject:
    changes the age cutoff from its 12-month default; `--peek-files` and
    `--peek-bytes` bound the content peek described in `references/macos-signals.md`.
 3. **Propose the project list.** From the clusters, draft `PARA.md` at the
-   root. Propose, never assume — you are guessing at commitments.
+   root, in the format `references/para-index-format.md` documents — the
+   parser fails silently on an unrecognized heading, so the five heading
+   names matter exactly. Propose, never assume — you are guessing at
+   commitments.
 4. **Have the user correct it, both ways.** They delete what is wrong *and add
    commitments the scan could not see*. A project with no files yet will never
    appear in a scan, and that is exactly the entry that matters most.
@@ -36,9 +39,13 @@ PARA sorts files by **how actionable they are**, not by subject:
    the JSON's `groups` from the scan's `clusters` is its own step, not a
    pass-through — see `references/plan-format.md`.
 6. **Apply on approval.** `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/apply.py" .para/plan-<ts>.json`.
-7. **Report.** Counts moved and skipped, collisions renamed, and the exact
-   `undo.py` command `apply.py` printed (add `--root <dir>` only if the
-   manifest is later moved out from under its `.para/` directory).
+7. **Report.** Counts moved and skipped, collisions renamed, and the undo
+   command:
+
+       python3 "${CLAUDE_PLUGIN_ROOT}/scripts/undo.py" <manifest> [--root <dir>]
+
+   `undo.py` infers the root from the manifest's location and requires it to
+   sit in `<root>/.para/`; pass `--root` explicitly otherwise.
 
 ## What you decide, and what you must not
 
