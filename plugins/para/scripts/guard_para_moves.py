@@ -39,16 +39,25 @@ CWD_CHANGING = {"cd", "pushd"}
 # (a grep pattern, a filename, an echoed string) is not an action — deletion
 # is judged by finding the verb ANYWHERE in the token list once the leading
 # word clears this exemption, so a read-only leader keeps that scan from
-# ever firing. `find` belongs here: `-name rm` puts an arbitrary value in as
-# a standalone token, and denying `find <root> -name rm` is how a guard gets
-# switched off. It costs nothing, because `find <root> -delete` is caught by
-# _deletes_by_flag, which is evaluated before and independently of this
-# exemption.
+# ever firing. Deliberately NOT here: `find`, which both deletes (`-delete`)
+# and runs arbitrary commands (`-exec rm {} \;`), so it must stay subject to
+# the token scan. What made `find <root> -name rm` a false positive was the
+# PREDICATE VALUE being read as a command name, and _scannable_tokens fixes
+# exactly that without exempting find from the scan.
 READ_ONLY = {
     "echo", "grep", "egrep", "fgrep", "rg", "cat", "less", "more", "head",
     "tail", "ls", "stat", "du", "df", "file", "wc", "test", "[", "printf",
     "diff", "cmp", "shasum", "md5sum", "sha256sum", "tree", "open", "bat",
-    "awk", "sed", "wc", "sort", "uniq", "cut", "find",
+    "awk", "sed", "wc", "sort", "uniq", "cut",
+}
+
+# find predicates whose next token is a VALUE (a name, a path, a user, a
+# type), never a command. `-exec` and `-execdir` are pointedly absent: the
+# token after those two IS a command, and must stay visible to the scan.
+FIND_VALUE_PREDICATES = {
+    "-name", "-iname", "-path", "-ipath", "-wholename", "-iwholename",
+    "-lname", "-ilname", "-regex", "-iregex", "-user", "-group",
+    "-newer", "-samefile", "-type", "-perm", "-size", "-inum", "-links",
 }
 
 
@@ -142,6 +151,28 @@ def _deletes_by_flag(segment, lead):
     return False
 
 
+def _scannable_tokens(tokens, lead):
+    """Tokens that could name a command, with predicate VALUES removed.
+
+    `find <root> -name rm` names a file to look for, not a command to run,
+    while `find <root> -exec rm {} \\;` does name one. Dropping only the token
+    after a value-taking predicate keeps the second visible while silencing
+    the first — a blanket READ_ONLY exemption for `find` hid both.
+    """
+    if lead != "find":
+        return tokens
+    kept, skip = [], False
+    for token in tokens:
+        if skip:
+            skip = False
+            continue
+        if token in FIND_VALUE_PREDICATES:
+            skip = True
+            continue
+        kept.append(token)
+    return kept
+
+
 def _resolve_cd(cwd, argument):
     """Apply a cd/pushd argument lexically. None means 'no longer knowable'.
 
@@ -192,11 +223,12 @@ def evaluate(command, roots):
         # recognize as value-taking must not hide it. Scan every token once
         # the leading word clears the read-only exemption.
         tokens = _tokens_of(segment)
+        scannable = _scannable_tokens(tokens, lead)
         deletes = lead in DESTRUCTIVE or (
-            lead not in READ_ONLY and any(t in DESTRUCTIVE for t in tokens)
+            lead not in READ_ONLY and any(t in DESTRUCTIVE for t in scannable)
         )
         relocates = lead in RELOCATING or (
-            lead not in READ_ONLY and any(t in RELOCATING for t in tokens)
+            lead not in READ_ONLY and any(t in RELOCATING for t in scannable)
         )
 
         if _deletes_by_flag(segment, lead) or deletes:

@@ -165,6 +165,25 @@ class Evaluate(unittest.TestCase):
         self.assertEqual(
             guard.evaluate("find /Users/me/Documents -name '*.tmp' -delete", ROOTS)[0], "deny")
 
+    def test_find_exec_rm_is_denied(self):
+        self.assertEqual(
+            guard.evaluate("find /Users/me/Documents -exec rm {} \\;", ROOTS)[0], "deny")
+
+    def test_find_exec_mv_is_denied(self):
+        self.assertEqual(
+            guard.evaluate("find /Users/me/Documents -exec mv {} /tmp \\;", ROOTS)[0], "deny")
+
+    def test_find_execdir_rm_is_denied(self):
+        self.assertEqual(
+            guard.evaluate("find /Users/me/Documents -execdir rm {} \\;", ROOTS)[0], "deny")
+
+    def test_find_searching_for_a_file_named_rm_is_still_allowed(self):
+        for cmd in ("find /Users/me/Documents -name rm -type f",
+                    "find /Users/me/Documents -iname mv",
+                    "find /Users/me/Documents -type f -name rm -newer rm"):
+            with self.subTest(cmd=cmd):
+                self.assertIsNone(guard.evaluate(cmd, ROOTS))
+
 
 class Cli(unittest.TestCase):
     def _run(self, payload, roots_file):
