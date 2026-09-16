@@ -54,6 +54,12 @@ def undo(manifest_path, root):
             skipped.append({"file": str(target_rel), "reason": "manifest path escapes the root"})
             continue
 
+        # `root / ""` is `root` itself, so an empty path would move the root into
+        # its own child. A path with no parts is equally meaningless here.
+        if not pathlib.PurePath(origin_rel).parts or not pathlib.PurePath(target_rel).parts:
+            skipped.append({"file": str(target_rel), "reason": "unreadable manifest line"})
+            continue
+
         current = root / target_rel
         origin = root / origin_rel
 
@@ -71,8 +77,15 @@ def undo(manifest_path, root):
             skipped.append({"file": target_rel, "reason": "modified since the move"})
             continue
 
-        origin.parent.mkdir(parents=True, exist_ok=True)
-        shutil.move(str(current), str(pp.safe_destination(origin)))
+        try:
+            origin.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(current), str(pp.safe_destination(origin)))
+        except OSError as error:
+            # Whatever a hand-edited manifest line does to shutil, it must cost
+            # only itself. `shutil.Error` and `SameFileError` both subclass
+            # OSError, so this covers the move's whole failure surface.
+            skipped.append({"file": str(target_rel), "reason": f"could not restore: {error}"})
+            continue
         restored += 1
 
     return {"restored": restored, "skipped": skipped}

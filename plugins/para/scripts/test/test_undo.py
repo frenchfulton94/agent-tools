@@ -175,6 +175,45 @@ class Undo(unittest.TestCase):
             self.assertEqual((root / "b.pdf").read_text(), "beta")
             self.assertIn("unreadable manifest line", [s["reason"] for s in result["skipped"]])
 
+    def test_an_empty_manifest_path_costs_only_itself(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            (root / "a.pdf").write_text("alpha")
+            plan = {
+                "version": 1, "root": str(root),
+                "groups": [{
+                    "id": "g1", "rule": "r", "reason": "w", "destination": "4-Archives",
+                    "count": 1, "samples": [], "files": ["a.pdf"],
+                }],
+            }
+            manifest = pathlib.Path(ap.apply_plan(plan, root)["manifest"])
+            info = root.lstat()
+            manifest.write_text(manifest.read_text() + json.dumps({
+                "from": "recovered.pdf", "to": "",
+                "size": info.st_size, "mtime_ns": info.st_mtime_ns, "inode": info.st_ino,
+            }) + "\n")
+            result = un.undo(manifest, root)
+            self.assertEqual(result["restored"], 1)
+            self.assertEqual((root / "a.pdf").read_text(), "alpha")
+            self.assertTrue(root.is_dir())
+
+    def test_an_empty_origin_does_not_restore_outside_the_root(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            (root / "4-Archives").mkdir()
+            (root / "4-Archives" / "a.pdf").write_text("alpha")
+            (root / ".para").mkdir()
+            manifest = root / ".para" / "undo-x.jsonl"
+            info = (root / "4-Archives" / "a.pdf").lstat()
+            manifest.write_text(json.dumps({
+                "from": "", "to": "4-Archives/a.pdf",
+                "size": info.st_size, "mtime_ns": info.st_mtime_ns, "inode": info.st_ino,
+            }) + "\n")
+            result = un.undo(manifest, root)
+            self.assertEqual(result["restored"], 0)
+            self.assertFalse(root.parent.joinpath(f"{root.name} (2)").exists())
+            self.assertTrue((root / "4-Archives" / "a.pdf").exists())
+
 
 if __name__ == "__main__":
     unittest.main()
