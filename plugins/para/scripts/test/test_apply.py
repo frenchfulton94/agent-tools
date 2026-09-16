@@ -1,4 +1,5 @@
 import json
+import os
 import pathlib
 import sys
 import tempfile
@@ -74,6 +75,18 @@ class Validate(unittest.TestCase):
 
 
 class Apply(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self._prev = os.environ.get("PARA_ROOTS_FILE")
+        os.environ["PARA_ROOTS_FILE"] = str(pathlib.Path(self._tmp.name) / "roots")
+
+    def tearDown(self):
+        if self._prev is None:
+            os.environ.pop("PARA_ROOTS_FILE", None)
+        else:
+            os.environ["PARA_ROOTS_FILE"] = self._prev
+        self._tmp.cleanup()
+
     def test_moves_files_and_writes_a_manifest(self):
         with tempfile.TemporaryDirectory() as d:
             root = pathlib.Path(d)

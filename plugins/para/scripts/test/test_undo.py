@@ -1,4 +1,5 @@
 import json
+import os
 import pathlib
 import sys
 import tempfile
@@ -24,6 +25,18 @@ def moved_fixture(root, content="hello"):
 
 
 class Undo(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self._prev = os.environ.get("PARA_ROOTS_FILE")
+        os.environ["PARA_ROOTS_FILE"] = str(pathlib.Path(self._tmp.name) / "roots")
+
+    def tearDown(self):
+        if self._prev is None:
+            os.environ.pop("PARA_ROOTS_FILE", None)
+        else:
+            os.environ["PARA_ROOTS_FILE"] = self._prev
+        self._tmp.cleanup()
+
     def test_restores_a_moved_file(self):
         with tempfile.TemporaryDirectory() as d:
             root = pathlib.Path(d)

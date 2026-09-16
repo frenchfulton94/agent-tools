@@ -11,6 +11,7 @@ Nothing here deletes. Archiving is a move.
 import argparse
 import datetime as dt
 import json
+import os
 import pathlib
 import shutil
 import sys
@@ -20,6 +21,21 @@ import para_paths as pp
 
 class InvalidPlan(Exception):
     """The plan failed validation and was not applied."""
+
+
+def register_root(root):
+    """Record the root so the guard hook knows to have an opinion about it."""
+    registry = pathlib.Path(
+        os.environ.get("PARA_ROOTS_FILE")
+        or pathlib.Path.home() / ".config" / "para" / "roots"
+    )
+    registry.parent.mkdir(parents=True, exist_ok=True)
+    existing = []
+    if registry.exists():
+        existing = [l.strip() for l in registry.read_text(encoding="utf-8").splitlines() if l.strip()]
+    if str(root) not in existing:
+        existing.append(str(root))
+        registry.write_text("\n".join(existing) + "\n", encoding="utf-8")
 
 
 def _resolve_destination(root, destination, name):
@@ -89,6 +105,8 @@ def apply_plan(plan, root):
 
     for name in pp.SKELETON:
         (root / name).mkdir(exist_ok=True)
+
+    register_root(root)
 
     moved, skipped = 0, []
     with open(manifest, "a", encoding="utf-8") as log:
