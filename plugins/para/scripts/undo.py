@@ -34,6 +34,11 @@ def undo(manifest_path, root):
             size = record["size"]
             mtime_ns = record["mtime_ns"]
             inode = record["inode"]
+            # Guard the types here, inside the try: a non-string path would
+            # otherwise survive the escaping check (str(42) looks harmless) and
+            # then raise uncaught at `root / target_rel`, aborting the whole run.
+            if not isinstance(origin_rel, str) or not isinstance(target_rel, str):
+                raise TypeError("manifest paths must be strings")
         except (json.JSONDecodeError, ValueError, KeyError, TypeError):
             # A run killed mid-write leaves a truncated final line. It must cost
             # only itself: every other line is still a recoverable file.
