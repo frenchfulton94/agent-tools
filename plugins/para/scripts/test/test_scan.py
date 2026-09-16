@@ -144,5 +144,52 @@ class Cli(unittest.TestCase):
         self.assertIn("home directory", refused.stderr)
 
 
+class TierTwo(unittest.TestCase):
+    def test_peek_reads_a_bounded_prefix(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = touch(pathlib.Path(d) / "notes.txt", content="client-redesign " * 500)
+            self.assertLessEqual(len(scan.peek(f, 64).encode("utf-8")), 64)
+
+    def test_peek_returns_empty_on_binary(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = pathlib.Path(d) / "blob.bin"
+            f.write_bytes(b"\x00\x01\x02\xff" * 64)
+            self.assertEqual(scan.peek(f, 128), "")
+
+    def test_denylist_is_enforced_regardless_of_budget(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            secret = touch(root / ".env.local", content="TOKEN=abc")
+            index = pi.Index(never_read=["**/.env*"])
+            opened = scan.peek_candidates([{"rel": ".env.local"}], root, index,
+                                          peek_files=100)
+            self.assertEqual(opened, [])
+            self.assertTrue(secret.exists())
+
+    def test_peek_budget_caps_file_count(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            entries = []
+            for i in range(10):
+                touch(root / f"f{i}.txt")
+                entries.append({"rel": f"f{i}.txt"})
+            opened = scan.peek_candidates(entries, root, pi.Index(), peek_files=3)
+            self.assertEqual(len(opened), 3)
+
+    def test_metadata_only_peeks_nothing(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            touch(root / "mystery.txt", content="client-redesign notes")
+            result = scan.scan(root, metadata_only=True)
+            self.assertEqual(result["peeked"], [])
+
+    def test_spotlight_degrades_without_raising(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = touch(pathlib.Path(d) / "a.txt")
+            signals = scan.spotlight(f)
+            self.assertIn("indexed", signals)
+            self.assertIsInstance(signals["tags"], list)
+
+
 if __name__ == "__main__":
     unittest.main()

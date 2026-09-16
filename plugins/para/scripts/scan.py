@@ -13,7 +13,9 @@ import argparse
 import datetime as dt
 import json
 import pathlib
+import plistlib
 import re
+import subprocess
 import sys
 
 import para_paths as pp
@@ -28,7 +30,75 @@ def _tokens(rel):
     return set(re.split(r"[^a-z0-9]+", rel.casefold())) - {""}
 
 
-def walk(root, index):
+MDLS_KEYS = (
+    "kMDItemLastUsedDate", "kMDItemUserTags",
+    "kMDItemWhereFroms", "kMDItemContentTypeTree",
+)
+
+
+def spotlight(path):
+    """Best-effort macOS metadata. Every field may be absent.
+
+    Spotlight indexing is off on many external and network volumes, so this
+    reports `indexed` and the caller falls back to portable metadata.
+    """
+    blank = {"last_used": None, "tags": [], "where_from": [], "indexed": False}
+    try:
+        result = subprocess.run(
+            ["mdls", "-plist", "-", str(path)],
+            capture_output=True, timeout=5,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return blank
+    if result.returncode != 0 or not result.stdout:
+        return blank
+    try:
+        data = plistlib.loads(result.stdout)
+    except Exception:
+        return blank
+    if not isinstance(data, dict):
+        return blank
+
+    used = data.get("kMDItemLastUsedDate")
+    return {
+        "last_used": used.timestamp() if hasattr(used, "timestamp") else None,
+        "tags": [str(t) for t in (data.get("kMDItemUserTags") or [])],
+        "where_from": [str(w) for w in (data.get("kMDItemWhereFroms") or [])],
+        "indexed": any(data.get(key) is not None for key in MDLS_KEYS),
+    }
+
+
+def peek(path, limit_bytes):
+    """Decode a bounded prefix. Returns '' for binary or unreadable files."""
+    try:
+        with open(path, "rb") as handle:
+            chunk = handle.read(limit_bytes)
+    except OSError:
+        return ""
+    if b"\x00" in chunk:
+        return ""
+    return chunk.decode("utf-8", errors="replace")
+
+
+def peek_candidates(entries, root, index, *, peek_files=200):
+    """Relative paths eligible for a content read, denylist first, then budget.
+
+    The denylist is checked before the budget, so a never-read path can never
+    be opened by raising the budget.
+    """
+    never_read = tuple(pp.DEFAULT_NEVER_READ) + tuple(index.never_read)
+    eligible = []
+    for entry in entries:
+        candidate = root / entry["rel"]
+        if pp.matches_any(candidate, root, never_read):
+            continue
+        eligible.append(entry["rel"])
+        if len(eligible) >= peek_files:
+            break
+    return eligible
+
+
+def walk(root, index, *, metadata_only=False):
     """Collect entries beneath root. Packages are single items."""
     entries = []
     stats = {"unreadable": 0, "skipped_never_move": 0}
@@ -61,11 +131,17 @@ def walk(root, index):
         except OSError:
             stats["unreadable"] += 1
             return
+        signals = {"last_used": None, "tags": [], "where_from": [], "indexed": False}
+        if not metadata_only:
+            signals = spotlight(path)
         entries.append({
             "rel": str(path.relative_to(root)),
-            "last_used": info.st_mtime,
+            # Last-used beats mtime: mtime churns on sync, copy, and restore.
+            "last_used": signals["last_used"] or info.st_mtime,
             "size": info.st_size,
-            "indexed": False,
+            "indexed": signals["indexed"],
+            "tags": signals["tags"],
+            "where_from": signals["where_from"],
         })
 
     for child in sorted(root.iterdir()):
@@ -150,17 +226,34 @@ def cluster(entries, index, *, archive_after_months=12, now=None):
     return clusters
 
 
-def scan(root, *, archive_after_months=12, metadata_only=False, para=None):
+def scan(root, *, archive_after_months=12, metadata_only=False,
+         peek_files=200, peek_bytes=8192, para=None):
     index = parse_index(para) if para else Index()
-    entries, stats = walk(root, index)
+    entries, stats = walk(root, index, metadata_only=metadata_only)
     clusters = cluster(entries, index, archive_after_months=archive_after_months)
+
+    peeked = []
+    if not metadata_only:
+        unresolved = [c for c in clusters if c["kind"] == "unresolved"]
+        if unresolved:
+            pending = [{"rel": rel} for rel in unresolved[0]["files"]]
+            for rel in peek_candidates(pending, root, index, peek_files=peek_files):
+                text = peek(root / rel, peek_bytes)
+                if not text:
+                    continue
+                peeked.append(rel)
+                for name in index.all_names():
+                    if name.casefold() in text.casefold():
+                        unresolved[0].setdefault("peek_hints", {})[rel] = name
+                        break
+
     return {
         "version": 1,
         "root": str(root),
         "volume": pp.volume_of(root),
         "generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "metadata_only": metadata_only,
-        "peeked": [],
+        "peeked": peeked,
         "unindexed": sum(1 for e in entries if not e["indexed"]),
         "unreadable": stats["unreadable"],
         "skipped_never_move": stats["skipped_never_move"],
@@ -173,6 +266,8 @@ def main():
     parser.add_argument("root")
     parser.add_argument("--archive-after", type=int, default=12, metavar="MONTHS")
     parser.add_argument("--metadata-only", action="store_true")
+    parser.add_argument("--peek-files", type=int, default=200)
+    parser.add_argument("--peek-bytes", type=int, default=8192)
     args = parser.parse_args()
 
     try:
@@ -185,7 +280,8 @@ def main():
     para = index_file.read_text(encoding="utf-8") if index_file.exists() else None
     json.dump(
         scan(root, archive_after_months=args.archive_after,
-             metadata_only=args.metadata_only, para=para),
+             metadata_only=args.metadata_only, peek_files=args.peek_files,
+             peek_bytes=args.peek_bytes, para=para),
         sys.stdout, indent=2,
     )
     print()
