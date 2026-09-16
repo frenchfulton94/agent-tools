@@ -34,10 +34,16 @@ PARA sorts files by **how actionable they are**, not by subject:
 4. **Have the user correct it, both ways.** They delete what is wrong *and add
    commitments the scan could not see*. A project with no files yet will never
    appear in a scan, and that is exactly the entry that matters most.
-5. **Render the plan.** Write `.para/plan-<ts>.json` and `.para/plan-<ts>.md`.
-   Group by decision — one block per rule, never one line per file. Building
-   the JSON's `groups` from the scan's `clusters` is its own step, not a
-   pass-through — see `references/plan-format.md`.
+5. **Re-scan, then render the plan.** Scan again first:
+   `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/scan.py" <dir>`. The step-2 scan ran
+   before `PARA.md` existed, so it had nothing to match against and produced no
+   `project-match`, `area-match`, or `resource-match` clusters — only this
+   second scan sees the list the user just corrected, and without it every one
+   of their confirmed commitments falls through to `4-Archives` or `0-Inbox`.
+   Then write `.para/plan-<ts>.json` and `.para/plan-<ts>.md` from **this**
+   scan's clusters. Group by decision — one block per rule, never one line per
+   file. Building the JSON's `groups` from the scan's `clusters` is its own
+   step, not a pass-through — see `references/plan-format.md`.
 6. **Apply on approval.** `python3 "${CLAUDE_PLUGIN_ROOT}/scripts/apply.py" .para/plan-<ts>.json`.
 7. **Report.** Counts moved and skipped, collisions renamed, and the undo
    command:
@@ -46,6 +52,12 @@ PARA sorts files by **how actionable they are**, not by subject:
 
    `undo.py` infers the root from the manifest's location and requires it to
    sit in `<root>/.para/`; pass `--root` explicitly otherwise.
+
+   Say once, here, that the first apply registered this directory in
+   `~/.config/para/roots`, so the guard hook now blocks deletions and
+   unplanned moves inside it, and that deleting that line unregisters it. It
+   is the run's only lasting change outside the directory, and the user should
+   hear about it from you rather than from a denied command later.
 
 ## What you decide, and what you must not
 

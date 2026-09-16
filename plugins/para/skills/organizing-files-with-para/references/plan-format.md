@@ -22,6 +22,12 @@ allowed to be loose in the first place.
 
 ## From scan clusters to plan groups
 
+Build from the **re-scan**, the one run in step 5 after `PARA.md` was written
+and corrected — not from the step-2 scan. `scan.py` parses `PARA.md` once, at
+invocation, so a scan taken before the file existed contains no
+`project-match`, `area-match`, or `resource-match` clusters at all, and a plan
+built from it files every confirmed commitment to `4-Archives` or `0-Inbox`.
+
 `scan.py` emits **clusters**, each keyed by `kind` (`age`, `project-match`,
 `area-match`, `resource-match`, `unresolved`) — that is the vocabulary of a
 scan, not of a plan. Building the plan's `groups` from a scan's `clusters` is
@@ -35,6 +41,17 @@ with it, and nothing downstream reads it. `id` is what the rest of the run
 addresses a group by: it is what `apply.py` names in a duplicate-claim error,
 what the Markdown plan's headings key on, and what the final report can point
 back to.
+
+The `unresolved` cluster may also carry **`peek_hints`** — the content peek's
+one output, a mapping of relative path to the `PARA.md` entry that file's
+opened prefix mentioned (`{"Scan 2024-03-11.pdf": "client-redesign"}`). Its
+files are in `0-Inbox` precisely because their *paths* matched nothing, so a
+hint is the only evidence that one of them belongs somewhere else. Use it to
+lift those files into a group destined for that entry, and say in the group's
+`reason` that the match came from contents rather than the filename, so the
+user approving the plan can weigh it accordingly. `peek_hints` itself is
+scan-side vocabulary: drop it from the plan's groups the same way `kind` is
+dropped.
 
 ## JSON
 
