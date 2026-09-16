@@ -63,7 +63,22 @@ def _restore_one(line, root):
 
 def undo(manifest_path, root):
     restored, skipped = 0, []
-    lines = pathlib.Path(manifest_path).read_text(encoding="utf-8").splitlines()
+    # `surrogateescape` decodes undecodable bytes into surrogates instead of
+    # raising. A partially written or corrupted manifest is exactly the artifact
+    # this tool exists to read, so the whole-file read must not abort the run
+    # either; the surrogates flow on into `_restore_one` and land in its
+    # blanket handler when they reach the filesystem.
+    try:
+        raw = pathlib.Path(manifest_path).read_text(
+            encoding="utf-8", errors="surrogateescape"
+        )
+    except OSError as error:
+        # An unreadable manifest is a clean, reported failure — never a traceback.
+        return {
+            "restored": 0,
+            "skipped": [{"file": str(manifest_path), "reason": "unreadable manifest line"}],
+        }
+    lines = raw.splitlines()
 
     # Reverse order, so nested destinations unwind before their parents.
     for line in reversed(lines):

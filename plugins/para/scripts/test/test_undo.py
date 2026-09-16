@@ -239,6 +239,27 @@ class Undo(unittest.TestCase):
             self.assertEqual((root / "a.pdf").read_text(), "alpha")
             self.assertEqual((root / "b.pdf").read_text(), "beta")
 
+    def test_raw_invalid_utf8_in_the_manifest_costs_only_itself(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            (root / "a.pdf").write_text("alpha")
+            (root / "b.pdf").write_text("beta")
+            plan = {
+                "version": 1, "root": str(root),
+                "groups": [{
+                    "id": "g1", "rule": "r", "reason": "w", "destination": "4-Archives",
+                    "count": 2, "samples": [], "files": ["a.pdf", "b.pdf"],
+                }],
+            }
+            manifest = pathlib.Path(ap.apply_plan(plan, root)["manifest"])
+            with open(manifest, "ab") as handle:
+                handle.write(b'{"from": "\xed\xa0\x80", "to": "x", '
+                             b'"size": 1, "mtime_ns": 1, "inode": 1}\n')
+            result = un.undo(manifest, root)
+            self.assertEqual(result["restored"], 2)
+            self.assertEqual((root / "a.pdf").read_text(), "alpha")
+            self.assertEqual((root / "b.pdf").read_text(), "beta")
+
 
 if __name__ == "__main__":
     unittest.main()
