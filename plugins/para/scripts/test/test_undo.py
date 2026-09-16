@@ -81,6 +81,66 @@ class Undo(unittest.TestCase):
             self.assertEqual((root / "a.pdf").read_text(), "something new here")
             self.assertEqual((root / "a (2).pdf").read_text(), "hello")
 
+    def test_a_truncated_final_line_costs_only_itself(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            (root / "a.pdf").write_text("alpha")
+            (root / "b.pdf").write_text("beta")
+            plan = {
+                "version": 1, "root": str(root),
+                "groups": [{
+                    "id": "g1", "rule": "r", "reason": "w", "destination": "4-Archives",
+                    "count": 2, "samples": [], "files": ["a.pdf", "b.pdf"],
+                }],
+            }
+            manifest = pathlib.Path(ap.apply_plan(plan, root)["manifest"])
+            manifest.write_text(manifest.read_text() + '{"from": "c.pdf", "to": "4-Archiv')
+            result = un.undo(manifest, root)
+            self.assertEqual(result["restored"], 2)
+            self.assertEqual((root / "a.pdf").read_text(), "alpha")
+            self.assertEqual((root / "b.pdf").read_text(), "beta")
+            self.assertIn("unreadable manifest line", [s["reason"] for s in result["skipped"]])
+
+    def test_a_line_missing_a_key_costs_only_itself(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            manifest = pathlib.Path(moved_fixture(root))
+            manifest.write_text(manifest.read_text() + json.dumps({"from": "z.pdf"}) + "\n")
+            result = un.undo(manifest, root)
+            self.assertEqual(result["restored"], 1)
+            self.assertIn("unreadable manifest line", [s["reason"] for s in result["skipped"]])
+
+    def test_refuses_an_absolute_manifest_path(self):
+        with tempfile.TemporaryDirectory() as outer:
+            o = pathlib.Path(outer)
+            victim = o / "victim.txt"
+            victim.write_text("SECRET")
+            root = o / "root"
+            (root / ".para").mkdir(parents=True)
+            manifest = root / ".para" / "undo-x.jsonl"
+            info = victim.lstat()
+            manifest.write_text(json.dumps({
+                "from": "pulled-in.txt", "to": str(victim),
+                "size": info.st_size, "mtime_ns": info.st_mtime_ns, "inode": info.st_ino,
+            }) + "\n")
+            result = un.undo(manifest, root)
+            self.assertEqual(result["restored"], 0)
+            self.assertEqual(result["skipped"][0]["reason"], "manifest path escapes the root")
+            self.assertTrue(victim.exists())
+
+    def test_refuses_a_traversing_manifest_path(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            (root / ".para").mkdir()
+            manifest = root / ".para" / "undo-x.jsonl"
+            manifest.write_text(json.dumps({
+                "from": "ok.txt", "to": "../escape.txt",
+                "size": 1, "mtime_ns": 1, "inode": 1,
+            }) + "\n")
+            result = un.undo(manifest, root)
+            self.assertEqual(result["restored"], 0)
+            self.assertEqual(result["skipped"][0]["reason"], "manifest path escapes the root")
+
 
 if __name__ == "__main__":
     unittest.main()
