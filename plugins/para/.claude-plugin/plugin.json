@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "para",
+  "displayName": "PARA",
+  "version": "0.1.0",
+  "description": "Organizes a directory into Tiago Forte's PARA structure — Projects, Areas, Resources, Archives — through an approve-before-move workflow: a plan grouped by decision rather than by file, classification from metadata and macOS Spotlight signals with a bounded content peek, a project list you own and correct, and an undo manifest for every move. Ships /para:organize and a guard hook that blocks deletion and unplanned moves inside a managed root.",
+  "author": {
+    "name": "Agent Tools",
+    "email": "michael@frenchfultonjr.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "para",
+    "files",
+    "organizing",
+    "macos",
+    "spotlight",
+    "productivity",
+    "second-brain"
+  ]
+}
