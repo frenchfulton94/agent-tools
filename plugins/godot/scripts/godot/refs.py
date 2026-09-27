@@ -29,6 +29,21 @@ reporting on the rest of the project. The cost is a false negative narrower
 than it sounds -- a script referenced *only* from inside the unparsable
 scene can be misreported as an orphan -- but that is preferable to refusing
 to analyse the project at all over one bad file elsewhere in the tree.
+
+That skip must not be silent, though: a caller who only looks at `broken`
+and `orphans` cannot otherwise tell a clean report from a partial one, which
+is the exact anti-pattern tscn.py's own docstring was hardened against, one
+layer up -- a partial result presented as complete is how a user deletes
+something they never saw. Every file that fails to parse is recorded in the
+`parse_errors` key instead of being dropped silently. `orphans` and `broken`
+are complete descriptions of the project only when `parse_errors` is empty;
+when it is not, treat both as a lower bound -- a script named only from
+inside an unparsable scene can appear in `orphans`, and references or
+breakage inside that scene are invisible to `broken`, purely because the
+file could not be read. Each scene/resource file is parsed exactly once
+(see `_parse_scenes`) and the resulting blocks are shared between the
+uid-index pass and the ext_resource/orphan pass, so a file that fails to
+parse is reported in `parse_errors` once, not once per consumer.
 """
 
 from __future__ import annotations
@@ -57,7 +72,29 @@ def _walk(root: str):
             yield full, os.path.relpath(full, root).replace(os.sep, "/")
 
 
-def _uid_index(root: str):
+def _parse_scenes(root: str):
+    """Parse every .tscn/.tres file in the tree exactly once.
+
+    Returns (parsed, parse_errors): `parsed` maps rel path -> list of Block
+    for every scene/resource that parsed cleanly; `parse_errors` lists
+    {"path": rel, "error": str} for every one that didn't. Both the
+    uid-index pass and the ext_resource/orphan pass in graph() consume this
+    same dict, so a file that fails to parse is recorded in `parse_errors`
+    once, never once per consumer.
+    """
+    parsed: dict = {}
+    parse_errors: list = []
+    for full, rel in _walk(root):
+        if not rel.endswith(SCENE_EXT):
+            continue
+        try:
+            parsed[rel] = tscn.parse(open(full, errors="replace").read())
+        except tscn.TscnParseError as exc:
+            parse_errors.append({"path": rel, "error": str(exc)})
+    return parsed, parse_errors
+
+
+def _uid_index(root: str, parsed: dict):
     index: dict = {}
     duplicates: dict = {}
 
@@ -78,10 +115,7 @@ def _uid_index(root: str):
             if match:
                 record(match.group(1), rel[: -len(".import")])
         elif rel.endswith(SCENE_EXT):
-            try:
-                blocks = tscn.parse(open(full, errors="replace").read())
-            except tscn.TscnParseError:
-                continue
+            blocks = parsed.get(rel)
             if blocks and blocks[0].kind in ("gd_scene", "gd_resource"):
                 record(blocks[0].attrs.get("uid"), rel)
 
@@ -93,6 +127,11 @@ def _project_references(root: str) -> set:
 
     Neither is named from inside any .tscn/.tres ext_resource entry, so
     without this they would be reported as orphaned on every project.
+
+    Assumes `root` is a project root that already has a project.godot --
+    the caller is expected to have validated that with project.find_root
+    (or equivalent) beforehand; a root missing it is treated as having no
+    autoloads or main scene rather than raising.
     """
     if not os.path.isfile(os.path.join(root, "project.godot")):
         return set()
@@ -112,17 +151,12 @@ def _project_references(root: str) -> set:
 
 
 def graph(root: str) -> dict:
-    index, duplicates = _uid_index(root)
+    parsed, parse_errors = _parse_scenes(root)
+    index, duplicates = _uid_index(root, parsed)
     broken = []
     referenced = _project_references(root)
 
-    for full, rel in _walk(root):
-        if not rel.endswith(SCENE_EXT):
-            continue
-        try:
-            blocks = tscn.parse(open(full, errors="replace").read())
-        except tscn.TscnParseError:
-            continue
+    for rel, blocks in parsed.items():
         for res in tscn.ext_resources(blocks):
             path = (res.get("path") or "")
             uid = res.get("uid")
@@ -158,4 +192,5 @@ def graph(root: str) -> dict:
         "broken": broken,
         "orphans": sorted(orphans),
         "duplicate_uids": duplicates,
+        "parse_errors": parse_errors,
     }

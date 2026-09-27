@@ -83,6 +83,40 @@ class TestGraph(unittest.TestCase):
         self.assertEqual(len(g["duplicate_uids"]), 1)
         self.assertEqual(g["duplicate_uids"][0]["uid"], "uid://cnnyipgx21jca")
 
+    def test_unparsable_scene_is_reported_not_silently_skipped(self):
+        # main.tscn is the only scene that references scripts/player.gd via
+        # its ext_resource entry. Corrupt it and graph() can no longer see
+        # that reference -- it must say so via parse_errors rather than
+        # quietly presenting an orphan list as if nothing were skipped.
+        # This is the exact anti-pattern tscn.py's own docstring warns
+        # against, one layer up: a partial result presented as complete is
+        # how a user deletes something they never saw.
+        with open(self.root / "main.tscn", "a") as f:
+            f.write("this is not a heading, property, or comment\n")
+
+        g = refs.graph(str(self.root))
+
+        # (a) parse_errors names the file that failed.
+        main_tscn_errors = [e for e in g["parse_errors"] if e["path"] == "main.tscn"]
+        self.assertEqual(len(main_tscn_errors), 1)
+
+        # (b) it appears exactly once -- _uid_index and graph()'s own
+        # ext_resource scan must share one parse pass over the file, not
+        # each report (or each re-parse) it independently.
+        self.assertEqual(len(g["parse_errors"]), 1)
+
+        # The .uid sidecar is a separate code path from the scene parse, so
+        # the uid is still known even though the scene that names it isn't.
+        self.assertEqual(g["uid_index"]["uid://cnnyipgx21jca"], "scripts/player.gd")
+
+        # (c) scripts/player.gd was referenced only from inside the now
+        # unparsable scene, so the graph legitimately cannot confirm it is
+        # still used -- but if it shows up in orphans, parse_errors must be
+        # non-empty right alongside it, so a caller can tell the report is
+        # partial rather than a clean, confident "unused".
+        if "scripts/player.gd" in g["orphans"]:
+            self.assertTrue(g["parse_errors"])
+
 
 if __name__ == "__main__":
     unittest.main()
