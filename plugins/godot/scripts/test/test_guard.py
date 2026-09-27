@@ -237,6 +237,70 @@ ROUND4_CASES = [
     ("# note: mv scripts/player.gd entities/player.gd", "allow"),
 ]
 
+# Fix round 5 of 5 (coordinator numbering): finding 1 (the completeness
+# check) verdicted ADDRESSED and load-bearing beyond its own trigger.
+# Finding 2 (the '#'/backtick fix) was NOT addressed -- narrowed, not
+# closed -- plus a new IMPORTANT finding: cross-execution-context pairing
+# credit laundered a decoy sidecar move.
+ROUND5_CASES = [
+    # CRITICAL 1 -- round 4's _strip_comments tracked quote state but not
+    # backtick depth, so an UNQUOTED '#' lexically inside an open backtick
+    # span (an ordinary build/issue-number idiom, not a contrivance) was
+    # still read as a top-level comment start, and the strip ran to
+    # end-of-string -- eating the closing backtick, the '&&', and a real
+    # unpaired move along with it.
+    ("`echo Building #42` && mv scripts/player.gd entities/player.gd", "deny"),
+    # The same '#' QUOTED inside the span was already handled correctly
+    # (double-quote tracking alone sufficed there) -- confirms the fix
+    # didn't regress the case that was never broken.
+    (
+        '`echo "Deploying build #42"` && mv scripts/player.gd entities/player.gd',
+        "deny",
+    ),
+    # Paired, to confirm the backtick-nested '#' doesn't itself cause a
+    # false deny/ask when the move is genuinely safe.
+    (
+        "`echo Building #42` && mv scripts/player.gd entities/player.gd "
+        "&& mv scripts/player.gd.uid entities/player.gd.uid",
+        "allow",
+    ),
+    # A genuine trailing comment (no backtick involved) must still strip.
+    ("mv scripts/player.gd entities/player.gd  # a real trailing comment", "deny"),
+    # IMPORTANT 2 -- a sidecar-pairing move named only inside a provably
+    # unreachable backtick span (`false &&` never lets it run) must not
+    # credit a real, unpaired top-level move.
+    (
+        "`false && mv scripts/player.gd.uid entities/player.gd.uid` "
+        "&& mv scripts/player.gd entities/player.gd",
+        "deny",
+    ),
+    # Ordinary same-context pairing must still allow: both at the top
+    # level...
+    (
+        "mv scripts/player.gd entities/player.gd && mv scripts/player.gd.uid entities/player.gd.uid",
+        "allow",
+    ),
+    # ...and both inside the SAME sh -c (one recursed context, shared).
+    (
+        'sh -c "mv scripts/player.gd entities/player.gd '
+        '&& mv scripts/player.gd.uid entities/player.gd.uid"',
+        "allow",
+    ),
+    # Accepted trade-off: split across a context boundary (one half inside
+    # sh -c, the other at top level) now denies, where it used to allow --
+    # an odd way to write a paired move, and the failure direction is safe.
+    (
+        'sh -c "mv scripts/player.gd entities/player.gd" '
+        "&& mv scripts/player.gd.uid entities/player.gd.uid",
+        "deny",
+    ),
+    # The reviewer's independently-discovered trigger for fix round 4's
+    # completeness check: an mv with NO destination at all must not be
+    # judged vacuously "resolved" just because there was nothing left to
+    # check.
+    ("touch foo.gd && mv scripts/player.gd", "ask"),
+]
+
 
 def decide(command, cwd=None):
     tool_input = {"command": command}
@@ -280,6 +344,14 @@ class TestGuard(unittest.TestCase):
     def test_round4_decision_table(self):
         failures = []
         for command, expected in ROUND4_CASES:
+            actual = decide(command)
+            if actual != expected:
+                failures.append(f"{command!r}: expected {expected}, got {actual}")
+        self.assertEqual(failures, [], "\n".join(failures))
+
+    def test_round5_decision_table(self):
+        failures = []
+        for command, expected in ROUND5_CASES:
             actual = decide(command)
             if actual != expected:
                 failures.append(f"{command!r}: expected {expected}, got {actual}")

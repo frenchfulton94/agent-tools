@@ -218,14 +218,15 @@ def sidecar_name_for(token):
 def _strip_comments(command):
     """Strip a bash-accurate '#' comment -- one that begins at the start
     of a WORD (the start of the command, or immediately after unquoted
-    whitespace) and is itself unquoted -- to end of line, leaving
-    everything else, including a '#' anywhere else, untouched.
+    whitespace), is itself unquoted, AND is not lexically inside an open
+    backtick span -- to end of line, leaving everything else, including
+    a '#' anywhere else, untouched.
 
     This exists because shlex's own default (`commenters='#'`) is wrong
     for this guard's purpose: it treats '#' as a comment start ANYWHERE,
-    including mid-word, with no quote-awareness. An entirely ordinary
-    filename broke this catastrophically (fix round 4, CRITICAL 2, a
-    pre-existing bug never caught before this round):
+    including mid-word, with no quote- or backtick-awareness. An
+    entirely ordinary filename broke this catastrophically (fix round 4,
+    CRITICAL 2, a pre-existing bug never caught before that round):
     'touch weird#file.gd && mv scripts/player.gd entities/player.gd'
     tokenized under the old default to just ['touch', 'weird'] -- the
     '&& mv ...' was silently discarded, `tokenize()` reported
@@ -234,6 +235,42 @@ def _strip_comments(command):
     complete, silent bypass of the only mechanism enforcing this plugin's
     safety claim, trivially triggered by a filename containing '#'.
 
+    Round 4's own fix had a gap in the same class (fix round 5,
+    CRITICAL 1): it tracked single- and double-quote state but not
+    backtick state, so an UNQUOTED '#' lexically inside an open backtick
+    span (`` `echo Building #42` `` -- an ordinary build/issue-number
+    idiom, not a contrivance) was still read as a top-level comment
+    start, and the strip ran to end-of-string -- eating the closing
+    backtick, everything after it, and a real unpaired move along with
+    it. A '#' that IS quoted inside the span
+    (`` `echo "Deploying build #42"` ``) was already handled correctly,
+    since double-quote tracking alone was sufficient there; the gap was
+    specifically the unquoted case. `in_backtick` below closes it: a '#'
+    is never a comment start while an unmatched backtick has been seen
+    an odd number of times since the last one outside any quote.
+
+    A backslash escapes the very next character outright (skipped as an
+    inseparable two-character unit) UNLESS already inside single quotes,
+    which POSIX gives no escape mechanism at all -- this one rule handles
+    an escaped double quote and an escaped backtick uniformly, and gives a
+    properly backslash-escaped NESTED backtick span the correct behavior
+    for free: the escaped inner backtick never toggles `in_backtick`, so
+    the outer span stays open across it, matching real bash. An unmatched
+    trailing backtick just leaves `in_backtick` True for the remainder of
+    the string, which only suppresses comment detection from that point
+    on -- analysing MORE text, never less, the direction this guard
+    always fails toward.
+
+    Deliberately NOT handled (ruled out, fix round 5): a '#' immediately
+    after a control operator with no space (`mv a b;#comment`) is, in
+    real bash, still a word-start comment; this function's simpler rule
+    (whitespace-or-start-of-string only) does not strip it. Confirmed
+    empirically this only ever means MORE text gets analyzed (the literal
+    '#comment...' survives as ordinary tokens feeding the rest of the
+    pipeline), never less -- worst case a spurious `ask`, never a missed
+    `deny`. Extending the rule to cover it was judged out of proportion
+    to the risk it would close.
+
     `tokenize()` calls this BEFORE handing the command to shlex, and
     disables shlex's own `commenters` entirely afterward, so a '#'
     surviving this pass (because it wasn't a real comment start) is never
@@ -241,6 +278,7 @@ def _strip_comments(command):
     out = []
     in_single = False
     in_double = False
+    in_backtick = False
     at_word_start = True
     i, n = 0, len(command)
     while i < n:
@@ -251,11 +289,14 @@ def _strip_comments(command):
                 in_single = False
             i += 1
             continue
-        if in_double:
+        # Not inside single quotes from here on -- single quotes are the
+        # only context POSIX gives no escape mechanism at all, so they
+        # must be checked, and exited, before backslash gets a look.
+        if ch == "\\" and i + 1 < n:
             out.append(ch)
-            if ch == '"' and command[i - 1] != "\\":
-                in_double = False
-            i += 1
+            out.append(command[i + 1])
+            at_word_start = False
+            i += 2
             continue
         if ch == "'":
             in_single = True
@@ -264,12 +305,18 @@ def _strip_comments(command):
             i += 1
             continue
         if ch == '"':
-            in_double = True
+            in_double = not in_double
             at_word_start = False
             out.append(ch)
             i += 1
             continue
-        if ch == "#" and at_word_start:
+        if ch == "`":
+            in_backtick = not in_backtick
+            at_word_start = False
+            out.append(ch)
+            i += 1
+            continue
+        if ch == "#" and at_word_start and not in_double and not in_backtick:
             while i < n and command[i] != "\n":
                 i += 1
             continue  # do not consume/emit the newline itself here
@@ -572,48 +619,93 @@ def _backtick_inner(tok):
     return None
 
 
-def flatten(command, depth=0, max_depth=6):
-    """Flatten a command into ({"tokens": [...], "exts": frozenset()}
-    entries, any_parse_failure). Covers the command's own top-level
-    statements, plus -- recursively, to a bounded depth -- the inner
-    command of every `sh -c` / `bash -c` / `zsh -c` / `eval` statement,
-    every backtick-delimited command substitution (see `_backtick_inner`),
-    and the exec'd sub-command of every `find -exec`/`-execdir` block.
-    This lets every later pass treat a nested shell's contents exactly
-    like top-level statements, instead of special-casing recursion order
-    at each check site. any_parse_failure is True if this command OR any
-    nested command it recursed into failed to fully tokenize."""
+def flatten(command, depth=0, max_depth=6, context=0, _counter=None):
+    """Flatten a command into ({"tokens": [...], "exts": frozenset(),
+    "context": <id>} entries, any_parse_failure). Covers the command's
+    own top-level statements, plus -- recursively, to a bounded depth --
+    the inner command of every `sh -c` / `bash -c` / `zsh -c` / `eval`
+    statement, every backtick-delimited command substitution (see
+    `_backtick_inner`), and the exec'd sub-command of every `find
+    -exec`/`-execdir` block. This lets every later pass treat a nested
+    shell's contents exactly like top-level statements, instead of
+    special-casing recursion order at each check site. any_parse_failure
+    is True if this command OR any nested command it recursed into
+    failed to fully tokenize.
+
+    `context` identifies WHICH execution context an entry came from
+    (fix round 5, IMPORTANT 2). Context 0 is the command's own top
+    level; every recursion into a genuinely separate execution --
+    `sh -c`/`eval`'s inner command, or a backtick span's inner text --
+    gets its OWN fresh id via `_counter` (a one-element mutable box
+    threaded through the whole recursion tree, so every nested call
+    shares one counter and no two contexts collide). A `find -exec`
+    sub-statement stays in its ENCLOSING statement's context: unlike
+    `sh -c`/`eval`/a backtick, it is not a separate subshell whose
+    output could be laundered back into the parent -- it is the same
+    top-level command actually naming that sub-command's arguments
+    directly.
+
+    This exists because sidecar-pairing (`_collect_moved_args_by_context` /
+    `_collect_removed_paths_by_context`, called from `analyze()`) must not credit a
+    pairing move found in one context against an unpaired move in
+    another: `` `false && mv a.gd.uid b/a.gd.uid` && mv a.gd b/a.gd ``
+    names the sidecar move only inside a backtick span that is provably
+    unreachable (`false &&` never lets it run), and crediting it anyway
+    laundered a genuinely unpaired top-level move into a silent allow.
+    The same crediting was possible across `eval`/`sh -c` recursion since
+    round 1. Scoping the credit to the context it was actually found in
+    closes this without building a real control-flow/reachability model
+    (ruled out of proportion -- this is the cheap, correct fix: pairs at
+    the top level pair with each other, pairs inside one recursed span
+    pair within that span, and nothing crosses a context boundary either
+    direction). Accepted trade-off: `sh -c "mv a.gd b/" && mv a.gd.uid
+    b/` now denies where it used to allow -- an odd way to write a paired
+    move, and the failure direction is safe."""
     entries = []
     if depth > max_depth:
         return entries, False
+    if _counter is None:
+        _counter = [0]  # context 0 is reserved for the top level
     tokens, failed = tokenize(command)
     any_failed = failed
     for stmt in split_statements(tokens):
         eff = strip_wrappers(stmt)
         fw = first_word(eff)
         top_tokens = _strip_exec_spans(stmt) if fw == "find" else stmt
-        entries.append({"tokens": top_tokens, "exts": frozenset()})
+        entries.append({"tokens": top_tokens, "exts": frozenset(), "context": context})
         if fw in SHELL_C_KEYWORDS and len(eff) >= 3 and eff[1] == "-c":
-            sub_entries, sub_failed = flatten(eff[2], depth + 1, max_depth)
+            _counter[0] += 1
+            sub_entries, sub_failed = flatten(
+                eff[2], depth + 1, max_depth, _counter[0], _counter
+            )
             entries.extend(sub_entries)
             any_failed = any_failed or sub_failed
         elif fw == "eval" and len(eff) >= 2:
-            sub_entries, sub_failed = flatten(" ".join(eff[1:]), depth + 1, max_depth)
+            _counter[0] += 1
+            sub_entries, sub_failed = flatten(
+                " ".join(eff[1:]), depth + 1, max_depth, _counter[0], _counter
+            )
             entries.extend(sub_entries)
             any_failed = any_failed or sub_failed
         if fw == "find":
             for exts, sub in find_exec_substatements(stmt):
-                entries.append({"tokens": sub, "exts": exts})
+                entries.append({"tokens": sub, "exts": exts, "context": context})
                 for tok in sub:
                     inner = _backtick_inner(tok)
                     if inner is not None:
-                        sub_entries, sub_failed = flatten(inner, depth + 1, max_depth)
+                        _counter[0] += 1
+                        sub_entries, sub_failed = flatten(
+                            inner, depth + 1, max_depth, _counter[0], _counter
+                        )
                         entries.extend(sub_entries)
                         any_failed = any_failed or sub_failed
         for tok in stmt:
             inner = _backtick_inner(tok)
             if inner is not None:
-                sub_entries, sub_failed = flatten(inner, depth + 1, max_depth)
+                _counter[0] += 1
+                sub_entries, sub_failed = flatten(
+                    inner, depth + 1, max_depth, _counter[0], _counter
+                )
                 entries.extend(sub_entries)
                 any_failed = any_failed or sub_failed
     return entries, any_failed
@@ -870,31 +962,41 @@ def _coarse_raw_backstop(command):
 # --- analysis ------------------------------------------------------------
 
 
-def _collect_moved_args(entries):
+def _collect_moved_args_by_context(entries):
     """Every argument (source or destination) named by any move- or
-    copy-class entry anywhere in the (flattened) command. Deliberately
-    whole-command, not per-statement: 'mv a.gd b/ && mv a.gd.uid b/' --
-    the sidecar moved in a separate, later statement of the SAME command
-    -- must still be allowed, so pairing is checked against this global
-    set."""
-    moved = set()
+    copy-class entry, grouped by the execution CONTEXT it came from (fix
+    round 5, IMPORTANT 2) -- not one global set. Within one context,
+    still deliberately whole-context rather than per-statement:
+    'mv a.gd b/ && mv a.gd.uid b/' at the top level -- the sidecar moved
+    in a separate, later statement of the SAME context -- must still be
+    allowed. But a pairing move named in a DIFFERENT context (a
+    `sh -c`/`eval`'s inner command, or a backtick span's inner text) must
+    NOT credit a move in this one: that cross-context crediting is
+    exactly what let `` `false && mv a.gd.uid b/a.gd.uid` && mv a.gd
+    b/a.gd `` launder a provably-unreachable decoy sidecar move (inside a
+    backtick span gated by `false &&`) into excusing a real, unpaired
+    top-level move. See `flatten()` for how context ids are assigned."""
+    moved_by_ctx = {}
     for e in entries:
         stmt = e["tokens"]
         if is_move_statement(stmt) or is_copy_statement(stmt):
             srcs, dest = positional_args(stmt)
-            moved.update(srcs)
+            s = moved_by_ctx.setdefault(e["context"], set())
+            s.update(srcs)
             if dest is not None:
-                moved.add(dest)
-    return moved
+                s.add(dest)
+    return moved_by_ctx
 
 
-def _collect_removed_paths(entries):
-    removed = set()
+def _collect_removed_paths_by_context(entries):
+    """As `_collect_moved_args_by_context`, but for `rm`/`git rm` targets."""
+    removed_by_ctx = {}
     for e in entries:
         if is_remove_statement(e["tokens"]):
             targets, _ = positional_args(e["tokens"])
-            removed.update(targets)
-    return removed
+            s = removed_by_ctx.setdefault(e["context"], set())
+            s.update(targets)
+    return removed_by_ctx
 
 
 def _any_unpaired_source(sources, predicate_exts, moved_norm, cwd):
@@ -928,29 +1030,34 @@ def analyze(command, cwd):
         if any(t.lower() == "--convert-3to4" for t in e["tokens"]):
             return ("deny", DENY_CONVERT_MSG)
 
-    moved_args = _collect_moved_args(entries)
-    moved_norm = {_key(a) for a in moved_args}
-    removed_paths = _collect_removed_paths(entries)
-    removed_norm = {_key(p) for p in removed_paths}
+    moved_by_ctx = _collect_moved_args_by_context(entries)
+    moved_norm_by_ctx = {ctx: {_key(a) for a in s} for ctx, s in moved_by_ctx.items()}
+    removed_by_ctx = _collect_removed_paths_by_context(entries)
+    removed_norm_by_ctx = {ctx: {_key(p) for p in s} for ctx, s in removed_by_ctx.items()}
 
     # deny: mv / git mv / rsync --remove-source-files / find -exec mv, with
     # a sidecar-bearing source whose sidecar is not named anywhere else in
-    # the command and is not confirmed absent on disk.
+    # the SAME EXECUTION CONTEXT (fix round 5, IMPORTANT 2 -- a pairing
+    # move named only in a different context, e.g. inside a backtick span,
+    # must not excuse this one) and is not confirmed absent on disk.
     for e in entries:
         stmt = e["tokens"]
         if is_move_statement(stmt):
             sources, _dest = positional_args(stmt)
+            moved_norm = moved_norm_by_ctx.get(e["context"], set())
             if _any_unpaired_source(sources, e["exts"], moved_norm, cwd):
                 return ("deny", DENY_MOVE_MSG)
 
     # deny: cp / install of a sidecar-bearing source that is ALSO removed
-    # elsewhere in the command, with no sidecar carried to the new path --
-    # a move spelled as two commands.
+    # elsewhere in the SAME CONTEXT, with no sidecar carried to the new
+    # path -- a move spelled as two commands.
     for e in entries:
         stmt = e["tokens"]
         if not is_copy_statement(stmt):
             continue
         srcs, _dest = positional_args(stmt)
+        moved_norm = moved_norm_by_ctx.get(e["context"], set())
+        removed_norm = removed_norm_by_ctx.get(e["context"], set())
         for src in srcs:
             if _key(src) not in removed_norm:
                 continue
