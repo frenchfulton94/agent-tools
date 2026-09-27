@@ -1,0 +1,40 @@
+# Runs as the MainLoop via `--script`, from OUTSIDE the project being captured.
+# Nothing is written into the user's project: the scene path and the output path
+# both arrive by environment variable, and the PNG is saved to an absolute path.
+#
+# Headless cannot do this -- the dummy renderer returns a null viewport texture
+# (spec 3.2), so this driver must run windowed. The caller positions the window
+# offscreen.
+extends SceneTree
+
+func _initialize() -> void:
+	var scene_path := OS.get_environment("GODOT_MCP_SCENE")
+	var out_path := OS.get_environment("GODOT_MCP_OUT")
+	var frames := int(OS.get_environment("GODOT_MCP_FRAMES"))
+	if frames <= 0:
+		frames = 4
+
+	var err := change_scene_to_file(scene_path)
+	if err != OK:
+		printerr("GODOT_MCP_ERROR: could not load scene ", scene_path)
+		quit(1)
+		return
+
+	for _i in range(frames):
+		await process_frame
+	await RenderingServer.frame_post_draw
+
+	var image := root.get_texture().get_image()
+	if image == null:
+		printerr("GODOT_MCP_ERROR: viewport texture was null (headless?)")
+		quit(1)
+		return
+
+	var save_err := image.save_png(out_path)
+	if save_err != OK:
+		printerr("GODOT_MCP_ERROR: could not write ", out_path)
+		quit(1)
+		return
+
+	print("GODOT_MCP_OK ", image.get_size().x, "x", image.get_size().y)
+	quit()
