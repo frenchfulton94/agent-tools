@@ -1,0 +1,29 @@
+/**
+ * godot-scripts.test.ts — runs the godot plugin's Python suite as part of `bun test`.
+ *
+ * The .tscn parser reads a user's scene files, and the guard decides whether a
+ * destructive move reaches the shell. Both are gated here rather than run by hand:
+ * a red Python suite fails the catalog suite. Skips cleanly when python3 is absent.
+ *
+ * Tests that need the Godot binary skip themselves from inside Python, so this
+ * stays green on a machine with no engine installed.
+ */
+
+import { describe, expect, test } from 'bun:test';
+import { spawnSync } from 'node:child_process';
+import { join } from 'node:path';
+
+const ROOT = join(import.meta.dir, '..');
+const hasPython = spawnSync('python3', ['--version'], { encoding: 'utf8' }).status === 0;
+
+describe('godot python scripts', () => {
+	test.skipIf(!hasPython)('unittest suite passes', () => {
+		const result = spawnSync(
+			'python3',
+			['-m', 'unittest', 'discover', '-s', 'test', '-p', 'test_*.py'],
+			{ cwd: join(ROOT, 'plugins/godot/scripts'), encoding: 'utf8' },
+		);
+		if (result.status !== 0) console.error(result.stderr || result.stdout);
+		expect(result.status).toBe(0);
+	});
+});
