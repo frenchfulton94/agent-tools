@@ -1,0 +1,18 @@
+{
+  "description": "Blocks the file operations that break uid:// references unrepairably, asks before deletions that orphan references, and reports GDScript parse errors after an edit",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/hooks/scripts/godot-guard.sh"],
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
