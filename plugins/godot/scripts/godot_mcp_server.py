@@ -7,7 +7,17 @@ needs no install step.
 Design notes:
   - Read-only with respect to project source. No tool creates, edits, or saves
     a project file. Every mutation an agent makes goes through Edit/Write/Bash,
-    which is what keeps it visible to the guard hook.
+    which is what keeps it visible to the guard hook. This is the property the
+    whole architecture rests on, so it is enforced in code, not just in
+    prose: screenshot_scene's out_path is the one tool argument that names a
+    filesystem write destination the caller chooses, and call_tool() refuses
+    any out_path that resolves inside the project directory (fix round 1,
+    CRITICAL 1) rather than handing it to the renderer unchecked -- an
+    unconstrained out_path could otherwise silently overwrite an arbitrary
+    project file (project.godot itself, in the reported case) with PNG bytes,
+    through a channel the Task 9 guard hook cannot see at all. Every other
+    tool's arguments were re-checked for the same class of gap and none of
+    them name a caller-chosen filesystem write destination.
   - project_overview, scene_tree and reference_graph never invoke the Godot
     binary, so a project can still be described on a machine with no engine.
   - check_shader and screenshot_scene need a real rendering device. Headless
@@ -153,7 +163,7 @@ TOOLS = [
     },
     {
         "name": "screenshot_scene",
-        "description": "Render a scene and save a PNG of it. Runs the game windowed but positioned offscreen, driven by a script outside the project, so nothing is written into the project. Requires a display. The result also carries the centre pixel's (r, g, b) as rendered, which is how a caller can tell a real render from a blank frame -- file size alone cannot, since a blank capture and a genuine one compress to nearly the same PNG size.",
+        "description": "Render a scene and save a PNG of it. Runs the game windowed but positioned offscreen, driven by a script outside the project, so nothing is written into the project. Requires a display. out_path must resolve outside the project directory -- a path inside it (project.godot included) is refused rather than silently overwritten. The result also carries the centre pixel's (r, g, b) as rendered, which is how a caller can tell a real render from a blank frame -- file size alone cannot, since a blank capture and a genuine one compress to nearly the same PNG size.",
         "inputSchema": {"type": "object", "properties": {"project_path": _PROJECT, "scene": {"type": "string", "description": "Scene to capture, e.g. res://main.tscn."}, "out_path": {"type": "string", "description": "Absolute path for the PNG. Defaults to a temporary file."}, "width": {"type": "integer"}, "height": {"type": "integer"}, "frames": {"type": "integer", "description": "Frames to advance before capturing. Default 4."}}, "required": ["project_path", "scene"]},
     },
     {
@@ -259,6 +269,17 @@ def call_tool(name, args):
         out_path = args.get("out_path") or os.path.join(
             tempfile.mkdtemp(prefix="godot-shot-"), "scene.png"
         )
+        # CRITICAL (fix round 1): out_path reached the renderer with no
+        # containment check. A caller-supplied path inside the project --
+        # project.godot itself, in the reported case -- was silently
+        # overwritten with PNG bytes: no warning, no isError, nothing a
+        # guard hook could see, directly contradicting this server's one
+        # load-bearing property (read-only w.r.t. project source). realpath
+        # on both sides so a symlink inside the project can't walk back in.
+        project_root = os.path.realpath(args["project_path"])
+        resolved_out = os.path.realpath(out_path)
+        if resolved_out == project_root or resolved_out.startswith(project_root + os.sep):
+            return False, f"out_path must be outside the project directory; got {out_path!r}."
         result = render.screenshot_scene(
             args["project_path"],
             args["scene"],
@@ -325,7 +346,27 @@ def dispatch_tool_call(name, arguments):
     without going through a subprocess and without needing the exact
     condition (a real timeout, a missing binary, no display) to actually
     occur.
+
+    `arguments` is validated as a dict here, before call_tool() ever sees it
+    (fix round 1, IMPORTANT 3): a JSON-RPC caller can send any JSON value for
+    "arguments", including a bare string. call_tool()'s bodies all index into
+    it as `args["some_key"]`, and indexing a string with a string key raises
+    a raw `TypeError: string indices must be integers`, which -- unlike the
+    four named exceptions below -- fell straight into the generic `except
+    Exception` branch as a multi-line traceback with absolute paths, not a
+    one-sentence error. None (arguments omitted) is treated as {}, matching
+    prior behaviour for tools whose schema has no required properties.
     """
+    if arguments is None:
+        arguments = {}
+    if not isinstance(arguments, dict):
+        return {
+            "content": [{"type": "text", "text": (
+                f"Invalid arguments for tool {name!r}: expected a JSON object, "
+                f"got {type(arguments).__name__} ({arguments!r})."
+            )}],
+            "isError": True,
+        }
     try:
         ok, text = call_tool(name, arguments)
     except engine.MissingBinary as exc:
@@ -373,7 +414,12 @@ def main():
             respond(request_id, {"tools": TOOLS})
         elif method == "tools/call":
             params = message.get("params") or {}
-            result = dispatch_tool_call(params.get("name", ""), params.get("arguments") or {})
+            # Pass the raw value through -- dispatch_tool_call() itself
+            # treats a missing/None "arguments" as {} and rejects anything
+            # else that isn't a dict. `or {}` here would also have silently
+            # coerced a wrong-but-falsy type (0, False, "") into {}, masking
+            # exactly the class of malformed input this is meant to catch.
+            result = dispatch_tool_call(params.get("name", ""), params.get("arguments"))
             respond(request_id, result)
         elif request_id is not None:
             respond(request_id, error={"code": -32601, "message": f"Method not found: {method}"})

@@ -135,16 +135,47 @@ class TestNeverDumpsRawApiLoad(unittest.TestCase):
     """Drift item 2: api.load_dump() stashes an internal
     "__api_search_index__" key on the dict it returns. lookup_class and
     search_classes must never leak it -- they build fresh dicts instead.
+
+    IMPORTANT (fix round 1, found by running the break-a-test drill on all
+    four drift-item tests, as recommended): the original version of the
+    lookup_class test called only lookup_class, in its own fresh subprocess.
+    The leak key is stashed onto the *in-memory* dump object as a side
+    effect of api.search_classes() calling api._search_index() -- api.py's
+    module-level _CACHE, and therefore that key, is never populated at all
+    unless something in the *same process* called search_classes first.
+    lookup_class itself never touches _search_index(). So the old test's
+    dump never had the key to leak in the first place, regardless of
+    whether lookup_class's own guard (using api.lookup_class() rather than
+    dumping api.load_dump() raw) was present or removed -- confirmed
+    directly: with call_tool()'s lookup_class branch changed to
+    `json.dumps(api.load_dump())`, the old single-call test still passed.
+    Fixed by calling search_classes first, in the same server subprocess, so
+    the key is genuinely present on the cached dump before lookup_class runs
+    against it.
     """
 
     @unittest.skipUnless(HAS_GODOT, "needs a Godot binary to generate the dump")
-    def test_lookup_class_does_not_leak_the_search_index(self):
-        response = call("lookup_class", {"name": "Node"})
-        text = response["result"]["content"][0]["text"]
+    def test_lookup_class_does_not_leak_the_search_index_after_search_ran_first(self):
+        responses = rpc(
+            {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
+            {"jsonrpc": "2.0", "id": 2, "method": "tools/call",
+             "params": {"name": "search_classes", "arguments": {"query": "body", "limit": 5}}},
+            {"jsonrpc": "2.0", "id": 3, "method": "tools/call",
+             "params": {"name": "lookup_class", "arguments": {"name": "Node"}}},
+        )
+        # search_classes ran first, in this same process -- its own call to
+        # api._search_index() has genuinely stashed the key onto the cached
+        # dump object by the time lookup_class runs against that same cache.
+        lookup_result = responses[-1]["result"]
+        self.assertFalse(lookup_result.get("isError"))
+        text = lookup_result["content"][0]["text"]
         self.assertNotIn("__api_search_index__", text)
 
     @unittest.skipUnless(HAS_GODOT, "needs a Godot binary to generate the dump")
     def test_search_classes_does_not_leak_the_search_index(self):
+        # search_classes populates the key itself, on its own first call, so
+        # a single isolated call already exercises the real risk (unlike
+        # lookup_class above) -- this one was not a false negative.
         response = call("search_classes", {"query": "body", "limit": 5})
         text = response["result"]["content"][0]["text"]
         self.assertNotIn("__api_search_index__", text)
@@ -176,18 +207,35 @@ class TestCheckShaderTimeoutIsAnErrorNotACleanCompile(unittest.TestCase):
     def test_timeout_is_reported_as_a_tool_error_not_a_clean_compile(self):
         # End-to-end through dispatch_tool_call() (in-process, so the mock
         # actually takes effect -- rpc() spawns a separate process and would
-        # not see it): a timeout must come back as isError, and its text
-        # must not be the "compiled with no errors" message.
+        # not see it): a timeout must come back as isError, with the
+        # exception's own clean message -- not the "compiled with no
+        # errors" message, and not a traceback either.
+        #
+        # IMPORTANT (fix round 1, break-a-test drill): the original version
+        # asserted only `assertIn("timed out", text)` and
+        # `assertNotIn("compiled with no errors", text)`. Both stay true even
+        # with the specific `except render.ShaderCheckTimedOut` clause
+        # removed from dispatch_tool_call(): ShaderCheckTimedOut is an
+        # Exception subclass, so it falls into the generic `except
+        # Exception: traceback.format_exc(limit=3)` branch instead, and that
+        # traceback's last line is `godot.render.ShaderCheckTimedOut: check
+        # shader timed out after 1s...` -- which contains "timed out" and
+        # does not contain "compiled with no errors", so the old assertions
+        # passed on a raw traceback. Confirmed directly: removing that one
+        # except clause left this test green. Fixed by asserting the text is
+        # exactly the exception's own message and contains no "Traceback".
+        message = "check_shader timed out after 1s"
         with mock.patch.object(
             server.render, "check_shader",
-            side_effect=render.ShaderCheckTimedOut("check_shader timed out after 1s"),
+            side_effect=render.ShaderCheckTimedOut(message),
         ):
             result = server.dispatch_tool_call("check_shader", {
                 "project_path": str(SAMPLE), "shader_path": "res://good.gdshader",
             })
         self.assertTrue(result.get("isError"))
         text = result["content"][0]["text"]
-        self.assertIn("timed out", text)
+        self.assertEqual(text, message)
+        self.assertNotIn("Traceback", text)
         self.assertNotIn("compiled with no errors", text)
 
 
@@ -215,6 +263,147 @@ class TestScreenshotPixelSurfaces(unittest.TestCase):
             self.assertEqual(len(body["pixel"]), 3)
         finally:
             shutil.rmtree(out_dir, ignore_errors=True)
+
+
+class TestScreenshotOutPathIsContainedOutsideTheProject(unittest.TestCase):
+    """CRITICAL (fix round 1): out_path reached the renderer with no
+    containment check. The reviewer verified empirically that passing
+    out_path = <project>/project.godot on a disposable copy SILENTLY
+    OVERWROTE it -- 372 bytes of project config replaced by 165 bytes
+    starting with the PNG magic number, no warning, no isError, no diff.
+    That directly contradicts this server's one load-bearing property
+    (read-only w.r.t. project source): a tool call is invisible to the
+    Task 9 guard hook, so an unconstrained out_path was a mutation channel
+    nothing could observe.
+
+    Uses a temp copy of the fixture, never the shared committed one under
+    test/fixtures/ -- these tests are specifically probing whether the
+    server can be made to overwrite a project file, so they must never
+    risk actually doing that to a file every other test in this suite
+    depends on.
+
+    The rejection path runs entirely inside call_tool(), before
+    render.screenshot_scene() (and therefore before any display/Godot
+    requirement) is ever reached, so the first two tests need neither.
+    """
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.root = self.tmp / "proj"
+        shutil.copytree(SAMPLE, self.root)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_path_inside_the_project_is_rejected(self):
+        target = self.root / "project.godot"
+        original = target.read_bytes()
+
+        response = call("screenshot_scene", {
+            "project_path": str(self.root),
+            "scene": "res://main.tscn",
+            "out_path": str(target),
+        })
+        self.assertTrue(response["result"].get("isError"), response["result"])
+        text = response["result"]["content"][0]["text"]
+        self.assertIn("out_path", text)
+        self.assertIn("project directory", text)
+
+        # Decisive, not just "an error came back": the file itself must be
+        # byte-for-byte untouched, not silently replaced by PNG bytes.
+        self.assertEqual(target.read_bytes(), original)
+
+    def test_path_inside_a_project_subdirectory_is_rejected(self):
+        response = call("screenshot_scene", {
+            "project_path": str(self.root),
+            "scene": "res://main.tscn",
+            "out_path": str(self.root / "scripts" / "sneaky.png"),
+        })
+        self.assertTrue(response["result"].get("isError"), response["result"])
+        self.assertFalse((self.root / "scripts" / "sneaky.png").exists())
+
+    def test_symlink_pointing_back_into_the_project_is_rejected(self):
+        # A path that is textually outside the project but resolves, via a
+        # symlink, back to a file inside it -- the reason the containment
+        # check compares os.path.realpath() on both sides rather than the
+        # raw strings.
+        outside = Path(tempfile.mkdtemp(prefix="godot-shot-outside-link-"))
+        try:
+            symlink_path = outside / "sneaky_link.godot"
+            symlink_path.symlink_to(self.root / "project.godot")
+            original = (self.root / "project.godot").read_bytes()
+
+            response = call("screenshot_scene", {
+                "project_path": str(self.root),
+                "scene": "res://main.tscn",
+                "out_path": str(symlink_path),
+            })
+            self.assertTrue(response["result"].get("isError"), response["result"])
+            self.assertEqual((self.root / "project.godot").read_bytes(), original)
+        finally:
+            shutil.rmtree(outside, ignore_errors=True)
+
+    @unittest.skipUnless(HAS_DISPLAY, "needs godot and a display")
+    def test_path_outside_the_project_still_works(self):
+        out_dir = Path(tempfile.mkdtemp(prefix="godot-shot-outside-"))
+        try:
+            response = call("screenshot_scene", {
+                "project_path": str(self.root),
+                "scene": "res://main.tscn",
+                "out_path": str(out_dir / "scene.png"),
+                "width": 64, "height": 64, "frames": 2,
+            })
+            self.assertFalse(response["result"].get("isError"), response["result"])
+            body = json.loads(response["result"]["content"][0]["text"])
+            self.assertTrue(os.path.isfile(body["path"]))
+        finally:
+            shutil.rmtree(out_dir, ignore_errors=True)
+
+
+class TestMalformedArgumentsIsACleanErrorNotATraceback(unittest.TestCase):
+    """IMPORTANT (fix round 1): calling a tool with a non-object
+    "arguments" (e.g. a bare string) used to reach call_tool()'s
+    `args["project_path"]` indexing, raising a raw
+    `TypeError: string indices must be integers` -- caught only by the
+    generic `except Exception` branch, surfacing a multi-line traceback
+    with absolute paths, unlike the four named exceptions' one-sentence
+    errors. dispatch_tool_call() now validates the type before ever
+    reaching call_tool().
+    """
+
+    def test_string_arguments_is_a_clean_error(self):
+        responses = rpc(
+            {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
+            {"jsonrpc": "2.0", "id": 2, "method": "tools/call",
+             "params": {"name": "project_overview", "arguments": "not-an-object"}},
+        )
+        result = responses[-1]["result"]
+        self.assertTrue(result.get("isError"))
+        text = result["content"][0]["text"]
+        self.assertNotIn("Traceback", text)
+        self.assertNotIn("string indices", text)
+
+    def test_list_arguments_is_a_clean_error(self):
+        result = server.dispatch_tool_call("project_overview", ["not", "a", "dict"])
+        self.assertTrue(result.get("isError"))
+        text = result["content"][0]["text"]
+        self.assertNotIn("Traceback", text)
+
+    def test_missing_arguments_still_defaults_to_empty_object(self):
+        # Confirms the fix didn't change behaviour for the common case: no
+        # "arguments" key at all (None) is still treated as {}, not rejected.
+        responses = rpc(
+            {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
+            {"jsonrpc": "2.0", "id": 2, "method": "tools/call",
+             "params": {"name": "search_classes"}},
+        )
+        result = responses[-1]["result"]
+        # No "query" key in {} -> KeyError inside call_tool(), which is a
+        # different (pre-existing, out of scope here) failure mode -- the
+        # point of this test is only that it is *not* rejected for having a
+        # non-dict "arguments", i.e. it reaches call_tool() at all.
+        self.assertTrue(result.get("isError"))
+        self.assertNotIn("expected a JSON object", result["content"][0]["text"])
 
 
 @unittest.skipUnless(HAS_GODOT, "needs a Godot binary to spawn a real child")
