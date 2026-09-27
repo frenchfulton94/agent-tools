@@ -48,6 +48,8 @@ reopens the design; it is not an implementation detail.
 | 14 | `check_shader` exists because `--check-only` is GDScript-only and headless shader loading silently passes broken shaders. |
 | 15 | The MCP server is Python, following `unraid-ops`, so the plugin does not require Bun on a machine that only wants Godot support. |
 | 16 | `project_overview`, `scene_tree`, and `reference_graph` are pure parsers requiring no Godot binary. This is a tested property, not an accident. |
+| 17 | The server uses the Python standard library only, speaking JSON-RPC 2.0 over stdio, following `unraid-ops`. No `mcp` package, no pip install step. A plugin that needs a dependency installed before its tools work is not portable. |
+| 18 | Python tests use `unittest` and are gated by `bun test` through `tests/godot-scripts.test.ts`, following `para`. The repository has no pytest. |
 
 ## 3. Verified engine behavior
 
@@ -105,6 +107,39 @@ a new UID (`uid://cbm7rcrqysjkg`), the scene still referenced the old one
 Blocking all moves would be wrong and noisy; blocking a move that orphans the
 sidecar is exact.
 
+### 3.7 Only some file types have UID sidecars
+
+Measured by importing projects and listing what Godot generated:
+
+| Type | Identity carrier |
+|---|---|
+| `.gd`, `.gdshader` | A `.uid` sidecar file next to it |
+| Imported assets (`.png`, `.wav`, ...) | A `.import` sidecar carrying `uid=` |
+| `.tscn`, `.tres` | Inline, in the `[gd_scene ...]` / `[gd_resource ...]` heading |
+
+**Consequence.** The guard's move rule applies only to sidecar-bearing types.
+Scenes and resources survive a move because their UID travels inside the file,
+and a directory move carries sidecars along with their files. A rule covering
+all five extensions would deny safe operations, which is how guards get
+disabled.
+
+### 3.8 UIDs are derived from the path, so only the move is destructive
+
+Deleting a sidecar in place and reimporting regenerates the **same** UID:
+
+| Operation | UID before | UID after |
+|---|---|---|
+| `rm a/s.gd.uid`, reimport | `uid://b24e2fth3n3xk` | `uid://b24e2fth3n3xk` |
+| `rm hero.png.import`, reimport | `uid://dka08b7p2ntk2` | `uid://dka08b7p2ntk2` |
+| `mv a/s.gd b/s.gd` without the `.uid` | `uid://bwimerv1cyist` | `uid://byx1h08w7qpq8` |
+| `mv hero.png art/` without the `.import` | `uid://dka08b7p2ntk2` | `uid://badik1e5sp48k` |
+
+**Consequence.** This narrows the guard considerably, and the narrowing matters.
+Deleting a sidecar looks alarming and is harmless; moving a file is routine and
+is the operation that destroys identity. A guard that denied sidecar deletion
+would fire on safe work often enough to be switched off, taking the rule that
+does matter with it.
+
 ### 3.5 Headless shader loading silently passes broken shaders
 
 `load()` on a `.gdshader` with an invalid `vec4` arity returned a non-null
@@ -158,9 +193,9 @@ disclosed in tool descriptions so it does not read as MCP-caused mutation.
         scripts/godot-guard.sh        PreToolUse: Bash
         scripts/check-gdscript.sh     PostToolUse: Edit|Write|MultiEdit
       scripts/
-        godot_mcp_server.py
-        test/test_mcp_server.py
-        test/test_guard.py
+        godot_mcp_server.py           thin JSON-RPC wiring over the package below
+        godot/                        one module per responsibility
+        test/test_*.py                unittest suites
         test/fixtures/sample-project/ a real minimal Godot project
       skills/                         17 skills, each SKILL.md + references/ + evals/triggers.md
 
@@ -172,8 +207,9 @@ Plus, in the repository rather than the plugin:
 
 ## 5. The MCP server
 
-Python, following `unraid-ops/scripts/unraid_mcp_server.py`. Nine tools, none
-of which mutate project source.
+Python, following `unraid-ops/scripts/unraid_mcp_server.py`: JSON-RPC 2.0 over
+stdio using the standard library only, so the plugin needs no install step.
+Nine tools, none of which mutate project source.
 
 | Tool | Returns | Mechanism | Needs `godot` | Needs a display |
 |---|---|---|---|---|
@@ -239,11 +275,12 @@ Both authored through `meta-skills:authoring-hooks`. Both tested under
 
 | Pattern | Action | Grounding |
 |---|---|---|
-| `mv`/`git mv` of `.gd`/`.tscn`/`.tres`/`.gdshader`/asset without the paired `.uid` | Block | Finding 3.4 — unrepairable |
-| `rm` of a `*.uid` file | Block | Identity reassigned on next import; every reference dangles |
+| `mv`/`git mv` of a `.gd` or `.gdshader` without its `.uid`, or of an imported asset without its `.import` | Block | Finding 3.4 — unrepairable |
+| `mv` of `.tscn`/`.tres`, or of a whole directory | Allow | Scenes and resources carry their UID inline (3.7); a directory move carries sidecars with it |
 | `--convert-3to4` | Block | Rewrites every file in the project in place |
 | `rm` of `.tscn`/`.tres`/`.gd`/`project.godot`/`export_presets.cfg` | Ask | Recoverable from git, but orphans references |
-| `rm -rf .godot/`, `rm` of `.import` files | Allow | Regenerated by `--import` |
+| `rm` of a `*.uid` or `*.import` **in place** | Allow | Regenerates identically (3.8) — the file's path has not changed |
+| `rm -rf .godot/` | Allow | Rebuilt by `--import` |
 
 The permit rows matter as much as the block rows. A guard that fires on
 harmless operations gets disabled, and then it protects nothing. The
@@ -371,7 +408,7 @@ declares `meta-skills`.
 |---|---|---|
 | `godot` on `PATH` | Six MCP tools, hook 2 | Clear "not found, set `GODOT_BIN`" error; hook 2 no-ops silently; the three parser tools still work |
 | A display | `check_shader`, `screenshot_scene` | Explicit "requires a display" message |
-| Python 3 + `mcp` | The server | Same posture as `unraid-ops` |
+| Python 3 (stdlib only) | The server | No pip install step; `python3` alone is enough |
 | GUT / gdUnit4 | `godot-testing-and-debugging` | `check_script`/`run_scene` are the zero-install baseline; the frameworks are presented as optional |
 | gdtoolkit (`gdformat`/`gdlint`) | `gdscript` | Optional throughout; never assumed |
 | .NET SDK | `godot-csharp` | The skill covers installing it |
@@ -401,8 +438,8 @@ covers what is assertable without a Godot binary: the guard's full decision
 table including the `rm -rf .godot` permit, and the `.tscn` parser against
 fixture scenes.
 
-**`scripts/test/*.py`** covers the Godot-dependent behavior and skips when
-`godot` is absent from `PATH`, so CI without Godot stays green while a
+**`scripts/test/*.py`** are `unittest` suites covering Godot-dependent
+behavior, skipping when `godot` is absent from `PATH`, so CI without Godot stays green while a
 developer with it gets full coverage. It pins findings 3.1, 3.4, and 3.5
 directly: a known-broken script is asserted reported broken, a sidecar-less
 move is asserted blocked, and a known-broken shader is asserted reported
