@@ -8,16 +8,46 @@ go stale (spec decision 7).
 
 The dump is written to the cache directory and reused until the engine version
 changes. Generating it costs about two seconds.
+
+Two things make the caching less obvious than it looks.
+
+First, the MCP server this module serves is long-lived and can field
+overlapping calls. Two callers racing a cold cache must never both write
+`extension_api.json` in place: each generates into its own private scratch
+directory and only ever publishes with a single atomic `os.replace()`, so a
+concurrent reader can only ever see one complete generation or another, never
+a torn mix of both.
+
+Second, a dump on disk can go bad by routes this module doesn't control — a
+process killed mid-write, a full disk — and a `json.JSONDecodeError` on every
+future call, forever, is worse than the cost of one extra regeneration. A bad
+dump is deleted and regenerated once rather than wedging the cache
+permanently; the user has no way to know `~/.cache/claude-godot-plugin`
+exists to delete it by hand.
 """
 
 from __future__ import annotations
 
 import json
 import os
+import re
+import shutil
+import tempfile
 
 from . import engine
 
+# cache_dir -> {"version": str, "dump": dict, "index": list | None}
+# "index" is the lazily-built, lowercased search corpus for search_classes,
+# built once per cache entry and reused across queries -- see _search_index.
 _CACHE: dict = {}
+
+# Every real Godot version string starts with a dotted numeric build
+# (4, 4.7 or 4.7.2) followed by a dotted word segment (.stable, .dev, ...).
+# Real installs always carry a build-hash suffix after that
+# (".official.ed1daf0bf"), but this pattern only needs to anchor the front:
+# it exists to reject banner/driver lines that can precede the version line
+# on some builds, not to validate the whole string.
+_VERSION_LINE = re.compile(r"^\d+\.\d+(\.\d+)?\.\w+")
 
 
 def _default_cache_dir() -> str:
@@ -27,22 +57,118 @@ def _default_cache_dir() -> str:
     return path
 
 
+def _resolve_cache_dir(cache_dir: str | None) -> str:
+    return cache_dir or _default_cache_dir()
+
+
 def engine_version() -> str:
+    """Return the running engine's version, e.g.
+    "4.7.2.stable.official.ed1daf0bf" -- every real install's --version
+    output carries a build-hash suffix; a literal without one (as in an
+    earlier draft of this module's own tests) does not match any real
+    install.
+
+    Scans every line of stdout, then every line of stderr, for the first one
+    that looks like a version, rather than trusting stdout.splitlines()[0]:
+    some builds print a banner line ahead of the version, blank/whitespace-only
+    stdout must fall through to stderr rather than being treated as present,
+    and empty output must raise a clear error instead of a bare IndexError.
+    """
     result = engine.run(["--version"], timeout=15)
-    return (result.stdout or result.stderr).strip().splitlines()[0].strip()
+    for stream in (result.stdout, result.stderr):
+        for line in (stream or "").splitlines():
+            candidate = line.strip()
+            if candidate and _VERSION_LINE.match(candidate):
+                return candidate
+    raise RuntimeError(
+        "Godot's --version output did not contain a recognizable version "
+        f"string. stdout={result.stdout!r} stderr={result.stderr!r}"
+    )
+
+
+def _read_dump(dump_path: str) -> dict:
+    with open(dump_path) as f:
+        return json.load(f)
+
+
+def _generate_dump(cache_dir: str, dump_path: str) -> None:
+    """Run Godot's dump into a private scratch directory, then publish it
+    onto `dump_path` with a single atomic `os.replace()`.
+
+    This is the fix for the concurrency half of the caching race: writing
+    the engine's own output straight at `dump_path` lets two overlapping
+    cold-cache callers interleave their writes into one corrupt file. A
+    private `tempfile.mkdtemp(dir=cache_dir)` per call means each writer's
+    output is only ever a complete file before it's ever visible at
+    `dump_path`, and `os.replace()` on the same filesystem is atomic, so a
+    racing reader can only ever observe one complete generation or another.
+    """
+    if not os.access(cache_dir, os.W_OK):
+        raise RuntimeError(
+            f"Cache directory {cache_dir!r} is not writable by this "
+            "process; cannot generate extension_api.json. Check its "
+            "permissions."
+        )
+    scratch = tempfile.mkdtemp(dir=cache_dir)
+    try:
+        engine.run(
+            ["--headless", "--dump-extension-api-with-docs"],
+            cwd=scratch,
+            timeout=120,
+        )
+        scratch_dump = os.path.join(scratch, "extension_api.json")
+        if not os.path.isfile(scratch_dump):
+            raise RuntimeError(
+                f"Godot did not produce extension_api.json in {scratch!r} "
+                f"(cache dir {cache_dir!r})."
+            )
+        os.replace(scratch_dump, dump_path)
+    finally:
+        shutil.rmtree(scratch, ignore_errors=True)
+
+
+def _regenerate(cache_dir: str, dump_path: str, version_path: str, current: str | None) -> str:
+    os.makedirs(cache_dir, exist_ok=True)
+    _generate_dump(cache_dir, dump_path)
+    version = current or engine_version()
+    with open(version_path, "w") as f:
+        f.write(version)
+    return version
 
 
 def load_dump(cache_dir: str | None = None) -> dict:
-    cache_dir = cache_dir or _default_cache_dir()
-    if cache_dir in _CACHE:
-        return _CACHE[cache_dir]
+    cache_dir = _resolve_cache_dir(cache_dir)
+
+    entry = _CACHE.get(cache_dir)
+    if entry is not None:
+        # A warm in-memory hit still has to check the live engine version:
+        # without this, a Godot upgrade in this long-lived MCP server stays
+        # invisible until the process restarts, and every answer keeps
+        # coming from the old engine's API for the rest of its life.
+        try:
+            live = engine_version()
+        except engine.MissingBinary:
+            return entry["dump"]  # Can't check; keep serving memory.
+        if live == entry["version"]:
+            return entry["dump"]
+        _CACHE.pop(cache_dir, None)  # Stale -- fall through and re-derive.
 
     dump_path = os.path.join(cache_dir, "extension_api.json")
     version_path = os.path.join(cache_dir, "VERSION")
 
     current = None
-    if os.path.isfile(dump_path) and os.path.isfile(version_path):
-        cached_version = open(version_path).read().strip()
+    if os.path.isfile(dump_path):
+        # A missing VERSION file (not just a missing dump) must still be
+        # treated as "no cached version on record" rather than skipping the
+        # check entirely -- a process killed between writing the dump and
+        # writing VERSION leaves exactly dump-present/VERSION-missing, and
+        # skipping the check here would serve that dump forever without ever
+        # calling engine_version() again to notice and repair it.
+        cached_version = (
+            open(version_path).read().strip()
+            if os.path.isfile(version_path)
+            else None
+        )
         try:
             current = engine_version()
         except engine.MissingBinary:
@@ -51,18 +177,18 @@ def load_dump(cache_dir: str | None = None) -> dict:
             os.remove(dump_path)
 
     if not os.path.isfile(dump_path):
-        os.makedirs(cache_dir, exist_ok=True)
-        engine.run(
-            ["--headless", "--dump-extension-api-with-docs"],
-            cwd=cache_dir,
-            timeout=120,
-        )
-        if not os.path.isfile(dump_path):
-            raise RuntimeError("Godot did not produce extension_api.json")
-        open(version_path, "w").write(current or engine_version())
+        current = _regenerate(cache_dir, dump_path, version_path, current)
 
-    dump = json.load(open(dump_path))
-    _CACHE[cache_dir] = dump
+    try:
+        dump = _read_dump(dump_path)
+    except (json.JSONDecodeError, OSError):
+        # Corrupt on disk -- self-heal by regenerating once instead of
+        # raising the same JSONDecodeError on every future call forever.
+        os.remove(dump_path)
+        current = _regenerate(cache_dir, dump_path, version_path, current)
+        dump = _read_dump(dump_path)
+
+    _CACHE[cache_dir] = {"version": current, "dump": dump, "index": None}
     return dump
 
 
@@ -106,22 +232,56 @@ def lookup_class(name: str, member: str | None = None, cache_dir: str | None = N
     return out
 
 
+def _search_index(cache_dir: str) -> list:
+    """The lowercased search corpus for `cache_dir`'s current dump, built
+    once and reused across calls to `search_classes`.
+
+    Descriptions are the bulk of the ~12 MB dump, so lowercasing all of them
+    on every query (rather than once per cache entry) would repeat that scan
+    on every call. This is keyed through the same `_CACHE` entry that holds
+    the dump it was built from, so it can never point at stale content: a
+    version change replaces the whole entry (see `load_dump`), index and all.
+    """
+    load_dump(cache_dir)  # Ensures _CACHE[cache_dir] exists and is fresh.
+    entry = _CACHE[cache_dir]
+    if entry["index"] is None:
+        entry["index"] = [
+            (
+                c.get("name", ""),
+                c.get("name", "").lower(),
+                c.get("brief_description") or "",
+                (c.get("brief_description") or "").lower(),
+                (c.get("description") or "").lower(),
+                c.get("inherits"),
+            )
+            for c in entry["dump"].get("classes", [])
+        ]
+    return entry["index"]
+
+
 def search_classes(query: str, limit: int = 25, cache_dir: str | None = None) -> list:
-    dump = load_dump(cache_dir)
+    cache_dir = _resolve_cache_dir(cache_dir)
     needle = (query or "").lower()
     scored = []
-    for entry in dump.get("classes", []):
-        name = entry.get("name", "")
-        brief = entry.get("brief_description") or ""
-        if needle in name.lower():
-            score = 0 if name.lower() == needle else 1
-        elif needle in brief.lower():
+    for name, name_lower, brief, brief_lower, desc_lower, inherits in _search_index(cache_dir):
+        if name_lower == needle:
+            score = 0
+        elif needle in name_lower:
+            score = 1
+        elif needle in brief_lower:
             score = 2
+        elif needle in desc_lower:
+            # Matching only name/brief_description misses classes that only
+            # discuss a concept in their full description -- e.g. "gravity"
+            # matches nothing in RigidBody2D's brief_description, but its
+            # description covers gravity at length. Ranked below name/brief
+            # hits so a precise match still sorts first.
+            score = 3
         else:
             continue
         scored.append((score, name, {
             "name": name,
-            "inherits": entry.get("inherits"),
+            "inherits": inherits,
             "brief_description": brief,
         }))
     scored.sort(key=lambda row: (row[0], row[1]))
