@@ -170,7 +170,7 @@ TOOLS = [
     },
     {
         "name": "screenshot_scene",
-        "description": "Render a scene and save a PNG of it. Runs the game windowed but positioned offscreen, driven by a script outside the project, so nothing is written into the project. Requires a display. out_path must resolve outside the project directory -- a path inside it (project.godot included) is refused rather than silently overwritten. The result also carries the centre pixel's (r, g, b) as rendered, which is how a caller can tell a real render from a blank frame -- file size alone cannot, since a blank capture and a genuine one compress to nearly the same PNG size.",
+        "description": "Render a scene and save a PNG of it. Runs the game windowed but positioned offscreen, driven by a script outside the project, so nothing is written into the project. Requires a display. out_path must resolve outside the project directory -- a path inside it (project.godot included) is refused rather than silently overwritten, and refused too if it already exists as a hardlinked file or a directory. The returned \"path\" is the fully resolved, canonical form of out_path, which is not always textually identical to what was passed in (a symlinked ancestor, or -- for the default out_path -- macOS resolving /var to /private/var); compare resolved paths, not raw strings. The result also carries the centre pixel's (r, g, b) as rendered, which is how a caller can tell a real render from a blank frame -- file size alone cannot, since a blank capture and a genuine one compress to nearly the same PNG size.",
         "inputSchema": {"type": "object", "properties": {"project_path": _PROJECT, "scene": {"type": "string", "description": "Scene to capture, e.g. res://main.tscn."}, "out_path": {"type": "string", "description": "Absolute path for the PNG. Defaults to a temporary file."}, "width": {"type": "integer"}, "height": {"type": "integer"}, "frames": {"type": "integer", "description": "Frames to advance before capturing. Default 4."}}, "required": ["project_path", "scene"]},
     },
     {
@@ -235,8 +235,8 @@ def _reference_graph_text(result: dict) -> str:
 
 def _out_path_is_inside_project(resolved_out: str, project_root: str) -> bool:
     """True if `resolved_out` names a location at or under `project_root`,
-    compared by filesystem identity (device + inode via os.path.samefile())
-    rather than by string prefix.
+    compared by filesystem identity (device + inode) rather than by string
+    prefix.
 
     String comparison is not enough (fix round 2, CRITICAL 1): macOS's
     default filesystem, APFS, is case-insensitive but case-preserving, so
@@ -244,48 +244,84 @@ def _out_path_is_inside_project(resolved_out: str, project_root: str) -> bool:
     existing directory component -- realpath("/tmp/x/PROJ") returns
     "/tmp/x/PROJ" verbatim even when the on-disk directory is
     "/tmp/x/proj", although both strings address the exact same directory
-    (os.stat() on either returns the same (st_dev, st_ino), and
-    os.path.samefile() says so). A caller changes nothing on disk and
-    still slips a differently-cased out_path straight past
-    `resolved_out.startswith(project_root + os.sep)` while landing on the
-    very same file. Reproduced directly against a temp copy of the
+    (stat() on either returns the same (st_dev, st_ino)). A caller changes
+    nothing on disk and still slips a differently-cased out_path straight
+    past `resolved_out.startswith(project_root + os.sep)` while landing on
+    the very same file. Reproduced directly against a temp copy of the
     fixture: out_path pointed at its own project.godot via an upper-cased
     ancestor directory name, silently overwritten -- the same 372-byte
     config to 165-byte PNG corruption signature as the original,
     string-only bypass. This plugin's primary platform is macOS, so this
     is the default environment, not an edge case.
 
-    Walks up resolved_out's directory chain (its immediate parent, that
-    parent's parent, and so on to the filesystem root), comparing each
-    ancestor to project_root with os.path.samefile() -- immune to case,
-    trailing slashes, and a symlinked directory anywhere in the chain,
-    because it compares the (st_dev, st_ino) a name resolves to rather
-    than the name itself.
+    An earlier version of this function (fix round 2) walked resolved_out's
+    ancestors comparing each to project_root with os.path.samefile(), but
+    fell back to the very same string comparison the moment ANY os.stat()
+    in that walk raised OSError -- not only for a genuinely non-existent
+    ancestor as its own docstring claimed, but for a PermissionError or any
+    other cause too, and critically: falling back on the string comparison
+    at that point re-admits the exact case-fold bypass this function
+    exists to close, for any out_path whose IMMEDIATE parent directory
+    happens not to exist yet even though a HIGHER, case-fold-aliased
+    ancestor does. Reproduced directly (fix round 3, IMPORTANT 1): out_path
+    pointed through the project's upper-cased alias into a not-yet-created
+    subdirectory was wrongly accepted, and once that subdirectory existed
+    (an ordinary thing for a caller or a race to produce), a real Godot
+    process wrote a real PNG inside the project through it. So this
+    version never falls back to a string comparison at all, at any point:
+    "immune to case ... anywhere in the chain" and "cannot be exploited"
+    were both true only as long as every ancestor already existed, which is
+    not guaranteed, so neither claim is repeated here without the walk
+    that actually earns it.
 
-    Falls back to the previous normalised-string comparison only for an
-    ancestor that does not exist on disk yet (samefile requires both sides
-    to exist, and raises OSError otherwise). That residual imprecision
-    cannot be exploited to overwrite anything: a write into a directory
-    that does not exist fails cleanly (screenshot_scene reports "No image
-    was produced"), unlike the case-insensitive bypass, which succeeded
-    silently against a real, existing file.
+    Stats project_root once. If that fails, identity can never be
+    determined for anything -- treated as unsafe (True, i.e. "reject") the
+    same as a genuine match, rather than falling through to strings.
+    Otherwise walks up resolved_out's ancestors (immediate parent, that
+    parent's parent, ... to the filesystem root); an ancestor that does not
+    exist yet is simply skipped in favour of the next one up -- not treated
+    as a reason to abandon identity comparison -- because a case-fold alias
+    of the project root can appear at any existing level, not only the
+    first one checked. Only once every existing ancestor has been checked
+    and none matched is the location confirmed genuinely outside; this is
+    still immune to case, trailing slashes, and a symlinked directory
+    anywhere in the chain, because it compares the (st_dev, st_ino) a name
+    resolves to rather than the name itself, at every level that has one to
+    compare.
     """
     if resolved_out == project_root:
         return True
 
+    try:
+        project_stat = os.stat(project_root)
+    except OSError:
+        return True  # Cannot verify anything against a root that isn't there.
+
     ancestor = os.path.dirname(resolved_out)
     while True:
         try:
-            if os.path.samefile(ancestor, project_root):
-                return True
+            ancestor_stat = os.stat(ancestor)
         except OSError:
-            return (
-                resolved_out == project_root
-                or resolved_out.startswith(project_root + os.sep)
-            )
+            # This ancestor does not exist (yet, or at all) -- ordinary for
+            # an out_path naming a not-yet-created subdirectory (the
+            # default out_path is exactly this shape). Move up one level;
+            # do NOT fall back to a string comparison here.
+            parent = os.path.dirname(ancestor)
+            if parent == ancestor:
+                # Not even the filesystem root could be resolved. Identity
+                # genuinely cannot be determined -- treat as unsafe.
+                return True
+            ancestor = parent
+            continue
+
+        if (ancestor_stat.st_dev, ancestor_stat.st_ino) == (project_stat.st_dev, project_stat.st_ino):
+            return True
+
         parent = os.path.dirname(ancestor)
         if parent == ancestor:
-            return False  # Reached the filesystem root with no match.
+            # Walked every existing ancestor up to the filesystem root;
+            # none of them was the project root.
+            return False
         ancestor = parent
 
 
@@ -360,12 +396,20 @@ def call_tool(name, args):
         except OSError:
             existing_out_stat = None
         if existing_out_stat is not None and existing_out_stat.st_nlink > 1:
+            # MINOR (fix round 3): st_nlink > 1 is not proof out_path is a
+            # hardlinked *file* -- any directory has st_nlink >= 2 as well
+            # (its own "." entry, plus one per subdirectory's ".."), so the
+            # message says "on disk", not "as a file", to stay accurate
+            # either way. Wording only -- the refusal itself is correct and
+            # unchanged for both cases.
             return False, (
-                f"out_path {out_path!r} already exists as a file with more "
-                "than one hard link (st_nlink > 1). Writing through it "
-                "could modify whatever else shares that inode -- possibly "
-                "a file inside the project -- and a hardlink has no "
-                "distinct path for a containment check to catch. Refused."
+                f"out_path {out_path!r} already exists on disk with more "
+                "than one hard link (st_nlink > 1) -- true of a directory, "
+                "and of a file deliberately hardlinked elsewhere. Writing "
+                "through it could modify whatever else shares that inode "
+                "-- possibly a file inside the project -- and a hardlink "
+                "has no distinct path for a containment check to catch. "
+                "Refused."
             )
 
         # CRITICAL 1 (fix round 2): see _out_path_is_inside_project()'s own
@@ -375,19 +419,32 @@ def call_tool(name, args):
         if _out_path_is_inside_project(resolved_out, project_root):
             return False, f"out_path must be outside the project directory; got {out_path!r}."
 
-        # MINOR (fix round 2): both checks above validate `out_path` as
-        # given (resolved once, above); render.screenshot_scene() below is
-        # handed that same, not-re-resolved string. Their agreement is
-        # load-bearing on this process's working directory being unchanged
-        # between the two calls -- true today (nothing in this codebase
-        # ever calls os.chdir()) but not documented anywhere else, so a
-        # future change resolving a relative out_path against a different
-        # cwd at write time than what was validated here would silently
-        # reopen this whole class of gap.
+        # IMPORTANT 2 (fix round 3): pass `resolved_out`, not the original
+        # `out_path`, to the renderer. Both checks above validated
+        # `resolved_out`; render.screenshot_scene() internally does its own
+        # os.path.abspath(out_path) using whatever cwd is live AT RENDER
+        # TIME (see render.py), so handing it the original, possibly
+        # relative `out_path` string re-resolves it a second time against
+        # filesystem state neither check ever saw -- a second, independent
+        # TOCTOU, on top of the CWD-must-not-change invariant this
+        # comment used to be the only place documenting. Passing the
+        # already-resolved, absolute, canonical path removes both: there is
+        # nothing left to re-resolve.
+        #
+        # User-visible consequence, not merely internal: the returned
+        # "path" field is now `resolved_out`, which can differ textually
+        # from the `out_path` a caller supplied even though both name the
+        # same file -- e.g. the DEFAULT out_path (no argument given) is
+        # already like this on macOS, where tempfile.mkdtemp() returns a
+        # "/var/folders/..." path and realpath() resolves it to
+        # "/private/var/folders/..." because /var is itself a symlink. No
+        # test asserted string equality on that field, so nothing broke,
+        # but a caller comparing the returned path against what it passed
+        # in should compare resolved paths, not raw strings.
         result = render.screenshot_scene(
             args["project_path"],
             args["scene"],
-            out_path,
+            resolved_out,
             width=int(args.get("width", 800)),
             height=int(args.get("height", 600)),
             frames=int(args.get("frames", 4)),

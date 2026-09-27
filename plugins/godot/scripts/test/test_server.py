@@ -437,6 +437,113 @@ class TestScreenshotOutPathIsContainedOutsideTheProject(unittest.TestCase):
         finally:
             shutil.rmtree(outside, ignore_errors=True)
 
+    @unittest.skipUnless(FS_IS_CASE_INSENSITIVE, "needs a case-insensitive filesystem to reproduce")
+    def test_directory_appearing_between_check_and_render_is_rejected(self):
+        # IMPORTANT 1 (fix round 3): the round-2 fix's OSError fallback
+        # re-admitted the case bypass whenever out_path's IMMEDIATE parent
+        # directory didn't exist yet, even though a HIGHER, case-fold
+        # ancestor did -- the exact hole CRITICAL 1 existed to close.
+        # Reproduced by the reviewer end to end: the missing subdirectory
+        # materialising between the check and the render let a real Godot
+        # process write a real PNG inside the project.
+        #
+        # Reproduces that exact sequencing deterministically -- no timing,
+        # no threading, so not flaky -- by wrapping the real containment
+        # check with a side effect that creates the subdirectory
+        # immediately after the check runs (whatever verdict it reaches),
+        # simulating precisely what the reviewer's race produced by hand:
+        # the directory does not exist WHEN THE CHECK RUNS, and does exist
+        # by the time render.screenshot_scene() would be called.
+        #
+        # An earlier version of this test pre-created the subdirectory
+        # before calling at all, which turned out not to exercise the bug:
+        # with the directory already present, the (even buggy) per-ancestor
+        # walk simply reaches an existing, matching ancestor one level up
+        # without ever hitting the vulnerable OSError branch, so that
+        # version stayed green whether or not the round-3 fix was applied.
+        # Caught by running this drill and confirming it went red for a
+        # DIFFERENT case (TestOutPathContainmentHandlesMissingAncestorsSafely,
+        # which tests the same missing-ancestor shape directly against the
+        # helper and does hit the bug) while this one stayed green.
+        upper_root = self.tmp / "PROJ"
+        self.assertTrue(os.path.samefile(upper_root, self.root))
+        subdir = upper_root / "newsubdir"
+        target = subdir / "scene.png"
+        self.assertFalse(subdir.exists())
+        original = (self.root / "project.godot").read_bytes()
+
+        real_check = server._out_path_is_inside_project
+
+        def _check_then_let_the_race_happen(resolved_out, project_root):
+            verdict = real_check(resolved_out, project_root)
+            os.makedirs(subdir, exist_ok=True)  # what the reviewer's race produced, right after the check
+            return verdict
+
+        try:
+            with mock.patch.object(
+                server, "_out_path_is_inside_project", side_effect=_check_then_let_the_race_happen,
+            ):
+                result = server.dispatch_tool_call("screenshot_scene", {
+                    "project_path": str(self.root),
+                    "scene": "res://main.tscn",
+                    "out_path": str(target),
+                })
+            self.assertTrue(result.get("isError"), result)
+            text = result["content"][0]["text"]
+            # Specifically the containment message, not e.g. a NoDisplay
+            # error that would also set isError but for an unrelated
+            # reason and would not prove this check actually caught it.
+            self.assertIn("out_path", text)
+            self.assertIn("project directory", text)
+            self.assertFalse(target.exists())
+            self.assertEqual((self.root / "project.godot").read_bytes(), original)
+        finally:
+            shutil.rmtree(subdir, ignore_errors=True)
+
+
+class TestOutPathContainmentHandlesMissingAncestorsSafely(unittest.TestCase):
+    """IMPORTANT 1 (fix round 3), tested directly against the helper --
+    fast, precise, and (for the unresolvable-root case) not practically
+    reachable through the full server without contriving an already-broken
+    project_path.
+    """
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.root = self.tmp / "proj"
+        shutil.copytree(SAMPLE, self.root)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _inside(self, out_path, project_path=None):
+        project_root = os.path.realpath(str(project_path or self.root))
+        resolved_out = os.path.realpath(str(out_path))
+        return server._out_path_is_inside_project(resolved_out, project_root)
+
+    @unittest.skipUnless(FS_IS_CASE_INSENSITIVE, "needs a case-insensitive filesystem to reproduce")
+    def test_missing_ancestor_does_not_mask_a_higher_case_fold_alias(self):
+        # The subdirectory is deliberately left NOT created -- this is the
+        # exact shape of the round-2 bug (the immediate parent doesn't
+        # exist), checked without needing the "race" at all: the fixed
+        # helper must find the case-fold alias by walking past the missing
+        # level, not by falling back to a string comparison once it hits it.
+        upper_root = self.tmp / "PROJ"
+        self.assertTrue(os.path.samefile(upper_root, self.root))
+        out_path = upper_root / "does-not-exist-yet" / "scene.png"
+        self.assertFalse((upper_root / "does-not-exist-yet").exists())
+        self.assertTrue(self._inside(out_path))
+
+    def test_unresolvable_project_root_is_treated_as_unsafe(self):
+        # If project_root itself cannot be stat'd at all, identity can
+        # never be determined for anything under it -- treated as unsafe
+        # (True, i.e. "reject") rather than falling through to a string
+        # comparison, which is the failure mode this whole function exists
+        # to avoid.
+        bogus_root = os.path.realpath(str(self.tmp / "does-not-exist-at-all"))
+        out_path = self.tmp / "does-not-exist-at-all" / "somewhere" / "scene.png"
+        self.assertTrue(self._inside(out_path, project_path=bogus_root))
+
 
 class TestOutPathContainmentDoesNotOverReject(unittest.TestCase):
     """The reviewer verified these are all correctly ACCEPTED today and
