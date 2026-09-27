@@ -60,9 +60,14 @@ def parse_cfg(text: str) -> dict:
         kv = _KEY.match(stripped)
         if kv:
             key, value = kv.group(1), kv.group(2)
+            value_start_line = i
             while _incomplete(value) and i < len(lines):
                 value += "\n" + lines[i]
                 i += 1
+            if _incomplete(value):
+                raise ValueError(
+                    f"Value not closed before end of file: [{section}] {key} = ... (started at line {value_start_line})"
+                )
             out.setdefault(section, {})[key] = value.strip()
     return out
 

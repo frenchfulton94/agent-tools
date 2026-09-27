@@ -22,6 +22,17 @@ class TestParseCfg(unittest.TestCase):
         cfg = project.parse_cfg((SAMPLE / "project.godot").read_text())
         self.assertEqual(cfg[""]["config_version"], "5")
 
+    def test_unterminated_multiline_value_raises(self):
+        text = """[section]
+key={
+"deadzone": 0.5,
+"""
+        with self.assertRaises(ValueError) as ctx:
+            project.parse_cfg(text)
+        self.assertIn("Value not closed", str(ctx.exception))
+        self.assertIn("section", str(ctx.exception))
+        self.assertIn("key", str(ctx.exception))
+
 
 class TestOverview(unittest.TestCase):
     def setUp(self):
@@ -47,9 +58,11 @@ class TestOverview(unittest.TestCase):
     def test_export_presets(self):
         presets = self.ov["export_presets"]
         self.assertEqual(len(presets), 2)
+        # Verify numeric sorting: preset.0 should come first even though preset.1 appears first in the file
         self.assertEqual(presets[0]["name"], "macOS")
         self.assertEqual(presets[0]["platform"], "macOS")
         self.assertTrue(presets[0]["runnable"])
+        self.assertEqual(presets[1]["name"], "Web")
         self.assertEqual(presets[1]["export_path"], "builds/web/index.html")
         self.assertFalse(presets[1]["runnable"])
 
