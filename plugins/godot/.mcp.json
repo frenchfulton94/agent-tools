@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "godot": {
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/godot_mcp_server.py"],
+      "env": {
+        "GODOT_BIN": "${user_config.godot_bin}"
+      }
+    }
+  }
+}
