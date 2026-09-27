@@ -118,6 +118,82 @@ REGRESSION_CASES = [
     ("rm -rf .godot", "allow"),
 ]
 
+# Fix round 2 of 5 (the coordinator's own numbering; not to be confused with
+# REGRESSION_CASES above, which is round 1's independent review): four more
+# problems surfaced by running the round-1 tokenizer against reality, not
+# just reading it.
+ROUND3_CASES = [
+    # CRITICAL 2 -- the tokenized rewrite is precise, and precise was
+    # narrower than the old whole-command regex it replaced: a real,
+    # well-defined process wrapper in front of `mv` bypassed classification
+    # entirely (the first token of the statement was never literally "mv").
+    # Each of these is a genuinely unpaired move and must still deny.
+    ("sudo mv scripts/player.gd entities/player.gd", "deny"),
+    ("env mv scripts/player.gd entities/player.gd", "deny"),
+    ("command mv scripts/player.gd entities/player.gd", "deny"),
+    ("nice mv scripts/player.gd entities/player.gd", "deny"),
+    ("/bin/mv scripts/player.gd entities/player.gd", "deny"),
+    ("/usr/bin/mv scripts/player.gd entities/player.gd", "deny"),
+    ('eval "mv scripts/player.gd entities/player.gd"', "deny"),
+    ("`mv scripts/player.gd entities/player.gd`", "deny"),  # backtick now a punctuation/boundary char
+    # The same wrapper shapes, paired, must still allow -- restoring
+    # precision means the wrapped command gets the SAME full analysis as
+    # an unwrapped mv, not an automatic deny just for being wrapped.
+    (
+        "sudo mv scripts/player.gd entities/player.gd && sudo mv scripts/player.gd.uid entities/player.gd.uid",
+        "allow",
+    ),
+    (
+        "/bin/mv scripts/player.gd entities/player.gd && /bin/mv scripts/player.gd.uid entities/player.gd.uid",
+        "allow",
+    ),
+    # Forms that evade precise classification entirely (the real argument is
+    # templated from stdin, or the command word is not the statement's own
+    # first token in any way this module specially unwraps) fall to the
+    # coarse ASK backstop -- restoring the old regex's reach without its
+    # false denies. Never DENY for these: precise analysis could not confirm
+    # anything, so ask is the honest tier, not a block.
+    ("echo scripts/player.gd | xargs mv -t entities/", "ask"),
+    ("for f in scripts/*.gd; do mv \"$f\" entities/; done", "ask"),
+    ("bash <<'HEREDOC'\nmv scripts/player.gd entities/player.gd\nHEREDOC", "ask"),
+    # IMPORTANT 3 -- one unmatched quote used to blind analysis of the WHOLE
+    # command, discarding even an earlier, well-formed, fully-parsed
+    # statement. A well-formed deny must survive a later typo.
+    ("mv scripts/player.gd entities/player.gd; echo 'oops", "deny"),
+    # The malformed fragment itself still can't be tokenized, so it falls to
+    # the raw-text backstop -- ask, not silent allow, not deny.
+    ("echo 'oops; mv scripts/player.gd entities/player.gd", "ask"),
+    # IMPORTANT 4 -- `mv -t DIR src` inverts the pairing check when the
+    # flag's value is misread as a source and the real source is excluded
+    # as "the destination". Both the separate-value and `=` forms of the
+    # flag must deny when genuinely unpaired, and allow when paired.
+    ("mv -t entities/ scripts/player.gd", "deny"),
+    ("mv --target-directory=entities/ scripts/player.gd", "deny"),
+    (
+        "mv -t entities/ scripts/player.gd && mv -t entities/ scripts/player.gd.uid",
+        "allow",
+    ),
+    (
+        "mv --target-directory=entities/ scripts/player.gd "
+        "&& mv --target-directory=entities/ scripts/player.gd.uid",
+        "allow",
+    ),
+    # rsync's -t means preserve-times, a boolean, NOT the target-directory
+    # flag -- must not be misread as consuming the next token as a target.
+    ("rsync -t -a --remove-source-files scripts/player.gd entities/player.gd", "deny"),
+    # MINOR 5 -- pairing must survive a harmless path spelling difference
+    # between the source's mv and the sidecar's mv (a leading './', a
+    # doubled separator) rather than failing safe on a cosmetic mismatch.
+    (
+        "mv ./scripts/player.gd entities/player.gd && mv scripts/player.gd.uid entities/player.gd.uid",
+        "allow",
+    ),
+    (
+        "mv scripts//player.gd entities/player.gd && mv scripts/player.gd.uid entities/player.gd.uid",
+        "allow",
+    ),
+]
+
 
 def decide(command, cwd=None):
     tool_input = {"command": command}
@@ -149,6 +225,46 @@ class TestGuard(unittest.TestCase):
             if actual != expected:
                 failures.append(f"{command!r}: expected {expected}, got {actual}")
         self.assertEqual(failures, [], "\n".join(failures))
+
+    def test_round3_decision_table(self):
+        failures = []
+        for command, expected in ROUND3_CASES:
+            actual = decide(command)
+            if actual != expected:
+                failures.append(f"{command!r}: expected {expected}, got {actual}")
+        self.assertEqual(failures, [], "\n".join(failures))
+
+    def test_cwd_pointing_at_unrelated_directory_still_denies(self):
+        # CRITICAL 1 (fix round 2): the disk check must not treat "this path
+        # doesn't resolve under cwd" as proof of "never imported". A real
+        # scripts/player.gd and its .uid sit in directory A; the payload's
+        # cwd names an unrelated, empty directory B (exactly what a
+        # compound `cd subdir && mv ...` produces when cwd disagrees with
+        # reality). Absence of proof under the WRONG directory is not proof
+        # of safety, so this must still deny.
+        with tempfile.TemporaryDirectory() as a, tempfile.TemporaryDirectory() as b:
+            os.makedirs(os.path.join(a, "scripts"))
+            os.makedirs(os.path.join(a, "entities"))
+            with open(os.path.join(a, "scripts", "player.gd"), "w") as f:
+                f.write("extends Node\n")
+            with open(os.path.join(a, "scripts", "player.gd.uid"), "w") as f:
+                f.write("uid://abc123\n")
+            self.assertEqual(
+                decide("mv scripts/player.gd entities/player.gd", cwd=b),
+                "deny",
+            )
+
+    def test_cwd_pointing_at_nonexistent_directory_still_denies(self):
+        # Same failure mode, the other common shape: cwd names a path that
+        # does not exist on disk at all (not just "the wrong, but real,
+        # directory").
+        self.assertEqual(
+            decide(
+                "mv scripts/player.gd entities/player.gd",
+                cwd="/nonexistent-dir-for-this-test/also-nonexistent",
+            ),
+            "deny",
+        )
 
     def test_permits_godot_cache_removal(self):
         # A guard that fires on harmless operations gets disabled, and then it
