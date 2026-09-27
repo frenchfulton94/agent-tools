@@ -380,6 +380,47 @@ class TestScreenshotOutPathIsContainedOutsideTheProject(unittest.TestCase):
         finally:
             shutil.rmtree(out_dir, ignore_errors=True)
 
+    def test_resolved_out_path_not_the_raw_one_is_passed_to_the_renderer(self):
+        # IMPORTANT 1 (fix round 4): round 3 changed the render.screenshot_scene()
+        # call to pass resolved_out rather than the raw out_path (closing a
+        # second, independent TOCTOU -- render.py re-resolves whatever
+        # string it's given against the CWD live at render time). That
+        # single-line change had no regression test: the reviewer reverted
+        # it, passing out_path instead, and all existing tests -- including
+        # test_path_outside_the_project_still_works above -- still passed,
+        # because none of them asserted anything about which exact string
+        # reaches the renderer, only that the call succeeds. Mocks the
+        # renderer and asserts directly on the third positional argument it
+        # actually receives, using a symlinked directory so the raw and
+        # resolved strings are guaranteed to differ textually while naming
+        # the same file.
+        real_dir = Path(tempfile.mkdtemp(prefix="godot-shot-real-"))
+        link_dir = real_dir.parent / (real_dir.name + "-link")
+        link_dir.symlink_to(real_dir)
+        try:
+            raw_out_path = str(link_dir / "scene.png")
+            resolved_out_path = os.path.realpath(raw_out_path)
+            self.assertNotEqual(raw_out_path, resolved_out_path)  # sanity: the symlink really changes the string
+
+            with mock.patch.object(
+                server.render, "screenshot_scene",
+                return_value={
+                    "path": resolved_out_path, "diagnostics": [], "timed_out": False, "pixel": (1, 2, 3),
+                },
+            ) as mocked:
+                result = server.dispatch_tool_call("screenshot_scene", {
+                    "project_path": str(self.root),
+                    "scene": "res://main.tscn",
+                    "out_path": raw_out_path,
+                })
+            self.assertFalse(result.get("isError"), result)
+            passed_out_path = mocked.call_args.args[2]
+            self.assertEqual(passed_out_path, resolved_out_path)
+            self.assertNotEqual(passed_out_path, raw_out_path)
+        finally:
+            link_dir.unlink()
+            shutil.rmtree(real_dir, ignore_errors=True)
+
     @unittest.skipUnless(FS_IS_CASE_INSENSITIVE, "needs a case-insensitive filesystem to reproduce")
     def test_case_variant_of_project_directory_is_rejected(self):
         # CRITICAL (fix round 2): the string-only check
@@ -543,6 +584,28 @@ class TestOutPathContainmentHandlesMissingAncestorsSafely(unittest.TestCase):
         bogus_root = os.path.realpath(str(self.tmp / "does-not-exist-at-all"))
         out_path = self.tmp / "does-not-exist-at-all" / "somewhere" / "scene.png"
         self.assertTrue(self._inside(out_path, project_path=bogus_root))
+
+    def test_unresolvable_project_path_is_reported_as_a_project_path_problem(self):
+        # MINOR 2 (fix round 4): _out_path_is_inside_project() itself
+        # correctly treats an unverifiable project_root as unsafe (the test
+        # above), but at the call_tool() level that shared a message with a
+        # genuine containment match -- "out_path must be outside the
+        # project directory" -- even though out_path was never the problem
+        # here. This is genuinely new as of round 3 (round 2's string
+        # fallback would have let a downstream engine error name the real
+        # cause instead), and every other tool in this server names
+        # project.godot directly when project_path is bad, so this one
+        # should too.
+        bogus_project = str(Path(tempfile.mkdtemp()) / "does-not-exist-at-all")
+        response = call("screenshot_scene", {
+            "project_path": bogus_project,
+            "scene": "res://main.tscn",
+            "out_path": str(self.tmp / "somewhere" / "scene.png"),
+        })
+        self.assertTrue(response["result"].get("isError"), response["result"])
+        text = response["result"]["content"][0]["text"]
+        self.assertIn("project_path", text)
+        self.assertNotIn("out_path", text)
 
 
 class TestOutPathContainmentDoesNotOverReject(unittest.TestCase):

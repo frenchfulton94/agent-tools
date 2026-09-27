@@ -288,6 +288,21 @@ def _out_path_is_inside_project(resolved_out: str, project_root: str) -> bool:
     anywhere in the chain, because it compares the (st_dev, st_ino) a name
     resolves to rather than the name itself, at every level that has one to
     compare.
+
+    Residual limitation, out of scope for this function to close (fix
+    round 4): a missing ancestor this function skips past could, between
+    this check running and the render actually writing, be created as a
+    SYMLINK into the project rather than an ordinary directory -- a
+    check-then-write gap no amount of refinement here can close, since it
+    needs an fd held open (or O_NOFOLLOW at the point of the actual write)
+    to close properly, not another check beforehand. Narrower still than
+    the already-narrow round-3 race: it needs a concurrent
+    filesystem-modifying actor hitting a millisecond window, and in this
+    plugin's threat model that actor is the agent itself via Bash, which
+    the Task 9 guard hook does observe. Do not read this function's
+    thoroughness elsewhere as a guarantee that it is airtight against a
+    concurrent adversary; it is not, by design, and closing that is a
+    different mechanism than a path check.
     """
     if resolved_out == project_root:
         return True
@@ -379,6 +394,19 @@ def call_tool(name, args):
         # looking like it does.
         project_root = os.path.realpath(args["project_path"])
         resolved_out = os.path.realpath(out_path)
+
+        # MINOR (fix round 4): if project_path itself can't be resolved,
+        # _out_path_is_inside_project() below would still correctly refuse
+        # the call (it treats an unverifiable root as unsafe), but its
+        # generic "cannot verify" case shares a return value with a genuine
+        # containment match, and the message at that call site names
+        # out_path -- which was never the problem here. Say so directly,
+        # naming project_path, matching how every other tool in this server
+        # surfaces a bad project_path (by naming project.godot).
+        try:
+            os.stat(project_root)
+        except OSError as exc:
+            return False, f"project_path {args['project_path']!r} could not be resolved: {exc}."
 
         # CRITICAL 2 (fix round 2): a pre-existing hardlink from outside the
         # project to a file inside it has no distinct path to resolve -- it
