@@ -1,6 +1,9 @@
 import os
+import tempfile
+import time
 import unittest
 from pathlib import Path
+from unittest import mock
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -8,6 +11,10 @@ from godot import engine
 
 SAMPLE = Path(__file__).parent / "fixtures" / "sample-project"
 HAS_GODOT = engine.find_binary() is not None
+
+FAKE_GODOT_ORPHAN = (
+    Path(__file__).parent / "fixtures" / "fake-binaries" / "hangs_with_orphan.sh"
+)
 
 GDSCRIPT_STDERR = """SCRIPT ERROR: Parse Error: Cannot assign a value of type "String" as "int".
           at: GDScript::reload (res://broken.gd:5)
@@ -19,6 +26,20 @@ ERROR: Failed to load script "res://broken.gd" with error "Parse error".
 
 SHADER_STDERR = """SHADER ERROR: Invalid arguments for the built-in function: "vec4(float,float,float)".
           at: (null) (res://bad.gdshader:3)
+"""
+
+# Captured verbatim from the real engine (godot 4.7.2.stable.official) by
+# pointing the sample project's main.tscn ext_resource at broken.gd with a
+# stale UID: `godot --headless --path <project> --quit-after 2`. The WARNING's
+# own `at:` frame points into engine C++ (resource_format_text.cpp) and is
+# rejected, so a naive fixed-window lookahead reaches past it into the next
+# diagnostic and reports the WARNING as living at broken.gd:5 -- an unrelated
+# script's parse error, not the stale-UID problem the warning is actually
+# about.
+MISATTRIBUTION_STDERR = """WARNING: res://main.tscn:3 - ext_resource, invalid UID: uid://zzinvaliduid00 - using text path instead: res://broken.gd
+     at: load (scene/resources/resource_format_text.cpp:501)
+SCRIPT ERROR: Parse Error: Cannot assign a value of type "String" as "int".
+          at: GDScript::reload (res://broken.gd:5)
 """
 
 
@@ -46,6 +67,22 @@ class TestDiagnostics(unittest.TestCase):
     def test_clean_output_yields_nothing(self):
         self.assertEqual(engine.diagnostics("Godot Engine v4.7.2.stable\n"), [])
 
+    def test_header_lookahead_does_not_cross_into_the_next_diagnostic(self):
+        # CRITICAL 2 pin: a header whose own `at:` frame is rejected (it
+        # points into engine C++, not res://) must not reach past itself and
+        # steal the FOLLOWING diagnostic's res:// location. The WARNING here
+        # must report no location of its own, not broken.gd:5 -- that line
+        # belongs to the unrelated SCRIPT ERROR right after it.
+        found = engine.diagnostics(MISATTRIBUTION_STDERR)
+        self.assertEqual(len(found), 2)
+        warning, script_error = found
+        self.assertEqual(warning["severity"], "WARNING")
+        self.assertIsNone(warning["file"])
+        self.assertIsNone(warning["line"])
+        self.assertEqual(script_error["severity"], "SCRIPT ERROR")
+        self.assertEqual(script_error["file"], "res://broken.gd")
+        self.assertEqual(script_error["line"], 5)
+
 
 @unittest.skipUnless(HAS_GODOT, "godot not on PATH")
 class TestAgainstRealEngine(unittest.TestCase):
@@ -72,6 +109,65 @@ class TestAgainstRealEngine(unittest.TestCase):
         self.assertTrue(result.timed_out)
 
 
+class TestOrphanOnTimeout(unittest.TestCase):
+    """CRITICAL 1 pin: a timeout must kill the whole process group, not just
+    the immediate PID, and must not itself block forever doing it.
+
+    Uses a fake "godot" binary (fixtures/fake-binaries/hangs_with_orphan.sh)
+    that writes a diagnostic to stderr, then backgrounds a 30s-sleeping
+    grandchild and exits. That grandchild inherits the stderr pipe and keeps
+    its write end open long after the immediate child is gone -- exactly the
+    shape of a scene that calls OS.execute()/OS.create_process() and hangs.
+    Does not need Godot installed; runs unconditionally.
+    """
+
+    def test_timeout_kills_the_whole_process_group_not_just_the_child(self):
+        os.environ["GODOT_BIN"] = str(FAKE_GODOT_ORPHAN)
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                start = time.monotonic()
+                result = engine.run([], cwd=tmp, timeout=2)
+                elapsed = time.monotonic() - start
+        finally:
+            del os.environ["GODOT_BIN"]
+
+        self.assertTrue(result.timed_out)
+        # Generous ceiling: this must be bounded by our own timeout plus the
+        # bounded backstop, nowhere near the grandchild's 30s sleep. A
+        # regression here would hang the test itself well past this.
+        self.assertLess(
+            elapsed, 15,
+            "run() blocked far past its own timeout -- an orphaned "
+            "grandchild is likely still holding the stderr pipe open",
+        )
+
+    def test_the_orphaned_grandchild_does_not_survive(self):
+        os.environ["GODOT_BIN"] = str(FAKE_GODOT_ORPHAN)
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                result = engine.run([], cwd=tmp, timeout=2)
+                self.assertTrue(result.timed_out)
+                pid_path = Path(tmp) / "child.pid"
+                self.assertTrue(pid_path.exists(), "fake binary never wrote its child's pid")
+                child_pid = int(pid_path.read_text().strip())
+
+                deadline = time.monotonic() + 3
+                alive = True
+                while time.monotonic() < deadline:
+                    try:
+                        os.kill(child_pid, 0)
+                    except ProcessLookupError:
+                        alive = False
+                        break
+                    time.sleep(0.1)
+                self.assertFalse(
+                    alive,
+                    f"grandchild pid {child_pid} survived proc.kill() as an orphan",
+                )
+        finally:
+            del os.environ["GODOT_BIN"]
+
+
 class TestFindBinary(unittest.TestCase):
     def test_env_override_wins(self):
         os.environ["GODOT_BIN"] = "/nonexistent/godot-x"
@@ -79,6 +175,43 @@ class TestFindBinary(unittest.TestCase):
             self.assertEqual(engine.find_binary(), "/nonexistent/godot-x")
         finally:
             del os.environ["GODOT_BIN"]
+
+    def test_bad_override_raises_missing_binary_not_a_raw_oserror(self):
+        # IMPORTANT 3: find_binary() must keep returning the override
+        # unconditionally (test_env_override_wins pins that contract), so
+        # the validation has to happen where the binary is actually
+        # invoked: run() must translate the resulting FileNotFoundError into
+        # this module's own MissingBinary, not leak a bare traceback.
+        os.environ["GODOT_BIN"] = "/nonexistent/godot-x"
+        try:
+            with self.assertRaises(engine.MissingBinary):
+                engine.run(["--version"])
+        finally:
+            del os.environ["GODOT_BIN"]
+
+    def test_finds_godot4_when_godot_is_absent(self):
+        # IMPORTANT 4: untested branch, made testable with no engine
+        # installed by monkeypatching shutil.which.
+        os.environ.pop("GODOT_BIN", None)
+
+        def fake_which(name):
+            return "/usr/local/bin/godot4" if name == "godot4" else None
+
+        with mock.patch.object(engine.shutil, "which", side_effect=fake_which):
+            self.assertEqual(engine.find_binary(), "/usr/local/bin/godot4")
+
+    def test_finds_mac_app_bundle_when_nothing_is_on_path(self):
+        # IMPORTANT 4: same technique, one fallback further.
+        os.environ.pop("GODOT_BIN", None)
+        with mock.patch.object(engine.shutil, "which", return_value=None), \
+             mock.patch.object(engine.os.path, "isfile", return_value=True):
+            self.assertEqual(engine.find_binary(), engine.MAC_APP)
+
+    def test_returns_none_when_nothing_is_found_anywhere(self):
+        os.environ.pop("GODOT_BIN", None)
+        with mock.patch.object(engine.shutil, "which", return_value=None), \
+             mock.patch.object(engine.os.path, "isfile", return_value=False):
+            self.assertIsNone(engine.find_binary())
 
 
 if __name__ == "__main__":

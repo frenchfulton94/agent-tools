@@ -17,13 +17,21 @@ const ROOT = join(import.meta.dir, '..');
 const hasPython = spawnSync('python3', ['--version'], { encoding: 'utf8' }).status === 0;
 
 describe('godot python scripts', () => {
-	test.skipIf(!hasPython)('unittest suite passes', () => {
-		const result = spawnSync(
-			'python3',
-			['-m', 'unittest', 'discover', '-s', 'test', '-p', 'test_*.py'],
-			{ cwd: join(ROOT, 'plugins/godot/scripts'), encoding: 'utf8' },
-		);
-		if (result.status !== 0) console.error(result.stderr || result.stdout);
-		expect(result.status).toBe(0);
-	});
+	// The engine wrapper's own tests spawn real subprocesses (including two
+	// that enforce a Python-side timeout against a hung fake binary), so the
+	// full suite runs well past bun's 5s default per-test timeout even
+	// though nothing is actually stuck. Generous ceiling, not a real budget.
+	test.skipIf(!hasPython)(
+		'unittest suite passes',
+		() => {
+			const result = spawnSync(
+				'python3',
+				['-m', 'unittest', 'discover', '-s', 'test', '-p', 'test_*.py'],
+				{ cwd: join(ROOT, 'plugins/godot/scripts'), encoding: 'utf8' },
+			);
+			if (result.status !== 0) console.error(result.stderr || result.stdout);
+			expect(result.status).toBe(0);
+		},
+		30000,
+	);
 });
