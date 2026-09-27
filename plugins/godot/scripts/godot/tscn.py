@@ -43,7 +43,7 @@ class Node:
     path: str = ""
 
 
-def _scan_value(text: str, start: int) -> int:
+def _scan_value(text: str, start: int, line_no: int) -> int:
     """Return the index just past the balanced value beginning at `start`.
 
     A plain token ends at the first depth-0 whitespace. Brackets, braces,
@@ -56,6 +56,14 @@ def _scan_value(text: str, start: int) -> int:
     `node_paths=PackedStringArray("a", "b")`), and a flat non-quote
     alternation stops at the first internal space or `]`, silently
     truncating the value instead of raising.
+
+    `_HEADING`'s greedy backtrack always reserves the line's *last* `]` for
+    the heading's own closing bracket, so a value's own closing bracket can
+    never be that character — a heading whose only bracket-attribute value
+    is missing its closing `]` (or whose quoted string is never closed)
+    scans to the end of `text` still unbalanced. That must raise rather than
+    hand back a truncated or wrong value: a partial result presented as
+    complete is the one outcome this parser must never produce.
     """
     i = start
     n = len(text)
@@ -80,6 +88,10 @@ def _scan_value(text: str, start: int) -> int:
         elif depth <= 0 and ch.isspace():
             break
         i += 1
+    if depth != 0 or in_string:
+        raise TscnParseError(
+            line_no, "attribute value is not closed before end of heading", text
+        )
     return i
 
 
@@ -110,7 +122,7 @@ def _parse_attrs(text: str, line_no: int) -> dict:
         while i < n and text[i].isspace():
             i += 1
         start = i
-        i = _scan_value(text, start)
+        i = _scan_value(text, start, line_no)
         value = text[start:i]
         if len(value) >= 2 and value[0] == '"' and value[-1] == '"':
             value = value[1:-1]
@@ -170,10 +182,16 @@ def parse(text: str) -> list:
         if prop:
             if current is None:
                 raise TscnParseError(i, "property before any heading", raw)
+            prop_line_no = i
             key, value = prop.group(1), prop.group(2)
             while _incomplete(value) and i < len(lines):
                 value += "\n" + lines[i]
                 i += 1
+            if _incomplete(value):
+                raise TscnParseError(
+                    prop_line_no,
+                    f"property {key!r} value is not closed before end of file",
+                )
             current.props[key] = value.strip()
             continue
 
