@@ -59,8 +59,12 @@ The fix is two-layered, not a bigger regex:
 `_strip_comments()` runs first, on the raw command text, before shlex ever
 sees it (fix round 4, CRITICAL 2 -- see its docstring: shlex's own default
 comment rule is wrong for this guard's purpose and was a complete, silent
-bypass). `shlex` in POSIX mode with a custom `punctuation_chars` (the
-library default plus a backtick -- the default omits it, which let a
+bypass; it also tracks backtick and `$(...)` state so a '#' lexically
+inside either is never mistaken for a top-level comment -- fix round 5's
+CRITICAL 1 for the backtick case, fix round 6's IMPORTANT 2 for `$(...)`,
+which was left open the first time and reproduced with the identical
+lexical shape). `shlex` in POSIX mode with a custom `punctuation_chars`
+(the library default plus a backtick -- the default omits it, which let a
 backtick-wrapped move glue onto the following word) then splits `;`, `&`,
 `&&`, `||`, `|`, `(`, `)`, `` ` `` out as their own tokens while leaving
 quoted content alone and stripping matching quotes; `commenters` is
@@ -70,12 +74,15 @@ lexer one token at a time instead of consuming it in one `list(...)` call,
 specifically so a parse failure partway through (one unmatched quote)
 still yields every token successfully read before that point -- an early
 statement that denies correctly on its own must not be discarded because a
-LATER, unrelated fragment has a typo in it. `_merge_backtick_spans()` then
-collapses each matched backtick pair back into a single opaque token (fix
-round 4, CRITICAL 1 -- an earlier round treated the backtick as a hard
-statement boundary, which split a real move into fragments too small for
-`positional_args` to read as one argument, silently ALLOWing a genuinely
-unpaired move).
+LATER, unrelated fragment has a typo in it. `_merge_backtick_spans()` and
+`_merge_paren_spans()` then each collapse their matched span (a backtick
+pair, or a `$(...)` -- properly depth-tracked, since `$(...)` nests where
+backticks do not) back into a single opaque token (fix round 4, CRITICAL 1
+for backticks, fix round 6 IMPORTANT 2 for `$(...)` -- an earlier round
+treated the backtick as a hard statement boundary, which split a real move
+into fragments too small for `positional_args` to read as one argument,
+silently ALLOWing a genuinely unpaired move; `$(...)` was left with the
+exact same exposure until this round).
 
 Known, accepted limits (documented rather than silently wrong):
   - Command substitution (`$(...)` and `` `...` ``) is not evaluated -- a
@@ -219,8 +226,8 @@ def _strip_comments(command):
     """Strip a bash-accurate '#' comment -- one that begins at the start
     of a WORD (the start of the command, or immediately after unquoted
     whitespace), is itself unquoted, AND is not lexically inside an open
-    backtick span -- to end of line, leaving everything else, including
-    a '#' anywhere else, untouched.
+    backtick span or an open `$(...)` substitution -- to end of line,
+    leaving everything else, including a '#' anywhere else, untouched.
 
     This exists because shlex's own default (`commenters='#'`) is wrong
     for this guard's purpose: it treats '#' as a comment start ANYWHERE,
@@ -249,21 +256,62 @@ def _strip_comments(command):
     is never a comment start while an unmatched backtick has been seen
     an odd number of times since the last one outside any quote.
 
+    Round 5's own fix had ANOTHER bug in the same class (fix round 6,
+    CRITICAL 1): the double-quote branch was collapsed to a bare
+    `in_double = not in_double` that fell through to the SAME
+    per-character dispatch used for unquoted text -- so a literal
+    apostrophe INSIDE an already-open double-quoted string (bash gives it
+    no special meaning there at all) was still read as opening a SINGLE
+    quote, permanently desyncing the tracker for the rest of the command
+    on an odd apostrophe count. A later genuine word-start '#' then fell
+    into the (phantom) single-quote branch and was never evaluated as a
+    comment at all -- narrating an action with a contraction
+    (`echo "building player's script"`) and then leaving a trailing
+    comment naming a real file is ordinary agent behavior, not a
+    contrivance. Fixed by giving `in_double` its own unconditional
+    consume-literally branch, structured exactly like `in_single`'s: while
+    inside double quotes, nothing is dispatched character-by-character at
+    all, and only a literal '"' closes it. This intentionally means
+    double-quoted content is now just as fully opaque to this function as
+    single-quoted content is -- a backtick or `$(` occurring INSIDE a
+    double-quoted string is not tracked either, a known, accepted
+    narrowing in exchange for the desync being impossible; nothing inside
+    a double-quoted string can produce an UNQUOTED, word-start '#' in the
+    first place, so this narrowing costs nothing for THIS function's
+    actual job.
+
+    `paren_depth` (fix round 6, IMPORTANT 2) is the `$(...)` analogue of
+    `in_backtick`: unlike a backtick pair, `$(...)` nests properly in
+    real bash (`$(echo $(date))`), so this tracks a DEPTH, incremented by
+    a literal '$' immediately followed by '(', and by every further '('
+    seen before it returns to 0, decremented by every ')' -- closing only
+    when depth reaches 0. A '#' is never a comment start while any
+    `$(...)` opened here has not yet closed. Confirmed empirically not
+    new to this round: `$(echo Building #42) && mv scripts/player.gd
+    entities/player.gd` reproduces against the version of this file that
+    only closed the backtick case, using the exact same lexical shape --
+    ruled in anyway because leaving `$(...)` open while `` `...` `` was
+    closed made "the '#' bypass is closed" true only for the spelling
+    people write less often.
+
     A backslash escapes the very next character outright (skipped as an
     inseparable two-character unit) UNLESS already inside single quotes,
-    which POSIX gives no escape mechanism at all -- this one rule handles
-    an escaped double quote and an escaped backtick uniformly, and gives a
-    properly backslash-escaped NESTED backtick span the correct behavior
-    for free: the escaped inner backtick never toggles `in_backtick`, so
-    the outer span stays open across it, matching real bash. An unmatched
-    trailing backtick just leaves `in_backtick` True for the remainder of
+    which POSIX gives no escape mechanism at all, or already inside
+    double quotes, which are now fully opaque to this function (see
+    above) -- this rule now only ever fires for an UNQUOTED backslash,
+    which still gives a properly backslash-escaped NESTED backtick span
+    the correct behavior for free: the escaped inner backtick never
+    toggles `in_backtick`, so the outer span stays open across it,
+    matching real bash. An unmatched trailing backtick, or a `$(...)`
+    that never closes, just leaves the tracker open for the remainder of
     the string, which only suppresses comment detection from that point
     on -- analysing MORE text, never less, the direction this guard
     always fails toward.
 
-    Deliberately NOT handled (ruled out, fix round 5): a '#' immediately
-    after a control operator with no space (`mv a b;#comment`) is, in
-    real bash, still a word-start comment; this function's simpler rule
+    Deliberately NOT handled (ruled out, fix round 5, reconfirmed still
+    accurate in fix round 6): a '#' immediately after a control operator
+    with no space (`mv a b;#comment`) is, in real bash, still a
+    word-start comment; this function's simpler rule
     (whitespace-or-start-of-string only) does not strip it. Confirmed
     empirically this only ever means MORE text gets analyzed (the literal
     '#comment...' survives as ordinary tokens feeding the rest of the
@@ -279,6 +327,7 @@ def _strip_comments(command):
     in_single = False
     in_double = False
     in_backtick = False
+    paren_depth = 0
     at_word_start = True
     i, n = 0, len(command)
     while i < n:
@@ -289,9 +338,13 @@ def _strip_comments(command):
                 in_single = False
             i += 1
             continue
-        # Not inside single quotes from here on -- single quotes are the
-        # only context POSIX gives no escape mechanism at all, so they
-        # must be checked, and exited, before backslash gets a look.
+        if in_double:
+            out.append(ch)
+            if ch == '"':
+                in_double = False
+            i += 1
+            continue
+        # Not inside any quotes from here on.
         if ch == "\\" and i + 1 < n:
             out.append(ch)
             out.append(command[i + 1])
@@ -305,7 +358,7 @@ def _strip_comments(command):
             i += 1
             continue
         if ch == '"':
-            in_double = not in_double
+            in_double = True
             at_word_start = False
             out.append(ch)
             i += 1
@@ -316,7 +369,25 @@ def _strip_comments(command):
             out.append(ch)
             i += 1
             continue
-        if ch == "#" and at_word_start and not in_double and not in_backtick:
+        if ch == "$" and i + 1 < n and command[i + 1] == "(":
+            paren_depth += 1
+            at_word_start = False
+            out.append(ch)
+            i += 1
+            continue
+        if ch == "(" and paren_depth > 0:
+            paren_depth += 1
+            at_word_start = False
+            out.append(ch)
+            i += 1
+            continue
+        if ch == ")" and paren_depth > 0:
+            paren_depth -= 1
+            at_word_start = False
+            out.append(ch)
+            i += 1
+            continue
+        if ch == "#" and at_word_start and not in_backtick and paren_depth == 0:
             while i < n and command[i] != "\n":
                 i += 1
             continue  # do not consume/emit the newline itself here
@@ -360,6 +431,75 @@ def _merge_backtick_spans(tokens):
     return out
 
 
+def _merge_paren_spans(tokens):
+    """Merge each `$(...)` command-substitution span in a flat token
+    stream into a single opaque token (still containing its '$', so
+    `_is_opaque` recognizes it, exactly like `_merge_backtick_spans`) --
+    the `$(...)` analogue of that function, given the same treatment for
+    the same reason (fix round 6, IMPORTANT 2): `_strip_comments` and
+    `_merge_backtick_spans` closed the '#'-swallowing and
+    statement-fragmenting bugs for `` `...` ``, but left BOTH open for
+    the `$(...)` spelling of the exact same syntax -- the one people
+    write more often.
+
+    Unlike a backtick pair, `$(...)` nests properly in real bash
+    (`$(echo $(date))`), so this tracks a DEPTH rather than toggling a
+    flag, closing only when it returns to 0 after the opening '$('. The
+    matching close is found by DEPTH, not by token boundary: shlex's
+    `punctuation_chars` mode glues any run of consecutive punctuation
+    characters into ONE token -- `$((1+2))` tokenizes with a literal
+    '))' token, and `$(echo $(date))` closes BOTH nesting levels inside
+    a single '))' token -- so the true close can land in the MIDDLE of a
+    token, not just at its edge. Handled by scanning each candidate
+    token character-by-character rather than assuming one paren per
+    token.
+
+    An unmatched `$(` (depth never returns to 0 before the stream ends)
+    is left alone -- the lone `$` token and whatever follows fall through
+    to ordinary tokenization/statement-splitting, which is MORE analysis
+    of that text, not less, the direction this guard always fails
+    toward."""
+    out = []
+    i, n = 0, len(tokens)
+    while i < n:
+        if tokens[i] == "$" and i + 1 < n and tokens[i + 1][:1] == "(":
+            depth = 0
+            collected = [tokens[i]]
+            j = i + 1
+            closed = False
+            leftover = ""
+            while j < n:
+                tok = tokens[j]
+                close_at = None
+                d = depth
+                for k, c in enumerate(tok):
+                    if c == "(":
+                        d += 1
+                    elif c == ")":
+                        d -= 1
+                        if d == 0:
+                            close_at = k
+                            break
+                if close_at is not None:
+                    collected.append(tok[: close_at + 1])
+                    leftover = tok[close_at + 1 :]
+                    closed = True
+                    j += 1
+                    break
+                collected.append(tok)
+                depth = d
+                j += 1
+            if closed:
+                out.append(" ".join(collected))
+                if leftover:
+                    out.append(leftover)
+                i = j
+                continue
+        out.append(tokens[i])
+        i += 1
+    return out
+
+
 def tokenize(command):
     """Whole-command shlex tokenization. Never executes anything -- shlex
     only lexes text, it does not evaluate command substitution or expand
@@ -392,7 +532,7 @@ def tokenize(command):
     # tokens in both shapes without affecting normal quoted arguments.
     tokens = [t.strip() for t in raw]
     tokens = [t for t in tokens if t != ""]
-    return _merge_backtick_spans(tokens), failed
+    return _merge_paren_spans(_merge_backtick_spans(tokens)), failed
 
 
 def split_statements(tokens):
@@ -619,15 +759,47 @@ def _backtick_inner(tok):
     return None
 
 
+def _paren_inner(tok):
+    """The text a merged `$(...)` span token (see `_merge_paren_spans`)
+    wraps, or None if `tok` isn't one -- the `$(...)` analogue of
+    `_backtick_inner`, for the same reason (fix round 6, IMPORTANT 2):
+    `$(...)` genuinely executes its inner text as a subprocess exactly
+    like a backtick span does, so it needs the same recursion into
+    `flatten()`, in ADDITION to the outer statement treating the whole
+    merged token as one opaque argument. `_merge_paren_spans` always
+    joins its collected pieces with a single space, so a real span
+    always has the exact shape '$ (' at its start; the closing ')' may
+    have trailing characters from a glued punctuation run stripped onto
+    a following token already (see that function), so `tok` itself
+    always ends in ')' when it is one of these."""
+    if tok.startswith("$ (") and tok.endswith(")"):
+        return tok[3:-1].strip()
+    return None
+
+
+def _substitution_inner(tok):
+    """The inner text of `tok` if it is a merged backtick span OR a
+    merged `$(...)` span (see `_backtick_inner` / `_paren_inner`), else
+    None. The single entry point `flatten()` uses to decide whether to
+    recurse into a token as a nested command substitution, so both
+    spellings of the same syntax get identical treatment at every scan
+    site (fix round 6, IMPORTANT 2 -- the two spellings must not drift
+    apart again the way `$(...)` was left behind the first time)."""
+    inner = _backtick_inner(tok)
+    if inner is not None:
+        return inner
+    return _paren_inner(tok)
+
+
 def flatten(command, depth=0, max_depth=6, context=0, _counter=None):
     """Flatten a command into ({"tokens": [...], "exts": frozenset(),
     "context": <id>} entries, any_parse_failure). Covers the command's
     own top-level statements, plus -- recursively, to a bounded depth --
     the inner command of every `sh -c` / `bash -c` / `zsh -c` / `eval`
-    statement, every backtick-delimited command substitution (see
-    `_backtick_inner`), and the exec'd sub-command of every `find
-    -exec`/`-execdir` block. This lets every later pass treat a nested
-    shell's contents exactly like top-level statements, instead of
+    statement, every backtick- or `$(...)`-delimited command substitution
+    (see `_substitution_inner`), and the exec'd sub-command of every
+    `find -exec`/`-execdir` block. This lets every later pass treat a
+    nested shell's contents exactly like top-level statements, instead of
     special-casing recursion order at each check site. any_parse_failure
     is True if this command OR any nested command it recursed into
     failed to fully tokenize.
@@ -635,14 +807,14 @@ def flatten(command, depth=0, max_depth=6, context=0, _counter=None):
     `context` identifies WHICH execution context an entry came from
     (fix round 5, IMPORTANT 2). Context 0 is the command's own top
     level; every recursion into a genuinely separate execution --
-    `sh -c`/`eval`'s inner command, or a backtick span's inner text --
-    gets its OWN fresh id via `_counter` (a one-element mutable box
-    threaded through the whole recursion tree, so every nested call
+    `sh -c`/`eval`'s inner command, or a backtick/`$(...)` span's inner
+    text -- gets its OWN fresh id via `_counter` (a one-element mutable
+    box threaded through the whole recursion tree, so every nested call
     shares one counter and no two contexts collide). A `find -exec`
     sub-statement stays in its ENCLOSING statement's context: unlike
-    `sh -c`/`eval`/a backtick, it is not a separate subshell whose
-    output could be laundered back into the parent -- it is the same
-    top-level command actually naming that sub-command's arguments
+    `sh -c`/`eval`/a substitution span, it is not a separate subshell
+    whose output could be laundered back into the parent -- it is the
+    same top-level command actually naming that sub-command's arguments
     directly.
 
     This exists because sidecar-pairing (`_collect_moved_args_by_context` /
@@ -691,7 +863,7 @@ def flatten(command, depth=0, max_depth=6, context=0, _counter=None):
             for exts, sub in find_exec_substatements(stmt):
                 entries.append({"tokens": sub, "exts": exts, "context": context})
                 for tok in sub:
-                    inner = _backtick_inner(tok)
+                    inner = _substitution_inner(tok)
                     if inner is not None:
                         _counter[0] += 1
                         sub_entries, sub_failed = flatten(
@@ -700,7 +872,7 @@ def flatten(command, depth=0, max_depth=6, context=0, _counter=None):
                         entries.extend(sub_entries)
                         any_failed = any_failed or sub_failed
         for tok in stmt:
-            inner = _backtick_inner(tok)
+            inner = _substitution_inner(tok)
             if inner is not None:
                 _counter[0] += 1
                 sub_entries, sub_failed = flatten(
@@ -909,15 +1081,19 @@ def _coarse_token_backstop(entries):
     `echo "mv a.gd b/"`: shlex keeps a quoted phrase as ONE token, so it
     is never equal to the bare word "mv". The EXTENSION check is looser
     on purpose (`ext_of` for an ordinary token, plus a raw substring
-    search for one merged from a backtick span): a merged span like
-    `` `echo scripts/player.gd` `` is opaque as a whole -- `ext_of` on it
-    finds no clean trailing extension -- but the raw text inside it still
-    names one, and that's exactly the kind of "looks relevant, could not
-    be pinned down" signal this backstop exists to catch (fix round 4,
-    CRITICAL 1). Entries precise analysis already fully resolved
-    (classified, complete, non-opaque) are excluded before either word or
-    extension is looked for in them, so an already-cleared,
-    correctly-paired command can never re-trigger this on its own text."""
+    search for one merged from a backtick or `$(...)` span): a merged
+    span like `` `echo scripts/player.gd` `` or `$(echo
+    scripts/player.gd)` is opaque as a whole -- `ext_of` on it finds no
+    clean trailing extension -- but the raw text inside it still names
+    one, and that's exactly the kind of "looks relevant, could not be
+    pinned down" signal this backstop exists to catch (fix round 4,
+    CRITICAL 1; extended to `$(...)` in fix round 6, IMPORTANT 2 -- a
+    merged `$(...)` token always starts with '$', already the exact
+    marker `_is_opaque` looks for). Entries precise analysis already
+    fully resolved (classified, complete, non-opaque) are excluded before
+    either word or extension is looked for in them, so an
+    already-cleared, correctly-paired command can never re-trigger this
+    on its own text."""
     has_word = False
     has_ext = False
     for e in entries:
@@ -936,7 +1112,7 @@ def _coarse_token_backstop(entries):
                     has_word = True
             if ext_of(tok) in GODOT_RELEVANT_EXTS:
                 has_ext = True
-            elif "`" in tok and _RAW_EXT_RE.search(tok):
+            elif ("`" in tok or tok.startswith("$")) and _RAW_EXT_RE.search(tok):
                 has_ext = True
     return has_word and has_ext
 

@@ -301,6 +301,90 @@ ROUND5_CASES = [
     ("touch foo.gd && mv scripts/player.gd", "ask"),
 ]
 
+# Fix round 6 (the coordinator's final round for this task): one Critical
+# fix round 5 itself introduced, plus an asymmetry that fix round 5's own
+# work exposed (closing the '#'-swallowing/statement-fragmenting bug class
+# for backticks but not for the more common `$(...)` spelling of the same
+# syntax).
+ROUND6_CASES = [
+    # CRITICAL 1 -- round 5 collapsed the double-quote branch to a bare
+    # `in_double = not in_double` that fell through to the SAME
+    # per-character dispatch as unquoted text, so a literal apostrophe
+    # INSIDE an already-open double-quoted string (no special meaning in
+    # real bash) was misread as opening a SINGLE quote, permanently
+    # desyncing the tracker on an odd apostrophe count. A later genuine
+    # word-start '#' then fell into the phantom single-quote branch and
+    # was never stripped -- its words (here, naming the very sidecar
+    # paths the pairing check looks for) became extra, unintended
+    # positional arguments of the mv statement immediately before it.
+    (
+        "echo \"building player's script\" && mv scripts/player.gd "
+        "entities/player.gd  # note scripts/player.gd.uid "
+        "entities/player.gd.uid unaffected",
+        "deny",
+    ),
+    # An EVEN apostrophe count self-heals (confirms the parity mechanism
+    # itself, not just this one fix) -- must also deny, same reason.
+    (
+        "echo \"it's the dev's script\" && mv scripts/player.gd "
+        "entities/player.gd  # note scripts/player.gd.uid "
+        "entities/player.gd.uid unaffected",
+        "deny",
+    ),
+    # The same apostrophe-in-double-quotes shape with NO trailing comment
+    # at all must still behave correctly (deny, genuinely unpaired) --
+    # confirms the fix isn't somehow coupled to the comment's presence.
+    ("echo \"building player's script\" && mv scripts/player.gd entities/player.gd", "deny"),
+    # Paired, with the apostrophe-bearing comment still present -- must
+    # allow, confirming the fix doesn't itself introduce a false deny/ask.
+    (
+        "echo \"building player's script\" && mv scripts/player.gd "
+        "entities/player.gd && mv scripts/player.gd.uid "
+        "entities/player.gd.uid  # done",
+        "allow",
+    ),
+    # IMPORTANT 2 -- `$(...)` gets none of the protection given to
+    # backticks: the same '#'-swallowing bug, mirrored exactly.
+    ("$(echo Building #42) && mv scripts/player.gd entities/player.gd", "deny"),
+    # The same '#' QUOTED inside the substitution was already safe
+    # (double-quote tracking alone sufficed) -- confirms no regression.
+    (
+        '$(echo "Deploying build #42") && mv scripts/player.gd entities/player.gd',
+        "deny",
+    ),
+    # Paired, to confirm the $(...)-nested '#' doesn't itself cause a
+    # false deny/ask when the move is genuinely safe.
+    (
+        "$(echo Building #42) && mv scripts/player.gd entities/player.gd "
+        "&& mv scripts/player.gd.uid entities/player.gd.uid",
+        "allow",
+    ),
+    # The same statement-fragmenting bug backticks had, mirrored for
+    # `$(...)`: an opaque DEST doesn't rescue a concrete, unpaired SOURCE.
+    ("mv scripts/player.gd $(echo entities/player.gd)", "deny"),
+    ("git mv scripts/player.gd $(echo entities/player.gd)", "deny"),
+    ("cp scripts/player.gd $(echo x) && rm scripts/player.gd", "deny"),
+    # An opaque SOURCE genuinely can't be pinned down -- ask, not deny,
+    # not a silent allow either.
+    ("mv $(echo scripts/player.gd) entities/", "ask"),
+    # A bare command line that is NOTHING BUT a `$(...)` span still runs
+    # its inner text as a real subprocess (same as the bare-backtick
+    # case) -- recursion must catch this.
+    ("$(mv scripts/player.gd entities/player.gd)", "deny"),
+    # `$(...)` nests properly (unlike backticks) -- a doubly-nested
+    # substitution must still recurse correctly into the real move.
+    ("mv scripts/player.gd $(echo $(echo entities/player.gd))", "deny"),
+    # The IMPORTANT-2 (fix round 5) cross-context laundering fix, mirrored
+    # for `$(...)`: a sidecar-pairing move named only inside a provably
+    # unreachable `$(...)` span must not credit a real, unpaired top-level
+    # move.
+    (
+        "$(false && mv scripts/player.gd.uid entities/player.gd.uid) "
+        "&& mv scripts/player.gd entities/player.gd",
+        "deny",
+    ),
+]
+
 
 def decide(command, cwd=None):
     tool_input = {"command": command}
@@ -352,6 +436,14 @@ class TestGuard(unittest.TestCase):
     def test_round5_decision_table(self):
         failures = []
         for command, expected in ROUND5_CASES:
+            actual = decide(command)
+            if actual != expected:
+                failures.append(f"{command!r}: expected {expected}, got {actual}")
+        self.assertEqual(failures, [], "\n".join(failures))
+
+    def test_round6_decision_table(self):
+        failures = []
+        for command, expected in ROUND6_CASES:
             actual = decide(command)
             if actual != expected:
                 failures.append(f"{command!r}: expected {expected}, got {actual}")
