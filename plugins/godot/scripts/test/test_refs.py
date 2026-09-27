@@ -2,10 +2,11 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from godot import refs
+from godot import refs, tscn
 
 SAMPLE = Path(__file__).parent / "fixtures" / "sample-project"
 
@@ -83,7 +84,7 @@ class TestGraph(unittest.TestCase):
         self.assertEqual(len(g["duplicate_uids"]), 1)
         self.assertEqual(g["duplicate_uids"][0]["uid"], "uid://cnnyipgx21jca")
 
-    def test_unparsable_scene_is_reported_not_silently_skipped(self):
+    def test_unparsable_and_unreadable_scenes_are_each_reported_once(self):
         # main.tscn is the only scene that references scripts/player.gd via
         # its ext_resource entry. Corrupt it and graph() can no longer see
         # that reference -- it must say so via parse_errors rather than
@@ -91,31 +92,72 @@ class TestGraph(unittest.TestCase):
         # This is the exact anti-pattern tscn.py's own docstring warns
         # against, one layer up: a partial result presented as complete is
         # how a user deletes something they never saw.
+        #
+        # Alongside it, corrupt a second .tscn and a .tres with syntax
+        # errors, and add one more .tscn that can't even be *opened* -- a
+        # dangling symlink, which survives a git checkout and is an
+        # ordinary failure mode, not a hypothetical one. All four must be
+        # named in parse_errors exactly once each: not zero (the bug this
+        # fix round exists to close) and not twice (a regression to
+        # re-parsing / double-reporting the same file, the failure mode a
+        # naive two-call-site fix would produce).
         with open(self.root / "main.tscn", "a") as f:
             f.write("this is not a heading, property, or comment\n")
+        (self.root / "broken_scene.tscn").write_text("also not one\n")
+        (self.root / "broken_resource.tres").write_text("nor this\n")
+        (self.root / "dangling.tscn").symlink_to(self.root / "does_not_exist.tscn")
 
-        g = refs.graph(str(self.root))
+        with mock.patch("godot.tscn.parse", wraps=tscn.parse) as spy:
+            g = refs.graph(str(self.root))
 
-        # (a) parse_errors names the file that failed.
-        main_tscn_errors = [e for e in g["parse_errors"] if e["path"] == "main.tscn"]
-        self.assertEqual(len(main_tscn_errors), 1)
+        error_paths = [e["path"] for e in g["parse_errors"]]
 
-        # (b) it appears exactly once -- _uid_index and graph()'s own
-        # ext_resource scan must share one parse pass over the file, not
-        # each report (or each re-parse) it independently.
-        self.assertEqual(len(g["parse_errors"]), 1)
+        # Every corrupt/unreadable file is named, exactly once.
+        for expected in (
+            "main.tscn",
+            "broken_scene.tscn",
+            "broken_resource.tres",
+            "dangling.tscn",
+        ):
+            self.assertEqual(
+                error_paths.count(expected), 1,
+                f"expected exactly one parse_errors entry for {expected!r}, "
+                f"got {error_paths.count(expected)}",
+            )
+        self.assertEqual(len(g["parse_errors"]), 4)
+
+        # tscn.parse() is only ever reachable for the three files that can
+        # be opened at all -- dangling.tscn fails at the open() step and
+        # never reaches it. Pinning the call count directly (rather than by
+        # proxy through parse_errors' length) is what would catch a
+        # regression to a second parse site being reintroduced elsewhere:
+        # main.tscn (the only scene that also parses successfully
+        # elsewhere in this suite) would then be parsed twice, and this
+        # count would rise to 4 without parse_errors necessarily changing.
+        self.assertEqual(spy.call_count, 3)
+
+        # The unreadable file's entry says so distinctly from a syntax
+        # error -- a caller (or a human) needs to know whether the fix is
+        # "edit the scene" or "check the filesystem".
+        by_path = {e["path"]: e["error"] for e in g["parse_errors"]}
+        self.assertIn("unreadable", by_path["dangling.tscn"].lower())
+        self.assertNotIn("unreadable", by_path["main.tscn"].lower())
 
         # The .uid sidecar is a separate code path from the scene parse, so
         # the uid is still known even though the scene that names it isn't.
         self.assertEqual(g["uid_index"]["uid://cnnyipgx21jca"], "scripts/player.gd")
 
-        # (c) scripts/player.gd was referenced only from inside the now
-        # unparsable scene, so the graph legitimately cannot confirm it is
-        # still used -- but if it shows up in orphans, parse_errors must be
-        # non-empty right alongside it, so a caller can tell the report is
-        # partial rather than a clean, confident "unused".
-        if "scripts/player.gd" in g["orphans"]:
-            self.assertTrue(g["parse_errors"])
+        # scripts/player.gd was referenced only from inside main.tscn, which
+        # can no longer be read -- the graph genuinely cannot confirm it is
+        # still used, so it is reported as an orphan. That is legitimate
+        # *only* because parse_errors names the specific file responsible;
+        # asserting both together (rather than "orphans contains X" alone,
+        # or "parse_errors is non-empty" alone -- either one in isolation
+        # can't tell a caller *why* the orphan call is uncertain) is what
+        # makes this assertion capable of failing on its own, rather than
+        # being implied for free by the count assertion above.
+        self.assertIn("scripts/player.gd", g["orphans"])
+        self.assertIn("main.tscn", error_paths)
 
 
 if __name__ == "__main__":

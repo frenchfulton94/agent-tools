@@ -35,8 +35,12 @@ and `orphans` cannot otherwise tell a clean report from a partial one, which
 is the exact anti-pattern tscn.py's own docstring was hardened against, one
 layer up -- a partial result presented as complete is how a user deletes
 something they never saw. Every file that fails to parse is recorded in the
-`parse_errors` key instead of being dropped silently. `orphans` and `broken`
-are complete descriptions of the project only when `parse_errors` is empty;
+`parse_errors` key instead of being dropped silently -- both a file that
+parses but is malformed (TscnParseError) and one that can't even be opened
+(a permission oddity, a symlink a git checkout left dangling: OSError, plus
+UnicodeDecodeError as a backstop), each labelled so a caller can tell "edit
+the scene" from "check the filesystem" apart. `orphans` and `broken` are
+complete descriptions of the project only when `parse_errors` is empty;
 when it is not, treat both as a lower bound -- a script named only from
 inside an unparsable scene can appear in `orphans`, and references or
 breakage inside that scene are invisible to `broken`, purely because the
@@ -81,6 +85,14 @@ def _parse_scenes(root: str):
     uid-index pass and the ext_resource/orphan pass in graph() consume this
     same dict, so a file that fails to parse is recorded in `parse_errors`
     once, never once per consumer.
+
+    A file can fail two different ways, and the error message says which:
+    it can be read but is malformed (tscn.TscnParseError -- the author's
+    problem, fixed by editing the scene), or it can't be read at all --
+    permission denied, or a symlink a git checkout left dangling (OSError,
+    plus UnicodeDecodeError for content `errors="replace"` doesn't already
+    paper over) -- the environment's problem, fixed by checking the
+    filesystem. Both are ordinary in a real project, not hypothetical.
     """
     parsed: dict = {}
     parse_errors: list = []
@@ -88,9 +100,14 @@ def _parse_scenes(root: str):
         if not rel.endswith(SCENE_EXT):
             continue
         try:
-            parsed[rel] = tscn.parse(open(full, errors="replace").read())
+            text = open(full, errors="replace").read()
+        except (OSError, UnicodeDecodeError) as exc:
+            parse_errors.append({"path": rel, "error": f"unreadable: {exc}"})
+            continue
+        try:
+            parsed[rel] = tscn.parse(text)
         except tscn.TscnParseError as exc:
-            parse_errors.append({"path": rel, "error": str(exc)})
+            parse_errors.append({"path": rel, "error": f"malformed: {exc}"})
     return parsed, parse_errors
 
 
