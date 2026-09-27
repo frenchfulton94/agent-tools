@@ -42,6 +42,25 @@ SCRIPT ERROR: Parse Error: Cannot assign a value of type "String" as "int".
           at: GDScript::reload (res://broken.gd:5)
 """
 
+# Constructed (not captured -- unlike MISATTRIBUTION_STDERR above) to guard a
+# related but distinct regression class: a clamp that resolves to the header
+# *after* next (e.g. `header_idxs[pos + 2]` in place of `header_idxs[pos + 1]`)
+# rather than the immediate next one. With three diagnostics in a row where
+# the first two both lack a res:// frame of their own, that bug lets the
+# SECOND diagnostic's window skip past itself and steal the THIRD
+# diagnostic's location -- not just the first stealing from the second,
+# which is all the two-header MISATTRIBUTION_STDERR case above can expose.
+# The "ERROR: Failed to load script" line is real engine phrasing (seen
+# verbatim in this project's own captured output), reordered here into the
+# middle position to build the specific three-header shape under test.
+SKIP_AHEAD_STDERR = """WARNING: res://main.tscn:3 - ext_resource, invalid UID: uid://zzinvaliduid00 - using text path instead: res://broken.gd
+     at: load (scene/resources/resource_format_text.cpp:501)
+ERROR: Failed to load script "res://broken.gd" with error "Parse error".
+   at: load (modules/gdscript/gdscript_resource_format.cpp:46)
+SCRIPT ERROR: Parse Error: Cannot assign a value of type "String" as "int".
+          at: GDScript::reload (res://broken.gd:5)
+"""
+
 
 class TestDiagnostics(unittest.TestCase):
     def test_extracts_script_errors_with_file_and_line(self):
@@ -79,6 +98,25 @@ class TestDiagnostics(unittest.TestCase):
         self.assertEqual(warning["severity"], "WARNING")
         self.assertIsNone(warning["file"])
         self.assertIsNone(warning["line"])
+        self.assertEqual(script_error["severity"], "SCRIPT ERROR")
+        self.assertEqual(script_error["file"], "res://broken.gd")
+        self.assertEqual(script_error["line"], 5)
+
+    def test_lookahead_does_not_skip_past_an_intermediate_header_either(self):
+        # A related failure mode to the test above: the clamp must stop at
+        # the IMMEDIATE next header, not some header further ahead. With
+        # three diagnostics where the first two both have only an
+        # engine-C++ frame of their own, the middle one must not reach past
+        # itself and steal the THIRD diagnostic's res:// location.
+        found = engine.diagnostics(SKIP_AHEAD_STDERR)
+        self.assertEqual(len(found), 3)
+        warning, load_error, script_error = found
+        self.assertEqual(warning["severity"], "WARNING")
+        self.assertIsNone(warning["file"])
+        self.assertIsNone(warning["line"])
+        self.assertEqual(load_error["severity"], "ERROR")
+        self.assertIsNone(load_error["file"])
+        self.assertIsNone(load_error["line"])
         self.assertEqual(script_error["severity"], "SCRIPT ERROR")
         self.assertEqual(script_error["file"], "res://broken.gd")
         self.assertEqual(script_error["line"], 5)
@@ -126,7 +164,12 @@ class TestOrphanOnTimeout(unittest.TestCase):
         try:
             with tempfile.TemporaryDirectory() as tmp:
                 start = time.monotonic()
-                result = engine.run([], cwd=tmp, timeout=2)
+                # The fake binary itself returns almost instantly; 0.4s is
+                # plenty for run()'s own TimeoutExpired to fire reliably
+                # without padding out the suite the way a multi-second
+                # timeout here would (this is most of what the suite gained
+                # when these tests were added).
+                result = engine.run([], cwd=tmp, timeout=0.4)
                 elapsed = time.monotonic() - start
         finally:
             del os.environ["GODOT_BIN"]
@@ -145,7 +188,7 @@ class TestOrphanOnTimeout(unittest.TestCase):
         os.environ["GODOT_BIN"] = str(FAKE_GODOT_ORPHAN)
         try:
             with tempfile.TemporaryDirectory() as tmp:
-                result = engine.run([], cwd=tmp, timeout=2)
+                result = engine.run([], cwd=tmp, timeout=0.4)
                 self.assertTrue(result.timed_out)
                 pid_path = Path(tmp) / "child.pid"
                 self.assertTrue(pid_path.exists(), "fake binary never wrote its child's pid")
