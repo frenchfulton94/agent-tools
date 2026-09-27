@@ -33,13 +33,24 @@ import os
 import re
 import shutil
 import tempfile
+import time
 
 from . import engine
 
-# cache_dir -> {"version": str, "dump": dict, "index": list | None}
-# "index" is the lazily-built, lowercased search corpus for search_classes,
-# built once per cache entry and reused across queries -- see _search_index.
+# cache_dir -> {"version": str, "dump": dict, "checked_at": float}
+# "checked_at" is a time.monotonic() reading from the last time this entry's
+# version was SUCCESSFULLY confirmed against the live engine -- see
+# _REVALIDATE_INTERVAL_SECONDS and load_dump's warm-hit branch.
 _CACHE: dict = {}
+
+# Revalidating a warm cache entry costs one `godot --version` subprocess
+# spawn -- measured at ~17.5ms, all of it process-spawn overhead. An agent
+# session can call lookup_class/search_classes dozens of times, and paying
+# that cost on every single call is pure waste when the engine practically
+# never changes underfoot. Revalidate at most this often per cache_dir
+# instead: still catches an engine upgrade in a long-lived MCP server (the
+# property Finding 5 bought), just not on every call.
+_REVALIDATE_INTERVAL_SECONDS = 60
 
 # Every real Godot version string starts with a dotted numeric build
 # (4, 4.7 or 4.7.2) followed by a dotted word segment (.stable, .dev, ...).
@@ -48,6 +59,12 @@ _CACHE: dict = {}
 # it exists to reject banner/driver lines that can precede the version line
 # on some builds, not to validate the whole string.
 _VERSION_LINE = re.compile(r"^\d+\.\d+(\.\d+)?\.\w+")
+
+# Stashed directly on a loaded dump dict (not keyed through _CACHE) so that
+# building/reading the search index never needs a second, separate lookup
+# into _CACHE after load_dump has already returned that dump object -- see
+# _search_index.
+_SEARCH_INDEX_KEY = "__api_search_index__"
 
 
 def _default_cache_dir() -> str:
@@ -138,17 +155,32 @@ def _regenerate(cache_dir: str, dump_path: str, version_path: str, current: str 
 
 def load_dump(cache_dir: str | None = None) -> dict:
     cache_dir = _resolve_cache_dir(cache_dir)
+    now = time.monotonic()
 
     entry = _CACHE.get(cache_dir)
     if entry is not None:
-        # A warm in-memory hit still has to check the live engine version:
-        # without this, a Godot upgrade in this long-lived MCP server stays
-        # invisible until the process restarts, and every answer keeps
-        # coming from the old engine's API for the rest of its life.
+        if now - entry["checked_at"] < _REVALIDATE_INTERVAL_SECONDS:
+            # Revalidated recently enough -- serve without spawning
+            # anything. This is what makes the check below cheap in
+            # practice: it only runs at most once per cache_dir per
+            # _REVALIDATE_INTERVAL_SECONDS, not on every call.
+            return entry["dump"]
+        # A warm hit outside the window still has to check the live engine
+        # version: without this, a Godot upgrade in this long-lived MCP
+        # server stays invisible until the process restarts, and every
+        # answer keeps coming from the old engine's API for the rest of its
+        # life. But a failed CHECK is not evidence the cached dump itself is
+        # stale -- a flaky subprocess spawn, or engine_version() itself
+        # raising because --version transiently printed nothing
+        # recognizable, says nothing about whether the dump we already have
+        # is wrong. Serve it rather than fail a request that would
+        # otherwise have succeeded; do not advance checked_at on failure, so
+        # the next call retries instead of waiting out the window.
         try:
             live = engine_version()
-        except engine.MissingBinary:
-            return entry["dump"]  # Can't check; keep serving memory.
+        except Exception:
+            return entry["dump"]
+        entry["checked_at"] = now
         if live == entry["version"]:
             return entry["dump"]
         _CACHE.pop(cache_dir, None)  # Stale -- fall through and re-derive.
@@ -157,6 +189,7 @@ def load_dump(cache_dir: str | None = None) -> dict:
     version_path = os.path.join(cache_dir, "VERSION")
 
     current = None
+    checked_ok = False
     if os.path.isfile(dump_path):
         # A missing VERSION file (not just a missing dump) must still be
         # treated as "no cached version on record" rather than skipping the
@@ -171,13 +204,19 @@ def load_dump(cache_dir: str | None = None) -> dict:
         )
         try:
             current = engine_version()
+            checked_ok = True
         except engine.MissingBinary:
             current = cached_version  # Serve the cache when the binary is gone.
         if cached_version != current:
             os.remove(dump_path)
 
     if not os.path.isfile(dump_path):
+        # _regenerate resolves and writes a live version (calling
+        # engine_version() itself if `current` isn't already known), and a
+        # failure here is a genuine "cannot produce a dump at all" -- unlike
+        # the warm path above, this is not caught broadly.
         current = _regenerate(cache_dir, dump_path, version_path, current)
+        checked_ok = True
 
     try:
         dump = _read_dump(dump_path)
@@ -186,9 +225,14 @@ def load_dump(cache_dir: str | None = None) -> dict:
         # raising the same JSONDecodeError on every future call forever.
         os.remove(dump_path)
         current = _regenerate(cache_dir, dump_path, version_path, current)
+        checked_ok = True
         dump = _read_dump(dump_path)
 
-    _CACHE[cache_dir] = {"version": current, "dump": dump, "index": None}
+    _CACHE[cache_dir] = {
+        "version": current,
+        "dump": dump,
+        "checked_at": now if checked_ok else float("-inf"),
+    }
     return dump
 
 
@@ -232,38 +276,48 @@ def lookup_class(name: str, member: str | None = None, cache_dir: str | None = N
     return out
 
 
-def _search_index(cache_dir: str) -> list:
-    """The lowercased search corpus for `cache_dir`'s current dump, built
-    once and reused across calls to `search_classes`.
+def _search_index(dump: dict) -> list:
+    """The lowercased search corpus for this dump object, built once and
+    reused across calls to `search_classes`.
 
     Descriptions are the bulk of the ~12 MB dump, so lowercasing all of them
-    on every query (rather than once per cache entry) would repeat that scan
-    on every call. This is keyed through the same `_CACHE` entry that holds
-    the dump it was built from, so it can never point at stale content: a
-    version change replaces the whole entry (see `load_dump`), index and all.
+    on every query (rather than once per dump) would repeat that scan on
+    every call. The index is cached directly on the dump object itself
+    (under `_SEARCH_INDEX_KEY`) rather than through a second, separate
+    `_CACHE[cache_dir]` lookup: `load_dump(cache_dir)` and re-indexing
+    `_CACHE[cache_dir]` afterwards are two operations, not one, and a
+    concurrent warm-hit revalidation on another thread can pop that entry in
+    the gap between them (load_dump's own revalidation does exactly this on
+    a version mismatch) -- which raised a bare KeyError out of the public
+    search_classes. Operating on the dump object load_dump already handed
+    back removes the gap entirely: there is no second _CACHE read to race.
+    A version change replaces the whole entry with a brand new dump object
+    (see `load_dump`), so this can never point at stale content either.
     """
-    load_dump(cache_dir)  # Ensures _CACHE[cache_dir] exists and is fresh.
-    entry = _CACHE[cache_dir]
-    if entry["index"] is None:
-        entry["index"] = [
-            (
-                c.get("name", ""),
-                c.get("name", "").lower(),
-                c.get("brief_description") or "",
-                (c.get("brief_description") or "").lower(),
-                (c.get("description") or "").lower(),
-                c.get("inherits"),
-            )
-            for c in entry["dump"].get("classes", [])
-        ]
-    return entry["index"]
+    cached = dump.get(_SEARCH_INDEX_KEY)
+    if cached is not None:
+        return cached
+    index = [
+        (
+            c.get("name", ""),
+            c.get("name", "").lower(),
+            c.get("brief_description") or "",
+            (c.get("brief_description") or "").lower(),
+            (c.get("description") or "").lower(),
+            c.get("inherits"),
+        )
+        for c in dump.get("classes", [])
+    ]
+    dump[_SEARCH_INDEX_KEY] = index
+    return index
 
 
 def search_classes(query: str, limit: int = 25, cache_dir: str | None = None) -> list:
-    cache_dir = _resolve_cache_dir(cache_dir)
+    dump = load_dump(cache_dir)
+    index = _search_index(dump)
     needle = (query or "").lower()
     scored = []
-    for name, name_lower, brief, brief_lower, desc_lower, inherits in _search_index(cache_dir):
+    for name, name_lower, brief, brief_lower, desc_lower, inherits in index:
         if name_lower == needle:
             score = 0
         elif needle in name_lower:
