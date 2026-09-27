@@ -1,4 +1,5 @@
 import os
+import subprocess
 import tempfile
 import time
 import unittest
@@ -206,6 +207,72 @@ class TestOrphanOnTimeout(unittest.TestCase):
                 self.assertFalse(
                     alive,
                     f"grandchild pid {child_pid} survived proc.kill() as an orphan",
+                )
+        finally:
+            del os.environ["GODOT_BIN"]
+
+
+class TestNonTimeoutExceptionAlsoKillsTheGroup(unittest.TestCase):
+    """IMPORTANT 6 pin: run() only killed the whole process group inside the
+    TimeoutExpired branch. Any OTHER exception unwinding through
+    communicate() (a KeyboardInterrupt, a bug in calling code on this
+    thread) left the child's whole process group -- including a grandchild
+    it had already spawned -- untouched. This predates Task 7 (every
+    engine.run caller was already exposed), but Task 7's windowed drivers
+    are the first callers where the orphan left behind is a VISIBLE WINDOW
+    on the user's screen, not an invisible headless process.
+
+    Reuses the same orphan-spawning fake binary as TestOrphanOnTimeout, but
+    forces a non-timeout exception out of communicate() instead of a real
+    timeout, by swapping the real Popen instance's own `communicate` method
+    after it's constructed.
+    """
+
+    def test_a_non_timeout_exception_during_communicate_still_kills_the_group(self):
+        os.environ["GODOT_BIN"] = str(FAKE_GODOT_ORPHAN)
+        real_popen = subprocess.Popen
+
+        class Boom(Exception):
+            pass
+
+        def raising_popen(*args, **kwargs):
+            proc = real_popen(*args, **kwargs)
+
+            def boom_communicate(*a, **kw):
+                # Give the fake binary time to actually run (background its
+                # sleeping grandchild and write child.pid) before the
+                # exception hits -- a real communicate() would have blocked
+                # this long anyway; raising instantly would race the shell
+                # script's own startup instead of exercising the fix.
+                time.sleep(0.3)
+                raise Boom("simulated non-timeout failure")
+
+            proc.communicate = boom_communicate
+            return proc
+
+        try:
+            with tempfile.TemporaryDirectory() as tmp:
+                with mock.patch.object(subprocess, "Popen", side_effect=raising_popen):
+                    with self.assertRaises(Boom):
+                        engine.run([], cwd=tmp, timeout=5)
+
+                pid_path = Path(tmp) / "child.pid"
+                self.assertTrue(pid_path.exists(), "fake binary never wrote its child's pid")
+                child_pid = int(pid_path.read_text().strip())
+
+                deadline = time.monotonic() + 3
+                alive = True
+                while time.monotonic() < deadline:
+                    try:
+                        os.kill(child_pid, 0)
+                    except ProcessLookupError:
+                        alive = False
+                        break
+                    time.sleep(0.1)
+                self.assertFalse(
+                    alive,
+                    f"grandchild pid {child_pid} survived a non-timeout exception "
+                    "during communicate()",
                 )
         finally:
             del os.environ["GODOT_BIN"]

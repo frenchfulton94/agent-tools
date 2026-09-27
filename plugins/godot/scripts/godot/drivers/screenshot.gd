@@ -36,5 +36,12 @@ func _initialize() -> void:
 		quit(1)
 		return
 
+	# A blank/grey capture and a genuine one compress to nearly the same PNG
+	# byte size, so file size alone cannot tell a caller the capture actually
+	# saw the scene. Print the centre pixel so a caller (and this package's
+	# own tests) can check content, not just that some PNG was written.
+	var probe := image.get_pixel(image.get_size().x / 2, image.get_size().y / 2)
+	print("GODOT_MCP_PIXEL ", probe.r8, ",", probe.g8, ",", probe.b8)
+
 	print("GODOT_MCP_OK ", image.get_size().x, "x", image.get_size().y)
 	quit()

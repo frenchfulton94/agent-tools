@@ -60,7 +60,7 @@ def find_binary():
     return None
 
 
-def run(args, cwd=None, timeout=60) -> Result:
+def run(args, cwd=None, timeout=60, env=None) -> Result:
     binary = find_binary()
     if not binary:
         raise MissingBinary(
@@ -70,6 +70,7 @@ def run(args, cwd=None, timeout=60) -> Result:
         proc = subprocess.Popen(
             [binary, *args],
             cwd=cwd,
+            env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
@@ -87,10 +88,8 @@ def run(args, cwd=None, timeout=60) -> Result:
         raise MissingBinary(
             f"Godot binary not found at {binary!r}: {exc}"
         ) from exc
-    try:
-        stdout, stderr = proc.communicate(timeout=timeout)
-        return Result(stdout, stderr, proc.returncode, False)
-    except subprocess.TimeoutExpired:
+
+    def _kill_group():
         # `start_new_session=True` above guarantees this process is its own
         # session AND process-group leader, so its pgid is its own pid --
         # for the life of the group, not just at creation. Use that directly
@@ -104,6 +103,12 @@ def run(args, cwd=None, timeout=60) -> Result:
             os.killpg(proc.pid, signal.SIGKILL)
         except (ProcessLookupError, PermissionError):
             pass
+
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+        return Result(stdout, stderr, proc.returncode, False)
+    except subprocess.TimeoutExpired:
+        _kill_group()
         try:
             stdout, stderr = proc.communicate(timeout=5)
         except subprocess.TimeoutExpired:
@@ -114,6 +119,41 @@ def run(args, cwd=None, timeout=60) -> Result:
             stdout, stderr = proc.communicate()
         returncode = proc.returncode if proc.returncode is not None else -1
         return Result(stdout, stderr, returncode, True)
+    except BaseException:
+        # Anything else unwinding through communicate() -- a
+        # KeyboardInterrupt, a bug in a caller's own code running on this
+        # thread, whatever -- must still tear down the whole process group
+        # before propagating, exactly like the timeout path above. This
+        # predates Task 7 (every engine.run caller was exposed), but Task
+        # 7's windowed drivers are the first callers where the orphan left
+        # behind is a VISIBLE WINDOW on the user's screen, not an invisible
+        # headless process.
+        _kill_group()
+        # Reap rather than leave a zombie: the immediate child is dead (or
+        # dying) from the SIGKILL above, so this just collects its exit
+        # status -- no pipe-draining needed (nothing more will be written)
+        # and no deadlock risk (wait() blocks on process state, not I/O).
+        # Bounded exactly like the timeout path's own reap, for the same
+        # reason: a caller who keeps this process alive for many calls (an
+        # MCP server) must not accumulate zombies across repeated failures.
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            try:
+                proc.kill()
+            except (ProcessLookupError, PermissionError):
+                pass
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                pass
+        # Nothing will read these again (the exception is about to
+        # propagate past any Result construction), so close them explicitly
+        # rather than leave the fds for the garbage collector to find.
+        for pipe in (proc.stdout, proc.stderr):
+            if pipe is not None:
+                pipe.close()
+        raise
 
 
 def diagnostics(stderr: str) -> list:
