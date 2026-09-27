@@ -194,6 +194,49 @@ ROUND3_CASES = [
     ),
 ]
 
+# Fix round 4 of 5 (coordinator numbering): two Criticals the round-3 pass
+# left open -- one it introduced, one open since round 1 and never caught.
+ROUND4_CASES = [
+    # CRITICAL 1 -- treating the backtick as a statement boundary (round
+    # 2's fix for backtick-gluing) split a real move into fragments too
+    # small for positional_args to read as one argument, so the degenerate
+    # leftover was judged "resolved" vacuously (nothing left to check, not
+    # because anything WAS checked). Measured against round 1 as
+    # regressions: all three denied under round 1, silently allowed (or
+    # downgraded from deny to ask) once the backtick became a boundary.
+    ("mv scripts/player.gd `echo entities/player.gd`", "deny"),
+    ("git mv scripts/player.gd `echo entities/player.gd`", "deny"),
+    ("cp scripts/player.gd `echo x` && rm scripts/player.gd", "deny"),
+    # The general fix, both directions: an opaque DESTINATION doesn't
+    # change a concrete, unpaired SOURCE's verdict (still deny -- the
+    # backtick's unknowable value doesn't rescue an already-bad source).
+    # An opaque SOURCE genuinely can't be pinned down -- ask, not deny,
+    # and not a silent allow either.
+    ("mv `echo scripts/player.gd` entities/", "ask"),
+    # A bare command line that is NOTHING BUT a backtick span still runs
+    # its inner text as a real subprocess in an actual shell (that's what
+    # command substitution means) -- recursing into it must catch this
+    # exactly like `eval "..."` / `sh -c "..."` are already recursed into.
+    ("`mv scripts/player.gd entities/player.gd`", "deny"),
+    # CRITICAL 2 -- shlex's default commenters='#' treats '#' as a comment
+    # start ANYWHERE, including mid-word, with no quote-awareness. An
+    # entirely ordinary filename silently discarded everything after it,
+    # and tokenize() reported no failure at all, so even the raw-text
+    # backstop never engaged -- a complete, silent bypass, pre-existing
+    # since round 1 and never caught until this round.
+    ("touch weird#file.gd && mv scripts/player.gd entities/player.gd", "deny"),
+    # A genuine trailing comment (preceded by whitespace) must still be
+    # stripped -- this command's comment TEXT itself names a real rm
+    # target; if the fix stopped stripping comments altogether instead of
+    # applying the correct, narrower rule, this would wrongly ask (the
+    # comment's "rm scripts/player.gd" would be read as swept into the
+    # same rm statement's own target list) instead of allow.
+    ("rm -rf .godot  # rm scripts/player.gd", "allow"),
+    # A line that is entirely a comment (from a leading '#' at the very
+    # start) executes nothing in a real shell.
+    ("# note: mv scripts/player.gd entities/player.gd", "allow"),
+]
+
 
 def decide(command, cwd=None):
     tool_input = {"command": command}
@@ -229,6 +272,14 @@ class TestGuard(unittest.TestCase):
     def test_round3_decision_table(self):
         failures = []
         for command, expected in ROUND3_CASES:
+            actual = decide(command)
+            if actual != expected:
+                failures.append(f"{command!r}: expected {expected}, got {actual}")
+        self.assertEqual(failures, [], "\n".join(failures))
+
+    def test_round4_decision_table(self):
+        failures = []
+        for command, expected in ROUND4_CASES:
             actual = decide(command)
             if actual != expected:
                 failures.append(f"{command!r}: expected {expected}, got {actual}")

@@ -56,24 +56,34 @@ The fix is two-layered, not a bigger regex:
 
 ## Tokenizing
 
-`shlex` in POSIX mode with a custom `punctuation_chars` (the library
-default plus a backtick -- the default omits it, which let a
-backtick-wrapped move glue onto the following word) splits `;`, `&`,
+`_strip_comments()` runs first, on the raw command text, before shlex ever
+sees it (fix round 4, CRITICAL 2 -- see its docstring: shlex's own default
+comment rule is wrong for this guard's purpose and was a complete, silent
+bypass). `shlex` in POSIX mode with a custom `punctuation_chars` (the
+library default plus a backtick -- the default omits it, which let a
+backtick-wrapped move glue onto the following word) then splits `;`, `&`,
 `&&`, `||`, `|`, `(`, `)`, `` ` `` out as their own tokens while leaving
-quoted content alone, strips matching quotes, and drops `# ...`-to-end-
-of-line comments. `tokenize()` drives the lexer one token at a time
-instead of consuming it in one `list(...)` call, specifically so a parse
-failure partway through (one unmatched quote) still yields every token
-successfully read before that point -- an early statement that denies
-correctly on its own must not be discarded because a LATER, unrelated
-fragment has a typo in it.
+quoted content alone and stripping matching quotes; `commenters` is
+disabled so it never reapplies its own cruder comment rule to text
+`_strip_comments()` already handled correctly. `tokenize()` drives the
+lexer one token at a time instead of consuming it in one `list(...)` call,
+specifically so a parse failure partway through (one unmatched quote)
+still yields every token successfully read before that point -- an early
+statement that denies correctly on its own must not be discarded because a
+LATER, unrelated fragment has a typo in it. `_merge_backtick_spans()` then
+collapses each matched backtick pair back into a single opaque token (fix
+round 4, CRITICAL 1 -- an earlier round treated the backtick as a hard
+statement boundary, which split a real move into fragments too small for
+`positional_args` to read as one argument, silently ALLOWing a genuinely
+unpaired move).
 
 Known, accepted limits (documented rather than silently wrong):
-  - Command substitution (`$(...)`) is not evaluated -- a filename it
-    computes cannot be reasoned about statically either way. Backticks are
-    now tokenized as their own boundary (see above), which is a
-    conservative treatment (the pair splits into a statement of its own),
-    not a full evaluation.
+  - Command substitution (`$(...)` and `` `...` ``) is not evaluated -- a
+    filename either one computes cannot be reasoned about statically
+    either way. Each is merged into a single OPAQUE token instead (see
+    `_is_opaque`), which keeps it as one argument for pairing purposes and
+    routes the statement to the coarse ASK backstop rather than silently
+    treating the unknowable value as "no extension, safe".
   - `xargs`'s own templated arguments are fundamentally opaque to static
     analysis (the real filename lives in whatever was piped to it, never
     a literal token in the xargs statement itself) -- this is why `xargs`
@@ -117,7 +127,18 @@ SHELL_C_KEYWORDS = frozenset({"sh", "bash", "zsh"})
 # hardcoding a guessed string, so this stays correct if the default set ever
 # changes upstream.
 PUNCTUATION_CHARS = shlex.shlex("", posix=True, punctuation_chars=True).punctuation_chars + "`"
-STATEMENT_BOUNDARY_TOKENS = frozenset({";", "&", "&&", "||", "|", "(", ")", "`", "\n"})
+# The backtick is NOT a statement boundary (fix round 4, CRITICAL 1): a
+# backtick-delimited span is command substitution, an ordinary part of ONE
+# argument, not a separator between commands. It is still listed in
+# PUNCTUATION_CHARS above so shlex tokenizes each backtick as its own
+# token instead of gluing it onto an adjacent word (round 2's fix), and
+# `tokenize()` then merges each matched backtick PAIR back into a single
+# opaque token before statements are split -- see `_merge_backtick_spans`.
+# Treating the backtick as a boundary (as an earlier round did) split a
+# real move into fragments too small for `positional_args` to read as one
+# argument, which silently ALLOWed a genuinely unpaired
+# `mv a.gd \`echo b/a.gd\``.
+STATEMENT_BOUNDARY_TOKENS = frozenset({";", "&", "&&", "||", "|", "(", ")", "\n"})
 PROJECT_CONFIG_BASENAMES = frozenset({"project.godot", "export_presets.cfg"})
 
 # Coarse backstop vocabulary (see module docstring, point 2).
@@ -194,6 +215,104 @@ def sidecar_name_for(token):
 # --- tokenizing ---------------------------------------------------------
 
 
+def _strip_comments(command):
+    """Strip a bash-accurate '#' comment -- one that begins at the start
+    of a WORD (the start of the command, or immediately after unquoted
+    whitespace) and is itself unquoted -- to end of line, leaving
+    everything else, including a '#' anywhere else, untouched.
+
+    This exists because shlex's own default (`commenters='#'`) is wrong
+    for this guard's purpose: it treats '#' as a comment start ANYWHERE,
+    including mid-word, with no quote-awareness. An entirely ordinary
+    filename broke this catastrophically (fix round 4, CRITICAL 2, a
+    pre-existing bug never caught before this round):
+    'touch weird#file.gd && mv scripts/player.gd entities/player.gd'
+    tokenized under the old default to just ['touch', 'weird'] -- the
+    '&& mv ...' was silently discarded, `tokenize()` reported
+    `failed=False` (nothing actually failed, as far as shlex was
+    concerned), so even the raw-text backstop never engaged either. A
+    complete, silent bypass of the only mechanism enforcing this plugin's
+    safety claim, trivially triggered by a filename containing '#'.
+
+    `tokenize()` calls this BEFORE handing the command to shlex, and
+    disables shlex's own `commenters` entirely afterward, so a '#'
+    surviving this pass (because it wasn't a real comment start) is never
+    reinterpreted as one by the cruder default rule downstream."""
+    out = []
+    in_single = False
+    in_double = False
+    at_word_start = True
+    i, n = 0, len(command)
+    while i < n:
+        ch = command[i]
+        if in_single:
+            out.append(ch)
+            if ch == "'":
+                in_single = False
+            i += 1
+            continue
+        if in_double:
+            out.append(ch)
+            if ch == '"' and command[i - 1] != "\\":
+                in_double = False
+            i += 1
+            continue
+        if ch == "'":
+            in_single = True
+            at_word_start = False
+            out.append(ch)
+            i += 1
+            continue
+        if ch == '"':
+            in_double = True
+            at_word_start = False
+            out.append(ch)
+            i += 1
+            continue
+        if ch == "#" and at_word_start:
+            while i < n and command[i] != "\n":
+                i += 1
+            continue  # do not consume/emit the newline itself here
+        at_word_start = ch in (" ", "\t", "\n")
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
+def _merge_backtick_spans(tokens):
+    """Merge each backtick-delimited span in a flat token stream into a
+    single opaque token that still contains its two backticks (so
+    `_is_opaque` recognizes it). A matched `` `...` `` pair is genuine
+    shell command substitution -- an ordinary part of the ONE argument it
+    sits inside, not a separator between statements. An earlier round
+    tokenized the backtick as a hard statement boundary, which split a
+    real move into fragments too small for `positional_args` to read as a
+    single argument -- `mv a.gd \\`echo b/a.gd\\`` became the three
+    "statements" `['mv', 'a.gd']`, `['echo', 'b/a.gd']`, `[]`, and the
+    degenerate first fragment was then judged fully "resolved" (nothing
+    left to check) instead of "truncated" -- a genuinely unpaired move
+    silently ALLOWed (fix round 4, CRITICAL 1).
+
+    An unmatched trailing backtick (no closing pair before the token
+    stream ends) is left as a lone token, same as before -- it cannot
+    attach to a real command word either way, so it does not spuriously
+    reclassify anything."""
+    out = []
+    i, n = 0, len(tokens)
+    while i < n:
+        if tokens[i] == "`":
+            j = i + 1
+            while j < n and tokens[j] != "`":
+                j += 1
+            if j < n:
+                out.append(" ".join(tokens[i : j + 1]))
+                i = j + 1
+                continue
+        out.append(tokens[i])
+        i += 1
+    return out
+
+
 def tokenize(command):
     """Whole-command shlex tokenization. Never executes anything -- shlex
     only lexes text, it does not evaluate command substitution or expand
@@ -204,8 +323,10 @@ def tokenize(command):
     via a single `list(...)` call. A syntax error confined to a later
     fragment of the command must not discard analysis of an earlier,
     well-formed one (fix round 2, IMPORTANT 3)."""
+    command = _strip_comments(command)
     lexer = shlex.shlex(command, posix=True, punctuation_chars=PUNCTUATION_CHARS)
     lexer.whitespace_split = True
+    lexer.commenters = ""  # comments already handled, accurately, above
     raw = []
     failed = False
     while True:
@@ -223,7 +344,8 @@ def tokenize(command):
     # every token, and dropping any that go empty, recovers the intended
     # tokens in both shapes without affecting normal quoted arguments.
     tokens = [t.strip() for t in raw]
-    return [t for t in tokens if t != ""], failed
+    tokens = [t for t in tokens if t != ""]
+    return _merge_backtick_spans(tokens), failed
 
 
 def split_statements(tokens):
@@ -434,15 +556,32 @@ def _strip_exec_spans(statement):
     return out
 
 
+def _backtick_inner(tok):
+    """The text a merged backtick-span token (see `_merge_backtick_spans`)
+    wraps, or None if `tok` isn't one. Real backtick command substitution
+    genuinely EXECUTES its inner text as a subprocess regardless of what
+    the captured output is later used for -- even a command line that is
+    NOTHING BUT a bare backtick span (`` `mv a.gd b/a.gd` `` on its own)
+    still runs the inner `mv` as a real side effect. So its inner text is
+    recursed into by `flatten()` exactly like `eval "..."` / `sh -c
+    "..."`, in ADDITION to (not instead of) the outer statement treating
+    the whole merged token as one opaque argument for its own pairing
+    analysis -- both are true at once in a real shell."""
+    if len(tok) >= 2 and tok[0] == "`" and tok[-1] == "`":
+        return tok[1:-1]
+    return None
+
+
 def flatten(command, depth=0, max_depth=6):
     """Flatten a command into ({"tokens": [...], "exts": frozenset()}
     entries, any_parse_failure). Covers the command's own top-level
     statements, plus -- recursively, to a bounded depth -- the inner
-    command of every `sh -c` / `bash -c` / `zsh -c` / `eval` statement, and
-    the exec'd sub-command of every `find -exec`/`-execdir` block. This
-    lets every later pass treat a nested shell's contents exactly like
-    top-level statements, instead of special-casing recursion order at
-    each check site. any_parse_failure is True if this command OR any
+    command of every `sh -c` / `bash -c` / `zsh -c` / `eval` statement,
+    every backtick-delimited command substitution (see `_backtick_inner`),
+    and the exec'd sub-command of every `find -exec`/`-execdir` block.
+    This lets every later pass treat a nested shell's contents exactly
+    like top-level statements, instead of special-casing recursion order
+    at each check site. any_parse_failure is True if this command OR any
     nested command it recursed into failed to fully tokenize."""
     entries = []
     if depth > max_depth:
@@ -465,6 +604,18 @@ def flatten(command, depth=0, max_depth=6):
         if fw == "find":
             for exts, sub in find_exec_substatements(stmt):
                 entries.append({"tokens": sub, "exts": exts})
+                for tok in sub:
+                    inner = _backtick_inner(tok)
+                    if inner is not None:
+                        sub_entries, sub_failed = flatten(inner, depth + 1, max_depth)
+                        entries.extend(sub_entries)
+                        any_failed = any_failed or sub_failed
+        for tok in stmt:
+            inner = _backtick_inner(tok)
+            if inner is not None:
+                sub_entries, sub_failed = flatten(inner, depth + 1, max_depth)
+                entries.extend(sub_entries)
+                any_failed = any_failed or sub_failed
     return entries, any_failed
 
 
@@ -588,46 +739,70 @@ ASK_BACKSTOP_MSG = (
 def _is_opaque(tok):
     """True when a positional argument cannot be read as a literal filename
     at all -- a shell variable or command-substitution reference (`$f`,
-    `$SRC`, `${f}`, `$(...)`). Its real value, and therefore its real
+    `$SRC`, `${f}`, `$(...)`), or a backtick-delimited command
+    substitution span merged into one token by `_merge_backtick_spans`
+    (fix round 4, CRITICAL 1 -- it still carries its two backticks, which
+    is what this checks for). Its real value, and therefore its real
     extension, is unknowable from text alone; treating it as "no
     extension, no sidecar needed" (what `ext_of` would otherwise silently
     conclude) would be inferring safety from ignorance, the same mistake
-    CRITICAL 1 closed for the disk check. `{}` (find's own per-match
-    placeholder, whose possible extensions are already tracked precisely
-    via `predicate_exts`) is deliberately not opaque -- callers exclude it
-    before this ever matters."""
-    return "$" in tok
+    CRITICAL 1 (fix round 2) closed for the disk check. `{}` (find's own
+    per-match placeholder, whose possible extensions are already tracked
+    precisely via `predicate_exts`) is deliberately not opaque -- callers
+    exclude it before this ever matters."""
+    return "$" in tok or "`" in tok
 
 
 def _entry_is_resolved(stmt):
     """True when precise analysis had enough information to reach a
     reliable verdict for this statement -- it was classified as a known
-    command AND none of its source/destination positional arguments are
-    opaque (fix round 3, CRITICAL 2 over-triggering). An unclassified
-    statement (kind is None -- a bare `find` shell, an `xargs` line, a
-    `for`/`while` header) is never "resolved": there was no precise
-    verdict for it to begin with, so it must still be visible to the
-    coarse backstop below. A CLASSIFIED statement whose source is a shell
-    variable (`mv "$f" entities/`) is deliberately treated the same way --
-    `command_kind` says "mv", but the sidecar check silently answered
-    "no extension, nothing to pair" only because the real filename is
-    unknowable, not because it truly has none. That is exactly the
-    "looks like a move, could not be pinned down precisely" case ASK
-    exists for, so it stays visible to the backstop too, despite being
-    classified. A resolved entry was fully and correctly handled by the
-    deny/ask loops above (whichever way that came out) and must not be
-    re-litigated here -- that was CRITICAL 2's fix round 3 regression:
-    a blanket text scan re-flagged every already-cleared paired mv, tscn
-    move, and bare cp, because a real, safe move by definition contains
-    both a move word and a Godot extension."""
+    command, its positional arguments are COMPLETE for that command's
+    shape, and none of them are opaque (fix round 3, CRITICAL 2
+    over-triggering; the completeness check is fix round 4, CRITICAL 1's
+    root-cause fix). An unclassified statement (kind is None -- a bare
+    `find` shell, an `xargs` line, a `for`/`while` header) is never
+    "resolved": there was no precise verdict for it to begin with, so it
+    must still be visible to the coarse backstop below.
+
+    The completeness check exists because `not any(...)` over an EMPTY
+    argument list is vacuously True -- "resolved" not because anything
+    was actually checked, but because there was nothing left TO check.
+    A statement can end up with too few positional arguments for its own
+    command form -- `positional_args` reads a bare `['mv', 'x']` as
+    (sources=[], dest='x'), zero sources -- and a truncated fragment like
+    that must be judged UNRESOLVED by definition, not vacuously cleared,
+    whatever caused the truncation. (A prior version of the backtick fix
+    surfaced exactly this: splitting on the backtick left a degenerate
+    `['mv', 'a.gd']` fragment that this function waved through because it
+    had no opaque tokens to find -- not because it had been checked.)
+
+    A CLASSIFIED, COMPLETE statement whose source is a shell variable or
+    a merged backtick span (`mv "$f" entities/`, `` mv `echo x.gd` y/ ``)
+    is deliberately ALSO treated as unresolved: `command_kind` says "mv",
+    but the sidecar check silently answered "no extension, nothing to
+    pair" only because the real filename is unknowable, not because it
+    truly has none. That is exactly the "looks like a move, could not be
+    pinned down precisely" case ASK exists for, so it stays visible to
+    the backstop too, despite being classified. A resolved entry was
+    fully and correctly handled by the deny/ask loops above (whichever
+    way that came out) and must not be re-litigated here -- that was
+    CRITICAL 2's fix round 3 regression: a blanket text scan re-flagged
+    every already-cleared paired mv, tscn move, and bare cp, because a
+    real, safe move by definition contains both a move word and a Godot
+    extension."""
     kind = command_kind(stmt)
     if kind is None:
         return False
     if kind in ("rm", "git-rm"):
-        check_toks = positional_args(stmt)[0]
+        targets, _dest = positional_args(stmt)
+        if not targets:
+            return False  # truncated/degenerate -- nothing was actually checked
+        check_toks = targets
     else:
         sources, dest = positional_args(stmt)
-        check_toks = list(sources) + ([dest] if dest is not None else [])
+        if not sources or dest is None:
+            return False  # truncated/degenerate -- same vacuous-truth risk
+        check_toks = list(sources) + [dest]
     return not any(_is_opaque(t) for t in check_toks if t != "{}")
 
 
@@ -637,13 +812,20 @@ def _coarse_token_backstop(entries):
     specially unwrap -- chiefly `xargs`, whose own arguments are templated
     from stdin and can never be literal tokens here -- or that WAS
     classified but left opaque (see `_entry_is_resolved`). Deliberately
-    exact TOKEN equality, not a raw substring search, so it does NOT
-    re-flag `grep "mv foo.gd"` or `echo "mv a.gd b/"`: shlex keeps a
-    quoted phrase as ONE token, so it is never equal to the bare word
-    "mv". Entries precise analysis already fully resolved (classified,
-    non-opaque) are excluded before either word or extension is looked
-    for in them, so an already-cleared, correctly-paired command can
-    never re-trigger this on its own text."""
+    exact TOKEN equality for the move/removal WORD, not a raw substring
+    search, so it does NOT re-flag `grep "mv foo.gd"` or
+    `echo "mv a.gd b/"`: shlex keeps a quoted phrase as ONE token, so it
+    is never equal to the bare word "mv". The EXTENSION check is looser
+    on purpose (`ext_of` for an ordinary token, plus a raw substring
+    search for one merged from a backtick span): a merged span like
+    `` `echo scripts/player.gd` `` is opaque as a whole -- `ext_of` on it
+    finds no clean trailing extension -- but the raw text inside it still
+    names one, and that's exactly the kind of "looks relevant, could not
+    be pinned down" signal this backstop exists to catch (fix round 4,
+    CRITICAL 1). Entries precise analysis already fully resolved
+    (classified, complete, non-opaque) are excluded before either word or
+    extension is looked for in them, so an already-cleared,
+    correctly-paired command can never re-trigger this on its own text."""
     has_word = False
     has_ext = False
     for e in entries:
@@ -661,6 +843,8 @@ def _coarse_token_backstop(entries):
                 if j < len(toks) and toks[j].lower() in _COARSE_MOVE_WORDS:
                     has_word = True
             if ext_of(tok) in GODOT_RELEVANT_EXTS:
+                has_ext = True
+            elif "`" in tok and _RAW_EXT_RE.search(tok):
                 has_ext = True
     return has_word and has_ext
 
