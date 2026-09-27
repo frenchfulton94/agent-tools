@@ -21,6 +21,27 @@ HAS_GODOT = engine.find_binary() is not None
 HAS_DISPLAY = HAS_GODOT and render.has_display()
 
 
+def _fs_is_case_insensitive():
+    """True if a file created under the system temp directory is also
+    reachable via an upper-cased name -- i.e. the filesystem folds case
+    (APFS's default mode on macOS, but not the only mode a real Mac can be
+    running). Checked empirically with a real probe file rather than
+    assumed, since the case-insensitive-but-case-preserving bypass this
+    guards against only exists on such a filesystem.
+    """
+    probe_dir = tempfile.mkdtemp(prefix="godot-fscheck-")
+    try:
+        probe = os.path.join(probe_dir, "CaseProbe")
+        with open(probe, "w"):
+            pass
+        return os.path.exists(os.path.join(probe_dir, "caseprobe"))
+    finally:
+        shutil.rmtree(probe_dir, ignore_errors=True)
+
+
+FS_IS_CASE_INSENSITIVE = _fs_is_case_insensitive()
+
+
 def rpc(*messages, timeout=180):
     payload = "".join(json.dumps(m) + "\n" for m in messages)
     proc = subprocess.run(
@@ -358,6 +379,156 @@ class TestScreenshotOutPathIsContainedOutsideTheProject(unittest.TestCase):
             self.assertTrue(os.path.isfile(body["path"]))
         finally:
             shutil.rmtree(out_dir, ignore_errors=True)
+
+    @unittest.skipUnless(FS_IS_CASE_INSENSITIVE, "needs a case-insensitive filesystem to reproduce")
+    def test_case_variant_of_project_directory_is_rejected(self):
+        # CRITICAL (fix round 2): the string-only check
+        # (resolved_out.startswith(project_root + os.sep)) is defeated for
+        # free on APFS (case-insensitive but case-preserving, the macOS
+        # default): os.path.realpath() does not canonicalise letter case,
+        # so an upper-cased ancestor directory name resolves to the exact
+        # same on-disk directory without matching as a string. Nothing on
+        # disk changes -- no rename, no new file, no symlink -- only the
+        # string the caller happens to type.
+        upper_root = self.tmp / "PROJ"
+        # Sanity check that this environment's filesystem really does fold
+        # case the way the test assumes, so a failure here means the test
+        # fixture itself is wrong, not the fix under test.
+        self.assertTrue(
+            os.path.exists(upper_root),
+            "case-insensitive fs expected but the upper-cased path does not exist",
+        )
+        self.assertTrue(os.path.samefile(upper_root, self.root))
+
+        target = upper_root / "project.godot"
+        original = (self.root / "project.godot").read_bytes()
+
+        response = call("screenshot_scene", {
+            "project_path": str(self.root),
+            "scene": "res://main.tscn",
+            "out_path": str(target),
+        })
+        self.assertTrue(response["result"].get("isError"), response["result"])
+        self.assertEqual((self.root / "project.godot").read_bytes(), original)
+
+    def test_hardlink_to_a_project_file_is_rejected(self):
+        # CRITICAL 2 (fix round 2): a hardlink from outside the project to
+        # a file inside it has no distinct path for ANY containment check
+        # to resolve -- it IS the same inode under a second name, not a
+        # reference to one. Narrower than the case bypass (it needs a
+        # hardlink to already exist), but writing through it corrupts the
+        # inside file exactly the same way.
+        outside = Path(tempfile.mkdtemp(prefix="godot-shot-hardlink-"))
+        try:
+            hardlink_path = outside / "looks_external.png"
+            os.link(str(self.root / "project.godot"), str(hardlink_path))
+            self.assertGreater(os.stat(hardlink_path).st_nlink, 1)
+            original = (self.root / "project.godot").read_bytes()
+
+            response = call("screenshot_scene", {
+                "project_path": str(self.root),
+                "scene": "res://main.tscn",
+                "out_path": str(hardlink_path),
+            })
+            self.assertTrue(response["result"].get("isError"), response["result"])
+            text = response["result"]["content"][0]["text"]
+            self.assertIn("hard link", text)
+            self.assertEqual((self.root / "project.godot").read_bytes(), original)
+        finally:
+            shutil.rmtree(outside, ignore_errors=True)
+
+
+class TestOutPathContainmentDoesNotOverReject(unittest.TestCase):
+    """The reviewer verified these are all correctly ACCEPTED today and
+    must stay accepted: an inode-walk implementation is more likely to
+    over-reject than a string-prefix one (mishandling a nonexistent
+    directory, a symlinked project root, a relative path, ...), so each
+    case is checked explicitly against the actual helper the server calls,
+    rather than assumed to still work by virtue of the rejection tests
+    passing.
+    """
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.root = self.tmp / "proj"
+        shutil.copytree(SAMPLE, self.root)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _inside(self, out_path, project_path=None):
+        project_root = os.path.realpath(str(project_path or self.root))
+        resolved_out = os.path.realpath(str(out_path))
+        return server._out_path_is_inside_project(resolved_out, project_root)
+
+    def test_sibling_prefixed_directory_is_not_rejected(self):
+        # "/tmp/proj" vs "/tmp/proj-backup/x.png" -- a naive prefix check
+        # without the separator would over-reject this; the existing
+        # `+ os.sep` string fallback already handled it, and the identity
+        # walk must not regress it.
+        sibling = self.tmp / "proj-backup" / "x.png"
+        self.assertFalse(self._inside(sibling))
+
+    def test_trailing_slash_on_project_path_is_not_rejected(self):
+        project_with_slash = str(self.root) + os.sep
+        self.assertFalse(self._inside(self.tmp / "outside.png", project_path=project_with_slash))
+        self.assertTrue(self._inside(self.root / "project.godot", project_path=project_with_slash))
+
+    def test_project_path_as_dot_is_not_rejected(self):
+        cwd = os.getcwd()
+        try:
+            os.chdir(self.root)
+            self.assertTrue(self._inside(self.root / "project.godot", project_path="."))
+            self.assertFalse(self._inside(self.tmp / "outside.png", project_path="."))
+        finally:
+            os.chdir(cwd)
+
+    def test_relative_project_path_is_not_rejected(self):
+        cwd = os.getcwd()
+        try:
+            os.chdir(self.tmp)
+            self.assertTrue(self._inside(self.root / "project.godot", project_path="proj"))
+        finally:
+            os.chdir(cwd)
+
+    def test_symlinked_project_path_is_not_rejected(self):
+        link = self.tmp / "proj-link"
+        link.symlink_to(self.root)
+        self.assertTrue(self._inside(self.root / "project.godot", project_path=str(link)))
+
+    def test_relative_out_path_is_not_rejected(self):
+        cwd = os.getcwd()
+        try:
+            os.chdir(self.tmp)
+            self.assertFalse(self._inside("outside.png"))
+            self.assertTrue(self._inside("proj/project.godot"))
+        finally:
+            os.chdir(cwd)
+
+    def test_dotdot_normalised_path_landing_outside_is_not_rejected(self):
+        out_path = self.root / ".." / "outside.png"
+        self.assertFalse(self._inside(out_path))
+
+    def test_nonexistent_out_path_directory_is_not_rejected(self):
+        out_path = self.tmp / "does-not-exist-yet" / "scene.png"
+        self.assertFalse(self._inside(out_path))
+
+    def test_sibling_prefixed_directory_end_to_end_is_not_rejected(self):
+        # The unit-level check above proves the helper's own logic; this
+        # confirms the full call_tool() wiring (both checks, in order)
+        # agrees, without needing a real Godot render to prove "accepted".
+        sibling_out = self.tmp / "proj-backup" / "x.png"
+        os.makedirs(sibling_out.parent, exist_ok=True)
+        with mock.patch.object(
+            server.render, "screenshot_scene",
+            return_value={"path": str(sibling_out), "diagnostics": [], "timed_out": False, "pixel": (1, 2, 3)},
+        ):
+            result = server.dispatch_tool_call("screenshot_scene", {
+                "project_path": str(self.root),
+                "scene": "res://main.tscn",
+                "out_path": str(sibling_out),
+            })
+        self.assertFalse(result.get("isError"), result)
 
 
 class TestMalformedArgumentsIsACleanErrorNotATraceback(unittest.TestCase):

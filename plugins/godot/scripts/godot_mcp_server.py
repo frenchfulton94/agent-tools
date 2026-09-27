@@ -11,13 +11,20 @@ Design notes:
     whole architecture rests on, so it is enforced in code, not just in
     prose: screenshot_scene's out_path is the one tool argument that names a
     filesystem write destination the caller chooses, and call_tool() refuses
-    any out_path that resolves inside the project directory (fix round 1,
-    CRITICAL 1) rather than handing it to the renderer unchecked -- an
-    unconstrained out_path could otherwise silently overwrite an arbitrary
-    project file (project.godot itself, in the reported case) with PNG bytes,
-    through a channel the Task 9 guard hook cannot see at all. Every other
-    tool's arguments were re-checked for the same class of gap and none of
-    them name a caller-chosen filesystem write destination.
+    any out_path that resolves inside the project directory rather than
+    handing it to the renderer unchecked -- an unconstrained out_path could
+    otherwise silently overwrite an arbitrary project file (project.godot
+    itself, in the reported case) with PNG bytes, through a channel the
+    Task 9 guard hook cannot see at all. Every other tool's arguments were
+    re-checked for the same class of gap and none of them name a
+    caller-chosen filesystem write destination. The containment check
+    itself compares filesystem identity (device+inode via
+    os.path.samefile()), not strings -- a string comparison is defeated for
+    free on a case-insensitive-but-case-preserving filesystem (APFS, the
+    macOS default; see _out_path_is_inside_project()'s docstring) -- and a
+    separate check refuses any out_path that already exists as a
+    multiply-linked file, since a hardlink names a file inside the project
+    with no distinguishing path for any containment check to catch.
   - project_overview, scene_tree and reference_graph never invoke the Godot
     binary, so a project can still be described on a machine with no engine.
   - check_shader and screenshot_scene need a real rendering device. Headless
@@ -226,6 +233,62 @@ def _reference_graph_text(result: dict) -> str:
     return "\n".join(lines)
 
 
+def _out_path_is_inside_project(resolved_out: str, project_root: str) -> bool:
+    """True if `resolved_out` names a location at or under `project_root`,
+    compared by filesystem identity (device + inode via os.path.samefile())
+    rather than by string prefix.
+
+    String comparison is not enough (fix round 2, CRITICAL 1): macOS's
+    default filesystem, APFS, is case-insensitive but case-preserving, so
+    os.path.realpath() does NOT canonicalise letter case for a real,
+    existing directory component -- realpath("/tmp/x/PROJ") returns
+    "/tmp/x/PROJ" verbatim even when the on-disk directory is
+    "/tmp/x/proj", although both strings address the exact same directory
+    (os.stat() on either returns the same (st_dev, st_ino), and
+    os.path.samefile() says so). A caller changes nothing on disk and
+    still slips a differently-cased out_path straight past
+    `resolved_out.startswith(project_root + os.sep)` while landing on the
+    very same file. Reproduced directly against a temp copy of the
+    fixture: out_path pointed at its own project.godot via an upper-cased
+    ancestor directory name, silently overwritten -- the same 372-byte
+    config to 165-byte PNG corruption signature as the original,
+    string-only bypass. This plugin's primary platform is macOS, so this
+    is the default environment, not an edge case.
+
+    Walks up resolved_out's directory chain (its immediate parent, that
+    parent's parent, and so on to the filesystem root), comparing each
+    ancestor to project_root with os.path.samefile() -- immune to case,
+    trailing slashes, and a symlinked directory anywhere in the chain,
+    because it compares the (st_dev, st_ino) a name resolves to rather
+    than the name itself.
+
+    Falls back to the previous normalised-string comparison only for an
+    ancestor that does not exist on disk yet (samefile requires both sides
+    to exist, and raises OSError otherwise). That residual imprecision
+    cannot be exploited to overwrite anything: a write into a directory
+    that does not exist fails cleanly (screenshot_scene reports "No image
+    was produced"), unlike the case-insensitive bypass, which succeeded
+    silently against a real, existing file.
+    """
+    if resolved_out == project_root:
+        return True
+
+    ancestor = os.path.dirname(resolved_out)
+    while True:
+        try:
+            if os.path.samefile(ancestor, project_root):
+                return True
+        except OSError:
+            return (
+                resolved_out == project_root
+                or resolved_out.startswith(project_root + os.sep)
+            )
+        parent = os.path.dirname(ancestor)
+        if parent == ancestor:
+            return False  # Reached the filesystem root with no match.
+        ancestor = parent
+
+
 def call_tool(name, args):
     if name == "project_overview":
         return True, json.dumps(project.overview(args["project_path"]), indent=2)
@@ -269,17 +332,58 @@ def call_tool(name, args):
         out_path = args.get("out_path") or os.path.join(
             tempfile.mkdtemp(prefix="godot-shot-"), "scene.png"
         )
-        # CRITICAL (fix round 1): out_path reached the renderer with no
-        # containment check. A caller-supplied path inside the project --
+        # out_path reached the renderer with no containment check as
+        # originally shipped. A caller-supplied path inside the project --
         # project.godot itself, in the reported case -- was silently
         # overwritten with PNG bytes: no warning, no isError, nothing a
         # guard hook could see, directly contradicting this server's one
-        # load-bearing property (read-only w.r.t. project source). realpath
-        # on both sides so a symlink inside the project can't walk back in.
+        # load-bearing property (read-only w.r.t. project source). Two
+        # independent checks below close two independent ways a
+        # caller-chosen out_path can name a file inside the project without
+        # looking like it does.
         project_root = os.path.realpath(args["project_path"])
         resolved_out = os.path.realpath(out_path)
-        if resolved_out == project_root or resolved_out.startswith(project_root + os.sep):
+
+        # CRITICAL 2 (fix round 2): a pre-existing hardlink from outside the
+        # project to a file inside it has no distinct path to resolve -- it
+        # IS the same inode under a second, unrelated-looking name, not a
+        # reference to one -- so no path-based check, however careful, can
+        # see through it; writing through that name corrupts the inside
+        # file just as directly as the original bug. Reproduced directly:
+        # hard-linking a file inside a temp copy of the fixture from an
+        # "outside" name, then writing through that name, corrupted the
+        # inside file with the same signature. A screenshot destination
+        # that already exists as a multiply-linked file is never a
+        # legitimate case, so refusing it costs nothing real.
+        try:
+            existing_out_stat = os.stat(resolved_out)
+        except OSError:
+            existing_out_stat = None
+        if existing_out_stat is not None and existing_out_stat.st_nlink > 1:
+            return False, (
+                f"out_path {out_path!r} already exists as a file with more "
+                "than one hard link (st_nlink > 1). Writing through it "
+                "could modify whatever else shares that inode -- possibly "
+                "a file inside the project -- and a hardlink has no "
+                "distinct path for a containment check to catch. Refused."
+            )
+
+        # CRITICAL 1 (fix round 2): see _out_path_is_inside_project()'s own
+        # docstring -- a plain string-prefix comparison here is defeated for
+        # free by a case-insensitive-but-case-preserving filesystem (APFS,
+        # the default on macOS, this plugin's primary platform).
+        if _out_path_is_inside_project(resolved_out, project_root):
             return False, f"out_path must be outside the project directory; got {out_path!r}."
+
+        # MINOR (fix round 2): both checks above validate `out_path` as
+        # given (resolved once, above); render.screenshot_scene() below is
+        # handed that same, not-re-resolved string. Their agreement is
+        # load-bearing on this process's working directory being unchanged
+        # between the two calls -- true today (nothing in this codebase
+        # ever calls os.chdir()) but not documented anywhere else, so a
+        # future change resolving a relative out_path against a different
+        # cwd at write time than what was validated here would silently
+        # reopen this whole class of gap.
         result = render.screenshot_scene(
             args["project_path"],
             args["scene"],
