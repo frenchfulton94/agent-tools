@@ -79,5 +79,60 @@ class TestExtResources(unittest.TestCase):
         self.assertEqual(res[0]["id"], "1_abc")
 
 
+class TestEngineAttrs(unittest.TestCase):
+    """Real Godot 4.7.2 output (engine_quirks.tscn was produced by a headless
+    ResourceSaver.save() run, not hand-typed) exercises heading attributes
+    whose values contain brackets, commas, and internal spaces. A parser that
+    merely fails to raise on these is not enough: it must recover the exact
+    value, because a silently truncated array reads as complete to anything
+    downstream.
+    """
+
+    def test_block_count_and_kinds_are_not_mis_scoped(self):
+        blocks = tscn.parse(load("engine_quirks.tscn"))
+        kinds = [b.kind for b in blocks]
+        self.assertEqual(
+            kinds,
+            [
+                "gd_scene",
+                "ext_resource",
+                "ext_resource",
+                "node",
+                "node",
+                "node",
+                "node",
+                "node",
+                "connection",
+            ],
+        )
+
+    def test_group_membership_is_not_truncated(self):
+        blocks = tscn.parse(load("engine_quirks.tscn"))
+        enemy = [b for b in blocks if b.attrs.get("name") == "Enemy"][0]
+        self.assertEqual(enemy.attrs["groups"], '["damageable", "enemies"]')
+
+    def test_multiple_node_paths_entries_are_not_truncated(self):
+        blocks = tscn.parse(load("engine_quirks.tscn"))
+        holder = [b for b in blocks if b.attrs.get("name") == "Holder"][0]
+        self.assertEqual(
+            holder.attrs["node_paths"],
+            'PackedStringArray("target_a", "target_b")',
+        )
+
+    def test_connection_binds_survives_engines_space_after_equals(self):
+        blocks = tscn.parse(load("engine_quirks.tscn"))
+        connection = [b for b in blocks if b.kind == "connection"][0]
+        self.assertEqual(connection.attrs["signal"], "tree_exiting")
+        self.assertEqual(connection.attrs["binds"], '["extra", 42]')
+
+    def test_scene_tree_still_builds_around_bracketed_attrs(self):
+        root = tscn.scene_tree(tscn.parse(load("engine_quirks.tscn")))
+        self.assertEqual(root.name, "Root")
+        self.assertEqual(
+            sorted(c.name for c in root.children),
+            ["Enemy", "Holder", "TargetA", "TargetB"],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

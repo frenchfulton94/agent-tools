@@ -11,8 +11,8 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-_HEADING = re.compile(r"^\[([A-Za-z_][A-Za-z0-9_]*)(\s[^\]]*)?\]\s*$")
-_ATTR = re.compile(r'([A-Za-z_][A-Za-z0-9_]*)=("(?:[^"\\]|\\.)*"|[^\s\]]+)')
+_HEADING = re.compile(r"^\[([A-Za-z_][A-Za-z0-9_]*)(\s.*)?\]\s*$")
+_ATTR_KEY = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 _PROP = re.compile(r'^([A-Za-z_][A-Za-z0-9_/.]*(?:\[[^\]]*\])?)\s*=\s*(.*)$')
 
 
@@ -43,9 +43,75 @@ class Node:
     path: str = ""
 
 
-def _parse_attrs(text: str) -> dict:
+def _scan_value(text: str, start: int) -> int:
+    """Return the index just past the balanced value beginning at `start`.
+
+    A plain token ends at the first depth-0 whitespace. Brackets, braces,
+    parens, and quoted strings (with backslash escapes) keep the value open
+    across internal spaces, the same depth-and-quote tracking `_incomplete`
+    uses to decide whether a *property* value continues on the next line —
+    applied here within a single heading line instead. Real Godot 4.7.2
+    output puts array- and constructor-valued attributes on node and
+    connection headings (`groups=["a", "b"]`,
+    `node_paths=PackedStringArray("a", "b")`), and a flat non-quote
+    alternation stops at the first internal space or `]`, silently
+    truncating the value instead of raising.
+    """
+    i = start
+    n = len(text)
+    depth = 0
+    in_string = False
+    escaped = False
+    while i < n:
+        ch = text[i]
+        if escaped:
+            escaped = False
+        elif in_string:
+            if ch == "\\":
+                escaped = True
+            elif ch == '"':
+                in_string = False
+        elif ch == '"':
+            in_string = True
+        elif ch in "([{":
+            depth += 1
+        elif ch in ")]}":
+            depth -= 1
+        elif depth <= 0 and ch.isspace():
+            break
+        i += 1
+    return i
+
+
+def _parse_attrs(text: str, line_no: int) -> dict:
     out = {}
-    for key, value in _ATTR.findall(text or ""):
+    text = text or ""
+    i, n = 0, len(text)
+    while i < n:
+        while i < n and text[i].isspace():
+            i += 1
+        if i >= n:
+            break
+        m = _ATTR_KEY.match(text, i)
+        if not m:
+            raise TscnParseError(
+                line_no, f"expected attribute name near {text[i:i + 20]!r}", text
+            )
+        key = m.group(0)
+        i = m.end()
+        while i < n and text[i].isspace():
+            i += 1
+        if i >= n or text[i] != "=":
+            raise TscnParseError(line_no, f"expected '=' after attribute {key!r}", text)
+        i += 1
+        # Godot's own writer sometimes emits a space between '=' and the
+        # value (observed on `connection` headings' `binds=` attribute); skip
+        # it rather than treating it as significant.
+        while i < n and text[i].isspace():
+            i += 1
+        start = i
+        i = _scan_value(text, start)
+        value = text[start:i]
         if len(value) >= 2 and value[0] == '"' and value[-1] == '"':
             value = value[1:-1]
         out[key] = value
@@ -93,7 +159,7 @@ def parse(text: str) -> list:
         if heading:
             current = Block(
                 kind=heading.group(1),
-                attrs=_parse_attrs(heading.group(2)),
+                attrs=_parse_attrs(heading.group(2), i),
                 props={},
                 line_no=i,
             )
