@@ -160,7 +160,7 @@ TOOLS = [
     },
     {
         "name": "run_scene",
-        "description": "Run a scene headlessly for a bounded number of frames and return its output together with any runtime errors and their GDScript backtraces. Rendering is disabled in this mode; use screenshot_scene to see what a scene looks like.",
+        "description": "Run a scene headlessly for a bounded number of frames and return its output together with any runtime errors and their GDScript backtraces. A runtime error's diagnostic carries a `backtrace` list (most recent call first, one `{frame, function, file, line}` per calling frame) whenever the engine printed one; `file`/`line` are null for a frame that resolves into engine C++ rather than a res:// path, the same rule applied to the diagnostic's own location. Capped at 40 frames -- a `backtrace_truncated` count on the diagnostic says how many deeper frames were left out, if any. Rendering is disabled in this mode; use screenshot_scene to see what a scene looks like.",
         "inputSchema": {"type": "object", "properties": {"project_path": _PROJECT, "scene": {"type": "string", "description": "Scene to run, e.g. res://main.tscn. Defaults to the project's main scene."}, "frames": {"type": "integer", "description": "Frames to run before quitting. Default 120."}}, "required": ["project_path"]},
     },
     {

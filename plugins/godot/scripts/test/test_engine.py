@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from godot import engine
 
 SAMPLE = Path(__file__).parent / "fixtures" / "sample-project"
+CRASH_PROJECT = Path(__file__).parent / "fixtures" / "crash-project"
 HAS_GODOT = engine.find_binary() is not None
 
 FAKE_GODOT_ORPHAN = (
@@ -61,6 +62,63 @@ ERROR: Failed to load script "res://broken.gd" with error "Parse error".
 SCRIPT ERROR: Parse Error: Cannot assign a value of type "String" as "int".
           at: GDScript::reload (res://broken.gd:5)
 """
+
+# Captured verbatim from the real engine (godot 4.7.2.stable.official): a
+# scene whose script crashes three calls deep (_ready -> level_one ->
+# level_two, an out-of-bounds Array read in level_two), run headless via
+# `godot --headless --path <project> --quit-after 5`. This is the exact
+# shape the tool's own description promises ("...with their GDScript
+# backtraces") and the one the fix this test guards makes true: before it,
+# `run_scene`'s returned diagnostics carried only the crash site
+# (level_two:11), and level_one/_ready were silently unreachable anywhere
+# in the tool's result even though the engine printed them.
+BACKTRACE_STDERR = """SCRIPT ERROR: Out of bounds get index '5' (on base: 'Array')
+          at: level_two (res://main.gd:11)
+          GDScript backtrace (most recent call first):
+              [0] level_two (res://main.gd:11)
+              [1] level_one (res://main.gd:7)
+              [2] _ready (res://main.gd:4)
+"""
+
+# Constructed (not captured): guards the same res://-only rule `_AT` already
+# enforces for a diagnostic's own location, applied to one frame INSIDE a
+# backtrace instead. Every backtrace this plan's own testing produced (a
+# three-deep call chain, a Timer-signal-triggered crash, a 60-deep
+# recursion) only ever contained res:// frames -- native call boundaries
+# simply end the chain rather than inserting a C++ frame -- so this
+# specific shape wasn't observed against the real engine. The brief still
+# calls for the same defensive rule `_AT` uses, on the reasoning that a
+# frame's location is exactly the same kind of string `_AT` already can't
+# trust to be a project file, so this pins that the parser doesn't assume
+# it either, without asserting a real engine ever produces it.
+BACKTRACE_WITH_ENGINE_FRAME_STDERR = """SCRIPT ERROR: Something broke
+          at: helper (res://main.gd:20)
+          GDScript backtrace (most recent call first):
+              [0] helper (res://main.gd:20)
+              [1] some_native_bridge (modules/gdscript/gdscript_vm.cpp:1234)
+              [2] _ready (res://main.gd:4)
+"""
+
+
+def _make_deep_backtrace_stderr(depth):
+    """Build a synthetic backtrace `depth` frames deep, all res://, to drive
+    the MAX_BACKTRACE_FRAMES cap without hand-writing dozens of literal
+    lines. Frame [0] is the crash site (matching the leading `at:` line);
+    frames [1..depth-1] are synthetic callers. Shape matches the real
+    60-deep recursion this plan captured directly against the engine
+    (`recurse()` calling itself, `--quit-after 10`) -- Godot itself did not
+    truncate that real backtrace at any point, so a cap has to be enforced
+    here, not assumed to already exist upstream.
+    """
+    lines = [
+        "SCRIPT ERROR: Out of bounds get index '9' (on base: 'Array')",
+        "          at: recurse (res://main.gd:9)",
+        "          GDScript backtrace (most recent call first):",
+        "              [0] recurse (res://main.gd:9)",
+    ]
+    for n in range(1, depth):
+        lines.append(f"              [{n}] recurse (res://main.gd:11)")
+    return "\n".join(lines) + "\n"
 
 
 class TestDiagnostics(unittest.TestCase):
@@ -122,6 +180,83 @@ class TestDiagnostics(unittest.TestCase):
         self.assertEqual(script_error["file"], "res://broken.gd")
         self.assertEqual(script_error["line"], 5)
 
+    def test_a_crash_with_no_backtrace_still_returns_cleanly(self):
+        # check_script's own stderr (GDSCRIPT_STDERR) never has a backtrace
+        # section -- --check-only never runs anything, so nothing ever
+        # crashes at runtime. Nothing here should raise, and no entry should
+        # grow a `backtrace` key it has no data for.
+        found = engine.diagnostics(GDSCRIPT_STDERR)
+        self.assertEqual(len(found), 3)
+        for entry in found:
+            self.assertNotIn("backtrace", entry)
+            self.assertNotIn("backtrace_truncated", entry)
+
+    def test_shader_errors_never_get_a_backtrace(self):
+        # Shader compile errors are compile-time, exactly like check_script's
+        # parse errors above -- nothing has run, so there is nothing to
+        # unwind. Guards the same absence for a different diagnostic shape.
+        found = engine.diagnostics(SHADER_STDERR)
+        self.assertEqual(len(found), 1)
+        self.assertNotIn("backtrace", found[0])
+
+    def test_backtrace_frames_come_back_in_order_with_correct_files_and_lines(self):
+        found = engine.diagnostics(BACKTRACE_STDERR)
+        self.assertEqual(len(found), 1)
+        entry = found[0]
+        self.assertEqual(entry["file"], "res://main.gd")
+        self.assertEqual(entry["line"], 11)
+        self.assertIn("backtrace", entry)
+        self.assertNotIn("backtrace_truncated", entry)
+        self.assertEqual(
+            entry["backtrace"],
+            [
+                {"frame": 0, "function": "level_two", "file": "res://main.gd", "line": 11},
+                {"frame": 1, "function": "level_one", "file": "res://main.gd", "line": 7},
+                {"frame": 2, "function": "_ready", "file": "res://main.gd", "line": 4},
+            ],
+        )
+
+    def test_backtrace_frame_pointing_into_engine_cpp_is_not_a_user_file(self):
+        found = engine.diagnostics(BACKTRACE_WITH_ENGINE_FRAME_STDERR)
+        self.assertEqual(len(found), 1)
+        backtrace = found[0]["backtrace"]
+        self.assertEqual(len(backtrace), 3)
+        # Frame 1's function name is real and kept; its location is engine
+        # C++, not a res:// path, so file/line are None -- the same
+        # treatment _AT already gives a diagnostic's own engine-C++ frame.
+        self.assertEqual(backtrace[1]["function"], "some_native_bridge")
+        self.assertIsNone(backtrace[1]["file"])
+        self.assertIsNone(backtrace[1]["line"])
+        # The frames on either side are ordinary res:// frames and must not
+        # be collateral damage from the one in the middle being rejected.
+        self.assertEqual(backtrace[0]["file"], "res://main.gd")
+        self.assertEqual(backtrace[2]["file"], "res://main.gd")
+
+    def test_backtrace_deeper_than_the_cap_is_truncated_with_a_count(self):
+        # Godot itself does not cap a deep recursion's backtrace (measured
+        # directly: a 60-deep recursion produced 61 uncapped frames plus
+        # _ready, 62 total, no truncation marker from the engine at any
+        # point) -- so a cap has to be enforced downstream of the engine,
+        # not assumed to already exist. 45 synthetic frames, capped to
+        # MAX_BACKTRACE_FRAMES (40), 5 left over.
+        stderr = _make_deep_backtrace_stderr(45)
+        found = engine.diagnostics(stderr)
+        self.assertEqual(len(found), 1)
+        entry = found[0]
+        self.assertEqual(len(entry["backtrace"]), engine.MAX_BACKTRACE_FRAMES)
+        self.assertEqual(entry["backtrace_truncated"], 5)
+        # The frames actually kept are the first 40 (most-recent-call-first
+        # order preserved), not an arbitrary 40 out of 45.
+        self.assertEqual(entry["backtrace"][0]["frame"], 0)
+        self.assertEqual(entry["backtrace"][-1]["frame"], 39)
+
+    def test_backtrace_at_or_under_the_cap_is_not_marked_truncated(self):
+        stderr = _make_deep_backtrace_stderr(engine.MAX_BACKTRACE_FRAMES)
+        found = engine.diagnostics(stderr)
+        entry = found[0]
+        self.assertEqual(len(entry["backtrace"]), engine.MAX_BACKTRACE_FRAMES)
+        self.assertNotIn("backtrace_truncated", entry)
+
 
 @unittest.skipUnless(HAS_GODOT, "godot not on PATH")
 class TestAgainstRealEngine(unittest.TestCase):
@@ -146,6 +281,27 @@ class TestAgainstRealEngine(unittest.TestCase):
         result = engine.run(["--headless", "--quit-after", "100000",
                              "--path", str(SAMPLE)], timeout=3)
         self.assertTrue(result.timed_out)
+
+    def test_run_scene_surfaces_the_real_backtrace_end_to_end(self):
+        # fixtures/crash-project/crash.tscn crashes three calls deep
+        # (_ready -> level_one -> level_two). Its own project, separate from
+        # SAMPLE, so it doesn't perturb any test that scans SAMPLE's exact
+        # file inventory (test_refs.py pins tscn.parse's call count against
+        # it). This is the end-to-end counterpart to the string-level
+        # BACKTRACE_STDERR tests above: it drives the real engine, not a
+        # captured transcript, confirming run_scene's own return value --
+        # not just diagnostics() in isolation -- actually carries the full
+        # chain.
+        result = engine.run_scene(str(CRASH_PROJECT), frames=5)
+        with_backtrace = [d for d in result["diagnostics"] if d.get("backtrace")]
+        self.assertEqual(len(with_backtrace), 1, "expected exactly one diagnostic with a backtrace")
+        entry = with_backtrace[0]
+        self.assertEqual(entry["file"], "res://crasher.gd")
+        functions = [f["function"] for f in entry["backtrace"]]
+        self.assertEqual(functions, ["level_two", "level_one", "_ready"])
+        for frame in entry["backtrace"]:
+            self.assertEqual(frame["file"], "res://crasher.gd")
+            self.assertIsInstance(frame["line"], int)
 
 
 class TestOrphanOnTimeout(unittest.TestCase):

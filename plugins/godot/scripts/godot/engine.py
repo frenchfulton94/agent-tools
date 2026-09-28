@@ -34,6 +34,24 @@ _HEAD = re.compile(r"^(SCRIPT ERROR|SHADER ERROR|ERROR|WARNING):\s*(.*)$")
 # Only res:// locations are the user's files; engine C++ frames are not.
 _AT = re.compile(r"^\s*at:\s*.*\((res://[^:)]+):(\d+)\)\s*$")
 
+# Since Godot 4.5, a runtime GDScript error is followed by its own call
+# stack: a header line, then one `[N] function (location)` line per frame,
+# most-recent-call-first. Frame lines never match _HEAD (they start with
+# `[`, not a severity word), so they can never be mistaken for a diagnostic
+# of their own; `_BT_LOC` below applies the exact same res://-only rule
+# `_AT` does to each frame's location, since a frame can equally point into
+# engine C++.
+_BT_HEADER = re.compile(r"^\s*GDScript backtrace \(most recent call first\):\s*$")
+_BT_FRAME = re.compile(r"^\s*\[(\d+)\]\s+(\S+)\s+\((.+)\)\s*$")
+_BT_LOC = re.compile(r"^(res://[^:]+):(\d+)$")
+
+# Mirrors check-gdscript.sh's own 40-line cap on the same class of problem: a
+# deep or infinite recursion crash can print a backtrace hundreds of frames
+# long, and an uncapped dump lands entirely in whatever is reading this
+# tool's output. Frames beyond this are counted, not silently dropped --
+# see `backtrace_truncated` below.
+MAX_BACKTRACE_FRAMES = 40
+
 
 class MissingBinary(Exception):
     pass
@@ -175,14 +193,77 @@ def diagnostics(stderr: str) -> list:
         # one error at another, unrelated error's file and line.
         next_header = header_idxs[pos + 1] if pos + 1 < len(header_idxs) else len(lines)
         limit = min(i + 4, next_header)
-        for follow in lines[i + 1 : limit]:
-            at = _AT.match(follow)
+        at_idx = None
+        for j in range(i + 1, limit):
+            at = _AT.match(lines[j])
             if at:
                 entry["file"] = at.group(1)
                 entry["line"] = int(at.group(2))
+                at_idx = j
                 break
+
+        # A backtrace, when present, always immediately follows the `at:`
+        # line this diagnostic's own frame was just found on -- never
+        # searched for independently of it, and never past `next_header`,
+        # for the same reason the `at:` search itself is bounded there: a
+        # backtrace's frame lines don't match _HEAD, so they can't be
+        # confused for a diagnostic, but bounding by next_header keeps this
+        # entirely inside the one diagnostic it belongs to regardless.
+        if at_idx is not None:
+            backtrace, truncated = _parse_backtrace(lines, at_idx + 1, next_header)
+            if backtrace:
+                entry["backtrace"] = backtrace
+                if truncated:
+                    entry["backtrace_truncated"] = truncated
+
         found.append(entry)
     return found
+
+
+def _parse_backtrace(lines, start, limit):
+    """Parse a `GDScript backtrace (most recent call first):` block that
+    begins at `lines[start]`, if it's actually there -- returns `([], 0)`
+    immediately otherwise (the ordinary case: most diagnostics, including
+    every compile-time one from `check_script`/`check_shader`, have no
+    backtrace at all, since nothing has actually run yet).
+
+    Returns `(frames, truncated_count)`. `frames` is capped at
+    `MAX_BACKTRACE_FRAMES`; `truncated_count` is how many real frames beyond
+    the cap were left out, so a caller can tell "the chain was this deep and
+    we stopped" from "that's the whole chain" -- the same distinction
+    `check_shader`'s `ShaderCheckTimedOut` exists to preserve for a timeout,
+    just for a different kind of truncation.
+    """
+    if start >= limit or not _BT_HEADER.match(lines[start]):
+        return [], 0
+
+    frames = []
+    j = start + 1
+    while j < limit:
+        m = _BT_FRAME.match(lines[j])
+        if not m:
+            break
+        loc = _BT_LOC.match(m.group(3))
+        if loc:
+            file_, line_ = loc.group(1), int(loc.group(2))
+        else:
+            # Same rule _AT enforces: a frame whose location isn't a res://
+            # path (engine C++, or anything else unrecognised) is not a
+            # user file, so it's reported with no file/line rather than a
+            # fabricated one -- the frame index and function name are still
+            # real and still kept.
+            file_, line_ = None, None
+        frames.append({
+            "frame": int(m.group(1)),
+            "function": m.group(2),
+            "file": file_,
+            "line": line_,
+        })
+        j += 1
+
+    if len(frames) > MAX_BACKTRACE_FRAMES:
+        return frames[:MAX_BACKTRACE_FRAMES], len(frames) - MAX_BACKTRACE_FRAMES
+    return frames, 0
 
 
 def check_script(root: str, rel_path: str, timeout: int = 30) -> list:

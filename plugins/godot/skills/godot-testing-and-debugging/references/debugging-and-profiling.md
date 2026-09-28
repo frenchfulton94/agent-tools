@@ -131,9 +131,10 @@ frame, not just the frame the error occurred in — always on when running in
 the editor or a debug export; off by default in release exports for
 performance, re-enabled via **Debug → Settings → GDScript → Always Track
 Call Stacks** if a production logging pipeline needs it. This is the exact
-backtrace block `run_scene`'s own caveat (SKILL.md, `verify-loop.md` rung 2)
-refers to: real, and printed to stderr, but not itself present in the MCP
-tool's structured result — only the crash line is.
+backtrace block `run_scene` carries through as each diagnostic's own
+`backtrace` list (SKILL.md, `verify-loop.md` rung 2) — real, printed to
+stderr, and now structured into the MCP tool's result rather than left for
+you to go read stderr yourself, capped at 40 frames per diagnostic.
 
 A native crash (not a GDScript error — an engine-level segfault) prints a
 separate C++ backtrace *and* a GDScript backtrace to stderr, but only the

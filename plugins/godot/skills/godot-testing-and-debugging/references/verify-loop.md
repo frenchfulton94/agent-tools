@@ -123,8 +123,13 @@ Real output for a scene whose script raises a runtime error three calls deep
     {
       "severity": "SCRIPT ERROR",
       "message": "Out of bounds get index '5' (on base: 'Array')",
-      "file": "res://main.gd",
-      "line": 11
+      "file": "res://crasher.gd",
+      "line": 20,
+      "backtrace": [
+        {"frame": 0, "function": "level_two", "file": "res://crasher.gd", "line": 20},
+        {"frame": 1, "function": "level_one", "file": "res://crasher.gd", "line": 15},
+        {"frame": 2, "function": "_ready", "file": "res://crasher.gd", "line": 11}
+      ]
     }
   ],
   "timed_out": false
@@ -135,24 +140,25 @@ Raw stderr for the same run, for comparison:
 
 ```
 SCRIPT ERROR: Out of bounds get index '5' (on base: 'Array')
-          at: level_two (res://main.gd:11)
+          at: level_two (res://crasher.gd:20)
           GDScript backtrace (most recent call first):
-              [0] level_two (res://main.gd:11)
-              [1] level_one (res://main.gd:7)
-              [2] _ready (res://main.gd:4)
+              [0] level_two (res://crasher.gd:20)
+              [1] level_one (res://crasher.gd:15)
+              [2] _ready (res://crasher.gd:11)
 ```
 
-Compare the two: `run_scene`'s `diagnostics` gives you exactly the crash
-site (`level_two`, line 11) — everything the tool's structured JSON carries.
-The `GDScript backtrace` block naming `level_one` and `_ready` is real,
-printed by the engine, and **entirely absent from the tool's result** —
-`run_scene` doesn't return raw stderr at all, only `stdout` and the
-extracted `diagnostics`. This matched across a direct check of both the
-underlying Python function and the MCP tool end-to-end, not just one or the
-other. Most of the time the crash site is all you need. When it isn't —
-when *why* `level_two` was called with a bad index matters more than *where*
-it failed — run the CLI form directly through Bash and read stderr yourself;
-nothing in the MCP layer surfaces those extra frames today.
+Compare the two: `run_scene`'s `diagnostics` carries the crash site
+(`level_two`, line 20) as `file`/`line`, exactly as before, and now also a
+`backtrace` list matching the engine's own `GDScript backtrace (most recent
+call first):` block frame for frame — `level_one` and `_ready` arrive
+alongside the crash site rather than only existing in raw stderr. Verified
+end to end: the real MCP server, not just the underlying Python, returns
+this shape (confirmed over its actual JSON-RPC stdio protocol against a
+three-deep crash). A frame whose location isn't a `res://` path (engine
+C++, same rule as everywhere else in this skill) gets `file`/`line: null`
+instead of a fabricated location, and the list is capped at 40 frames — a
+deep or infinite recursion can print far more — with a
+`backtrace_truncated` count on the diagnostic when frames were left out.
 
 A `timed_out: true` here means the scene never quit within its frame budget
 (a `while true` with no exit condition, for instance) — not the same thing

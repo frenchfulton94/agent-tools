@@ -72,14 +72,19 @@ is blank. Full MCP-call-and-CLI-equivalent detail, including sample output
 for every rung, is in `references/verify-loop.md`.
 
 `run_scene`'s returned diagnostics give you the *immediate* error site (the
-frame where the error was actually raised) — verified directly: a three-deep
-call chain (`_ready` → `level_one` → `level_two`) crashing in `level_two`
-returns only `level_two`'s file and line. Godot also prints a full
-`GDScript backtrace (most recent call first):` listing every calling frame
-to stderr, but that list is not included anywhere in `run_scene`'s result —
-only the crash site is. If the calling context matters and not just the
-crash line, run the equivalent command directly (`references/verify-loop.md`
-has it) and read stderr yourself.
+frame where the error was actually raised) *and* the full calling chain
+behind it — verified directly: a three-deep call chain (`_ready` →
+`level_one` → `level_two`) crashing in `level_two` returns a diagnostic
+whose top-level `file`/`line` name `level_two`'s crash site, plus a
+`backtrace` list (most recent call first, one `{frame, function, file,
+line}` per caller) naming `level_one` and `_ready` right alongside it — the
+same `GDScript backtrace (most recent call first):` list Godot prints to
+stderr, structured rather than left as text you'd have to go read yourself.
+A frame whose location resolves into engine C++ rather than a `res://` path
+gets `file`/`line: null`, the same rule applied everywhere else in this
+skill. The list is capped at 40 frames — a deep or infinite recursion can
+print far more than that — with a `backtrace_truncated` count on the
+diagnostic saying how many deeper frames were left out, if any.
 
 `screenshot_scene` returns a `pixel` key — the rendered center pixel's
 `(r, g, b)` — specifically so you can tell a real render from a blank one.
@@ -130,8 +135,8 @@ stderr yourself means recognizing the same distinction.
 When a runtime error's location matters beyond the immediate crash line,
 Godot also prints (since 4.5, on by default in the editor and debug
 exports) a full `GDScript backtrace (most recent call first):` list of every
-calling frame — see the `run_scene` caveat above for why this doesn't
-automatically reach you through the MCP tool. The debugger panel, profiler,
+calling frame — `run_scene` carries this through as the diagnostic's own
+`backtrace` list (see the ladder section above). The debugger panel, profiler,
 custom performance monitors, and file logging are covered — distilled from
 upstream, not vendored — in `references/debugging-and-profiling.md`, along
 with the `--debug-*` visualization and profiling flags from the vendored
