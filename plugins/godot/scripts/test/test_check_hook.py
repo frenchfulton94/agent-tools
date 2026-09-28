@@ -95,6 +95,32 @@ class TestWithEngine(unittest.TestCase):
         proc = run_hook(uses)
         self.assertEqual(proc.stdout.strip(), "")
 
+    def test_unrelated_newer_file_without_class_name_still_reports(self):
+        # Fix round 2, IMPORTANT 1, case B. The ordinary session shape: an
+        # agent edits several .gd files in a row before anything reimports.
+        # After the first edit, every subsequent edit sees some OTHER .gd
+        # file that is also newer than the cache. A content-blind "is
+        # anything else newer" check (fix round 1's version of this
+        # staleness test) suppresses every one of those subsequent edits --
+        # for the rest of the session -- even on files with real, unrelated
+        # errors, because a stale cache can only produce a spurious
+        # diagnostic through one mechanism: an unindexed class_name. This is
+        # the same shape as test_stale_cross_file_class_name_stays_silent
+        # immediately above, with the one line that matters removed: no
+        # class_name here, so nothing about the cache being behind can make
+        # any reference in broken.gd wrong, and the real error must be
+        # reported.
+        (self.root / "enemy_type.gd").write_text("extends Resource\n")
+        broken = self.root / "broken.gd"
+        broken.write_text(
+            'extends Node\n\nfunc _ready() -> void:\n\tvar x: int = "still broken"\n'
+        )
+        proc = run_hook(broken)
+        payload = json.loads(proc.stdout)
+        context = payload["hookSpecificOutput"]["additionalContext"]
+        self.assertIn("broken.gd", context)
+        self.assertIn("String", context)
+
     def test_editing_only_the_checked_file_still_reports(self):
         # Companion to the fix above. PostToolUse fires right after Claude
         # wrote the exact file being checked, so that file's mtime is
