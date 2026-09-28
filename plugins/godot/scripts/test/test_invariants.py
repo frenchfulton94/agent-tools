@@ -26,17 +26,25 @@ ENGINE_MODULES = {"engine", "api", "render"}
 
 
 def _imported_names(path: Path) -> set:
+    """Every segment of every imported name.
+
+    Collecting only `split(".")[0]` was a real hole: for `from . import engine`
+    the head IS "engine" and the check worked, but for the absolute spellings
+    `import godot.engine` and `from godot.engine import run` the head is
+    "godot", so the engine module was reachable with the test still green.
+    Recording every segment covers relative and absolute spellings alike.
+    """
     tree = ast.parse(path.read_text())
     names = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                names.add(alias.name.split(".")[0])
+                names.update(alias.name.split("."))
         elif isinstance(node, ast.ImportFrom):
             if node.module:
-                names.add(node.module.split(".")[0])
+                names.update(node.module.split("."))
             for alias in node.names:
-                names.add(alias.name.split(".")[0])
+                names.update(alias.name.split("."))
     return names
 
 
@@ -53,6 +61,31 @@ class TestPureParsersNeverReachTheEngine(unittest.TestCase):
             "A pure parser reached an engine module. project_overview, "
             "scene_tree and reference_graph must work with no Godot binary "
             "installed (spec decision 16).",
+        )
+
+    def test_no_pure_module_can_spawn_a_process_at_all(self):
+        """Decision 16's actual words are "requiring no Godot binary", which is
+        a stronger claim than "imports no engine module". A direct
+        `subprocess.run(["godot", "--version"])` inside overview() violates the
+        property while importing nothing the closure test looks for, so the
+        spawning primitives are banned outright from the pure parsers.
+        """
+        banned = {"subprocess", "multiprocessing", "popen2", "commands"}
+        offenders = []
+        for name in PURE_MODULES:
+            source = (PKG / name).read_text()
+            reached = _imported_names(PKG / name) & banned
+            if reached:
+                offenders.append(f"{name} imports {sorted(reached)}")
+            for call in ("os.system(", "os.popen(", "os.spawn", "os.exec"):
+                if call in source:
+                    offenders.append(f"{name} calls {call}")
+        self.assertEqual(
+            offenders,
+            [],
+            "A pure parser can spawn a process. Decision 16 promises these "
+            "three tools need no Godot binary, which bans spawning it "
+            "directly, not merely importing the module that would.",
         )
 
     def test_the_transitive_closure_is_clean_too(self):
@@ -81,26 +114,50 @@ class TestNoLeakedFileHandles(unittest.TestCase):
     Harmless under CPython refcounting and not harmless under anything else.
     """
 
-    def test_no_bare_open_read_in_the_package(self):
+    def test_every_open_is_bound_by_a_with(self):
+        """Assert on the `open` CALL, not on one spelling of its use.
+
+        Matching `open(...).read()` as a single chained expression pinned one
+        spelling and missed the property. All of these leak the identical
+        handle and kept that version green:
+
+            _f = open(p); parse_cfg(_f.read())     # measurably ResourceWarns
+            list(open(p))
+            io.open(p).read()
+            open(p).readline()
+
+        Every legitimate read in this package is `with open(...) as f`, so the
+        rule is simply: an `open` call must be a `with` item's context
+        expression. Nothing here needs an exception.
+        """
         offenders = []
         targets = [PKG / n for n in os.listdir(PKG) if n.endswith(".py")]
         targets.append(SERVER)
+        hooks = SERVER.parents[2] / "hooks" / "scripts"
+        if hooks.is_dir():
+            targets += [hooks / n for n in os.listdir(hooks) if n.endswith(".py")]
+
+        def is_open(call):
+            func = call.func
+            if isinstance(func, ast.Name):
+                return func.id == "open"
+            return isinstance(func, ast.Attribute) and func.attr == "open"
+
         for path in targets:
             tree = ast.parse(path.read_text())
+            managed = set()
             for node in ast.walk(tree):
-                # open(...) used as a plain expression -- i.e. not bound by a
-                # `with`, whose context expression is a separate node type.
-                if not isinstance(node, ast.Call):
-                    continue
-                func = node.func
-                if isinstance(func, ast.Attribute) and func.attr in ("read", "readlines"):
-                    inner = func.value
-                    if isinstance(inner, ast.Call) and getattr(inner.func, "id", "") == "open":
-                        offenders.append(f"{path.name}:{node.lineno}")
+                if isinstance(node, (ast.With, ast.AsyncWith)):
+                    for item in node.items:
+                        managed.add(id(item.context_expr))
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Call) and is_open(node) and id(node) not in managed:
+                    offenders.append(f"{path.name}:{node.lineno}")
         self.assertEqual(
             offenders,
             [],
-            "open(...).read() leaks the handle; use `with open(...) as f`.",
+            "An open() outside a `with` leaks the handle under any "
+            "implementation that does not refcount. Use `with open(...) as f`.",
         )
 
 

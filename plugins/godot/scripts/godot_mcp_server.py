@@ -498,14 +498,13 @@ def call_tool(name, args):
         project_root = os.path.realpath(args["project_path"])
         resolved_out = os.path.realpath(out_path)
 
-        # MINOR (fix round 4): if project_path itself can't be resolved,
-        # _out_path_is_inside_project() below would still correctly refuse
-        # the call (it treats an unverifiable root as unsafe), but its
-        # generic "cannot verify" case shares a return value with a genuine
-        # containment match, and the message at that call site names
-        # out_path -- which was never the problem here. Say so directly,
-        # naming project_path, matching how every other tool in this server
-        # surfaces a bad project_path (by naming project.godot).
+        # _require_project() above already proved project.godot is a file here,
+        # so this stat can now only fail if the directory vanished between the
+        # two calls. Kept as a race guard rather than deleted, because the
+        # realpath()'d project_root is what the containment check below
+        # compares against. The fix-round-4 message it used to carry (naming
+        # project_path rather than out_path, which was never the problem) now
+        # comes from _require_project, which every path-taking tool shares.
         try:
             os.stat(project_root)
         except OSError as exc:

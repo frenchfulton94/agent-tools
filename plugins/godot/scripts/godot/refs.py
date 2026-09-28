@@ -124,10 +124,22 @@ def _uid_index(root: str, parsed: dict, parse_errors: list):
     duplicates: dict = {}
 
     def read(full, rel):
+        # Decoded STRICTLY, deliberately. errors="replace" would make the
+        # UnicodeDecodeError arm below unreachable and turn a corrupt sidecar
+        # into a mangled uid silently recorded in the index -- the scene's
+        # uid:// then resolves to nothing, so the script is reported in both
+        # `broken` and `orphans` while parse_errors: [] asserts the report is
+        # complete. That is a confident wrong answer about exactly the case
+        # this module exists to diagnose, and worse than the crash it replaced.
         try:
-            with open(full, errors="replace") as f:
-                return f.read()
-        except (OSError, UnicodeDecodeError) as exc:
+            with open(full, "rb") as f:
+                raw = f.read()
+        except OSError as exc:
+            parse_errors.append({"path": rel, "error": f"unreadable: {exc}"})
+            return None
+        try:
+            return raw.decode("utf-8")
+        except UnicodeDecodeError as exc:
             parse_errors.append({"path": rel, "error": f"unreadable: {exc}"})
             return None
 

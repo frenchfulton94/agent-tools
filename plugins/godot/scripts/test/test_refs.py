@@ -1,3 +1,4 @@
+import json
 import shutil
 import tempfile
 import os
@@ -203,6 +204,23 @@ class TestUnreadableSidecarsAreReportedNotRaised(unittest.TestCase):
             os.chmod(bad, 0o644)
         paths = [e["path"] for e in result["parse_errors"]]
         self.assertIn("art.png.import", paths)
+
+    def test_non_utf8_uid_is_reported_not_silently_mangled(self):
+        # Re-review IMPORTANT A. errors="replace" would decode this to
+        # "uid://b\ufffd\ufffd123" and record it in the index: the scene's real
+        # uid:// then resolves to nothing, so the script lands in BOTH `broken`
+        # and `orphans` while parse_errors: [] claims the report is complete.
+        # A crash is bad ergonomics; this would be a confident wrong answer
+        # about the exact case the module exists to diagnose.
+        bad = os.path.join(self.root, "scripts", "player.gd.uid")
+        os.makedirs(os.path.dirname(bad), exist_ok=True)
+        with open(bad, "wb") as f:
+            f.write(b"uid://b\xff\xfe123")
+        result = self._graph()
+        paths = [e["path"] for e in result["parse_errors"]]
+        self.assertIn("scripts/player.gd.uid", paths)
+        blob = json.dumps(result)
+        self.assertNotIn("\ufffd", blob)
 
     def test_a_healthy_project_still_reports_no_parse_errors(self):
         # Over-blocking direction: the hardening must not manufacture errors.

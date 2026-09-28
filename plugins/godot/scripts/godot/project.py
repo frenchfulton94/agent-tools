@@ -5,7 +5,9 @@ values that may span lines when a bracket or brace is left open. Keys contain
 slashes (`config/name`), so this is not configparser-compatible.
 
 Nothing here invokes the Godot binary. A project can be described on a machine
-with no engine installed, and test_no_binary_needed pins that.
+with no engine installed, and test_invariants.TestPureParsersNeverReachTheEngine
+pins that -- both that no engine module is reachable from here and that nothing
+in this module can spawn a process at all, which is what the claim needs.
 """
 
 from __future__ import annotations
