@@ -97,6 +97,15 @@ def engine_version() -> str:
             candidate = line.strip()
             if candidate and _VERSION_LINE.match(candidate):
                 return candidate
+    # A timeout reaches here too, because run() SIGKILLs the child and a killed
+    # engine prints nothing -- indistinguishable from a build with unparseable
+    # version output unless we say which one happened.
+    if result.timed_out:
+        raise RuntimeError(
+            "Godot did not print a version within 15s; the process was killed. "
+            "Check that GODOT_BIN (or the `godot` on PATH) is a real engine "
+            "binary and not a wrapper that waits on input."
+        )
     raise RuntimeError(
         "Godot's --version output did not contain a recognizable version "
         f"string. stdout={result.stdout!r} stderr={result.stderr!r}"
@@ -128,13 +137,22 @@ def _generate_dump(cache_dir: str, dump_path: str) -> None:
         )
     scratch = tempfile.mkdtemp(dir=cache_dir)
     try:
-        engine.run(
+        result = engine.run(
             ["--headless", "--dump-extension-api-with-docs"],
             cwd=scratch,
             timeout=120,
         )
         scratch_dump = os.path.join(scratch, "extension_api.json")
         if not os.path.isfile(scratch_dump):
+            # Both a timeout and a genuine failure land here with no file, so
+            # name which one rather than reporting the symptom for both.
+            if result.timed_out:
+                raise RuntimeError(
+                    "Godot did not finish dumping the class reference within "
+                    "120s; the process was killed and no cache was written. "
+                    "The dump is a one-time cost per engine version -- retry, "
+                    "and it will be served from cache afterwards."
+                )
             raise RuntimeError(
                 f"Godot did not produce extension_api.json in {scratch!r} "
                 f"(cache dir {cache_dir!r})."
@@ -197,11 +215,10 @@ def load_dump(cache_dir: str | None = None) -> dict:
         # writing VERSION leaves exactly dump-present/VERSION-missing, and
         # skipping the check here would serve that dump forever without ever
         # calling engine_version() again to notice and repair it.
-        cached_version = (
-            open(version_path).read().strip()
-            if os.path.isfile(version_path)
-            else None
-        )
+        cached_version = None
+        if os.path.isfile(version_path):
+            with open(version_path) as f:
+                cached_version = f.read().strip()
         try:
             current = engine_version()
             checked_ok = True

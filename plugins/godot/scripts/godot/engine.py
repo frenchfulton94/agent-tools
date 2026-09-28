@@ -57,6 +57,10 @@ class MissingBinary(Exception):
     pass
 
 
+class ScriptCheckTimedOut(Exception):
+    pass
+
+
 @dataclass
 class Result:
     stdout: str
@@ -267,10 +271,27 @@ def _parse_backtrace(lines, start, limit):
 
 
 def check_script(root: str, rel_path: str, timeout: int = 30) -> list:
+    """Raises ScriptCheckTimedOut rather than silently returning `[]` when the
+    check itself times out. `result.timed_out` and "no diagnostics" are not the
+    same fact: `run()` SIGKILLs a hung engine, which then prints nothing, so a
+    timeout produces exactly the empty stderr a clean script produces -- and
+    the server renders an empty list as "the script parses and type-checks."
+    Falling through to `[]` here would report a script that was never actually
+    checked as fine, which is the one thing section 3.1 of the spec exists to
+    prevent. Same defect, same fix as render.check_shader; this is its sibling.
+    """
     result = run(
         ["--headless", "--path", root, "--check-only", "--script", rel_path],
         timeout=timeout,
     )
+    if result.timed_out:
+        raise ScriptCheckTimedOut(
+            f"check_script timed out after {timeout}s on {rel_path!r}. "
+            "This is not a verdict -- it is not the same as a clean parse. "
+            "A first-ever --check-only on a large project runs an implicit "
+            "import pass, which can exceed the timeout; try again once the "
+            "project has been imported."
+        )
     return diagnostics(result.stderr)
 
 

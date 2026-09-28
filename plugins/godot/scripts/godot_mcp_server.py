@@ -340,12 +340,110 @@ def _out_path_is_inside_project(resolved_out: str, project_root: str) -> bool:
         ancestor = parent
 
 
+class BadInputPath(Exception):
+    """A project_path or scene_path that does not name what it claims to.
+
+    Raised rather than returned so every tool reports a typo'd or stale path
+    identically. Before this existed the nine tools had four conventions for
+    the same user error: project_overview and scene_tree emitted a raw Python
+    traceback (with absolute filesystem paths in it), while reference_graph,
+    check_script and check_shader returned a confident CLEAN or EMPTY answer
+    indistinguishable from a healthy project -- `broken: [], orphans: [],
+    parse_errors: []` for a path that is not a project at all. A confident
+    empty answer is the worst of the four, because absence reads as fact and
+    an agent acts on it. Only screenshot_scene got this right.
+    """
+
+
+def _require_project(args):
+    """Read-only: stats project.godot and nothing else. Nothing here may
+    create, touch or otherwise write, because this server's one load-bearing
+    property is that it never mutates project source.
+    """
+    root = args["project_path"]
+    if not os.path.isfile(os.path.join(root, "project.godot")):
+        raise BadInputPath(
+            f"project_path {root!r} is not a Godot project: no project.godot "
+            "there. Check the path, or pass the directory that contains "
+            "project.godot rather than a subdirectory of it."
+        )
+
+
+def _require_scene(args):
+    path = args["scene_path"]
+    if not os.path.isfile(path):
+        raise BadInputPath(
+            f"scene_path {path!r} does not name a readable file. Pass a "
+            "filesystem path to a .tscn file, not a res:// path."
+        )
+
+
+LOOKUP_BUDGET = 60000
+
+
+def _fit_class(found, budget=LOOKUP_BUDGET):
+    """Shrink a class record to fit the budget by dropping whole MEMBERS, not
+    characters.
+
+    This used to be `json.dumps(found, indent=2)[:60000]`, which cuts
+    mid-token and hands the agent text that announces itself as JSON and does
+    not parse. Not a rare edge: measured against the real 1,036-class dump for
+    4.7.2, 25 classes serialise past 60,000 characters, and they are the ones
+    most worth looking up -- RenderingServer (360,832), DisplayServer,
+    Control, TextEdit, CanvasItem, Window, and Node (106,638) itself.
+
+    Members are dropped from the longest list first, so a class stays
+    described rather than losing one whole category, and each truncated list
+    ends with an explicit marker saying how many were omitted -- the agent can
+    then ask for one by name via the `member` argument, which returns just
+    that member and is never truncated in practice.
+    """
+    if len(json.dumps(found, indent=2)) <= budget:
+        return found
+
+    names = ["methods", "properties", "signals", "constants", "enums"]
+    # Original member lists and their original counts, captured once. Every
+    # marker below is computed against these, so a list halved more than once
+    # still reports how many were dropped in total rather than how many the
+    # last pass removed.
+    full = {
+        k: list(found[k]) for k in names
+        if isinstance(found.get(k), list) and found[k]
+    }
+    keep = {k: len(v) for k, v in full.items()}
+
+    def build():
+        out = dict(found)
+        for k, original in full.items():
+            n = keep[k]
+            if n >= len(original):
+                out[k] = original
+                continue
+            out[k] = original[:n] + [
+                f"...{len(original) - n} more {k} omitted to fit the response "
+                f'budget; pass member="<name>" to lookup_class for any one '
+                f"of them (this class has {len(original)} in total)"
+            ]
+        return out
+
+    while len(json.dumps(build(), indent=2)) > budget:
+        halvable = [k for k in keep if keep[k] > 1]
+        if not halvable:
+            break
+        widest = max(halvable, key=lambda k: keep[k])
+        keep[widest] = max(1, keep[widest] // 2)
+    return build()
+
+
 def call_tool(name, args):
     if name == "project_overview":
+        _require_project(args)
         return True, json.dumps(project.overview(args["project_path"]), indent=2)
 
     if name == "scene_tree":
-        text = open(args["scene_path"], errors="replace").read()
+        _require_scene(args)
+        with open(args["scene_path"], errors="replace") as f:
+            text = f.read()
         blocks = tscn.parse(text)
         root = tscn.scene_tree(blocks)
         out = ["# Nodes", *_node_lines(root), "", "# External resources"]
@@ -354,21 +452,25 @@ def call_tool(name, args):
         return True, "\n".join(out)
 
     if name == "reference_graph":
+        _require_project(args)
         return True, _reference_graph_text(refs.graph(args["project_path"]))
 
     if name == "check_script":
+        _require_project(args)
         found = engine.check_script(args["project_path"], args["script_path"])
         if not found:
             return True, "No diagnostics. The script parses and type-checks."
         return True, json.dumps(found, indent=2)
 
     if name == "run_scene":
+        _require_project(args)
         result = engine.run_scene(
             args["project_path"], args.get("scene"), int(args.get("frames", 120))
         )
         return True, json.dumps(result, indent=2)
 
     if name == "check_shader":
+        _require_project(args)
         # render.check_shader() raises ShaderCheckTimedOut rather than
         # returning [] on a timed-out compile attempt; that is caught in
         # main()'s dispatch below, alongside the other translated exceptions,
@@ -380,6 +482,7 @@ def call_tool(name, args):
         return True, json.dumps(found, indent=2)
 
     if name == "screenshot_scene":
+        _require_project(args)
         out_path = args.get("out_path") or os.path.join(
             tempfile.mkdtemp(prefix="godot-shot-"), "scene.png"
         )
@@ -487,7 +590,7 @@ def call_tool(name, args):
         found = api.lookup_class(args["name"], args.get("member"))
         if not found:
             return False, f"No such class: {args['name']}"
-        return True, json.dumps(found, indent=2)[:60000]
+        return True, json.dumps(_fit_class(found), indent=2)
 
     if name == "search_classes":
         # api.search_classes() likewise builds a fresh list; same rule.
@@ -563,6 +666,10 @@ def dispatch_tool_call(name, arguments):
     except render.NoDisplay as exc:
         ok, text = False, str(exc)
     except render.ShaderCheckTimedOut as exc:
+        ok, text = False, str(exc)
+    except engine.ScriptCheckTimedOut as exc:
+        ok, text = False, str(exc)
+    except BadInputPath as exc:
         ok, text = False, str(exc)
     except tscn.TscnParseError as exc:
         ok, text = False, f"Could not parse the scene file: {exc}"

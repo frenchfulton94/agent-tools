@@ -1,5 +1,6 @@
 import shutil
 import tempfile
+import os
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -158,6 +159,54 @@ class TestGraph(unittest.TestCase):
         # being implied for free by the count assertion above.
         self.assertIn("scripts/player.gd", g["orphans"])
         self.assertIn("main.tscn", error_paths)
+
+
+class TestUnreadableSidecarsAreReportedNotRaised(unittest.TestCase):
+    """Final whole-branch review, IMPORTANT 2.
+
+    Task 4 hardened the .tscn read path in _parse_scenes so an unreadable file
+    became a parse_errors entry rather than an exception, on the reasoning that
+    "broken symlinks survive a checkout, so this is ordinary, not exotic." The
+    sidecar reads twenty lines below never got the same treatment -- and a
+    project has one .uid per script, far more of them than .tscn files.
+    """
+
+    def setUp(self):
+        self.root = tempfile.mkdtemp(prefix="godot-sidecar-")
+        shutil.copytree(SAMPLE, self.root, dirs_exist_ok=True)
+
+    def tearDown(self):
+        shutil.rmtree(self.root, ignore_errors=True)
+
+    def _graph(self):
+        return refs.graph(self.root)
+
+    def test_dangling_uid_symlink_is_reported(self):
+        link = os.path.join(self.root, "dangling.gd.uid")
+        os.symlink(os.path.join(self.root, "nowhere-at-all"), link)
+        result = self._graph()  # must not raise FileNotFoundError
+        paths = [e["path"] for e in result["parse_errors"]]
+        self.assertIn("dangling.gd.uid", paths)
+
+    def test_unreadable_import_sidecar_is_reported(self):
+        bad = os.path.join(self.root, "art.png.import")
+        with open(bad, "w") as f:
+            f.write('uid="uid://abc"\n')
+        os.chmod(bad, 0o000)
+        try:
+            if os.access(bad, os.R_OK):
+                self.skipTest("running as a user that ignores the mode bits")
+            result = self._graph()  # must not raise PermissionError
+        finally:
+            # Restore before tearDown, not via addCleanup: cleanups run AFTER
+            # tearDown, by which point the whole tree is already gone.
+            os.chmod(bad, 0o644)
+        paths = [e["path"] for e in result["parse_errors"]]
+        self.assertIn("art.png.import", paths)
+
+    def test_a_healthy_project_still_reports_no_parse_errors(self):
+        # Over-blocking direction: the hardening must not manufacture errors.
+        self.assertEqual(self._graph()["parse_errors"], [])
 
 
 if __name__ == "__main__":

@@ -41,7 +41,7 @@ reopens the design; it is not an implementation detail.
 | 7 | The class reference is never vendored. `--dump-extension-api-with-docs` generates it from the user's own binary, keyed by engine version, so it is correct for whatever Godot they run. |
 | 8 | A narrow slice of prose documentation is vendored verbatim, limited to exact material that paraphrasing corrupts: the `.tscn` grammar, the CLI flag tables, the GDScript style/typing/warning references, export and feature tags, and best practices. |
 | 9 | Skills are decomposed as spine plus consolidated subsystems, preserving subsystem-shaped triggering. Workflow-phase naming was rejected because vague descriptions are the documented cause of skills that never fire. |
-| 10 | Seventeen skills, all in v0.1.0. `godot-performance` was added after `tutorials/performance/` proved to fit neither the 3D nor the testing skill. |
+| 10 | Seventeen skills. `godot-performance` was added after `tutorials/performance/` proved to fit neither the 3D nor the testing skill. **Amended after the foundation plan:** they land across multiple plans, not in one release. 0.1.0 is the foundation — the MCP server, both hooks, the vendored slice, and the four spine skills (`gdscript`, `godot-project-architecture`, `godot-scene-files`, `godot-testing-and-debugging`). The remaining thirteen, including the C# and GDExtension skills of decision 2 and the `godot-editor-tooling` of decision 11, ship in later plans. Nothing may reference a skill that has not shipped yet — `gdscript` initially routed C# work to an unbuilt `godot-csharp`, which reached users as a dead end; `tests/marketplace-integrity.test.ts` now fails on any such reference. |
 | 11 | The Godot editor-tooling skill is named `godot-editor-tooling`, not `godot-editor-plugins`, to avoid a triggering collision with `meta-skills:authoring-plugins`, which ships from the same catalog. |
 | 12 | Zero runtime references to skills outside this plugin, and no `dependencies` array in the manifest. |
 | 13 | No LSP is written for GDScript or GDShader. GDScript's ships in the editor; an LSP serves a human's editor, and Claude Code has no LSP client. |
@@ -107,6 +107,35 @@ a new UID (`uid://cbm7rcrqysjkg`), the scene still referenced the old one
 Blocking all moves would be wrong and noisy; blocking a move that orphans the
 sidecar is exact.
 
+### 3.5 Headless shader loading silently passes broken shaders
+
+`load()` on a `.gdshader` with an invalid `vec4` arity returned a non-null
+Shader under `--headless` and printed nothing. Under a real renderer the same
+shader reported:
+
+    E   3->  COLOR = vec4(1.0, 0.0, 0.0);
+    SHADER ERROR: Invalid arguments for the built-in function: "vec4(float,float,float)".
+              at: (null) (res://bad.gdshader:3)
+
+Only the first error was reported; a second fault on line 4 was not reached.
+
+**Consequence.** Shader validation requires a real renderer, is iterative
+rather than batch, and the obvious headless approach reports success on code
+that cannot compile.
+
+### 3.6 Timings and environment
+
+| Measurement | Value |
+|---|---|
+| `--check-only` on one script | 130 ms |
+| `--import` on a trivial project | 1.6 s |
+| `--dump-extension-api-with-docs` | 11.9 MB, ~2 s, 1,036 classes |
+| `--dump-extension-api` (no docs) | 6.9 MB |
+| `timeout(1)` on macOS | not present — the server owns its own deadlines |
+
+Running Godot against a project at all creates `.godot/` and per-file `.uid`
+artifacts. This is normal import behavior, conventionally gitignored, and is
+disclosed in tool descriptions so it does not read as MCP-caused mutation.
 ### 3.7 Only some file types have UID sidecars
 
 Measured by importing projects and listing what Godot generated:
@@ -162,35 +191,6 @@ inconsistent one); a guard that denied sidecar deletion in place would fire
 on work that is safe by either reasoning often enough to be switched off,
 taking the rule that does matter with it.
 
-### 3.5 Headless shader loading silently passes broken shaders
-
-`load()` on a `.gdshader` with an invalid `vec4` arity returned a non-null
-Shader under `--headless` and printed nothing. Under a real renderer the same
-shader reported:
-
-    E   3->  COLOR = vec4(1.0, 0.0, 0.0);
-    SHADER ERROR: Invalid arguments for the built-in function: "vec4(float,float,float)".
-              at: (null) (res://bad.gdshader:3)
-
-Only the first error was reported; a second fault on line 4 was not reached.
-
-**Consequence.** Shader validation requires a real renderer, is iterative
-rather than batch, and the obvious headless approach reports success on code
-that cannot compile.
-
-### 3.6 Timings and environment
-
-| Measurement | Value |
-|---|---|
-| `--check-only` on one script | 130 ms |
-| `--import` on a trivial project | 1.6 s |
-| `--dump-extension-api-with-docs` | 11.9 MB, ~2 s, 1,036 classes |
-| `--dump-extension-api` (no docs) | 6.9 MB |
-| `timeout(1)` on macOS | not present — the server owns its own deadlines |
-
-Running Godot against a project at all creates `.godot/` and per-file `.uid`
-artifacts. This is normal import behavior, conventionally gitignored, and is
-disclosed in tool descriptions so it does not read as MCP-caused mutation.
 
 ## 4. What ships
 
@@ -235,7 +235,7 @@ Nine tools, none of which mutate project source.
 
 | Tool | Returns | Mechanism | Needs `godot` | Needs a display |
 |---|---|---|---|---|
-| `project_overview` | Engine version, main scene, autoloads, input actions, rendering method, export presets | Parses `project.godot`, `export_presets.cfg` | no | no |
+| `project_overview` | Project name, `config/features` (which carries the engine version the project targets — read from project.godot, so no binary is needed), main scene, autoloads, input actions, rendering method, export presets | Parses `project.godot`, `export_presets.cfg` | no | no |
 | `scene_tree` | Node hierarchy with types, scripts, key properties, signal connections, external resources | Parses `.tscn` | no | no |
 | `reference_graph` | Broken `uid://`/`res://` references, orphaned files, duplicate UIDs | Walks project, cross-references | no | no |
 | `check_script` | `{severity, file, line, message}` diagnostics | `--headless --check-only --script`, stderr parsed | yes | no |

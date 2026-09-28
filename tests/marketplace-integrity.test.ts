@@ -156,6 +156,37 @@ describe('skills', () => {
 		}
 		expect(collisions).toEqual([]);
 	});
+
+	// A description is the only thing an agent reads before deciding what a skill covers and
+	// where to go next, so a skill it names had better exist. `gdscript` shipped pointing C#
+	// work at `godot-csharp`, which is planned but unbuilt — an agent handed a C# question was
+	// routed to a skill it could not find, and got nothing. Neither existing gate saw it:
+	// uniqueness only checks skills that ship, and the audit only checks the README column.
+	//
+	// Cross-plugin references are a separate, deliberate rule (a portable plugin must not
+	// depend on a sibling), so this checks against every skill in the catalog — the weaker
+	// claim, which catches the dangling-name failure without prejudging that rule.
+	test('no skill description names a skill the catalog does not ship', () => {
+		const shipped = new Set<string>();
+		for (const dir of pluginDirs) for (const skill of skillsOf(dir)) shipped.add(skill);
+
+		const dangling: string[] = [];
+		for (const dir of pluginDirs) {
+			for (const skill of skillsOf(dir)) {
+				const { description } = skillFrontmatter(
+					join(PLUGINS_DIR, dir, 'skills', skill, 'SKILL.md'),
+				);
+				if (!description) continue;
+				// Only the explicit routing form — "use `name`" / "see name" — so ordinary
+				// prose that happens to contain a hyphenated phrase is not read as a pointer.
+				for (const m of description.matchAll(/(?:use|see)\s+`?([a-z][a-z0-9]*(?:-[a-z0-9]+)+)`?/gi)) {
+					const named = (m[1] as string).toLowerCase();
+					if (!shipped.has(named)) dangling.push(`${dir}/${skill} -> ${named}`);
+				}
+			}
+		}
+		expect(dangling).toEqual([]);
+	});
 });
 
 describe('README', () => {

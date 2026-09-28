@@ -111,3 +111,18 @@ document: fixing them for real would mean editing two skills' `description`
 fields against each other, which is a design change to skills that already
 shipped and passed their own review, not something this verification task
 is scoped to do unilaterally.
+
+**Adjudicated by the final whole-branch review: #10 and #11 are working as
+intended, not open defects.** "No clean single fire" is only a problem if
+exactly one skill may fire, and nothing in the harness requires that — skills
+load together routinely. Both prompts genuinely span two skills: #10 needs the
+verify loop *and* the language semantics, #11 needs the backtrace read *and* a
+judgement on whether the autoload design is the root cause. Two descriptions
+both claiming a prompt that really does span both is correct behaviour.
+
+The failure worth guarding against is the opposite one — a prompt that fires
+*nothing*, or fires one skill with no route onward. Neither applies here:
+whichever of the two fires names the other by name in its own text, so the
+agent always has a next step. Forcing exclusivity by editing two shipped
+`description` fields against each other would make the plugin worse, so the
+matrix stands as written.

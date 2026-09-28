@@ -76,5 +76,50 @@ class TestFindRoot(unittest.TestCase):
         self.assertIsNone(project.find_root("/"))
 
 
+class TestKeyPatternAcceptsWhatGodotAccepts(unittest.TestCase):
+    """Final whole-branch review, MINOR 1 (raised to Important by the controller).
+
+    The old pattern required a key to start with a letter or underscore and
+    contain no hyphen; anything else did not match and the line was SILENTLY
+    skipped. Deferred during Task 3 as unreachable "since overview() never
+    exposes layer names" -- true of layer names, false of input actions, which
+    project_overview does expose as a documented part of its contract.
+
+    All four names below were confirmed accepted by Godot 4.7.2 itself:
+    InputMap.has_action() returns true for every one.
+    """
+
+    CFG = (
+        "[input]\n\n"
+        'ui_accept={\n"deadzone": 0.5\n}\n'
+        '2d_jump={\n"deadzone": 0.5\n}\n'
+        'move-left={\n"deadzone": 0.5\n}\n'
+        'player1_fire={\n"deadzone": 0.5\n}\n'
+        "\n[layer_names]\n\n"
+        '2d_physics/layer_1="world"\n'
+        '3d_physics/layer_1="terrain"\n'
+    )
+
+    def test_numeric_leading_and_hyphenated_keys_survive(self):
+        cfg = project.parse_cfg(self.CFG)
+        self.assertEqual(
+            sorted(cfg["input"]),
+            ["2d_jump", "move-left", "player1_fire", "ui_accept"],
+        )
+
+    def test_layer_names_are_no_longer_dropped(self):
+        cfg = project.parse_cfg(self.CFG)
+        self.assertEqual(
+            sorted(cfg["layer_names"]), ["2d_physics/layer_1", "3d_physics/layer_1"]
+        )
+
+    def test_widening_did_not_turn_unrecognised_lines_into_errors(self):
+        # The deliberate asymmetry: parse_cfg raises only on an unterminated
+        # value, never on a line it simply does not recognise. Widening the
+        # ACCEPT pattern must not have changed that.
+        cfg = project.parse_cfg("[s]\nthis line has no equals sign\nk=v\n")
+        self.assertEqual(cfg["s"]["k"], "v")
+
+
 if __name__ == "__main__":
     unittest.main()

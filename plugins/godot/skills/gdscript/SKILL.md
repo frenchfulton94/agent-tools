@@ -1,6 +1,6 @@
 ---
 name: gdscript
-description: Writes and reviews GDScript for Godot 4 — static typing and inference, the official style guide, the warning system and its configuration, @export annotations, doc comments, and format strings. Use when writing, reviewing, or fixing a .gd file, when deciding whether to annotate a type, when a GDScript warning or parse error needs interpreting, or when exporting a variable to the inspector. For the scene files a script attaches to, use godot-scene-files; for running or checking the code, use godot-testing-and-debugging; for C# instead of GDScript, use godot-csharp.
+description: Writes and reviews GDScript for Godot 4 — static typing and inference, the official style guide, the warning system and its configuration, @export annotations, doc comments, and format strings. Use when writing, reviewing, or fixing a .gd file, when deciding whether to annotate a type, when a GDScript warning or parse error needs interpreting, or when exporting a variable to the inspector. For the scene files a script attaches to, use godot-scene-files; for running or checking the code, use godot-testing-and-debugging.
 license: MIT
 compatibility: Godot 4.x. The optional gdformat/gdlint tools ship separately as gdtoolkit and are never assumed present.
 ---

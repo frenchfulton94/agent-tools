@@ -58,6 +58,12 @@ class_cache="$root/.godot/global_script_class_cache.cfg"
 [[ -f "$class_cache" ]] || exit 0
 
 rel="${file#"$root"/}"
+# No deadline is imposed here, deliberately. Spec 5.1 rule 2 ("the server owns
+# its timeouts") applies to the MCP server, which enforces it in engine.py
+# because it is long-lived; this hook is not, and timeout(1) does not exist on
+# stock macOS. The bound is the harness's own `timeout: 20` on this hook in
+# hooks.json -- a real ceiling, but 20s, not the ~145ms a clean check measures.
+# If that entry is ever removed, this invocation becomes unbounded.
 errors=$("$godot_bin" --headless --path "$root" --check-only --script "$rel" 2>&1 >/dev/null \
   | grep -E '^(SCRIPT ERROR|ERROR):|^\s+at: .*\(res://' || true)
 

@@ -387,6 +387,45 @@ ROUND6_CASES = [
     ),
 ]
 
+# Round 7 (final whole-branch review, IMPORTANT 3): five rounds of adversarial
+# review all targeted the TOKENIZER -- how arguments are found. Nobody audited
+# the VOCABULARY those arguments are matched against, and ASSET_EXTS was
+# missing mainstream game-asset types, so `mv hero.tga art/` sailed through the
+# hardened tokenizer and was then simply not recognised as an asset.
+#
+# Both directions, because this guard has failed both ways during the plan:
+# the unpaired move must deny, and the paired move must still allow.
+ROUND7_CASES = [
+    # Measured on 4.7.2: each of these writes a .import carrying a uid=.
+    ("mv hero.tga art/", "deny"),
+    ("mv hero.bmp art/", "deny"),
+    ("mv sky.hdr art/", "deny"),
+    ("mv sky.exr art/", "deny"),
+    ("mv rig.dae models/", "deny"),
+    ("mv table.csv data/", "deny"),
+    ("mv level.escn scenes/", "deny"),
+    ("mv body.woff fonts/", "deny"),
+    ("mv body.woff2 fonts/", "deny"),
+    # Over-blocking direction: pairing the sidecar must still allow, for every
+    # newly covered type. A vocabulary fix that broke pairing would be a
+    # regression traded for a fix.
+    ("mv hero.tga hero.tga.import art/", "allow"),
+    ("mv hero.bmp hero.bmp.import art/", "allow"),
+    ("mv sky.hdr sky.hdr.import art/", "allow"),
+    ("mv sky.exr sky.exr.import art/", "allow"),
+    ("mv rig.dae rig.dae.import models/", "allow"),
+    ("mv table.csv table.csv.import data/", "allow"),
+    ("mv level.escn level.escn.import scenes/", "allow"),
+    ("mv body.woff body.woff.import fonts/", "allow"),
+    ("mv body.woff2 body.woff2.import fonts/", "allow"),
+    # Measured ABSENT: dds and ktx load directly at runtime and flac produces
+    # no sidecar even for a genuine file, so there is no uid to orphan and a
+    # deny here would be pure over-blocking.
+    ("mv tex.dds art/", "allow"),
+    ("mv tex.ktx art/", "allow"),
+    ("mv music.flac audio/", "allow"),
+]
+
 
 def decide(command, cwd=None):
     tool_input = {"command": command}
@@ -446,6 +485,14 @@ class TestGuard(unittest.TestCase):
     def test_round6_decision_table(self):
         failures = []
         for command, expected in ROUND6_CASES:
+            actual = decide(command)
+            if actual != expected:
+                failures.append(f"{command!r}: expected {expected}, got {actual}")
+        self.assertEqual(failures, [], "\n".join(failures))
+
+    def test_round7_decision_table(self):
+        failures = []
+        for command, expected in ROUND7_CASES:
             actual = decide(command)
             if actual != expected:
                 failures.append(f"{command!r}: expected {expected}, got {actual}")

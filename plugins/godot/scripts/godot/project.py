@@ -14,7 +14,16 @@ import os
 import re
 
 _SECTION = re.compile(r"^\[([^\]]+)\]\s*$")
-_KEY = re.compile(r'^([A-Za-z_][A-Za-z0-9_/.]*)\s*=\s*(.*)$')
+# Godot's own ConfigFile accepts keys this pattern used to reject, and the
+# rejected line was SILENTLY skipped. Measured on 4.7.2: InputMap.has_action()
+# returns true for "2d_jump" and "move-left", and [layer_names] keys look like
+# "2d_physics/layer_1" -- none of which start with a letter or underscore, or
+# avoid hyphens. project_overview exposes input_actions as part of its
+# contract, so those actions vanished from a read tool's answer with no error.
+# Widened to accept, NOT to raise: an unrecognised line is still skipped
+# rather than made fatal, which is the deliberate asymmetry parse_cfg keeps
+# (it raises only on an unterminated value, where the file is truly corrupt).
+_KEY = re.compile(r'^([^=\s\[][^=]*?)\s*=\s*(.*)$')
 
 
 def _incomplete(value: str) -> bool:
@@ -101,10 +110,12 @@ def find_root(start: str) -> str | None:
 
 
 def overview(root: str) -> dict:
-    cfg = parse_cfg(open(os.path.join(root, "project.godot")).read())
+    with open(os.path.join(root, "project.godot")) as f:
+        cfg = parse_cfg(f.read())
     presets_path = os.path.join(root, "export_presets.cfg")
     if os.path.isfile(presets_path):
-        cfg.update(parse_cfg(open(presets_path).read()))
+        with open(presets_path) as f:
+            cfg.update(parse_cfg(f.read()))
     app = cfg.get("application", {})
 
     autoloads = {}

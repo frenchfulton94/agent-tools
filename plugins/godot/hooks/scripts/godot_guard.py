@@ -110,10 +110,32 @@ import sys
 # --- file-identity vocabulary (measured, spec 3.7 / 3.8) --------------------
 
 SIDECAR_EXTS = frozenset({"gd", "gdshader"})  # .uid sidecar beside the file
+# .import sidecar beside the file. This is an engine-checked ALLOWLIST, not an
+# exhaustive list of Godot's import types: membership was measured on 4.7.2 by
+# importing one file of each type and reading back the uid= the engine wrote.
+# A type missing from here fails open (the move is allowed and the sidecar can
+# be orphaned), so extend it by measuring, never by assuming.
+#
+# Measured ABSENT and deliberately excluded -- these produce NO .import and so
+# have no uid to orphan:
+#   dds, ktx  -- ResourceLoader recognises both at runtime, so they load
+#                directly and never enter the import pipeline at all.
+#   flac      -- no sidecar even for a genuine file, not just a stub.
+#
+# `blend` is the one member NOT measured here: its importer refuses to run
+# headless without a configured Blender install ("Blender path is invalid or
+# not set"), so this machine cannot produce the sidecar either way. It is
+# included because the cost is asymmetric -- a wrong inclusion costs a deny on
+# a sidecar-less move of a file that has no sidecar, which
+# sidecar_confirmed_absent() already allows, while a wrong exclusion is exactly
+# the unrepairable break this guard exists to prevent.
 ASSET_EXTS = frozenset({
-    "png", "jpg", "jpeg", "webp", "svg", "wav", "ogg", "mp3",
-    "glb", "gltf", "fbx", "obj", "ttf", "otf",
-})  # .import sidecar beside the file
+    "png", "jpg", "jpeg", "webp", "svg", "bmp", "tga", "hdr", "exr",
+    "wav", "ogg", "mp3",
+    "glb", "gltf", "fbx", "obj", "dae", "escn", "blend",
+    "ttf", "otf", "woff", "woff2",
+    "csv",
+})
 INLINE_UID_EXTS = frozenset({"tscn", "tres"})  # uid:// lives inside the file
 GODOT_RELEVANT_EXTS = SIDECAR_EXTS | ASSET_EXTS | INLINE_UID_EXTS
 SIDECAR_SUFFIX = ".uid"

@@ -867,5 +867,119 @@ class TestSignalHandlingTearsDownInFlightChildren(unittest.TestCase):
                     pass
 
 
+class TestBadInputPathIsNeverAConfidentAnswer(unittest.TestCase):
+    """Final whole-branch review, IMPORTANT 4.
+
+    Nine tools had four conventions for one user error (a typo'd or stale
+    path): two raw tracebacks, three confident CLEAN-or-EMPTY answers, one
+    correct message. The clean answers are the dangerous ones -- an agent
+    asking "does this project have broken references?" about a mistyped path
+    was told broken: [], orphans: [], parse_errors: [] with no error flag,
+    which is indistinguishable from a healthy project.
+    """
+
+    def setUp(self):
+        self.missing = os.path.join(
+            tempfile.mkdtemp(prefix="godot-nonproject-"), "not-a-project"
+        )
+
+    def test_every_project_path_tool_rejects_a_nonexistent_project(self):
+        for tool, extra in [
+            ("project_overview", {}),
+            ("reference_graph", {}),
+            ("check_script", {"script_path": "a.gd"}),
+            ("run_scene", {}),
+            ("check_shader", {"shader_path": "res://a.gdshader"}),
+            ("screenshot_scene", {"scene": "res://a.tscn"}),
+        ]:
+            with self.subTest(tool=tool):
+                args = {"project_path": self.missing, **extra}
+                with self.assertRaises(server.BadInputPath) as caught:
+                    server.call_tool(tool, args)
+                self.assertIn("is not a Godot project", str(caught.exception))
+
+    def test_a_real_project_is_not_rejected(self):
+        # The over-blocking direction: the pre-check must not reject the
+        # fixture project, or it has traded a wrong answer for no answer.
+        server._require_project({"project_path": str(SAMPLE)})
+
+    def test_scene_tree_rejects_a_missing_scene_file(self):
+        with self.assertRaises(server.BadInputPath) as caught:
+            server.call_tool("scene_tree", {"scene_path": self.missing + ".tscn"})
+        self.assertIn("does not name a readable file", str(caught.exception))
+
+    def test_dispatch_reports_it_as_an_error_not_a_traceback(self):
+        result = server.dispatch_tool_call(
+            "reference_graph", {"project_path": self.missing}
+        )
+        self.assertTrue(result.get("isError"))
+        text = result["content"][0]["text"]
+        self.assertIn("is not a Godot project", text)
+        self.assertNotIn("Traceback", text)
+
+
+class TestCheckScriptTimeoutIsNotAVerdict(unittest.TestCase):
+    """Final whole-branch review, IMPORTANT 1.
+
+    run() SIGKILLs a hung engine, which then prints nothing -- so a timeout
+    produced exactly the empty stderr a clean script produces, and the server
+    rendered it as "the script parses and type-checks." This is the same
+    defect Task 7 fixed for check_shader; the fix was applied to that one call
+    site and never generalised to its sibling.
+    """
+
+    def test_timed_out_check_raises_rather_than_reporting_clean(self):
+        timed_out = engine.Result(stdout="", stderr="", returncode=-9, timed_out=True)
+        with mock.patch.object(engine, "run", return_value=timed_out):
+            with self.assertRaises(engine.ScriptCheckTimedOut) as caught:
+                engine.check_script(str(SAMPLE), "a.gd")
+        self.assertIn("not a verdict", str(caught.exception))
+
+    def test_a_clean_result_still_reports_clean(self):
+        clean = engine.Result(stdout="", stderr="", returncode=0, timed_out=False)
+        with mock.patch.object(engine, "run", return_value=clean):
+            self.assertEqual(engine.check_script(str(SAMPLE), "a.gd"), [])
+
+    def test_the_server_surfaces_it_as_an_error(self):
+        timed_out = engine.Result(stdout="", stderr="", returncode=-9, timed_out=True)
+        with mock.patch.object(engine, "run", return_value=timed_out):
+            result = server.dispatch_tool_call(
+                "check_script",
+                {"project_path": str(SAMPLE), "script_path": "scripts/player.gd"},
+            )
+        self.assertTrue(result.get("isError"))
+        self.assertNotIn("parses and type-checks", result["content"][0]["text"])
+
+
+class TestLookupClassAlwaysReturnsValidJson(unittest.TestCase):
+    """Final whole-branch review, MINOR 3 (raised: 25 of 1,036 classes hit it).
+
+    `json.dumps(found, indent=2)[:60000]` cut mid-token, so the agent received
+    text that announces itself as JSON and does not parse. The classes past
+    the cut are the ones most worth looking up -- Node, Control, CanvasItem,
+    Window, TextEdit, RenderingServer.
+    """
+
+    def test_oversized_class_is_trimmed_by_members_and_still_parses(self):
+        big = {
+            "name": "Huge",
+            "methods": [{"name": f"m{i}", "description": "x" * 400} for i in range(400)],
+            "properties": [{"name": f"p{i}", "description": "y" * 400} for i in range(400)],
+        }
+        self.assertGreater(len(json.dumps(big, indent=2)), server.LOOKUP_BUDGET)
+        text = json.dumps(server._fit_class(big), indent=2)
+        self.assertLessEqual(len(text), server.LOOKUP_BUDGET)
+        parsed = json.loads(text)  # the whole point: it must parse
+        self.assertEqual(parsed["name"], "Huge")
+        marker = parsed["methods"][-1]
+        self.assertIsInstance(marker, str)
+        self.assertIn("more methods omitted", marker)
+        self.assertIn("400 in total", marker)
+
+    def test_a_small_class_is_returned_untouched(self):
+        small = {"name": "Tiny", "methods": [{"name": "a"}], "properties": []}
+        self.assertEqual(server._fit_class(small), small)
+
+
 if __name__ == "__main__":
     unittest.main()

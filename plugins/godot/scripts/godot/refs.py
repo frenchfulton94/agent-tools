@@ -100,7 +100,8 @@ def _parse_scenes(root: str):
         if not rel.endswith(SCENE_EXT):
             continue
         try:
-            text = open(full, errors="replace").read()
+            with open(full, errors="replace") as f:
+                text = f.read()
         except (OSError, UnicodeDecodeError) as exc:
             parse_errors.append({"path": rel, "error": f"unreadable: {exc}"})
             continue
@@ -111,9 +112,24 @@ def _parse_scenes(root: str):
     return parsed, parse_errors
 
 
-def _uid_index(root: str, parsed: dict):
+def _uid_index(root: str, parsed: dict, parse_errors: list):
+    """Sidecar reads are hardened exactly as `_parse_scenes` above is, and feed
+    the same `parse_errors` list. A module that reports a malformed .tscn but
+    raises FileNotFoundError on a dangling .uid symlink is incoherent, and a
+    project has one .uid per script -- far more of them than .tscn files, so
+    this is the likelier path to hit. A missing sidecar only makes `broken` and
+    `orphans` a lower bound, which is what `parse_errors` already declares.
+    """
     index: dict = {}
     duplicates: dict = {}
+
+    def read(full, rel):
+        try:
+            with open(full, errors="replace") as f:
+                return f.read()
+        except (OSError, UnicodeDecodeError) as exc:
+            parse_errors.append({"path": rel, "error": f"unreadable: {exc}"})
+            return None
 
     def record(uid, rel):
         if not uid:
@@ -125,10 +141,15 @@ def _uid_index(root: str, parsed: dict):
 
     for full, rel in _walk(root):
         if rel.endswith(".uid"):
-            source = rel[: -len(".uid")]
-            record(open(full).read().strip(), source)
+            text = read(full, rel)
+            if text is None:
+                continue
+            record(text.strip(), rel[: -len(".uid")])
         elif rel.endswith(".import"):
-            match = _UID_IN_IMPORT.search(open(full, errors="replace").read())
+            text = read(full, rel)
+            if text is None:
+                continue
+            match = _UID_IN_IMPORT.search(text)
             if match:
                 record(match.group(1), rel[: -len(".import")])
         elif rel.endswith(SCENE_EXT):
@@ -169,7 +190,7 @@ def _project_references(root: str) -> set:
 
 def graph(root: str) -> dict:
     parsed, parse_errors = _parse_scenes(root)
-    index, duplicates = _uid_index(root, parsed)
+    index, duplicates = _uid_index(root, parsed, parse_errors)
     broken = []
     referenced = _project_references(root)
 
