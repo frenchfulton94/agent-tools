@@ -26,7 +26,7 @@ simple INI-style format. A texture's looks roughly like:
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b24e2fth3n3xk"
+uid="uid://ypc0c31ly0bt"
 path="res://.godot/imported/player.png-a1b2c3d4e5f6.ctex"
 
 [deps]
@@ -65,12 +65,17 @@ is meant to be committed, and nothing is lost by deleting the whole folder:
 the next time the project is opened (or reimported headlessly), Godot
 regenerates it from the source assets and their `.import` sidecars.
 
-The same guidance does **not** list `.import` files for exclusion. That's
-deliberate, and for a more specific reason than "it carries the UID" — a
-deleted `.import` sidecar regenerates an *identical* UID on reimport (see
-`uid-and-identity.md`), so UID continuity alone wouldn't require committing
-it. What a missing `.import` file actually loses is the `[params]` block:
-any non-default import setting — a specific compression mode, disabled
+The same guidance does **not** list `.import` files for exclusion, and two
+separate things are lost if one goes missing. First, unlike a `.uid`
+sidecar's path-derived determinism, a deleted `.import` sidecar is **not**
+guaranteed to regenerate the same UID on reimport — measured alternating
+between two different values across repeated delete-and-reimport cycles on
+the same asset (see `uid-and-identity.md`). A scene that still names the
+asset's unchanged `path=` keeps loading regardless, since Godot falls back to
+the path when the UID doesn't match — but anything resolving that asset
+*purely* by `uid://` is exposed to the churn. Second, and independent of
+UID continuity, a missing `.import` file loses the `[params]` block: any
+non-default import setting — a specific compression mode, disabled
 mipmaps, a particular texture filter — resets to that importer's defaults on
 regeneration, silently, with no error. Commit `.import` files; gitignore
 `.godot/`.

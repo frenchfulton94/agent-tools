@@ -28,11 +28,27 @@ file it identifies, rather than beside it in a separate sidecar — nothing to
 strand by moving the file alone. Everything else needs its sidecar to travel
 with it (next section).
 
-UIDs are derived from the file's path, not stored arbitrarily, which makes a
-missing sidecar cheap: deleting a `.uid` or `.import` sidecar **in place**
-and letting Godot reimport it regenerates the **identical** UID — measured
-directly, `uid://b24e2fth3n3xk` before deleting the sidecar and again after
-reimport. Treat a missing sidecar as a nuisance, not data loss.
+Deleting a sidecar **in place** — the file it identifies left exactly where
+it is — is cheap, but the two sidecar types don't behave the same way on
+reimport:
+
+- **`.uid` (scripts, shaders):** the UID is derived from the file's path, so
+  reimporting after deleting the sidecar regenerates the **identical** UID —
+  measured directly and reproduced over six delete-and-reimport cycles,
+  `uid://b24e2fth3n3xk` every time, deterministic. Treat a missing `.uid`
+  sidecar as a nuisance, not data loss.
+- **`.import` (imported assets):** the UID is **not** guaranteed to come back
+  the same — measured alternating between two different UIDs across six
+  delete-and-reimport cycles on the same texture. This is milder than it
+  sounds, though: the asset itself is untouched, and a scene whose
+  `ext_resource` still names the unchanged `path=` keeps loading and the
+  texture keeps resolving, because Godot falls back to the path when the UID
+  no longer matches. What's actually at risk is a reference that resolves
+  *purely* by `uid://` with no path to fall back on (e.g. a bare
+  `load("uid://…")` call) — that can point at nothing once the UID changes.
+
+See `references/uid-and-identity.md` for the full measurement and why the
+two carriers diverge.
 
 ## Moving is the only destructive operation — and only without the sidecar
 
@@ -130,9 +146,12 @@ at.
    whatever's in `parse_errors` first, then re-run before trusting `broken`.
 3. Each `broken` entry carries a `reason`: `uid-not-found` means the
    reference names a UID that no file in the project currently owns — the
-   signature of a sidecar-less move. `missing-path` means the reference
-   carries no UID at all and its literal path doesn't resolve either —
-   typically an older-format resource or one hand-edited down to a bare path.
+   signature of a sidecar-less move (see "Moving is the only destructive
+   operation" above for the repair: find every scene naming the old UID and
+   repoint it by hand, since nothing reassociates an orphaned UID
+   automatically). `missing-path` means the reference carries no UID at all
+   and its literal path doesn't resolve either — typically an older-format
+   resource or one hand-edited down to a bare path.
 4. Run `scene_tree` on the specific scene `reference_graph` flagged, to see
    which node, script, or `ext_resource` entry is the one actually at fault.
    `scene_tree` parses the file directly too — neither tool needs the engine
@@ -147,9 +166,10 @@ should live relative to each other, `.gdignore`, addon placement) belong to
 - `references/tscn-format.md` — the full five-section grammar with a worked
   example of each, including `groups=`, `node_paths=`, `unique_id=`, and the
   `binds=` connection attribute's literal trailing space.
-- `references/uid-and-identity.md` — the sidecar table in full, both move
-  outcomes with commands, duplicate UIDs, and exactly what `--import` does
-  and does not repair.
+- `references/uid-and-identity.md` — the sidecar table in full, why deleting
+  a `.uid` sidecar is safe but a `.import` sidecar isn't guaranteed to
+  regenerate the same UID, both move outcomes with commands, duplicate UIDs,
+  and exactly what `--import` does and does not repair.
 - `references/import-pipeline.md` — `.import` file contents, the
   `.godot/imported/` cache, why `.godot/` is safe to delete (and belongs in
   `.gitignore`, unlike the `.import` files themselves), and what triggers a

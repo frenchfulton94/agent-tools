@@ -44,11 +44,15 @@ battery records for itself.
 5. "What does UNUSED_PARAMETER mean?" → `gdscript` — a GDScript warning
    name, no scene/resource/UID vocabulary in the query at all.
 
-Items 1–4 are the load-bearing ones: this skill's description carves out
+Items 1–2 are the load-bearing ones: this skill's description carves out
 GDScript authorship and running/screenshotting a scene by pointing at
-`gdscript` and `godot-testing-and-debugging` by name specifically so a
+`gdscript` and `godot-testing-and-debugging` by name specifically, so a
 request that only superficially touches "a Godot file" doesn't pull this
-skill in over the one that actually owns it.
+skill in over the one the description itself names as the correct owner.
+Items 3–4 are supplementary near-miss checks against `godot-project-architecture`
+and `godot-csharp` — real adjacent-domain traps worth having in the battery,
+but neither is named in this skill's description, so they test general
+non-overreach rather than a carve-out clause doing its job.
 
 ## Recorded results
 

@@ -9,7 +9,7 @@ does not state most of it.
 ## Contents
 
 - [Where identity lives, file type by file type](#where-identity-lives-file-type-by-file-type)
-- [Deleting a sidecar in place is safe](#deleting-a-sidecar-in-place-is-safe)
+- [Deleting a sidecar in place: safe for `.uid`, not for `.import`](#deleting-a-sidecar-in-place-safe-for-uid-not-for-import)
 - [Moving without the sidecar is not](#moving-without-the-sidecar-is-not)
 - [Duplicate UIDs](#duplicate-uids)
 - [What `--import` does and does not repair](#what---import-does-and-does-not-repair)
@@ -27,19 +27,34 @@ same file — nothing to strand by moving it alone (see the next two
 sections). Every other file type depends on a second file sitting beside it,
 and that second file is what a move can leave behind.
 
-## Deleting a sidecar in place is safe
+## Deleting a sidecar in place: safe for `.uid`, not for `.import`
 
-UIDs are derived deterministically from the file's path, not assigned once
-and stored arbitrarily. So deleting a `.uid` or `.import` sidecar — while
-the file it identifies stays exactly where it is — and letting Godot
-reimport it regenerates the **identical** UID.
+The two sidecar types are derived differently, and deleting one in place —
+while the file it identifies stays exactly where it is — does not behave
+the same way for both.
 
-Measured directly: `uid://b24e2fth3n3xk` before deleting `player.gd.uid`,
-and `uid://b24e2fth3n3xk` again after `godot --headless --path . --import`
-regenerated it. A missing sidecar for a file that hasn't moved is a
-nuisance, recoverable by reimporting — never treat it as data loss, and
-never treat "the `.uid` file is gone" alone as evidence a reference is
-broken.
+**`.uid` (scripts, shaders):** the UID is derived deterministically from the
+file's path, so deleting the sidecar and letting Godot reimport it
+regenerates the **identical** UID. Measured directly and reproduced over six
+delete-and-reimport cycles: `uid://b24e2fth3n3xk` before deleting
+`player.gd.uid`, and the same `uid://b24e2fth3n3xk` every single cycle after
+`godot --headless --path . --import` regenerated it. Treat a missing `.uid`
+sidecar as a nuisance, not data loss, and never treat "the `.uid` file is
+gone" alone as evidence a reference is broken.
+
+**`.import` (imported assets):** the mechanism is different, and the UID is
+**not** guaranteed to come back the same. Measured over six
+delete-and-reimport cycles on one texture: the UID alternated between two
+different values every cycle (`uid://ypc0c31ly0bt`, then
+`uid://ilysqd6ng7fg`, then back), never settling on one value the way the
+`.uid` case does. This is milder than it sounds, though: on a scene whose
+`ext_resource` named the original UID against the asset's unchanged `path=`,
+deleting the `.import` and reimporting still left the scene loading and the
+texture resolving, because Godot falls back to the path when the UID no
+longer matches. Nothing about the asset itself is lost — what's actually at
+risk is a reference that resolves *purely* by `uid://` with no path to fall
+back on (a bare `load("uid://…")` call, say), which can point at nothing
+once the UID changes underneath it.
 
 ## Moving without the sidecar is not
 
