@@ -12,7 +12,7 @@ from godot import engine
 
 SAMPLE = Path(__file__).parent / "fixtures" / "sample-project"
 CRASH_PROJECT = Path(__file__).parent / "fixtures" / "crash-project"
-HAS_GODOT = engine.find_binary() is not None
+from .engine_gate import engine_smoke, requires_engine  # noqa: E402
 
 FAKE_GODOT_ORPHAN = (
     Path(__file__).parent / "fixtures" / "fake-binaries" / "hangs_with_orphan.sh"
@@ -258,7 +258,7 @@ class TestDiagnostics(unittest.TestCase):
         self.assertNotIn("backtrace_truncated", entry)
 
 
-@unittest.skipUnless(HAS_GODOT, "godot not on PATH")
+@requires_engine
 class TestAgainstRealEngine(unittest.TestCase):
     def test_broken_script_is_reported_broken_despite_exit_zero(self):
         # Spec 3.1: --check-only exits 0 on parse errors. This test is the guard
@@ -478,6 +478,48 @@ class TestFindBinary(unittest.TestCase):
         with mock.patch.object(engine.shutil, "which", return_value=None), \
              mock.patch.object(engine.os.path, "isfile", return_value=False):
             self.assertIsNone(engine.find_binary())
+
+
+class TestEngineSmoke(unittest.TestCase):
+    """The ONE engine invocation that stays in the catalog's fast gate.
+
+    Everything else that drives Godot moved behind `requires_engine`, which
+    means `bun test` could otherwise go green on a server that can no longer
+    talk to the engine at all -- the gate would still exercise the parsers and
+    the guard, and report success, while every verify tool was broken. This
+    test exists so that cannot happen quietly.
+
+    It is deliberately one `--check-only` (~150ms) and asserts the whole chain
+    end to end rather than any one link: the binary is found, a subprocess is
+    spawned and reaped, stderr is captured, and a diagnostic is parsed out of
+    it. And it asserts the plugin's load-bearing claim from spec 3.1 -- that a
+    broken script is recognised from STDERR, not from an exit code, because
+    `--check-only` returns 0 either way. A regression that made this server
+    trust the exit code would pass every other fast test and fail here.
+
+    Keep this to a single invocation. If it needs a second, that is a sign the
+    thing being tested belongs in the engine suite.
+    """
+
+    @engine_smoke
+    def test_a_broken_script_is_reported_from_stderr(self):
+        found = engine.check_script(str(SAMPLE), "broken.gd")
+        self.assertTrue(
+            found,
+            "check_script found no diagnostics in the known-broken fixture. "
+            "Either the engine path is broken or stderr parsing regressed -- "
+            "both invisible to the rest of the fast gate.",
+        )
+        self.assertTrue(
+            any("broken.gd" in (d.get("file") or "") for d in found),
+            f"diagnostics did not name broken.gd: {found!r}",
+        )
+
+    @engine_smoke
+    def test_a_clean_script_yields_no_diagnostics(self):
+        # The other direction, because "always reports an error" would satisfy
+        # the assertion above while being just as broken.
+        self.assertEqual(engine.check_script(str(SAMPLE), "scripts/player.gd"), [])
 
 
 if __name__ == "__main__":

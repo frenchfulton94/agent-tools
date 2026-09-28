@@ -11,7 +11,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from godot import api, engine
 
-HAS_GODOT = engine.find_binary() is not None
+from .engine_gate import requires_engine  # noqa: E402
 
 FAKE_DUMP = {
     "header": {"version_full_name": "Godot Engine v4.7.2.stable.official"},
@@ -619,7 +619,7 @@ class TestUnwritableCacheDir(unittest.TestCase):
         self.assertIn(self.tmp, message)
 
 
-@unittest.skipUnless(HAS_GODOT, "godot not on PATH")
+@requires_engine
 class TestAgainstRealEngine(unittest.TestCase):
     def test_dump_is_generated_and_cached_by_version(self):
         tmp = tempfile.mkdtemp()

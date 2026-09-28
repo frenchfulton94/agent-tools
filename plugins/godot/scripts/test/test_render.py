@@ -10,8 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from godot import engine, render
 
 SAMPLE = Path(__file__).parent / "fixtures" / "sample-project"
-HAS_GODOT = engine.find_binary() is not None
-HAS_DISPLAY = HAS_GODOT and render.has_display()
+from .engine_gate import requires_display  # noqa: E402
 
 
 class TestDriversExist(unittest.TestCase):
@@ -20,7 +19,7 @@ class TestDriversExist(unittest.TestCase):
         self.assertTrue(render.DRIVER_SHADER.is_file())
 
 
-@unittest.skipUnless(HAS_DISPLAY, "needs godot and a display")
+@requires_display
 class TestShaderCheck(unittest.TestCase):
     def test_good_shader_reports_nothing(self):
         self.assertEqual(render.check_shader(str(SAMPLE), "res://good.gdshader"), [])
@@ -120,7 +119,7 @@ class TestCheckShaderTimeout(unittest.TestCase):
                 render.check_shader(str(SAMPLE), "res://good.gdshader", timeout=1)
 
 
-@unittest.skipUnless(HAS_DISPLAY, "needs godot and a display")
+@requires_display
 class TestCheckShaderRealTimeout(unittest.TestCase):
     def test_forced_short_timeout_raises_rather_than_returning_a_clean_verdict(self):
         # Against the real engine: 0.05s cannot possibly let Godot boot,
@@ -265,7 +264,7 @@ class TestDriveEnvIsolation(unittest.TestCase):
         )
 
 
-@unittest.skipUnless(HAS_DISPLAY, "needs godot and a display")
+@requires_display
 class TestScreenshot(unittest.TestCase):
     def test_captures_a_non_empty_png_without_touching_the_project(self):
         before = sorted(p.name for p in SAMPLE.iterdir())

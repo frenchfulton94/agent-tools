@@ -17,8 +17,7 @@ import godot_mcp_server as server  # noqa: E402
 SERVER = Path(__file__).resolve().parents[1] / "godot_mcp_server.py"
 SAMPLE = Path(__file__).parent / "fixtures" / "sample-project"
 
-HAS_GODOT = engine.find_binary() is not None
-HAS_DISPLAY = HAS_GODOT and render.has_display()
+from .engine_gate import requires_display, requires_engine  # noqa: E402
 
 
 def _fs_is_case_insensitive():
@@ -175,7 +174,7 @@ class TestNeverDumpsRawApiLoad(unittest.TestCase):
     against it.
     """
 
-    @unittest.skipUnless(HAS_GODOT, "needs a Godot binary to generate the dump")
+    @requires_engine
     def test_lookup_class_does_not_leak_the_search_index_after_search_ran_first(self):
         responses = rpc(
             {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
@@ -192,7 +191,7 @@ class TestNeverDumpsRawApiLoad(unittest.TestCase):
         text = lookup_result["content"][0]["text"]
         self.assertNotIn("__api_search_index__", text)
 
-    @unittest.skipUnless(HAS_GODOT, "needs a Godot binary to generate the dump")
+    @requires_engine
     def test_search_classes_does_not_leak_the_search_index(self):
         # search_classes populates the key itself, on its own first call, so
         # a single isolated call already exercises the real risk (unlike
@@ -265,7 +264,7 @@ class TestScreenshotPixelSurfaces(unittest.TestCase):
     "pixel" key. The tool must pass it through rather than dropping it.
     """
 
-    @unittest.skipUnless(HAS_DISPLAY, "needs godot and a display")
+    @requires_display
     def test_screenshot_scene_reports_the_centre_pixel(self):
         out_dir = Path(tempfile.mkdtemp(prefix="godot-shot-test-"))
         try:
@@ -364,7 +363,7 @@ class TestScreenshotOutPathIsContainedOutsideTheProject(unittest.TestCase):
         finally:
             shutil.rmtree(outside, ignore_errors=True)
 
-    @unittest.skipUnless(HAS_DISPLAY, "needs godot and a display")
+    @requires_display
     def test_path_outside_the_project_still_works(self):
         out_dir = Path(tempfile.mkdtemp(prefix="godot-shot-outside-"))
         try:
@@ -747,7 +746,7 @@ class TestMalformedArgumentsIsACleanErrorNotATraceback(unittest.TestCase):
         self.assertNotIn("expected a JSON object", result["content"][0]["text"])
 
 
-@unittest.skipUnless(HAS_GODOT, "needs a Godot binary to spawn a real child")
+@requires_engine
 class TestSignalHandlingTearsDownInFlightChildren(unittest.TestCase):
     """The server's children run detached into their own process group
     (engine.run uses start_new_session=True). If this server process is

@@ -49,7 +49,7 @@ reopens the design; it is not an implementation detail.
 | 15 | The MCP server is Python, following `unraid-ops`, so the plugin does not require Bun on a machine that only wants Godot support. |
 | 16 | `project_overview`, `scene_tree`, and `reference_graph` are pure parsers requiring no Godot binary. This is a tested property, not an accident. |
 | 17 | The server uses the Python standard library only, speaking JSON-RPC 2.0 over stdio, following `unraid-ops`. No `mcp` package, no pip install step. A plugin that needs a dependency installed before its tools work is not portable. |
-| 18 | Python tests use `unittest` and are gated by `bun test` through `tests/godot-scripts.test.ts`, following `para`. The repository has no pytest. |
+| 18 | Python tests use `unittest` and are gated by `bun test` through `tests/godot-scripts.test.ts`, following `para`. The repository has no pytest. **Amended after the foundation plan:** the suite is split by marker. `bun test` runs the fast subset (~6s) plus one real `--check-only` smoke check and asserts the split is still in force; the 33 engine-driving tests run via `bun run test:engine` (~23s), which `CLAUDE.md` requires for commits under `plugins/godot/`. Unsplit they were ~38s of a ~40s gate, and a gate slow enough to avoid gets avoided. |
 
 ## 3. Verified engine behavior
 
@@ -461,8 +461,13 @@ table including the `rm -rf .godot` permit, and the `.tscn` parser against
 fixture scenes.
 
 **`scripts/test/*.py`** are `unittest` suites covering Godot-dependent
-behavior, skipping when `godot` is absent from `PATH`, so CI without Godot stays green while a
-developer with it gets full coverage. It pins findings 3.1, 3.4, and 3.5
+behavior. Each engine-driving test declares itself through
+`test/engine_gate.py` rather than each suite recomputing a `HAS_GODOT` of its
+own -- which looked like an off-switch and was not one, since `find_binary()`
+falls back to `/Applications/Godot.app` and so stays true with `godot` off
+`PATH` (measured: all 203 ran on a stripped `PATH`, nothing skipped). CI
+without Godot stays green, and a developer with it gets full coverage from
+`bun run test:engine`. It pins findings 3.1, 3.4, and 3.5
 directly: a known-broken script is asserted reported broken, a sidecar-less
 move is asserted blocked, and a known-broken shader is asserted reported
 broken.

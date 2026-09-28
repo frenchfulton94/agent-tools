@@ -12,7 +12,7 @@ from godot import engine
 
 HOOK = Path(__file__).resolve().parents[2] / "hooks" / "scripts" / "check-gdscript.sh"
 SAMPLE = Path(__file__).parent / "fixtures" / "sample-project"
-HAS_GODOT = engine.find_binary() is not None
+from .engine_gate import requires_engine  # noqa: E402
 
 
 def run_hook(file_path, env=None):
@@ -45,16 +45,57 @@ class TestAlwaysAdvisory(unittest.TestCase):
         self.assertEqual(proc.stdout.strip(), "")
 
 
-@unittest.skipUnless(HAS_GODOT, "godot not on PATH")
+@requires_engine
 class TestWithEngine(unittest.TestCase):
+    """Imports the fixture ONCE, then hands each test its own copy.
+
+    `setUp` used to run a full `--headless --import` per test method, which
+    measured 20.0s across these 18 tests -- on its own more than half of the
+    entire catalog's `bun test` gate. The per-test isolation it bought is
+    real and must not be given up: several tests below mutate the project,
+    including deleting `.godot/` outright and adding a `class_name` the cache
+    has never seen, so a project shared between tests would leak state in the
+    exact dimension these tests measure.
+
+    So the import happens once into a pristine template, and each test gets a
+    `copytree` of the ALREADY-IMPORTED project -- same isolation, one engine
+    invocation instead of eighteen.
+
+    Verified before relying on it, because a cache full of absolute paths
+    would make a copied project behave differently from a freshly imported
+    one: nothing under `.godot/` embeds the project path (both a text and a
+    raw-byte scan of `editor/`, `imported/`, `uid_cache.bin` and
+    `global_script_class_cache.cfg` came back empty), and driving the real
+    hook against a copied-but-never-imported-at-that-path project produced
+    byte-identical output to the freshly imported one. `copytree` uses
+    `copy2`, so mtimes are preserved and the hook's cache-freshness check
+    sees the same ordering it would after a real import.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls._template_dir = Path(tempfile.mkdtemp(prefix="godot-hook-template-"))
+        cls._template = cls._template_dir / "proj"
+        shutil.copytree(SAMPLE, cls._template)
+        subprocess.run(
+            [engine.find_binary(), "--headless", "--path", str(cls._template), "--import"],
+            capture_output=True, timeout=180,
+        )
+        if not (cls._template / ".godot" / "global_script_class_cache.cfg").is_file():
+            raise AssertionError(
+                "the template import produced no class cache, so every test "
+                "below would silently exercise the unimported path instead of "
+                "the one it is written for"
+            )
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls._template_dir, ignore_errors=True)
+
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
         self.root = self.tmp / "proj"
-        shutil.copytree(SAMPLE, self.root)
-        subprocess.run(
-            [engine.find_binary(), "--headless", "--path", str(self.root), "--import"],
-            capture_output=True, timeout=180,
-        )
+        shutil.copytree(self._template, self.root)
 
     def tearDown(self):
         shutil.rmtree(self.tmp)
@@ -78,15 +119,15 @@ class TestWithEngine(unittest.TestCase):
         self.assertEqual(proc.stdout.strip(), "")
 
     def test_stale_cross_file_class_name_stays_silent(self):
-        # Fix round 1, IMPORTANT 1. The project is already imported (setUp
-        # ran --import), but a class_name is added in one file and used from
+        # Fix round 1, IMPORTANT 1. The project is already imported (the
+        # the template import ran), but a class_name is added in one file and used
         # a second file in the very next edit, before anything re-imports.
         # Confirmed against the engine: this reports "Could not find type
         # EnemyType in the current scope" even though EnemyType is spelled
         # correctly and its declaring file is sitting right there,
         # unimported. A directory-existence check for .godot/ (the original
         # version of this hook) does not catch this -- .godot/ already
-        # exists from setUp -- only a freshness check does.
+        # exists in the copied template -- only a freshness check does.
         (self.root / "enemy_type.gd").write_text("class_name EnemyType\nextends Resource\n")
         uses = self.root / "uses_enemy.gd"
         uses.write_text(

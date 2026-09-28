@@ -27,6 +27,14 @@ Both must pass before any commit that touches `plugins/`:
   are all listed in its row — `bun test` checks the row exists and links
   correctly, not its contents). Exits non-zero on errors only.
 
+**A third command is required for commits touching `plugins/godot/`:**
+`bun run test:engine` (~23s). The godot plugin's Python suite is split — the
+tests that drive the real engine are gated behind `GODOT_SKIP_ENGINE_TESTS`,
+which `bun test` sets, because unsplit they were ~38s of a ~40s gate. `bun test`
+still makes one real `--check-only` as a smoke check, and fails if the gate
+stops skipping, but it does not run the 33 engine-gated tests. Skipping
+`test:engine` on a godot change means shipping untested engine behaviour.
+
 `bun run audit:strict` also fails on warnings. It does not currently pass and
 is not a gate — run it to compare warning counts, not to gate a commit.
 `claude plugin validate .` is the authoritative marketplace check.

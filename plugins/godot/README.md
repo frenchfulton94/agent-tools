@@ -145,14 +145,35 @@ claude plugin validate plugins/godot --strict
 
 ## Local development
 
+The Python suite is split in two, because unsplit it was ~38s of the catalog's
+~40s `bun test` gate:
+
 ```bash
-cd plugins/godot/scripts && python3 -m unittest discover -s test
+bun test              # the fast subset, ~6s of the ~8s gate
+bun run test:engine   # everything, including the 33 engine-driving tests, ~23s
 ```
 
-Runs the whole Python suite (parsers, the engine wrapper, the render driver,
-the guard, and the server's JSON-RPC dispatch) against fixture projects; a
-handful of tests additionally drive the real engine end to end and are
-skipped automatically when `godot` isn't on `PATH`.
+`bun test` covers the parsers, the guard's full decision table, the server's
+JSON-RPC dispatch and the hook's logic, plus **one real `--check-only`** as a
+smoke check — so the gate cannot go green on a server that has stopped being
+able to talk to Godot. It also fails if the split stops working, since a gate
+that silently runs everything is as bad as one that silently runs nothing.
+
+`bun run test:engine` is **required before committing a change under
+`plugins/godot/`**. To run it directly, or to run the fast subset by hand:
+
+```bash
+cd plugins/godot/scripts
+python3 -m unittest discover -s test -t . -p 'test_*.py'                          # all
+GODOT_SKIP_ENGINE_TESTS=1 python3 -m unittest discover -s test -t . -p 'test_*.py'  # fast
+```
+
+The `-t .` is required: without it, discovery imports the suites as top-level
+modules and the shared `test/engine_gate.py` import fails.
+
+Tests that need a real rendering device skip themselves on a headless machine
+(spec 3.2 — headless renders nothing), so a CI box without a display stays
+green while a developer with one gets full coverage.
 
 ```bash
 claude --plugin-dir plugins/godot

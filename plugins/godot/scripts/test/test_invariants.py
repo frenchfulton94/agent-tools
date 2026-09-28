@@ -9,6 +9,7 @@ regresses silently: nothing fails when someone adds the thing back.
 import ast
 import os
 import unittest
+from unittest import mock
 from pathlib import Path
 
 PKG = Path(__file__).resolve().parents[1] / "godot"
@@ -159,6 +160,71 @@ class TestNoLeakedFileHandles(unittest.TestCase):
             "An open() outside a `with` leaks the handle under any "
             "implementation that does not refcount. Use `with open(...) as f`.",
         )
+
+
+class TestEngineGate(unittest.TestCase):
+    """The suite-splitting gate decides what `bun test` runs, so its logic is
+    worth pinning rather than trusting.
+
+    The flag is an opt-OUT, deliberately: `python3 -m unittest discover` by
+    hand gets the whole suite, and only a caller that explicitly wants speed
+    asks for less. Forgetting the flag costs time, never coverage -- the
+    inverse default would silently under-test every hand-run.
+    """
+
+    def _gate(self, env):
+        """Import engine_gate fresh under a given environment."""
+        import importlib
+        with mock.patch.dict(os.environ, env, clear=False):
+            for key in ("GODOT_SKIP_ENGINE_TESTS",):
+                if key not in env:
+                    os.environ.pop(key, None)
+            import test.engine_gate as gate
+            return importlib.reload(gate)
+
+    def test_the_flag_disables_engine_tests(self):
+        gate = self._gate({"GODOT_SKIP_ENGINE_TESTS": "1"})
+        self.assertTrue(gate.SKIP_ENGINE)
+        self.assertFalse(gate.ENGINE_TESTS_ENABLED)
+        self.assertFalse(gate.DISPLAY_TESTS_ENABLED)
+
+    def test_engine_tests_are_on_by_default(self):
+        gate = self._gate({})
+        self.assertFalse(gate.SKIP_ENGINE)
+        self.assertEqual(gate.ENGINE_TESTS_ENABLED, gate.HAS_BINARY)
+
+    def test_falsey_spellings_do_not_disable(self):
+        # A stray GODOT_SKIP_ENGINE_TESTS=0 in someone's shell must not quietly
+        # turn the full suite into the fast one.
+        for value in ("", "0", "false", "no", "FALSE"):
+            with self.subTest(value=value):
+                gate = self._gate({"GODOT_SKIP_ENGINE_TESTS": value})
+                self.assertFalse(gate.SKIP_ENGINE, f"{value!r} disabled the engine tests")
+
+    def test_the_smoke_marker_ignores_the_flag(self):
+        # The one exception: the smoke invocation must still run in the fast
+        # gate, or `bun test` could go green against a server that can no
+        # longer reach Godot at all.
+        gate = self._gate({"GODOT_SKIP_ENGINE_TESTS": "1"})
+        self.assertFalse(gate.ENGINE_TESTS_ENABLED)
+
+        ran = []
+
+        class Probe(unittest.TestCase):
+            @gate.engine_smoke
+            def test_probe(self):
+                ran.append(True)
+
+        unittest.TextTestRunner(stream=open(os.devnull, "w"), verbosity=0).run(
+            unittest.TestLoader().loadTestsFromTestCase(Probe)
+        )
+        self.assertEqual(bool(ran), gate.HAS_BINARY)
+
+    def tearDown(self):
+        # Leave the module as the rest of the suite found it.
+        import importlib
+        import test.engine_gate as gate
+        importlib.reload(gate)
 
 
 if __name__ == "__main__":
