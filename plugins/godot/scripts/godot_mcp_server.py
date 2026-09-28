@@ -1,0 +1,724 @@
+#!/usr/bin/env python3
+"""MCP server for Godot 4 projects.
+
+Speaks JSON-RPC 2.0 over stdio using only the standard library, so the plugin
+needs no install step.
+
+Design notes:
+  - Read-only with respect to project source. No tool creates, edits, or saves
+    a project file. Every mutation an agent makes goes through Edit/Write/Bash,
+    which is what keeps it visible to the guard hook. This is the property the
+    whole architecture rests on, so it is enforced in code, not just in
+    prose: screenshot_scene's out_path is the one tool argument that names a
+    filesystem write destination the caller chooses, and call_tool() refuses
+    any out_path that resolves inside the project directory rather than
+    handing it to the renderer unchecked -- an unconstrained out_path could
+    otherwise silently overwrite an arbitrary project file (project.godot
+    itself, in the reported case) with PNG bytes, through a channel the
+    Task 9 guard hook cannot see at all. Every other tool's arguments were
+    re-checked for the same class of gap and none of them name a
+    caller-chosen filesystem write destination. The containment check
+    itself compares filesystem identity (device+inode via
+    os.path.samefile()), not strings -- a string comparison is defeated for
+    free on a case-insensitive-but-case-preserving filesystem (APFS, the
+    macOS default; see _out_path_is_inside_project()'s docstring) -- and a
+    separate check refuses any out_path that already exists as a
+    multiply-linked file, since a hardlink names a file inside the project
+    with no distinguishing path for any containment check to catch.
+  - project_overview, scene_tree and reference_graph never invoke the Godot
+    binary, so a project can still be described on a machine with no engine.
+  - check_shader and screenshot_scene need a real rendering device. Headless
+    returns a null viewport and compiles no shaders, so it cannot substitute.
+  - Running Godot against a project creates .godot/ and .uid artifacts. That is
+    normal import behaviour, not something this server writes.
+  - api.load_dump() is NOT safe to json.dumps() directly: it stashes an
+    internal "__api_search_index__" key on the dump dict it returns (see
+    godot/api.py), which would leak into tool output and roughly double the
+    payload. Only api.lookup_class() and api.search_classes() build fresh,
+    caller-safe dicts -- call_tool must only ever reach the API through those
+    two, never through api.load_dump() itself.
+  - refs.graph() can report a fifth key, "parse_errors": scene/resource files
+    it could not read or parse at all. `orphans` and `broken` are complete
+    descriptions of the project only when that list is empty; when it is not,
+    both are a lower bound, and `broken` can also OVERCOUNT (a scene that
+    failed to parse contributes no uid of its own, so another scene
+    referencing it by uid is reported broken even though the target exists).
+    reference_graph's tool description says this, and its output puts
+    parse_errors first and calls it out in prose rather than leaving it to be
+    noticed at the end of a JSON blob.
+  - render.check_shader() raises render.ShaderCheckTimedOut instead of
+    returning [] when the compile attempt itself times out. That is handled
+    as its own error case below: a timeout is not the same fact as "compiled
+    with no errors", and reporting it as clean would reintroduce the bug
+    Task 7 fixed.
+
+Signal handling:
+  engine.run() spawns Godot with start_new_session=True so a hung scene's own
+  OS.execute()/OS.create_process() grandchildren can be reaped as a group (see
+  godot/engine.py). The flip side is that the child is no longer in this
+  server's process group either -- if THIS process is killed, the child is
+  orphaned and keeps running until its own --quit-after expires. For
+  check_shader and screenshot_scene that child is a real (offscreen) Godot
+  window, not an invisible headless process.
+
+  Python's own default SIGINT handling already turns Ctrl-C into a
+  KeyboardInterrupt, which engine.run()'s `except BaseException` clause
+  already tears down. SIGTERM has no such default: the OS terminates the
+  process immediately without running any Python code at all, which would
+  skip that cleanup entirely. So both signals are handled explicitly here,
+  by wrapping subprocess.Popen process-wide to track every child this server
+  spawns (there is at most one in flight at a time -- the server handles one
+  JSON-RPC message at a time) and killing its whole process group -- not just
+  its pid, for the same OS.execute()-grandchild reason engine.py documents --
+  before this process exits.
+"""
+
+import json
+import os
+import signal
+import subprocess
+import sys
+import tempfile
+import threading
+import traceback
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+# --- Track every child subprocess this server spawns, process-wide --------
+#
+# engine.run() (godot/engine.py) is the sole place subprocess.Popen is called,
+# always with start_new_session=True, so proc.pid IS the child's process
+# group id for its whole life (matching engine.py's own _kill_group(), which
+# uses proc.pid directly rather than os.getpgid() for the same reason: on
+# macOS, getpgid raises once the immediate child has exited even though the
+# group -- still holding a live grandchild -- is perfectly valid to signal).
+#
+# Wrapping subprocess.Popen here, rather than modifying engine.py, tracks
+# every child regardless of which module spawned it (engine.run() itself,
+# and api.py/render.py, which only ever reach a child through engine.run())
+# without adding bookkeeping to modules Tasks 2-7 already built and tested.
+# The patch works regardless of import order: engine.py calls
+# `subprocess.Popen(...)` as a live attribute lookup on the shared subprocess
+# module at call time, not a name bound at import time, so reassigning
+# subprocess.Popen here is visible to it as soon as this module is imported,
+# no matter when engine.py itself was imported.
+_LIVE_PROCS_LOCK = threading.Lock()
+_LIVE_PROCS = set()
+_RealPopen = subprocess.Popen
+
+
+class _TrackedPopen(_RealPopen):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        with _LIVE_PROCS_LOCK:
+            _LIVE_PROCS.add(self)
+
+    def _prune_if_done(self, result):
+        if result is not None:
+            with _LIVE_PROCS_LOCK:
+                _LIVE_PROCS.discard(self)
+        return result
+
+    def poll(self):
+        return self._prune_if_done(super().poll())
+
+    def wait(self, timeout=None):
+        result = super().wait(timeout=timeout)
+        self._prune_if_done(result)
+        return result
+
+
+subprocess.Popen = _TrackedPopen
+
+from godot import api, engine, project, refs, render, tscn  # noqa: E402
+
+PROTOCOL_VERSION = "2024-11-05"
+SERVER_INFO = {"name": "godot", "version": "0.1.0"}
+
+_PROJECT = {"type": "string", "description": "Absolute path to the project directory (contains project.godot)."}
+
+TOOLS = [
+    {
+        "name": "project_overview",
+        "description": "Summarise a Godot project: name, engine features, main scene, autoloads, input actions, rendering method, and export presets. Parses project.godot and export_presets.cfg directly and does not need the Godot binary.",
+        "inputSchema": {"type": "object", "properties": {"project_path": _PROJECT}, "required": ["project_path"]},
+    },
+    {
+        "name": "scene_tree",
+        "description": "Show the node hierarchy of a .tscn file with node types, attached scripts, key properties, and the external resources it references. Parses the file directly and does not need the Godot binary or the editor.",
+        "inputSchema": {"type": "object", "properties": {"scene_path": {"type": "string", "description": "Absolute path to a .tscn or .tres file."}}, "required": ["scene_path"]},
+    },
+    {
+        "name": "reference_graph",
+        "description": "Report broken uid:// and res:// references, orphaned files, and duplicate UIDs across a project. Catches the case where a script was moved without its .uid sidecar, which no reimport can repair. A scene or resource file that cannot be read or parsed is skipped rather than aborting the whole report, and is listed in the result's `parse_errors`. `orphans` and `broken` are complete only when `parse_errors` is empty -- when it is not, both are a lower bound (a file referenced only from inside a skipped scene can be misreported as orphaned), and `broken` can also OVERCOUNT: a scene that fails to parse contributes no uid of its own, so another scene referencing it by uid is reported broken even though the target file exists. Does not need the Godot binary.",
+        "inputSchema": {"type": "object", "properties": {"project_path": _PROJECT}, "required": ["project_path"]},
+    },
+    {
+        "name": "check_script",
+        "description": "Parse and type-check one GDScript file, returning diagnostics with file and line. Note that Godot's own --check-only exits 0 even when a script has parse errors, so this reads the diagnostics rather than the exit status.",
+        "inputSchema": {"type": "object", "properties": {"project_path": _PROJECT, "script_path": {"type": "string", "description": "Path to the .gd file, relative to the project root."}}, "required": ["project_path", "script_path"]},
+    },
+    {
+        "name": "run_scene",
+        "description": "Run a scene headlessly for a bounded number of frames and return its output together with any runtime errors and their GDScript backtraces. A runtime error's diagnostic carries a `backtrace` list (most recent call first, one `{frame, function, file, line}` per calling frame) whenever the engine printed one; `file`/`line` are null for a frame that resolves into engine C++ rather than a res:// path, the same rule applied to the diagnostic's own location. Capped at 40 frames -- a `backtrace_truncated` count on the diagnostic says how many deeper frames were left out, if any. Rendering is disabled in this mode; use screenshot_scene to see what a scene looks like.",
+        "inputSchema": {"type": "object", "properties": {"project_path": _PROJECT, "scene": {"type": "string", "description": "Scene to run, e.g. res://main.tscn. Defaults to the project's main scene."}, "frames": {"type": "integer", "description": "Frames to run before quitting. Default 120."}}, "required": ["project_path"]},
+    },
+    {
+        "name": "check_shader",
+        "description": "Compile a .gdshader under a real renderer and report compilation errors with line numbers. Requires a display: compiling headlessly reports success even for shaders that cannot compile. Compilation stops at the first error, so fixing shaders is iterative. If the compile attempt itself times out, this is reported as its own error rather than as a clean compile -- a timeout is not evidence the shader is fine, it means no verdict was reached.",
+        "inputSchema": {"type": "object", "properties": {"project_path": _PROJECT, "shader_path": {"type": "string", "description": "Shader to compile, e.g. res://water.gdshader."}}, "required": ["project_path", "shader_path"]},
+    },
+    {
+        "name": "screenshot_scene",
+        "description": "Render a scene and save a PNG of it. Runs the game windowed but positioned offscreen, driven by a script outside the project, so nothing is written into the project. Requires a display. out_path must resolve outside the project directory -- a path inside it (project.godot included) is refused rather than silently overwritten, and refused too if it already exists as a hardlinked file or a directory. The returned \"path\" is the fully resolved, canonical form of out_path, which is not always textually identical to what was passed in (a symlinked ancestor, or -- for the default out_path -- macOS resolving /var to /private/var); compare resolved paths, not raw strings. The result also carries the centre pixel's (r, g, b) as rendered, which is how a caller can tell a real render from a blank frame -- file size alone cannot, since a blank capture and a genuine one compress to nearly the same PNG size.",
+        "inputSchema": {"type": "object", "properties": {"project_path": _PROJECT, "scene": {"type": "string", "description": "Scene to capture, e.g. res://main.tscn."}, "out_path": {"type": "string", "description": "Absolute path for the PNG. Defaults to a temporary file."}, "width": {"type": "integer"}, "height": {"type": "integer"}, "frames": {"type": "integer", "description": "Frames to advance before capturing. Default 4."}}, "required": ["project_path", "scene"]},
+    },
+    {
+        "name": "lookup_class",
+        "description": "Look up a Godot class: its inheritance chain, description, methods, properties, and signals, optionally narrowed to one member. Generated from the user's own engine binary, so it matches their Godot version exactly.",
+        "inputSchema": {"type": "object", "properties": {"name": {"type": "string", "description": "Class name, e.g. CharacterBody2D."}, "member": {"type": "string", "description": "Optional method, property, or signal name."}}, "required": ["name"]},
+    },
+    {
+        "name": "search_classes",
+        "description": "Find Godot classes by name or by what they do, searching class names and brief descriptions. Use when the right node type for a job is unknown.",
+        "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}, "limit": {"type": "integer"}}, "required": ["query"]},
+    },
+]
+
+
+def _node_lines(node, depth=0):
+    if node is None:
+        return ["(no root node)"]
+    label = f"{'  ' * depth}- {node.name}"
+    if node.type:
+        label += f" [{node.type}]"
+    if node.instance:
+        label += f" (instance {node.instance})"
+    if "script" in node.props:
+        label += f" script={node.props['script']}"
+    lines = [label]
+    for child in node.children:
+        lines.extend(_node_lines(child, depth + 1))
+    return lines
+
+
+def _reference_graph_text(result: dict) -> str:
+    """Render refs.graph()'s result with parse_errors surfaced up front.
+
+    graph() returns parse_errors as its fifth key, which a plain
+    json.dumps(result) would leave at the tail of the blob -- easy to miss
+    for a caller skimming `broken: []` and concluding the report is clean.
+    Reordering the dict puts it first in the JSON text too, and a non-empty
+    list gets an explicit prose warning ahead of the JSON, spelling out both
+    the lower-bound and the overcount consequences rather than leaving the
+    caller to infer them from an empty-looking `broken`.
+    """
+    parse_errors = result.get("parse_errors", [])
+    ordered = {"parse_errors": parse_errors}
+    ordered.update({k: v for k, v in result.items() if k != "parse_errors"})
+
+    lines = []
+    if parse_errors:
+        lines.append(
+            f"WARNING: {len(parse_errors)} scene/resource file(s) could not be read "
+            "or parsed and were skipped -- see parse_errors below. `orphans` and "
+            "`broken` are therefore a LOWER BOUND, not a complete report: a file "
+            "referenced only from inside a skipped scene can be misreported as "
+            "orphaned. `broken` can also OVERCOUNT: a scene that fails to parse "
+            "contributes no uid of its own, so another scene referencing it by uid "
+            "is reported broken even though the target file exists."
+        )
+        lines.append("")
+    lines.append(json.dumps(ordered, indent=2))
+    return "\n".join(lines)
+
+
+def _out_path_is_inside_project(resolved_out: str, project_root: str) -> bool:
+    """True if `resolved_out` names a location at or under `project_root`,
+    compared by filesystem identity (device + inode) rather than by string
+    prefix.
+
+    String comparison is not enough (fix round 2, CRITICAL 1): macOS's
+    default filesystem, APFS, is case-insensitive but case-preserving, so
+    os.path.realpath() does NOT canonicalise letter case for a real,
+    existing directory component -- realpath("/tmp/x/PROJ") returns
+    "/tmp/x/PROJ" verbatim even when the on-disk directory is
+    "/tmp/x/proj", although both strings address the exact same directory
+    (stat() on either returns the same (st_dev, st_ino)). A caller changes
+    nothing on disk and still slips a differently-cased out_path straight
+    past `resolved_out.startswith(project_root + os.sep)` while landing on
+    the very same file. Reproduced directly against a temp copy of the
+    fixture: out_path pointed at its own project.godot via an upper-cased
+    ancestor directory name, silently overwritten -- the same 372-byte
+    config to 165-byte PNG corruption signature as the original,
+    string-only bypass. This plugin's primary platform is macOS, so this
+    is the default environment, not an edge case.
+
+    An earlier version of this function (fix round 2) walked resolved_out's
+    ancestors comparing each to project_root with os.path.samefile(), but
+    fell back to the very same string comparison the moment ANY os.stat()
+    in that walk raised OSError -- not only for a genuinely non-existent
+    ancestor as its own docstring claimed, but for a PermissionError or any
+    other cause too, and critically: falling back on the string comparison
+    at that point re-admits the exact case-fold bypass this function
+    exists to close, for any out_path whose IMMEDIATE parent directory
+    happens not to exist yet even though a HIGHER, case-fold-aliased
+    ancestor does. Reproduced directly (fix round 3, IMPORTANT 1): out_path
+    pointed through the project's upper-cased alias into a not-yet-created
+    subdirectory was wrongly accepted, and once that subdirectory existed
+    (an ordinary thing for a caller or a race to produce), a real Godot
+    process wrote a real PNG inside the project through it. So this
+    version never falls back to a string comparison at all, at any point:
+    "immune to case ... anywhere in the chain" and "cannot be exploited"
+    were both true only as long as every ancestor already existed, which is
+    not guaranteed, so neither claim is repeated here without the walk
+    that actually earns it.
+
+    Stats project_root once. If that fails, identity can never be
+    determined for anything -- treated as unsafe (True, i.e. "reject") the
+    same as a genuine match, rather than falling through to strings.
+    Otherwise walks up resolved_out's ancestors (immediate parent, that
+    parent's parent, ... to the filesystem root); an ancestor that does not
+    exist yet is simply skipped in favour of the next one up -- not treated
+    as a reason to abandon identity comparison -- because a case-fold alias
+    of the project root can appear at any existing level, not only the
+    first one checked. Only once every existing ancestor has been checked
+    and none matched is the location confirmed genuinely outside; this is
+    still immune to case, trailing slashes, and a symlinked directory
+    anywhere in the chain, because it compares the (st_dev, st_ino) a name
+    resolves to rather than the name itself, at every level that has one to
+    compare.
+
+    Residual limitation, out of scope for this function to close (fix
+    round 4): a missing ancestor this function skips past could, between
+    this check running and the render actually writing, be created as a
+    SYMLINK into the project rather than an ordinary directory -- a
+    check-then-write gap no amount of refinement here can close, since it
+    needs an fd held open (or O_NOFOLLOW at the point of the actual write)
+    to close properly, not another check beforehand. Narrower still than
+    the already-narrow round-3 race: it needs a concurrent
+    filesystem-modifying actor hitting a millisecond window, and in this
+    plugin's threat model that actor is the agent itself via Bash, which
+    the Task 9 guard hook does observe. Do not read this function's
+    thoroughness elsewhere as a guarantee that it is airtight against a
+    concurrent adversary; it is not, by design, and closing that is a
+    different mechanism than a path check.
+    """
+    if resolved_out == project_root:
+        return True
+
+    try:
+        project_stat = os.stat(project_root)
+    except OSError:
+        return True  # Cannot verify anything against a root that isn't there.
+
+    ancestor = os.path.dirname(resolved_out)
+    while True:
+        try:
+            ancestor_stat = os.stat(ancestor)
+        except OSError:
+            # This ancestor does not exist (yet, or at all) -- ordinary for
+            # an out_path naming a not-yet-created subdirectory (the
+            # default out_path is exactly this shape). Move up one level;
+            # do NOT fall back to a string comparison here.
+            parent = os.path.dirname(ancestor)
+            if parent == ancestor:
+                # Not even the filesystem root could be resolved. Identity
+                # genuinely cannot be determined -- treat as unsafe.
+                return True
+            ancestor = parent
+            continue
+
+        if (ancestor_stat.st_dev, ancestor_stat.st_ino) == (project_stat.st_dev, project_stat.st_ino):
+            return True
+
+        parent = os.path.dirname(ancestor)
+        if parent == ancestor:
+            # Walked every existing ancestor up to the filesystem root;
+            # none of them was the project root.
+            return False
+        ancestor = parent
+
+
+class BadInputPath(Exception):
+    """A project_path or scene_path that does not name what it claims to.
+
+    Raised rather than returned so every tool reports a typo'd or stale path
+    identically. Before this existed the nine tools had four conventions for
+    the same user error: project_overview and scene_tree emitted a raw Python
+    traceback (with absolute filesystem paths in it), while reference_graph,
+    check_script and check_shader returned a confident CLEAN or EMPTY answer
+    indistinguishable from a healthy project -- `broken: [], orphans: [],
+    parse_errors: []` for a path that is not a project at all. A confident
+    empty answer is the worst of the four, because absence reads as fact and
+    an agent acts on it. Only screenshot_scene got this right.
+    """
+
+
+def _require_project(args):
+    """Read-only: stats project.godot and nothing else. Nothing here may
+    create, touch or otherwise write, because this server's one load-bearing
+    property is that it never mutates project source.
+    """
+    root = args["project_path"]
+    if not os.path.isfile(os.path.join(root, "project.godot")):
+        raise BadInputPath(
+            f"project_path {root!r} is not a Godot project: no project.godot "
+            "there. Check the path, or pass the directory that contains "
+            "project.godot rather than a subdirectory of it."
+        )
+
+
+def _require_scene(args):
+    path = args["scene_path"]
+    if not os.path.isfile(path):
+        raise BadInputPath(
+            f"scene_path {path!r} does not name a readable file. Pass a "
+            "filesystem path to a .tscn file, not a res:// path."
+        )
+
+
+LOOKUP_BUDGET = 60000
+
+
+def _fit_class(found, budget=LOOKUP_BUDGET):
+    """Shrink a class record to fit the budget by dropping whole MEMBERS, not
+    characters.
+
+    This used to be `json.dumps(found, indent=2)[:60000]`, which cuts
+    mid-token and hands the agent text that announces itself as JSON and does
+    not parse. Not a rare edge: measured against the real 1,036-class dump for
+    4.7.2, 25 classes serialise past 60,000 characters, and they are the ones
+    most worth looking up -- RenderingServer (360,832), DisplayServer,
+    Control, TextEdit, CanvasItem, Window, and Node (106,638) itself.
+
+    Members are dropped from the longest list first, so a class stays
+    described rather than losing one whole category, and each truncated list
+    ends with an explicit marker saying how many were omitted -- the agent can
+    then ask for one by name via the `member` argument, which returns just
+    that member and is never truncated in practice.
+    """
+    if len(json.dumps(found, indent=2)) <= budget:
+        return found
+
+    names = ["methods", "properties", "signals", "constants", "enums"]
+    # Original member lists and their original counts, captured once. Every
+    # marker below is computed against these, so a list halved more than once
+    # still reports how many were dropped in total rather than how many the
+    # last pass removed.
+    full = {
+        k: list(found[k]) for k in names
+        if isinstance(found.get(k), list) and found[k]
+    }
+    keep = {k: len(v) for k, v in full.items()}
+
+    def build():
+        out = dict(found)
+        for k, original in full.items():
+            n = keep[k]
+            if n >= len(original):
+                out[k] = original
+                continue
+            out[k] = original[:n] + [
+                f"...{len(original) - n} more {k} omitted to fit the response "
+                f'budget; pass member="<name>" to lookup_class for any one '
+                f"of them (this class has {len(original)} in total)"
+            ]
+        return out
+
+    while len(json.dumps(build(), indent=2)) > budget:
+        halvable = [k for k in keep if keep[k] > 1]
+        if not halvable:
+            break
+        widest = max(halvable, key=lambda k: keep[k])
+        keep[widest] = max(1, keep[widest] // 2)
+    return build()
+
+
+def call_tool(name, args):
+    if name == "project_overview":
+        _require_project(args)
+        return True, json.dumps(project.overview(args["project_path"]), indent=2)
+
+    if name == "scene_tree":
+        _require_scene(args)
+        with open(args["scene_path"], errors="replace") as f:
+            text = f.read()
+        blocks = tscn.parse(text)
+        root = tscn.scene_tree(blocks)
+        out = ["# Nodes", *_node_lines(root), "", "# External resources"]
+        for res in tscn.ext_resources(blocks) or []:
+            out.append(f"- {res['type']} {res['path']} ({res['uid']})")
+        return True, "\n".join(out)
+
+    if name == "reference_graph":
+        _require_project(args)
+        return True, _reference_graph_text(refs.graph(args["project_path"]))
+
+    if name == "check_script":
+        _require_project(args)
+        found = engine.check_script(args["project_path"], args["script_path"])
+        if not found:
+            return True, "No diagnostics. The script parses and type-checks."
+        return True, json.dumps(found, indent=2)
+
+    if name == "run_scene":
+        _require_project(args)
+        result = engine.run_scene(
+            args["project_path"], args.get("scene"), int(args.get("frames", 120))
+        )
+        return True, json.dumps(result, indent=2)
+
+    if name == "check_shader":
+        _require_project(args)
+        # render.check_shader() raises ShaderCheckTimedOut rather than
+        # returning [] on a timed-out compile attempt; that is caught in
+        # main()'s dispatch below, alongside the other translated exceptions,
+        # so it is reported as an error rather than silently falling into
+        # the "no diagnostics" branch here.
+        found = render.check_shader(args["project_path"], args["shader_path"])
+        if not found:
+            return True, "Shader compiled with no errors."
+        return True, json.dumps(found, indent=2)
+
+    if name == "screenshot_scene":
+        _require_project(args)
+        out_path = args.get("out_path") or os.path.join(
+            tempfile.mkdtemp(prefix="godot-shot-"), "scene.png"
+        )
+        # out_path reached the renderer with no containment check as
+        # originally shipped. A caller-supplied path inside the project --
+        # project.godot itself, in the reported case -- was silently
+        # overwritten with PNG bytes: no warning, no isError, nothing a
+        # guard hook could see, directly contradicting this server's one
+        # load-bearing property (read-only w.r.t. project source). Two
+        # independent checks below close two independent ways a
+        # caller-chosen out_path can name a file inside the project without
+        # looking like it does.
+        project_root = os.path.realpath(args["project_path"])
+        resolved_out = os.path.realpath(out_path)
+
+        # _require_project() above already proved project.godot is a file here,
+        # so this stat can now only fail if the directory vanished between the
+        # two calls. Kept as a race guard rather than deleted, because the
+        # realpath()'d project_root is what the containment check below
+        # compares against. The fix-round-4 message it used to carry (naming
+        # project_path rather than out_path, which was never the problem) now
+        # comes from _require_project, which every path-taking tool shares.
+        try:
+            os.stat(project_root)
+        except OSError as exc:
+            return False, f"project_path {args['project_path']!r} could not be resolved: {exc}."
+
+        # CRITICAL 2 (fix round 2): a pre-existing hardlink from outside the
+        # project to a file inside it has no distinct path to resolve -- it
+        # IS the same inode under a second, unrelated-looking name, not a
+        # reference to one -- so no path-based check, however careful, can
+        # see through it; writing through that name corrupts the inside
+        # file just as directly as the original bug. Reproduced directly:
+        # hard-linking a file inside a temp copy of the fixture from an
+        # "outside" name, then writing through that name, corrupted the
+        # inside file with the same signature. A screenshot destination
+        # that already exists as a multiply-linked file is never a
+        # legitimate case, so refusing it costs nothing real.
+        try:
+            existing_out_stat = os.stat(resolved_out)
+        except OSError:
+            existing_out_stat = None
+        if existing_out_stat is not None and existing_out_stat.st_nlink > 1:
+            # MINOR (fix round 3): st_nlink > 1 is not proof out_path is a
+            # hardlinked *file* -- any directory has st_nlink >= 2 as well
+            # (its own "." entry, plus one per subdirectory's ".."), so the
+            # message says "on disk", not "as a file", to stay accurate
+            # either way. Wording only -- the refusal itself is correct and
+            # unchanged for both cases.
+            return False, (
+                f"out_path {out_path!r} already exists on disk with more "
+                "than one hard link (st_nlink > 1) -- true of a directory, "
+                "and of a file deliberately hardlinked elsewhere. Writing "
+                "through it could modify whatever else shares that inode "
+                "-- possibly a file inside the project -- and a hardlink "
+                "has no distinct path for a containment check to catch. "
+                "Refused."
+            )
+
+        # CRITICAL 1 (fix round 2): see _out_path_is_inside_project()'s own
+        # docstring -- a plain string-prefix comparison here is defeated for
+        # free by a case-insensitive-but-case-preserving filesystem (APFS,
+        # the default on macOS, this plugin's primary platform).
+        if _out_path_is_inside_project(resolved_out, project_root):
+            return False, f"out_path must be outside the project directory; got {out_path!r}."
+
+        # IMPORTANT 2 (fix round 3): pass `resolved_out`, not the original
+        # `out_path`, to the renderer. Both checks above validated
+        # `resolved_out`; render.screenshot_scene() internally does its own
+        # os.path.abspath(out_path) using whatever cwd is live AT RENDER
+        # TIME (see render.py), so handing it the original, possibly
+        # relative `out_path` string re-resolves it a second time against
+        # filesystem state neither check ever saw -- a second, independent
+        # TOCTOU, on top of the CWD-must-not-change invariant this
+        # comment used to be the only place documenting. Passing the
+        # already-resolved, absolute, canonical path removes both: there is
+        # nothing left to re-resolve.
+        #
+        # User-visible consequence, not merely internal: the returned
+        # "path" field is now `resolved_out`, which can differ textually
+        # from the `out_path` a caller supplied even though both name the
+        # same file -- e.g. the DEFAULT out_path (no argument given) is
+        # already like this on macOS, where tempfile.mkdtemp() returns a
+        # "/var/folders/..." path and realpath() resolves it to
+        # "/private/var/folders/..." because /var is itself a symlink. No
+        # test asserted string equality on that field, so nothing broke,
+        # but a caller comparing the returned path against what it passed
+        # in should compare resolved paths, not raw strings.
+        result = render.screenshot_scene(
+            args["project_path"],
+            args["scene"],
+            resolved_out,
+            width=int(args.get("width", 800)),
+            height=int(args.get("height", 600)),
+            frames=int(args.get("frames", 4)),
+        )
+        if not result["path"]:
+            return False, "No image was produced.\n" + json.dumps(result, indent=2)
+        return True, json.dumps(result, indent=2)
+
+    if name == "lookup_class":
+        # api.lookup_class() builds a fresh dict; never reach this through
+        # api.load_dump() directly (see the module docstring above).
+        found = api.lookup_class(args["name"], args.get("member"))
+        if not found:
+            return False, f"No such class: {args['name']}"
+        return True, json.dumps(_fit_class(found), indent=2)
+
+    if name == "search_classes":
+        # api.search_classes() likewise builds a fresh list; same rule.
+        return True, json.dumps(
+            api.search_classes(args["query"], int(args.get("limit", 25))), indent=2
+        )
+
+    return False, f"Unknown tool: {name}"
+
+
+def respond(request_id, result=None, error=None):
+    message = {"jsonrpc": "2.0", "id": request_id}
+    if error is not None:
+        message["error"] = error
+    else:
+        message["result"] = result
+    sys.stdout.write(json.dumps(message) + "\n")
+    sys.stdout.flush()
+
+
+def _kill_live_children():
+    with _LIVE_PROCS_LOCK:
+        procs = list(_LIVE_PROCS)
+    for proc in procs:
+        if proc.poll() is None:
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                pass
+
+
+def _install_signal_handlers():
+    def _handle(signum, frame):
+        _kill_live_children()
+        sys.exit(1)
+
+    signal.signal(signal.SIGTERM, _handle)
+    signal.signal(signal.SIGINT, _handle)
+
+
+def dispatch_tool_call(name, arguments):
+    """Call `name`, translating the exceptions call_tool() lets through into
+    a clean tool-error result rather than a bare traceback. Split out from
+    main()'s loop so tests can drive this exception translation directly,
+    without going through a subprocess and without needing the exact
+    condition (a real timeout, a missing binary, no display) to actually
+    occur.
+
+    `arguments` is validated as a dict here, before call_tool() ever sees it
+    (fix round 1, IMPORTANT 3): a JSON-RPC caller can send any JSON value for
+    "arguments", including a bare string. call_tool()'s bodies all index into
+    it as `args["some_key"]`, and indexing a string with a string key raises
+    a raw `TypeError: string indices must be integers`, which -- unlike the
+    four named exceptions below -- fell straight into the generic `except
+    Exception` branch as a multi-line traceback with absolute paths, not a
+    one-sentence error. None (arguments omitted) is treated as {}, matching
+    prior behaviour for tools whose schema has no required properties.
+    """
+    if arguments is None:
+        arguments = {}
+    if not isinstance(arguments, dict):
+        return {
+            "content": [{"type": "text", "text": (
+                f"Invalid arguments for tool {name!r}: expected a JSON object, "
+                f"got {type(arguments).__name__} ({arguments!r})."
+            )}],
+            "isError": True,
+        }
+    try:
+        ok, text = call_tool(name, arguments)
+    except engine.MissingBinary as exc:
+        ok, text = False, str(exc)
+    except render.NoDisplay as exc:
+        ok, text = False, str(exc)
+    except render.ShaderCheckTimedOut as exc:
+        ok, text = False, str(exc)
+    except engine.ScriptCheckTimedOut as exc:
+        ok, text = False, str(exc)
+    except BadInputPath as exc:
+        ok, text = False, str(exc)
+    except tscn.TscnParseError as exc:
+        ok, text = False, f"Could not parse the scene file: {exc}"
+    except Exception:
+        ok, text = False, traceback.format_exc(limit=3)
+    result = {"content": [{"type": "text", "text": text}]}
+    if not ok:
+        result["isError"] = True
+    return result
+
+
+def main():
+    _install_signal_handlers()
+    for line in sys.stdin:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            message = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+
+        method = message.get("method")
+        request_id = message.get("id")
+
+        if method == "initialize":
+            requested = (message.get("params") or {}).get("protocolVersion")
+            respond(request_id, {
+                "protocolVersion": requested or PROTOCOL_VERSION,
+                "capabilities": {"tools": {}},
+                "serverInfo": SERVER_INFO,
+            })
+        elif method in ("notifications/initialized", "notifications/cancelled"):
+            continue
+        elif method == "ping":
+            respond(request_id, {})
+        elif method == "tools/list":
+            respond(request_id, {"tools": TOOLS})
+        elif method == "tools/call":
+            params = message.get("params") or {}
+            # Pass the raw value through -- dispatch_tool_call() itself
+            # treats a missing/None "arguments" as {} and rejects anything
+            # else that isn't a dict. `or {}` here would also have silently
+            # coerced a wrong-but-falsy type (0, False, "") into {}, masking
+            # exactly the class of malformed input this is meant to catch.
+            result = dispatch_tool_call(params.get("name", ""), params.get("arguments"))
+            respond(request_id, result)
+        elif request_id is not None:
+            respond(request_id, error={"code": -32601, "message": f"Method not found: {method}"})
+
+
+if __name__ == "__main__":
+    main()

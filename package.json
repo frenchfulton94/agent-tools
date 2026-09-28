@@ -7,6 +7,7 @@
   "type": "module",
   "scripts": {
     "test": "bun test",
+    "test:engine": "cd plugins/godot/scripts && python3 -m unittest discover -s test -t . -p 'test_*.py'",
     "audit": "bun plugins/meta-skills/skills/maintaining-plugin-marketplaces/scripts/audit_marketplace.ts .",
     "audit:strict": "bun plugins/meta-skills/skills/maintaining-plugin-marketplaces/scripts/audit_marketplace.ts . --strict",
     "validate": "claude plugin validate ."

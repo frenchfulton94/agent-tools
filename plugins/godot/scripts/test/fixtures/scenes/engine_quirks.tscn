@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://root.gd" id="1_cvyw8"]
+[ext_resource type="Script" path="res://holder.gd" id="2_4efwe"]
+
+[node name="Root" type="Node2D" unique_id=1875567328]
+script = ExtResource("1_cvyw8")
+
+[node name="Enemy" type="Sprite2D" parent="." unique_id=1372617621 groups=["damageable", "enemies"]]
+
+[node name="Holder" type="Node2D" parent="." unique_id=2015271264 node_paths=PackedStringArray("target_a", "target_b")]
+script = ExtResource("2_4efwe")
+target_a = NodePath("../TargetA")
+target_b = NodePath("../TargetB")
+
+[node name="TargetA" type="Node2D" parent="." unique_id=981781774]
+
+[node name="TargetB" type="Node2D" parent="." unique_id=1926719150]
+
+[connection signal="tree_exiting" from="Enemy" to="." method="_on_enemy_exit" binds= ["extra", 42]]

@@ -82,6 +82,12 @@
       "source": "./plugins/para",
       "category": "productivity",
       "description": "Organizes a directory into Tiago Forte's PARA structure — Projects, Areas, Resources, Archives — through an approve-before-move workflow: a plan grouped by decision rather than by file, classification from metadata and macOS Spotlight signals with a bounded content peek, a project list you own and correct, and an undo manifest for every move. Ships /para:organize and a guard hook that blocks deletion and unplanned moves inside a managed root."
+    },
+    {
+      "name": "godot",
+      "source": "./plugins/godot",
+      "category": "development",
+      "description": "Game development with Godot 4 — project and scene architecture, the .tscn and .tres file formats and their uid:// identity rules, GDScript with static typing, and a verify loop built on the engine's own headless tooling. Ships a read-only MCP server that parses a project, checks scripts and shaders, runs scenes, captures screenshots, and serves the class reference generated from the user's own engine binary, plus a guard against the file moves that break uid:// references unrepairably."
     }
   ]
 }

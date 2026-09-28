@@ -1,0 +1,13 @@
+Source:  https://github.com/godotengine/godot-docs
+Branch:  master
+Engine:  4.7 (conf.py godot_version)
+Synced:  2026-09-26
+
+These files are VERBATIM copies. Never edit them.
+
+Why these and not others: they carry exact material that paraphrasing
+corrupts — the .tscn grammar the parser is written against, the CLI flag
+tables, the GDScript style/typing/warning references, and the export and
+feature-tag tables. Everything else is distilled into each skill's
+references/. The class reference is not vendored at all; it is generated
+from the user's own engine binary by the MCP server.

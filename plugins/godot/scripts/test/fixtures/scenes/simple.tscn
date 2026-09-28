@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://cecaux1sm7mo0"]
+
+; a comment line
+
+[ext_resource type="Script" uid="uid://cnnyipgx21jca" path="res://scripts/player.gd" id="1_abc"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_abc")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+position = Vector2(10, 20)

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "godot",
+  "displayName": "Godot",
+  "version": "0.1.0",
+  "description": "Game development with Godot 4 — project and scene architecture, the .tscn and .tres file formats and their uid:// identity rules, GDScript with static typing, and a verify loop built on the engine's own headless tooling. Ships a read-only MCP server that parses a project, checks scripts and shaders, runs scenes, captures screenshots, and serves the class reference generated from the user's own engine binary, plus a guard against the file moves that break uid:// references unrepairably.",
+  "author": {
+    "name": "Agent Tools",
+    "email": "michael@frenchfultonjr.dev"
+  },
+  "license": "MIT",
+  "keywords": ["godot", "gdscript", "gamedev", "game-engine", "tscn", "shaders", "game-development"],
+  "userConfig": {
+    "godot_bin": {
+      "type": "string",
+      "title": "Godot binary path",
+      "description": "Absolute path to the Godot 4 editor binary. Leave empty to find it on PATH (godot, then godot4), falling back to /Applications/Godot.app/Contents/MacOS/Godot on macOS."
+    }
+  }
+}
