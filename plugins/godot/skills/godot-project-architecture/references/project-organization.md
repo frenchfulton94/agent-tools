@@ -2,7 +2,9 @@
 
 Read this for folder layout, naming, what to commit versus ignore, and the
 practical path for moving a project between Godot versions. Distilled from
-the vendored `project_organization.rst` and `version_control_systems.rst`,
+the vendored
+`${CLAUDE_PLUGIN_ROOT}/godot-docs/best_practices/project_organization.rst`
+and `${CLAUDE_PLUGIN_ROOT}/godot-docs/best_practices/version_control_systems.rst`,
 with the version-control identity facts corrected against direct
 measurement on Godot 4.7.2 (the vendored doc predates the `.uid` sidecar
 system and doesn't mention it at all). The upgrade-path and project-settings
@@ -73,7 +75,9 @@ source CSV, regenerable from the CSV that should itself be committed).
 | Imported assets (`.png`, `.wav`, `.glb`, …) | `.import` sidecar | Yes |
 | `.tscn`, `.tres` | inline `uid=` on the file's own heading | Yes (the whole file) |
 
-This corrects the vendored `version_control_systems.rst`, which predates the
+This corrects the vendored
+`${CLAUDE_PLUGIN_ROOT}/godot-docs/best_practices/version_control_systems.rst`,
+which predates the
 `.uid` sidecar system and says nothing about it. Measured directly against
 Godot 4.7.2 for this plugin's build:
 

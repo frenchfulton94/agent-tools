@@ -4,8 +4,9 @@ Read this when deciding how to persist player progress or settings, which
 path prefix to write to, and which serialization format to reach for.
 Distilled from upstream files not vendored in this plugin —
 `tutorials/io/saving_games.rst` and `tutorials/io/data_paths.rst` — plus the
-vendored `data_preferences.rst` for the data-structure angle. Marked
-distilled versus vendored inline.
+vendored
+`${CLAUDE_PLUGIN_ROOT}/godot-docs/best_practices/data_preferences.rst` for
+the data-structure angle. Marked distilled versus vendored inline.
 
 ## Contents
 

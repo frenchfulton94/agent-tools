@@ -3,10 +3,12 @@
 Read this for the full reasoning behind the autoload decision in SKILL.md,
 the mechanics of decoupling a scene from its environment, and exactly when
 each Godot lifecycle callback fires. Distilled from the vendored
-`autoloads_versus_regular_nodes.rst` and `godot_notifications.rst`, plus two
-files not vendored in this plugin — `tutorials/scripting/instancing_with_signals.rst`
-and `tutorials/scripting/groups.rst` — marked as distilled rather than
-citable against the vendored slice.
+`${CLAUDE_PLUGIN_ROOT}/godot-docs/best_practices/autoloads_versus_regular_nodes.rst`
+and `${CLAUDE_PLUGIN_ROOT}/godot-docs/best_practices/godot_notifications.rst`,
+plus two files not vendored in this plugin —
+`tutorials/scripting/instancing_with_signals.rst` and
+`tutorials/scripting/groups.rst` — marked as distilled rather than citable
+against the vendored slice.
 
 ## Contents
 
@@ -18,7 +20,7 @@ citable against the vendored slice.
 
 ## The cutting-audio example in full
 
-*(distilled from `autoloads_versus_regular_nodes.rst`, vendored)*
+*(distilled from `${CLAUDE_PLUGIN_ROOT}/godot-docs/best_practices/autoloads_versus_regular_nodes.rst`, vendored)*
 
 The scenario: a platformer plays a sound effect on coin pickup. A single
 `AudioStreamPlayer` cuts its own sound off if two pickups happen close
@@ -152,9 +154,9 @@ group is the same group, not two.
 ## Full callback order
 
 *(the notification/callback material here is vendored in
-`godot_notifications.rst`; the `_ready`-before-main-scene autoload ordering
-below was verified directly against Godot 4.7.2 for this skill, not merely
-read off the docs)*
+`${CLAUDE_PLUGIN_ROOT}/godot-docs/best_practices/godot_notifications.rst`;
+the `_ready`-before-main-scene autoload ordering below was verified directly
+against Godot 4.7.2 for this skill, not merely read off the docs)*
 
 **Property initialization**, in order, for one node:
 

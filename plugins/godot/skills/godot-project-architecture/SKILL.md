@@ -142,9 +142,12 @@ The **owner** property is what actually determines a scene's saved content:
 a node saves into a `.tscn` file only if its `owner` is set to that scene's
 root (or omitted, for the root itself). A node added at runtime and parented
 into an existing tree without an owner assignment exists at runtime but
-won't round-trip through a save — this is the mechanism, not merely a
-convention, so "is `owner` set correctly" is the first thing to check when a
-runtime-added node mysteriously isn't in the saved scene.
+won't round-trip through a save — verified directly against Godot 4.7.2 for
+this skill: a child added with `owner` set was present in the saved scene,
+an otherwise-identical child left without `owner` was silently absent. This
+is the mechanism, not merely a convention, so "is `owner` set correctly" is
+the first thing to check when a runtime-added node mysteriously isn't in the
+saved scene.
 
 For overall tree shape: give the game an entry point (commonly a `Main`
 node) with a world and a GUI branch beneath it, and put a system under an
@@ -158,9 +161,12 @@ tree — as a sibling, or under whatever node's lifetime it actually tracks.
 ## Where the rest lives
 
 - `references/nodes-scenes-resources.md` — the full node/script/scene/resource
-  ladder, `scenes_versus_scripts.rst` and `node_alternatives.rst` distilled,
-  worked examples, and when an `Array`/`Dictionary` beats writing a class.
-- `references/autoloads-and-signals.md` — `autoloads_versus_regular_nodes.rst`
+  ladder, `${CLAUDE_PLUGIN_ROOT}/godot-docs/best_practices/scenes_versus_scripts.rst`
+  and `${CLAUDE_PLUGIN_ROOT}/godot-docs/best_practices/node_alternatives.rst`
+  distilled, worked examples, and when an `Array`/`Dictionary` beats writing
+  a class.
+- `references/autoloads-and-signals.md` —
+  `${CLAUDE_PLUGIN_ROOT}/godot-docs/best_practices/autoloads_versus_regular_nodes.rst`
   and the shooting-bullets signal example distilled in full, groups as a
   third decoupling tool, and the complete `_init`/`_enter_tree`/`_ready`/
   `_notification` callback order with the property-initialization sequence.

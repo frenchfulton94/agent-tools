@@ -1,8 +1,11 @@
 # Nodes, scenes, scripts, and resources
 
 Read this when deciding what container a new piece of functionality or data
-should live in. Distilled from the vendored `scenes_versus_scripts.rst` and
-`node_alternatives.rst`, with one addition (`data_preferences.rst`'s
+should live in. Distilled from the vendored
+`${CLAUDE_PLUGIN_ROOT}/godot-docs/best_practices/scenes_versus_scripts.rst`
+and `${CLAUDE_PLUGIN_ROOT}/godot-docs/best_practices/node_alternatives.rst`,
+with one addition
+(`${CLAUDE_PLUGIN_ROOT}/godot-docs/best_practices/data_preferences.rst`'s
 Array/Dictionary/Object comparison) for the case where the answer is "none
 of the above — a plain collection is enough."
 
