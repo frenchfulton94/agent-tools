@@ -15,12 +15,18 @@
 #           the original, `rsync --remove-source-files`, and `find ... -exec mv
 #           ... \;` — all treated the same as a plain `mv`.
 #   ask   — recoverable from git, but orphans references until it is.
-#   allow — everything else, silently. UIDs are derived from the path (measured,
-#           spec 3.8), so deleting a .uid or .import IN PLACE regenerates the
-#           identical UID and is harmless; only a move changes the path. Directory
-#           moves are safe too, because the sidecars travel inside the directory.
-#           A guard that fires on safe operations gets turned off, and then it
-#           protects nothing — including the one rule that matters.
+#   allow — everything else, silently. Deleting a .uid or .import IN PLACE (the
+#           file it identifies stays exactly where it is) is harmless (measured,
+#           spec 3.8): the file's path hasn't changed, so a scene naming its
+#           unchanged path= still resolves either way. This is NOT because both
+#           sidecars regenerate the identical UID on reimport — only the .uid
+#           case does; a deleted .import sidecar reliably comes back as *some*
+#           UID, but not the same one cycle to cycle. Only a move changes the
+#           path, which is what actually breaks a uid://-only reference.
+#           Directory moves are safe too, because the sidecars travel inside
+#           the directory. A guard that fires on safe operations gets turned
+#           off, and then it protects nothing — including the one rule that
+#           matters.
 #
 # ## Why this file is three lines of logic and a delegate, not the whole guard
 #

@@ -123,22 +123,44 @@ and a directory move carries sidecars along with their files. A rule covering
 all five extensions would deny safe operations, which is how guards get
 disabled.
 
-### 3.8 UIDs are derived from the path, so only the move is destructive
+### 3.8 The two sidecar carriers do not regenerate the same way
 
-Deleting a sidecar in place and reimporting regenerates the **same** UID:
+Deleting a sidecar in place (the file it identifies stays exactly where it
+is) and reimporting does **not** behave identically for both carriers —
+corrected during Task 14 from an earlier, uniform statement of this finding
+that a later, independent re-measurement (ten delete-and-reimport cycles for
+`.uid`, twelve for `.import`, including with `.godot/`'s UID cache wiped cold
+first) showed to be false for `.import`. Both measurements — six cycles
+originally, ten/twelve independently — agree on the qualitative split below;
+only the original's "both regenerate identically" summary was wrong.
 
 | Operation | UID before | UID after |
 |---|---|---|
-| `rm a/s.gd.uid`, reimport | `uid://b24e2fth3n3xk` | `uid://b24e2fth3n3xk` |
-| `rm hero.png.import`, reimport | `uid://dka08b7p2ntk2` | `uid://dka08b7p2ntk2` |
+| `rm a/s.gd.uid`, reimport | `uid://b24e2fth3n3xk` | `uid://b24e2fth3n3xk` (every cycle) |
+| `rm hero.png.import`, reimport | `uid://dka08b7p2ntk2` | alternates between two values across cycles, e.g. `uid://ypc0c31ly0bt` / `uid://ilysqd6ng7fg` |
 | `mv a/s.gd b/s.gd` without the `.uid` | `uid://bwimerv1cyist` | `uid://byx1h08w7qpq8` |
 | `mv hero.png art/` without the `.import` | `uid://dka08b7p2ntk2` | `uid://badik1e5sp48k` |
 
-**Consequence.** This narrows the guard considerably, and the narrowing matters.
-Deleting a sidecar looks alarming and is harmless; moving a file is routine and
-is the operation that destroys identity. A guard that denied sidecar deletion
-would fire on safe work often enough to be switched off, taking the rule that
-does matter with it.
+A `.uid` sidecar deleted in place is genuinely path-derived: the UID is a
+deterministic function of the file's path, so it comes back identical every
+time. A `.import` sidecar deleted in place is not — reimporting regenerates
+*some* UID, but not reliably the same one from cycle to cycle.
+
+**Consequence.** This still narrows the guard considerably, and the narrowing
+still matters, but for a milder reason than "both regenerate identically."
+Deleting either sidecar in place is harmless enough to allow: the asset
+itself is never lost, and a scene naming the asset's unchanged `path=` keeps
+loading regardless of which UID reimport picked, because Godot falls back to
+the path. What is actually at risk from a `.import` sidecar's non-identical
+regeneration is a reference that resolves *purely* by `uid://` with no `path=`
+to fall back on — and even that keeps working locally, because Godot's own
+UID cache (`.godot/uid_cache.bin`) retains historical UID→path mappings
+rather than replacing them; it only surfaces on a fresh clone or CI checkout,
+where that cache does not exist yet. Moving a file is the operation that
+destroys identity outright (no UID resolves at all, not just an
+inconsistent one); a guard that denied sidecar deletion in place would fire
+on work that is safe by either reasoning often enough to be switched off,
+taking the rule that does matter with it.
 
 ### 3.5 Headless shader loading silently passes broken shaders
 
@@ -279,7 +301,7 @@ Both authored through `meta-skills:authoring-hooks`. Both tested under
 | `mv` of `.tscn`/`.tres`, or of a whole directory | Allow | Scenes and resources carry their UID inline (3.7); a directory move carries sidecars with it |
 | `--convert-3to4` | Block | Rewrites every file in the project in place |
 | `rm` of `.tscn`/`.tres`/`.gd`/`project.godot`/`export_presets.cfg` | Ask | Recoverable from git, but orphans references |
-| `rm` of a `*.uid` or `*.import` **in place** | Allow | Regenerates identically (3.8) — the file's path has not changed |
+| `rm` of a `*.uid` or `*.import` **in place** | Allow | The file's path has not changed, so a scene naming its `path=` still resolves either way (3.8) — `.uid` regenerates identically on reimport, `.import` does not reliably, but neither loses the asset |
 | `rm -rf .godot/` | Allow | Rebuilt by `--import` |
 
 The permit rows matter as much as the block rows. A guard that fires on

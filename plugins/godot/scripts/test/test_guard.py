@@ -24,8 +24,10 @@ CASES = [
     # --- allow: regenerable -------------------------------------------------
     ("rm -rf .godot", "allow"),
     ("rm -rf .godot/imported", "allow"),
-    # Spec 3.8: UIDs are path-derived, so deleting a sidecar in place
-    # regenerates the identical UID. Denying these would be noise.
+    # Spec 3.8: deleting a sidecar in place leaves the file's path unchanged,
+    # so a scene naming its path= still resolves either way (only .uid
+    # reliably regenerates the identical UID on reimport; .import does not,
+    # but the asset itself is never lost). Denying these would be noise.
     ("rm scripts/player.gd.uid", "allow"),
     ("rm -f assets/hero.png.import", "allow"),
     ("rm assets/hero.png.import && godot --headless --import", "allow"),
