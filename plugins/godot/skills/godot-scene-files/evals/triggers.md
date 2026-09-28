@@ -60,7 +60,10 @@ Not run under a clean-context dispatch — the task that produced this skill
 directed no subagent dispatch, the same constraint `gdscript`'s own trigger
 battery recorded for itself at Task 1. The queries above are exercisable by
 hand once `godot-testing-and-debugging`, `godot-project-architecture`, and
-`godot-csharp` exist to compete against; until then, items 1–4 in the
+`godot-csharp` exist to compete against; until then, items 1–2 in the
 negative list "firing" would only be observable as this skill answering a
 question its own description says belongs elsewhere, since there is nothing
-else installed yet to fire instead.
+else installed yet to fire instead. Items 3–4 "firing" would only be
+observable as this skill answering a question that belongs to a sibling its
+description never names in the first place — a real over-reach if it
+happened, but not one the description's own wording would have predicted.

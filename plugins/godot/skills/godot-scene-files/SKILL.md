@@ -45,7 +45,10 @@ reimport:
   texture keeps resolving, because Godot falls back to the path when the UID
   no longer matches. What's actually at risk is a reference that resolves
   *purely* by `uid://` with no path to fall back on (e.g. a bare
-  `load("uid://…")` call) — that can point at nothing once the UID changes.
+  `load("uid://…")` call) — but only on a fresh clone or CI checkout. In an
+  ongoing local session, `.godot/uid_cache.bin` keeps the old UID resolvable
+  regardless, so a bare `uid://` load can work for its author and still fail
+  once `.godot/` (gitignored) doesn't exist yet to fall back on.
 
 See `references/uid-and-identity.md` for the full measurement and why the
 two carriers diverge.

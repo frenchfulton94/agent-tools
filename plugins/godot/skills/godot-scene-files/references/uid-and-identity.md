@@ -53,8 +53,17 @@ deleting the `.import` and reimporting still left the scene loading and the
 texture resolving, because Godot falls back to the path when the UID no
 longer matches. Nothing about the asset itself is lost — what's actually at
 risk is a reference that resolves *purely* by `uid://` with no path to fall
-back on (a bare `load("uid://…")` call, say), which can point at nothing
-once the UID changes underneath it.
+back on (a bare `load("uid://…")` call, say) — but only once the project's
+UID cache is genuinely cold. `.godot/uid_cache.bin` accumulates historical
+UID→path mappings rather than replacing them, so in an ongoing local
+session a bare `load("uid://<the old uid>")` keeps succeeding even after the
+`.import` regenerated a different one — nothing looks wrong, because
+`ResourceUID` still has the stale entry on hand. The failure only surfaces
+on a fresh clone or a CI checkout: `.godot/` is gitignored, so that cache
+doesn't exist there, and reimporting from the committed files alone leaves
+`load("uid://<the old uid>")` returning `null` and `ResourceUID.has_id()`
+returning `false`. A bare `uid://` load that works for its author and fails
+in CI is the shape this actually takes.
 
 ## Moving without the sidecar is not
 

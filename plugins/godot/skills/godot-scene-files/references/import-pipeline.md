@@ -72,8 +72,13 @@ guaranteed to regenerate the same UID on reimport — measured alternating
 between two different values across repeated delete-and-reimport cycles on
 the same asset (see `uid-and-identity.md`). A scene that still names the
 asset's unchanged `path=` keeps loading regardless, since Godot falls back to
-the path when the UID doesn't match — but anything resolving that asset
-*purely* by `uid://` is exposed to the churn. Second, and independent of
+the path when the UID doesn't match — and anything resolving that asset
+*purely* by `uid://` is exposed to the churn too, but only on a fresh clone
+or CI checkout. `.godot/uid_cache.bin` (itself gitignored, inside `.godot/`)
+accumulates historical UID→path mappings rather than replacing them, so a
+bare `uid://` load kept working in whatever local session did the reimport;
+it's the checkout that never had that cache built up which actually sees the
+stale UID resolve to nothing. Second, and independent of
 UID continuity, a missing `.import` file loses the `[params]` block: any
 non-default import setting — a specific compression mode, disabled
 mipmaps, a particular texture filter — resets to that importer's defaults on
