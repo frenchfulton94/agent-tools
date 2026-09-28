@@ -20,7 +20,11 @@ describe('godot python scripts', () => {
 	// The engine wrapper's own tests spawn real subprocesses (including two
 	// that enforce a Python-side timeout against a hung fake binary), so the
 	// full suite runs well past bun's 5s default per-test timeout even
-	// though nothing is actually stuck. Generous ceiling, not a real budget.
+	// though nothing is actually stuck. Generous ceiling, not a real budget --
+	// bumped from 30000 to 90000 when the GDScript check hook's suite grew
+	// past 30s (measured at ~35.5s) after adding several tests that each run
+	// a real `godot --check-only`/`--import` invocation; raise it again
+	// rather than trim test coverage if a future round pushes past this.
 	test.skipIf(!hasPython)(
 		'unittest suite passes',
 		() => {
@@ -32,6 +36,6 @@ describe('godot python scripts', () => {
 			if (result.status !== 0) console.error(result.stderr || result.stdout);
 			expect(result.status).toBe(0);
 		},
-		30000,
+		90000,
 	);
 });

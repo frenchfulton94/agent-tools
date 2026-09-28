@@ -167,12 +167,12 @@ class TestWithEngine(unittest.TestCase):
         # points at the preloaded file, not at the file just edited. The
         # header must not claim the errors ARE in the edited file.
         #
-        # Both files are new, so re-import once after adding them: without
-        # that, the fix-round-1 freshness check (IMPORTANT 1, tested above)
-        # would correctly-but-irrelevantly silence this case too, since
-        # bad_preload_target.gd is a second, non-checked file newer than the
-        # cache. Re-importing isolates the misattribution question from the
-        # staleness question.
+        # Both files are new; re-importing once after adding them is no
+        # longer load-bearing under the round-3 per-diagnostic filter (these
+        # diagnostics -- a type mismatch and a downstream compile failure --
+        # never match the missing-type shapes that trigger a class_name
+        # lookup at all, regardless of freshness), but it costs nothing and
+        # keeps this test isolated from any future change to that filter.
         (self.root / "bad_preload_target.gd").write_text(
             'extends Node\n\nfunc _ready() -> void:\n\tvar x: int = "not an int"\n'
         )
@@ -189,6 +189,112 @@ class TestWithEngine(unittest.TestCase):
         context = payload["hookSpecificOutput"]["additionalContext"]
         self.assertNotIn("errors in uses_preload.gd", context)
         self.assertIn("bad_preload_target.gd", context)
+        # Fix round 3: the hedge clause itself must be present here, since
+        # every surviving `at:` location genuinely differs from $rel.
+        self.assertIn("may live in a res://", context)
+
+    def test_header_has_no_preload_hedge_when_error_is_local(self):
+        # Fix round 3. The hedge ("errors may live in a preloaded file") is
+        # only earned when some surviving `at:` location actually differs
+        # from the edited file. Unconditionally hedging under-credits a
+        # genuine local error on a skim -- broken.gd's errors are entirely
+        # its own, so the header must not soften that.
+        proc = run_hook(self.root / "broken.gd")
+        payload = json.loads(proc.stdout)
+        context = payload["hookSpecificOutput"]["additionalContext"]
+        self.assertNotIn("may live in a res://", context)
+
+    def test_class_name_inside_multiline_string_does_not_suppress_unrelated_error(self):
+        # Fix round 3, finding A. A bystander file containing the substring
+        # "class_name" only inside a multi-line string (not a declaration at
+        # all -- it compiles cleanly) must not suppress a real, unrelated
+        # error in the file being checked. Confirmed against the engine:
+        # round 2's file-content-blind check ("does any newer file contain
+        # the text class_name") could not tell this apart from a genuine
+        # declaration; the round-3 per-diagnostic filter can, because
+        # broken2.gd's actual error ("Cannot assign...") never matches the
+        # missing-type shapes that trigger a class_name lookup at all, so
+        # what the bystander file contains is irrelevant.
+        (self.root / "bystander.gd").write_text(
+            'extends Resource\n\nconst NOTE = """\nclass_name NotARealDeclaration\n"""\n'
+        )
+        broken = self.root / "broken2.gd"
+        broken.write_text(
+            'extends Node\n\nfunc _ready() -> void:\n\tvar x: int = "still broken"\n'
+        )
+        proc = run_hook(broken)
+        payload = json.loads(proc.stdout)
+        context = payload["hookSpecificOutput"]["additionalContext"]
+        self.assertIn("broken2.gd", context)
+        self.assertIn("String", context)
+
+    def test_symlinked_target_with_class_name_still_reports_own_real_error(self):
+        # Fix round 3, finding B. The checked path is a symlink to a file
+        # that itself declares a class_name; -samefile's identity semantics
+        # around a symlinked path are exactly the kind of thing that could
+        # make the target look like "a different, newer, class_name-
+        # declaring file" relative to the checked path. Under the round-3
+        # design this cannot matter: the file's own error is a type
+        # mismatch, never a missing-type diagnostic, so it is never a
+        # candidate for the class_name lookup regardless of what -samefile
+        # decides about the symlink's identity.
+        real = self.root / "real_target.gd"
+        real.write_text(
+            'class_name SymlinkedClass\nextends Node\n\nfunc _ready() -> void:\n\tvar x: int = "still broken"\n'
+        )
+        link = self.root / "linked.gd"
+        link.symlink_to(real)
+        proc = run_hook(link)
+        payload = json.loads(proc.stdout)
+        context = payload["hookSpecificOutput"]["additionalContext"]
+        self.assertIn("String", context)
+
+    def test_unrelated_class_name_elsewhere_does_not_suppress_unrelated_error(self):
+        # Fix round 3, finding C. A class_name file exists elsewhere in the
+        # project, newer than the cache, but names a class the checked
+        # file's error has nothing to do with. Round 2's design suppressed
+        # on this alone -- "any newer file containing class_name anywhere"
+        # -- which would silence a project's entire error reporting during
+        # active scaffolding, exactly when new class_name declarations are
+        # being added on purpose. The round-3 filter requires the SPECIFIC
+        # missing name to match, so an unrelated declaration cannot qualify.
+        (self.root / "unrelated_class.gd").write_text(
+            "class_name TotallyUnrelated\nextends Resource\n"
+        )
+        broken = self.root / "broken.gd"
+        broken.write_text(
+            'extends Node\n\nfunc _ready() -> void:\n\tvar x: int = "still broken"\n'
+        )
+        proc = run_hook(broken)
+        payload = json.loads(proc.stdout)
+        context = payload["hookSpecificOutput"]["additionalContext"]
+        self.assertIn("broken.gd", context)
+        self.assertIn("String", context)
+
+    def test_stale_and_real_error_in_same_file_reports_only_the_real_one(self):
+        # Fix round 3. The strictly-better property the per-diagnostic
+        # design gives over its predecessors: a file with BOTH a stale-cache
+        # artifact (an unindexed class_name reference) AND a genuine,
+        # unrelated error must report only the real one, dropping just the
+        # stale-cache pairs rather than either reporting both (crying wolf)
+        # or suppressing both (going silent on a real bug). Confirmed
+        # against the engine that referencing an unindexed class_name
+        # produces two diagnostic pairs (`Could not find type` for the type
+        # annotation use, `Identifier ... not declared` for the constructor
+        # call use) alongside the real error, all in the same file, in one
+        # `--check-only` run.
+        (self.root / "enemy_type.gd").write_text("class_name EnemyType\nextends Resource\n")
+        combined = self.root / "combined.gd"
+        combined.write_text(
+            'extends Node\n\nfunc _ready() -> void:\n'
+            '\tvar e: EnemyType = EnemyType.new()\n'
+            '\tvar x: int = "still broken"\n'
+        )
+        proc = run_hook(combined)
+        payload = json.loads(proc.stdout)
+        context = payload["hookSpecificOutput"]["additionalContext"]
+        self.assertNotIn("EnemyType", context)
+        self.assertIn("String", context)
 
     def test_engine_cpp_frames_never_appear_in_context(self):
         # Fix round 1, IMPORTANT 4. broken.gd's stderr always ends with a
