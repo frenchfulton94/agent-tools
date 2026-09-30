@@ -1,0 +1,9 @@
+iPhone Duo Screenshot Specifications - Verified 2026-09-30
+
+Outer display: 1398 × 2034 pixels or 2034 × 1398 pixels
+Inner display: 2007 × 2853 pixels or 2853 × 2007 pixels
+
+Upload Availability Note:
+Support for uploading assets for iPhone Duo in App Store Connect will be available later this year.
+
+Match: Values fetched match brief expectations.
