@@ -191,6 +191,11 @@ depth, ~~Advanced Git~~, ~~Flight School guides~~.
 > docs/specs/2026-09-12-phase7-fluid-interfaces-design.md. ML is deferred for
 > sequencing, not for value; the Phase 6 withdrawal of the "old and stable"
 > rationale stands.
+>
+> **Amended 2026-09-30 (Phase 9).** Phase 8 shipped the catalog migration,
+> not ML, and did not amend the line above. ML remains the one outstanding
+> long-tail item. Phase 9 is on-demand work: adaptive layout and iPhone Duo —
+> see docs/specs/2026-09-30-phase9-adaptive-layout-design.md.
 
 Each phase gets its own plan cycle; this spec is the standing charter.
 

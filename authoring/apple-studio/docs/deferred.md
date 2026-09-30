@@ -122,6 +122,17 @@ block Phase 2; each has an explicit trigger for when to act.
    stated above — a shipped real feature — remains unmet, so **no skill is
    cut this phase, regardless of the count.** The count is zero again, which
    is a repeat of the prior finding, not a new reason for the outcome.
+
+   **Phase 9 measurement (2026-09-30).** This re-runs the Phase 6/7 scan,
+   scoped to sessions since 2026-09-12 (the prior measurement date). It
+   found 2,168 transcripts and **0** genuine non-fixture invocations of an
+   `apple-studio:*` skill. All 60 excluded invocations came from a single
+   project directory, `StudioFixture`. Evidence:
+   `records/2026-09-30-phase9-adaptive-layout/task-0-sweep/killswitch.log`.
+
+   **Decision rule applied unchanged, not improvised:** the precondition —
+   a shipped real feature — remains unmet, so **no skill is cut this phase,
+   regardless of the count.**
 2. **Stop-gate session-start baseline (only on observed pain).** Add a
    session-start baseline build capture to `stop-gate` to avoid a one-turn
    false block on projects that were already red before the session started.
