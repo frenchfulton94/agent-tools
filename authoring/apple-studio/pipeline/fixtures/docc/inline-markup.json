@@ -1,0 +1,28 @@
+{
+  "metadata": {"title": "Fixture page", "platforms": [{"name": "iOS", "introducedAt": "13.0", "deprecatedAt": "27.2", "deprecated": false}]},
+  "deprecationSummary": [{"type": "paragraph", "inlineContent": [{"type": "text", "text": "Use the replacement instead."}]}],
+  "abstract": [{"type": "text", "text": "A fixture."}],
+  "references": {"doc://x/Target": {"title": "TargetSymbol", "url": "/documentation/x/target"}},
+  "primaryContentSections": [{"kind": "content", "content": [
+    {"type": "paragraph", "inlineContent": [
+      {"type": "text", "text": "A container called an "},
+      {"type": "newTerm", "inlineContent": [{"type": "text", "text": "arrangement view"}]},
+      {"type": "text", "text": " holds two views."}
+    ]},
+    {"type": "unorderedList", "items": [
+      {"content": [{"type": "paragraph", "inlineContent": [
+        {"type": "emphasis", "inlineContent": [{"type": "text", "text": "The fold."}]},
+        {"type": "text", "text": " Present when partly open."}
+      ]}]}
+    ]},
+    {"type": "paragraph", "inlineContent": [
+      {"type": "strong", "inlineContent": [
+        {"type": "text", "text": "See "},
+        {"type": "reference", "identifier": "doc://x/Target"}
+      ]}
+    ]},
+    {"type": "aside", "style": "note", "name": "Note", "content": [
+      {"type": "paragraph", "inlineContent": [{"type": "text", "text": "Aside body text."}]}
+    ]}
+  ]}]
+}
