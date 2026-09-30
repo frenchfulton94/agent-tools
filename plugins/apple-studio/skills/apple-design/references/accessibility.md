@@ -1,4 +1,4 @@
-> verified: 2026-08 against https://developer.apple.com/design/human-interface-guidelines/accessibility, https://developer.apple.com/design/human-interface-guidelines/voiceover, https://developer.apple.com/design/human-interface-guidelines/buttons, https://developer.apple.com/design/human-interface-guidelines/inclusion, https://developer.apple.com/design/human-interface-guidelines/motion
+> verified: 2026-08 against https://developer.apple.com/design/human-interface-guidelines/accessibility, https://developer.apple.com/design/human-interface-guidelines/voiceover, https://developer.apple.com/design/human-interface-guidelines/buttons, https://developer.apple.com/design/human-interface-guidelines/inclusion, https://developer.apple.com/design/human-interface-guidelines/motion; re-checked 2026-09 (Phase 9: snippets reframed, accentColor → tint)
 > sources: live HIG (DocC JSON); SwiftUI by Tutorials v5.0.0 (Kodeco), ch. 12 (Accessibility)
 > note: the map assigns Reduce Motion to the `motion` endpoint, but that page doesn't cover the Reduce Motion setting — the obligation text here is sourced from the Accessibility page; only the visionOS motion-comfort material is motion.json-sourced. General motion taste lives in `animation-taste.md`. All SwiftUI/UIKit API symbols named below were individually confirmed against live Apple documentation JSON (exact name, signature, and platform availability) before this file was committed.
 
@@ -27,13 +27,21 @@ Every element VoiceOver announces is built from up to four attributes — label,
 - `accessibilityHidden(true)` — remove purely decorative content (background art, redundant glyphs beside already-labeled text) from the accessibility tree. Apply it *after* view-shaping modifiers like `.resizable()` on an `Image`, since some modifiers return a different view type that doesn't carry the accessibility modifier forward the same way.
 
 ```swift
-Slider(value: $guess.red)
-    .accentColor(.red)
-    .accessibilityValue("red \(Int(guess.red * 255))")
+struct ColorGuessRow: View {
+    @State private var red = 0.5
 
-Image("decorative-background")
-    .resizable()
-    .accessibilityHidden(true)
+    var body: some View {
+        VStack {
+            Slider(value: $red)
+                .tint(.red)
+                .accessibilityValue("red \(Int(red * 255))")
+
+            Image("decorative-background")
+                .resizable()
+                .accessibilityHidden(true)
+        }
+    }
+}
 ```
 
 Never trust an image's *visual* recognizability as a substitute for a label — describe what the image conveys in context, not what it depicts in isolation, and skip describing images whose content is already captured by adjacent visible text (HIG: VoiceOver, https://developer.apple.com/design/human-interface-guidelines/voiceover).
@@ -61,10 +69,17 @@ When the system Reduce Motion setting is on, an app's obligation is specific and
 In SwiftUI, gate custom animations on the environment value rather than assuming the system disables everything for you — standard system transitions adapt automatically, but any custom `withAnimation`/`Animation` you author does not:
 
 ```swift
-@Environment(\.accessibilityReduceMotion) private var reduceMotion
+struct StatusGlyph: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-var body: some View {
-    reduceMotion ? AnyView(staticGlyph) : AnyView(animatedGlyph)
+    var body: some View {
+        if reduceMotion {
+            Image(systemName: "circle.fill")
+        } else {
+            Image(systemName: "circle.fill")
+                .symbolEffect(.pulse)
+        }
+    }
 }
 ```
 
