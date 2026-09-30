@@ -1,0 +1,16 @@
+fire-1	apple-design	FIRE	Build the settings screen UI
+fire-2	apple-design	FIRE	Does this screen feel native?
+fire-3	apple-design	FIRE	What's the right navigation pattern for a three-level hierarchy?
+fire-4	apple-design	FIRE	My layout breaks at larger text sizes - fix it
+fire-5	apple-design	FIRE	Add a confirmation flow before deleting
+fire-6	apple-design	FIRE	Review this screen for accessibility
+fire-7	apple-design	FIRE	Make my app work on iPhone Duo
+fire-8	apple-design	FIRE	My toolbar buttons disappear when the phone is closed
+fire-9	apple-design	FIRE	Content gets cut off at the fold
+fire-10	apple-design	FIRE	Should I use an arrangement view here?
+nofire-1	apple-design	NOFIRE	Design our brand color palette
+nofire-2	apple-design	NOFIRE	Fix this Sendable warning
+nofire-3	apple-design	NOFIRE	Run the app and screenshot it
+nofire-4	apple-design	NOFIRE	Should I use SwiftData or Core Data?
+nofire-5	apple-design	NOFIRE	Screenshot the app on the iPhone Duo simulator
+nofire-6	apple-design	NOFIRE	What screenshot sizes does the App Store need for iPhone Duo?

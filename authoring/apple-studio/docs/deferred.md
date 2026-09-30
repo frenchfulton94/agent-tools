@@ -666,6 +666,53 @@ block Phase 2; each has an explicit trigger for when to act.
     **Trigger: before any phase that edits `apple-design`'s description, and
     before trusting a trigger-eval pass rate on a fixture with no real UI in it.**
 
+    **Phase 9 (2026-09-30).** The fixture now has a real screen.
+    `MailboxScreen.swift` adds a mailbox with `NavigationSplitView`,
+    `TabView`, and per-context toolbars. It is committed to StudioFixture at
+    `5287d2c`. `triggers.md` gained four Duo should-fire rows and two Duo
+    should-NOT-fire rows.
+
+    The baseline sweep, with the description unedited, scored 11/16 PASS.
+    Should-fire rows scored 6/10: fire-1 through fire-6 passed, and fire-7
+    through fire-10, the four Duo rows, all failed. Should-NOT rows scored
+    5/6: nofire-1 ("Design our brand color palette") failed, and the rest
+    passed.
+
+    Full evidence is in `task-6-evals/classification.md`. fire-7 and fire-10
+    are genuine Duo routing misses. The session never invokes the skill, and
+    it answers from priors or asks an avoidable clarifying question. fire-8
+    is a genuine Duo routing miss too. The session calls `xcode-loop`
+    instead of `apple-design`. fire-9 is a prompt-wording defect, not a
+    routing miss. The model reads "gets cut off" as a claim about its own
+    message and never engages the task. This reproduced outside the fixture
+    and outside the harness. nofire-1 reproduces the Phase 8 brand-color
+    finding unchanged.
+
+    Because fire-7, fire-8, and fire-10 are Duo routing misses, Step 8's
+    description edit was made. The post-edit sweep also scored 11/16. fire-7
+    and fire-8 were fixed. But two rows that passed in the baseline failed
+    after the edit. nofire-6 ("What screenshot sizes does the App Store need
+    for iPhone Duo?") now called `apple-design` first. The added "iPhone
+    Duo" wording pulled it in, before the session self-corrected to
+    `app-release`. fire-5 ("Add a confirmation flow before deleting")
+    stopped calling any skill at all, for reasons the wording change does
+    not explain. Per Step 9's rule, a regression on a previously-passing row
+    reverts the edit. **The description edit is reverted. SKILL.md carries
+    no diff from before Step 8.**
+
+    **Item 13 is not resolved.** Open should-fire rows are fire-7, fire-8,
+    and fire-10 — genuine Duo routing misses. fire-9 counts as non-routing
+    per its classification and does not block resolution. The open
+    should-NOT row is nofire-1, the pre-existing brand-color miss, unaffected
+    by this phase's edit.
+
+    **Trigger for the next try:** find a change that fixes fire-7,
+    fire-8, and fire-10. It must not pull `apple-design` ahead of
+    `app-release` on release-logistics questions that merely mention iPhone
+    Duo. Evidence: `records/2026-09-30-phase9-adaptive-layout/task-6-evals/`
+    (`prompts.tsv`, `baseline/results.tsv`, `after-edit/results.tsv`,
+    `classification.md`).
+
 ## Accepted (no action)
 
 Phase 3 minors reviewed and accepted as-is — no follow-up action needed:

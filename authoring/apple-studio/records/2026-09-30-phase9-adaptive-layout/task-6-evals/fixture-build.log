@@ -1,0 +1,9 @@
+=== iOS build (generic/platform=iOS Simulator) ===
+note: Disabling hardened runtime with ad-hoc codesigning. (in target 'StudioFixture' from project 'StudioFixture')
+** BUILD SUCCEEDED **
+
+
+=== macOS build (platform=macOS) ===
+
+** BUILD SUCCEEDED **
+
