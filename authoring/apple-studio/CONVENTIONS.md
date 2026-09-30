@@ -45,8 +45,12 @@ out of scope — other tooling owns "does it look distinctively ours"; this plug
 
 ## Reference files (distilled knowledge)
 
-- Location: `plugins/apple-studio/skills/<skill>/references/<topic>.md`, 3–6 files per skill,
-  a few hundred lines each. Not book summaries — decision-grade guidance only.
+- Location: `plugins/apple-studio/skills/<skill>/references/<topic>.md`, one file per
+  decision area, a few hundred lines each. Most skills need 3–6. A reference file MUST NOT
+  be named for a device; name it for the decision it serves. (Amended 2026-09-30,
+  Phase 9: iPhone Duo guidance lives in `apple-design/references/adaptive-layout.md`,
+  because its APIs are documented for every platform.) Not book summaries —
+  decision-grade guidance only.
 - Every reference file starts with this header:
 
   ```

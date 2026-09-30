@@ -13,6 +13,7 @@ Read the reference for the decision at hand:
 - Layout, typography, color, materials, SF Symbols → `references/hig-foundations.md`
 - Navigation, modality, feedback, forms, empty states (HIG gap — no dedicated empty-states page; hig-patterns.md's empty-state coverage is HIG-sourced, folded into the Tab Bars bullet) → `references/hig-patterns.md`
 - iPhone vs iPad vs Mac in one codebase → `references/platform-idioms.md`
+- Layout across sizes, poses, and foldables (iPhone Duo), reserved regions, bars that move to the side → `references/adaptive-layout.md`
 - Accessibility (labels, targets, contrast, motion) → `references/accessibility.md`
 - Implementing design correctly in SwiftUI → `references/swiftui-design-implementation.md`
 - Whether and how to animate → `references/animation-taste.md`

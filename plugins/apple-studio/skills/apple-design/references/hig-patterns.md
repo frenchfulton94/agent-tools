@@ -1,4 +1,4 @@
-> verified: 2026-09 against https://developer.apple.com/design/human-interface-guidelines/navigation-and-search, https://developer.apple.com/design/human-interface-guidelines/search-fields, https://developer.apple.com/design/human-interface-guidelines/sidebars, https://developer.apple.com/design/human-interface-guidelines/tab-bars, https://developer.apple.com/design/human-interface-guidelines/token-fields, https://developer.apple.com/design/human-interface-guidelines/modality, https://developer.apple.com/design/human-interface-guidelines/feedback, https://developer.apple.com/design/human-interface-guidelines/entering-data, https://developer.apple.com/design/human-interface-guidelines/onboarding, https://developer.apple.com/design/human-interface-guidelines/settings, https://developer.apple.com/design/human-interface-guidelines/loading; re-checked 2026-09 against https://developer.apple.com/documentation/swiftui/view/sensoryfeedback(_:trigger:).md for the layered-feedback mechanism addition (Phase 7 Task 2)
+> verified: 2026-09 against https://developer.apple.com/design/human-interface-guidelines/navigation-and-search, https://developer.apple.com/design/human-interface-guidelines/search-fields, https://developer.apple.com/design/human-interface-guidelines/sidebars, https://developer.apple.com/design/human-interface-guidelines/tab-bars, https://developer.apple.com/design/human-interface-guidelines/token-fields, https://developer.apple.com/design/human-interface-guidelines/modality, https://developer.apple.com/design/human-interface-guidelines/feedback, https://developer.apple.com/design/human-interface-guidelines/entering-data, https://developer.apple.com/design/human-interface-guidelines/onboarding, https://developer.apple.com/design/human-interface-guidelines/settings, https://developer.apple.com/design/human-interface-guidelines/loading; re-checked 2026-09 against https://developer.apple.com/documentation/swiftui/view/sensoryfeedback(_:trigger:).md for the layered-feedback mechanism addition (Phase 7 Task 2); re-checked 2026-09 (Phase 9: pointer to adaptive-layout.md)
 > sources: live HIG (DocC JSON)
 > note: HIG has no dedicated empty-states page as of 2026-08 (4 slug variants probed, all 404; full Patterns and Components indexes checked) — not covered here, not invented.
 
@@ -29,6 +29,8 @@ Size tab bars for restraint.
 - Reserve badges strictly for information that actually warrants interrupting attention. Overuse erodes their signal.
 - A tab bar is for navigating between top-level sections only — route in-context actions through a toolbar instead.
 (HIG: Tab Bars)
+
+Where bars move to a vertical edge — iPhone Duo's outer display and landscape inner display — item order, overflow, and toolbar-versus-tab-bar compression are in `adaptive-layout.md` § Bars that adapt to space.
 
 ## Search
 
