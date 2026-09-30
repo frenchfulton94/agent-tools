@@ -1,0 +1,20 @@
+Catalog diff: catalog-before.log vs catalog-after.log
+TOTAL before: TOTAL: 31/51 snippets typecheck clean
+TOTAL after:  TOTAL: 32/51 snippets typecheck clean
+
+Flips (Ruling 3: FAIL->PASS is an improvement, not a regression; PASS->FAIL would be a failure):
+18c18
+<   [FAIL] #3  let definitions = IntentDefinitions(bundleIdentifier: "com.example.my-ap
+---
+>   [PASS:with-prior+ctx  ] #3  let definitions = IntentDefinitions(bundleIdentifier: "com.example.my-ap
+
+File: plugins/apple-studio/skills/apple-intelligence/references/app-intents-implementation.md
+Snippet #3 (IntentDefinitions(bundleIdentifier: ...)): FAIL -> PASS (mode: with-prior+ctx)
+Cause: Ruling 7 restored the AppIntentsTesting framework search path. The
+old hardcoded /Applications/Xcode-beta.app/... path no longer exists on
+this machine (the beta installed as 'Xcode 27-1-beta.app'), so os.path.isdir()
+silently returned false and the -F flag was dropped, hiding AppIntentsTesting
+from every macOS-target compile. Deriving the path from
+'xcrun --sdk macosx --show-sdk-platform-path' restores it.
+
+No PASS->FAIL flips.

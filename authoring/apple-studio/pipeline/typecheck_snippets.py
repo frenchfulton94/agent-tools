@@ -15,6 +15,18 @@ USAGE (from the catalog root)
 
 Exit code 0 only if every snippet compiles.
 
+IOS DIRECTIVE (added Phase 9): a reference whose APIs are iOS-only declares
+`> typecheck: ios <major>.<minor>` in its header block — before the first
+```swift fence, e.g. `> typecheck: ios 27.0`. When present, every snippet in
+that file is compiled against the installed iPhoneOS SDK and target
+`arm64-apple-ios<version>` instead of the macOS default. Without the
+directive a file compiles for macOS, which is correct for cross-platform
+SwiftUI and wrong for UIKit or iOS-only SwiftUI (the Duo / adaptive-layout
+APIs include iOS-only symbols that fail to typecheck on macOS). Exit codes:
+0 all snippets in all files typecheck clean; 1 a snippet failed to typecheck;
+2 a directive is malformed, or names an iOS version newer than the installed
+iPhoneOS SDK — this exits rather than silently falling back to macOS.
+
 DESIGN NOTE: reference snippets are illustrative fragments, not programs. The
 goal is to catch INVENTED API, not to punish elided context, so each snippet is
 tried in several framings (declaration, top-level, wrapped in a function, with a
@@ -27,8 +39,8 @@ made a correct `Attachment(image)` snippet fail, because Attachment takes a
 CGImage/CIImage/CVPixelBuffer/URL. A wrong preamble type produces a bogus
 failure that reads exactly like a reference defect.
 
-AppIntentsTesting is not on the default framework search path; the -F below
-handles it.
+AppIntentsTesting is not on the default framework search path; the macOS -F
+derived from `xcrun --show-sdk-platform-path` in run() handles it.
 
 Phase 6 Tasks 2/3/6/7. Stricter than prior phases because the APIs are
 post-training-data and cannot be sanity-checked from memory.
@@ -46,6 +58,10 @@ FRAMEWORK_HINTS = [
     ("FoundationModels", r"\b(SystemLanguageModel|LanguageModelSession|Generable|GenerationOptions|ContextOptions|Instructions\b|Prompt\(|Transcript|LanguageModelError|GenerationSchema|GeneratedContent|Guide\(|Tool\b|Attachment|ImageReference|PrivateCloudComputeLanguageModel|DynamicGenerationSchema|@Generable|@Guide)"),
     ("AppIntents",      r"\b(AppIntent|AppEntity|AppEnum|EntityQuery|AppShortcut|IntentParameter|AppIntentError|@Parameter|ParameterSummary|EntityPropertyQuery|IntentDescription|IntentDefinitions|IntentResult|LocalizedStringResource)"),
     ("SwiftUI",         r"\b(View\b|@State|@Binding|@Environment|VStack|HStack|Text\(|List\b|ScrollView|NavigationStack|@Observable|Button\(|\.task\b|some View|DragGesture|@GestureState|withAnimation|Animation\.|Spring\(|ButtonStyle|ScrollTargetBehavior|sensoryFeedback|scaleEffect|\.gesture\()"),
+    # Added Phase 9 for the iOS directive. UIKit snippets only make sense in a
+    # file that declares `> typecheck: ios <version>`; on macOS UIKit does not
+    # exist and every one of them fails.
+    ("UIKit",           r"\b(UIViewController|UIView\b|UIBarButtonItem|UINavigationItem|UITraitCollection|UISheetPresentationController|UIArrangementViewController)"),
     # CoreGraphics-only snippets (a gesture-math helper taking CGFloat and no
     # SwiftUI type) matched no hint and failed with "cannot find type 'CGFloat'",
     # which reads exactly like an invented symbol. Added Phase 7, 2026-09-12.
@@ -68,12 +84,48 @@ def imports_for(code):
         out.append("Foundation")
     return out
 
-def run(src, extra):
+DIRECTIVE = re.compile(r"^> typecheck:\s*(.*?)\s*$", re.M)
+
+class DirectiveError(Exception):
+    pass
+
+def ios_target(text):
+    """Return the iOS version a reference declares, or None for the macOS default."""
+    m = DIRECTIVE.search(text)
+    if not m:
+        return None
+    v = re.fullmatch(r"ios (\d+\.\d+)", m.group(1))
+    if not v:
+        raise DirectiveError(f"bad directive {m.group(1)!r}: expected 'ios <major>.<minor>'")
+    want = v.group(1)
+    have = subprocess.run(["xcrun", "--sdk", "iphoneos", "--show-sdk-version"],
+                          capture_output=True, text=True).stdout.strip()
+    as_tuple = lambda s: tuple(int(x) for x in s.split("."))
+    if not have or as_tuple(have) < as_tuple(want):
+        raise DirectiveError(f"installed iPhoneOS SDK {have or '(none)'} is older than the directive ios {want}")
+    return want
+
+def run(src, extra, ios=None):
     with tempfile.NamedTemporaryFile("w", suffix=".swift", delete=False) as f:
         f.write(src); p = f.name
     try:
-        SDK_F = "/Applications/Xcode-beta.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks"
-        fw = ["-F", SDK_F] if os.path.isdir(SDK_F) else []
+        if ios:
+            sdk = subprocess.run(["xcrun", "--sdk", "iphoneos", "--show-sdk-path"],
+                                 capture_output=True, text=True).stdout.strip()
+            plat = subprocess.run(["xcrun", "--sdk", "iphoneos", "--show-sdk-platform-path"],
+                                  capture_output=True, text=True).stdout.strip()
+            fw = ["-sdk", sdk, "-target", f"arm64-apple-ios{ios}",
+                  "-F", f"{plat}/Developer/Library/Frameworks"]
+        else:
+            # Phase 9, Ruling 7: the hardcoded Xcode-beta.app path this used to
+            # carry stopped existing when the beta installed as a differently
+            # named app and replaced it, silently dropping the AppIntentsTesting
+            # framework path. Derive the macOS platform's Frameworks dir instead
+            # of hardcoding one Xcode install's name.
+            plat = subprocess.run(["xcrun", "--sdk", "macosx", "--show-sdk-platform-path"],
+                                  capture_output=True, text=True).stdout.strip()
+            SDK_F = f"{plat}/Developer/Library/Frameworks"
+            fw = ["-F", SDK_F] if os.path.isdir(SDK_F) else []
         r = subprocess.run(["swiftc", "-typecheck", *fw, *extra, p],
                            capture_output=True, text=True, timeout=240)
         return r.returncode, (r.stderr or "").replace(p, "<snippet>")
@@ -107,6 +159,7 @@ def preamble_for(code):
         ("text",         "String",               None),
         ("view",         "__View",               None),
         ("untrustedTextFromTheUser", "String", None),
+        ("proxy",        "GeometryProxy",        "SwiftUI"),
     ]
     used = [(n, t, m) for n, t, m in BINDINGS if re.search(r"\b" + re.escape(n) + r"\b", code)]
     if not used:
@@ -121,7 +174,7 @@ def preamble_for(code):
         mods.add("CoreGraphics")
     return out, sorted(mods)
 
-def check(code, prior=""):
+def check(code, prior="", ios=None):
     pre, pre_mods = preamble_for(code)
     mods = imports_for(code)
     for m in pre_mods:
@@ -150,7 +203,7 @@ def check(code, prior=""):
                              ["-parse-as-library"]))
     diags = []
     for name, src, extra in attempts:
-        rc, err = run(src, extra)
+        rc, err = run(src, extra, ios)
         if rc == 0:
             return True, name, ""
         diags.append(f"--- mode: {name} ---\n{err.strip()}")
@@ -158,14 +211,26 @@ def check(code, prior=""):
 
 def main():
     total = ok = 0
+    directive_error = False
     for path in sys.argv[1:]:
         text = pathlib.Path(path).read_text()
+        # Added Phase 9: a file may declare its own iOS target via the header
+        # directive `> typecheck: ios <major>.<minor>`. A malformed directive,
+        # or one newer than the installed SDK, is a hard stop for this file —
+        # it never silently falls back to compiling for macOS.
+        try:
+            ios = ios_target(text)
+        except DirectiveError as e:
+            print(f"\n{'='*78}\nFILE: {path}  DIRECTIVE ERROR: {e}")
+            directive_error = True
+            continue
         blocks = re.findall(r"```swift\n(.*?)```", text, re.S)
-        print(f"\n{'='*78}\nFILE: {path}   ({len(blocks)} swift blocks)")
+        target = f"ios {ios}" if ios else "macOS (default)"
+        print(f"\n{'='*78}\nFILE: {path}   ({len(blocks)} swift blocks)   target: {target}")
         prior = ""
         for i, code in enumerate(blocks, 1):
             total += 1
-            passed, mode, diag = check(code, prior)
+            passed, mode, diag = check(code, prior, ios)
             # A snippet that stands alone as declarations becomes context for the
             # snippets after it — reference examples build on each other, and a
             # type defined in block 1 is legitimately used in block 3.
@@ -181,6 +246,8 @@ def main():
                 for line in diag.splitlines():
                     print("      " + line)
     print(f"\nTOTAL: {ok}/{total} snippets typecheck clean")
+    if directive_error:
+        sys.exit(2)
     sys.exit(0 if ok == total else 1)
 
 main()

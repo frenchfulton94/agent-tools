@@ -1,0 +1,6 @@
+ok   ios-only.md -> 0
+ok   macos-default.md -> 1
+ok   invented.md -> 1
+ok   bad-directive.md -> 2
+ok   too-new.md -> 2
+ok   uikit.md -> 0

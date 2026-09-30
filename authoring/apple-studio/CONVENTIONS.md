@@ -82,6 +82,12 @@ own shipped interface — is named alongside them:
   shipped SDK, and found two non-compiling samples in Apple's own
   documentation. Compilation, not fetch success, is the ship gate for any
   API-specific claim.
+  A reference whose APIs are iOS-only declares `> typecheck: ios <major>.<minor>`
+  in its header block; the script then compiles that file against the iPhoneOS
+  SDK. Without the directive a file compiles for macOS, which is correct for
+  cross-platform SwiftUI and wrong for UIKit or iOS-only SwiftUI. A malformed
+  directive, or one newer than the installed SDK, exits 2 rather than falling
+  back. (Amended 2026-09-30, Phase 9.)
 - **`pipeline/run_evals.py`** — runs the trigger-eval sweep against the fixture
   app. **`--allowedTools` does not stop an eval session from writing to the
   fixture.** Phase 6 left nine source files and a build directory in

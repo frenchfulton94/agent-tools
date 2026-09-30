@@ -1,0 +1,26 @@
+FAIL ios-only.md: exit 1, want 0
+         |                           `- note: 'ToolbarOverflowMenu' has been explicitly marked unavailable here
+       6 |     nonisolated public init(@ContentBuilder content: () -> Content)
+       7 |     public static func _makeToolbar(content: _GraphValue<ToolbarOverflowMenu<Content>>, inputs: _ToolbarInputs) -> _ToolbarOutputs
+
+TOTAL: 0/1 snippets typecheck clean
+ok   macos-default.md -> 1
+ok   invented.md -> 1
+FAIL bad-directive.md: exit 1, want 2
+         |                           `- note: 'ToolbarOverflowMenu' has been explicitly marked unavailable here
+       6 |     nonisolated public init(@ContentBuilder content: () -> Content)
+       7 |     public static func _makeToolbar(content: _GraphValue<ToolbarOverflowMenu<Content>>, inputs: _ToolbarInputs) -> _ToolbarOutputs
+
+TOTAL: 0/1 snippets typecheck clean
+FAIL too-new.md: exit 1, want 2
+         |                           `- note: 'ToolbarOverflowMenu' has been explicitly marked unavailable here
+       6 |     nonisolated public init(@ContentBuilder content: () -> Content)
+       7 |     public static func _makeToolbar(content: _GraphValue<ToolbarOverflowMenu<Content>>, inputs: _ToolbarInputs) -> _ToolbarOutputs
+
+TOTAL: 0/1 snippets typecheck clean
+FAIL uikit.md: exit 1, want 0
+         |                                 `- error: cannot infer contextual base in reference to member 'systemBackground'
+       8 |     }
+       9 | }
+
+TOTAL: 0/1 snippets typecheck clean
