@@ -1,0 +1,94 @@
+ok      additionalOverflowItems
+MISSING ArrangementView
+MISSING arrangementViewStyle
+ok      axes
+ok      axisBehavior
+ok      backgroundExtensionEffect
+ok      Button
+ok      cancellationAction
+ok      division
+ok      fixed
+ok      Form
+ok      frame
+ok      h
+MISSING hig
+ok      horizontalSizeClass
+ok      HStack
+ok      isActive
+ok      Layout
+ok      leadingItemGroups
+ok      List
+ok      margins
+ok      NavigationSplitView
+ok      NavigationStack
+ok      nil
+ok      occlusion
+ok      overlay
+ok      Picker
+ok      pinnedTrailingGroup
+ok      platform
+ok      preferredPlacement
+ok      preferredVerticalBarBehavior
+ok      presentationPlacement
+ok      ReservedRegion
+ok      reservedRegions
+ok      ScrollView
+ok      split
+ok      swift
+ok      TabView
+ok      Toggle
+ok      toolbar
+ok      ToolbarItemGroup
+ok      ToolbarOverflowMenu
+ok      toolbarVerticalBehavior
+ok      toolbarVerticalCompressionBehavior
+MISSING toolbarVerticalEdge
+ok      toolbarVisibility
+ok      topBarPinnedTrailing
+ok      UIArrangementViewController
+ok      UIBackgroundExtensionView
+ok      UINavigationBar
+ok      UITabBar
+ok      UIToolbar
+ok      UIVerticalBarCompressionBehavior
+ok      updateArrangement
+ok      userInterfaceIdiom
+ok      verticalBarCompressionBehavior
+ok      verticalBarEdge
+ok      verticalSizeClass
+ok      visibilityPriority
+MISSING VStack
+MISSING xcode
+MISSING ZStack
+
+--- resolutions (2026-09-30) ---
+The Step 4 command as written checks only SwiftUI.framework's swiftinterface
+and UIKit's Headers/Modules. In the iOS 27.1 SDK, SwiftUI's own APIs (View,
+stacks, layout modifiers, and iPhone Duo's ArrangementView/ReservedRegion
+surface) are declared in a separate SwiftUICore.framework and re-exported by
+SwiftUI via `@_exported import`. `SwiftUICore.swiftmodule/arm64e-apple-ios.swiftinterface`
+is not on the check's search path, so every real symbol below is a false
+MISSING from that gap, not an invented API. Confirmed present, correctly
+named, and matching the file's usage by grepping SwiftUICore's swiftinterface
+directly (word-boundary match, same as the Step 4 method):
+
+- ArrangementView: `nonisolated public struct ArrangementView<Primary, Secondary> : SwiftUICore::View, ~Swift::Sendable where Primary : SwiftUICore::View, Secondary : SwiftUICore::View` — matches the file's two-view description.
+- arrangementViewStyle: `nonisolated public func arrangementViewStyle(_ style: some ArrangementViewStyle) -> some SwiftUICore::View` — matches `.arrangementViewStyle(.split.axes(.horizontal))` usage in the snippet (already typechecked clean in Step 2).
+- toolbarVerticalEdge: `public var toolbarVerticalEdge: SwiftUICore::HorizontalEdge? { get }` — matches the file's claim that it is an environment value returning an optional edge (`nil` on hardware without a vertical bar).
+- VStack / ZStack: `@frozen nonisolated public struct VStack<Content> : SwiftUICore::View, ~Swift::Sendable` and the same shape for `ZStack` — core SwiftUI containers, present as expected; only used in this file to describe which stack maps to which ArrangementView style, no signature claim at risk.
+
+Also spot-checked (not required by the brief, done for confidence since the
+SwiftUICore gap was found): ReservedRegion's `isActive`, `frame`, `margins`,
+`.occlusion`, `.division`, `.includeInactive`, and
+`reservedRegions(kind:options:layoutDirectionBehavior:)` with default
+`layoutDirectionBehavior: SwiftUICore::LayoutDirectionBehavior = .mirrors`
+all exist in SwiftUICore's swiftinterface exactly as the file describes.
+
+Non-symbol MISSING (expected per the brief):
+- hig: from the inline reference `` `hig-patterns.md` `` (a file name, not a symbol).
+- xcode: from the inline reference `` `xcode-loop` `` (a skill name, not a symbol).
+
+Net result: no MISSING symbol required a correction or removal in
+adaptive-layout.md. All five real symbols exist in the shipped 27.1 SDK under
+SwiftUICore.framework; the two non-symbol hits are file/skill names as
+expected.
