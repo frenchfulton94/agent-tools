@@ -61,7 +61,9 @@ struct LiveBadgeOverlay: View {
         GeometryReader { proxy in
             let cameraRegions = proxy.reservedRegions(kind: .occlusion)
             let topTrailingBlocked = cameraRegions.contains { region in
-                region.frame.minY < 80 && region.frame.maxX > proxy.size.width - 160
+                region.isActive
+                    && region.frame.minY < 80
+                    && region.frame.maxX > proxy.size.width - 160
             }
             Text("Live")
                 .padding(8)
@@ -74,7 +76,7 @@ struct LiveBadgeOverlay: View {
 }
 ```
 
-This is the manual fallback. System components already avoid reserved regions, so use this only in a custom view that the system does not move. The badge makes one small move, from the top corner to the bottom corner. The frames are mirrored by default, so the trailing check is correct in right-to-left languages.
+This is the manual fallback. System components already avoid reserved regions, so use this only in a custom view that the system does not move. The predicate checks `isActive`, so an inactive camera does not move the badge. The badge makes one small move, from the top corner to the bottom corner. The frames are mirrored by default, so the trailing check is correct in right-to-left languages.
 
 ## Arrangement views
 
@@ -174,13 +176,20 @@ struct FloatingPaletteHost: View {
     var body: some View {
         Image(systemName: "paintpalette")
             .padding()
-            .frame(maxWidth: .infinity, maxHeight: .infinity,
-                   alignment: barEdge == .leading ? .bottomTrailing : .bottomLeading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: paletteAlignment)
+    }
+
+    private var paletteAlignment: Alignment {
+        switch barEdge {
+        case .leading: .bottomLeading
+        case .trailing: .bottomTrailing
+        case nil: .bottomTrailing
+        }
     }
 }
 ```
 
-Place a custom floating control on the edge opposite the vertical bar.
+Place custom bars and floating controls relative to `toolbarVerticalEdge`. Apple's own example aligns the control to the same edge as the vertical bar. Handle `nil` with the layout that you use on devices without a vertical bar. (toolbarVerticalEdge)
 
 **Full width and proximity.** A visual, non-scrolling screen can use the full display width with no bars, as Calculator does. Keep it clear of the Dynamic Island and the status bar. A background can span the full width while scrolling content stays inset. Keep controls next to the content they change: Mail keeps its list controls above the list, not in the vertical bar. (HIG: Designing for iPhone Duo § Vertical controls)
 

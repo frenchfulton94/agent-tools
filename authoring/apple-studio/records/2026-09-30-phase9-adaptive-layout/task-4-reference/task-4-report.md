@@ -163,3 +163,52 @@ citations.
   possible follow-up, but Tasks 5 and 8 might reference it.
 - `docc.py` does not render `termList` nodes (see Pages fetched).
 - The other untracked `task-5` through `task-9` record directories were not part of this commit.
+
+---
+
+# Fix round 1 (2026-09-30)
+
+The task review found three Important issues. The controller issued Ruling 9 for issue 3. Minor
+findings wait for the final review and were not acted on.
+
+## What changed
+
+1. **Stale pointers to moved content.** Two pointers in `swiftui-design-implementation.md` sent
+   `NavigationSplitView` collapse to `platform-idioms.md`, whose bullet this task had moved out.
+   Line 3 now keeps menu bar, window state, and platform branching on `platform-idioms.md`, and
+   sends `NavigationSplitView` collapse to `adaptive-layout.md` § System containers first. Line 87
+   now points to `adaptive-layout.md` § System containers first.
+   A grep of `apple-design/` for `platform-idioms`, `collapse`, `size class`,
+   `horizontalSizeClass`, `fluid`, and `breakpoint` found no other pointer to the moved content.
+   The other hits are either the file's own content (`hig-patterns.md:19-20` on the sidebar,
+   `hig-foundations.md:23` on inspectors) or pointers that are still valid
+   (`platform-idioms.md:18,49,85`, which this task already routed to `adaptive-layout.md`, and
+   `swiftui-design-implementation.md:77` on menu bar, windows, and branching).
+2. **`isActive` in the badge snippet.** The `LiveBadgeOverlay` predicate now starts with
+   `region.isActive &&`, so the snippet follows the file's own "always check `isActive`" rule. The
+   prose after the snippet adds one sentence: the predicate checks `isActive`, so an inactive
+   camera does not move the badge.
+3. **Bar-edge placement (Ruling 9).** I withdrew the unsourced "edge opposite the vertical bar"
+   rule and replaced it with the sourced rule. Place custom bars and floating controls relative to
+   `toolbarVerticalEdge`. Apple's own example aligns the control to the same edge as the bar.
+   Handle `nil` with the layout that you use on devices without a vertical bar.
+   `FloatingPaletteHost` now aligns to the bar's edge through a `paletteAlignment` switch:
+   `.leading` → `.bottomLeading`, `.trailing` → `.bottomTrailing`, and `nil` → `.bottomTrailing`.
+   Apple's docs state no rationale for the same-edge choice, so the reference states none.
+
+`adaptive-layout.md` is now 245 lines, still inside the 200–300 range.
+
+## Commands and output
+
+- `DEVELOPER_DIR="/Applications/Xcode 27-1-beta.app/Contents/Developer" python3 authoring/apple-studio/pipeline/typecheck_snippets.py plugins/apple-studio/skills/apple-design/references/*.md`
+  gave `TOTAL: 8/8 snippets typecheck clean`, exit 0. The rewritten `LiveBadgeOverlay` (#1) and
+  `FloatingPaletteHost` (#4) both pass as parse-as-library. `typecheck-27.1.log` was regenerated.
+- Vale on `adaptive-layout.md`: 0 errors, 0 warnings.
+- Vale on `swiftui-design-implementation.md`: 0 errors, 61 warnings. These are **identical to the
+  pre-edit baseline** at `HEAD`, which also has 61 warnings. A sorted diff of the two
+  `--output=line` listings differs only in the column of one existing warning on line 87
+  (109 → 135), because the pointer text there is longer. The file predates the R1-E register.
+  Rewriting it is outside this fix round.
+- `bun test`: 198 pass, 0 fail.
+- `bun run audit`: 0 errors, 55 warnings, unchanged from the Task 4 commit.
+- `claude plugin validate . --strict`: passed.
