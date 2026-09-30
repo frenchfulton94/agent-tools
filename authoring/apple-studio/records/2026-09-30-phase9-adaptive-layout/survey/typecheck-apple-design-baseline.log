@@ -1,0 +1,337 @@
+$ python3 authoring/apple-studio/pipeline/typecheck_snippets.py plugins/apple-studio/skills/apple-design/references/*.md
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/accessibility.md   (2 swift blocks)
+  [FAIL] #1  Slider(value: $guess.red)
+      imports tried: (none)
+      --- mode: parse-as-library ---
+      <snippet>:1:1: error: expressions are not allowed at the top level
+      1 | Slider(value: $guess.red)
+        | `- error: expressions are not allowed at the top level
+      2 |     .accentColor(.red)
+      3 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      
+      <snippet>:5:1: error: expressions are not allowed at the top level
+      3 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      4 | 
+      5 | Image("decorative-background")
+        | `- error: expressions are not allowed at the top level
+      6 |     .resizable()
+      7 |     .accessibilityHidden(true)
+      
+      <snippet>:1:1: error: cannot find 'Slider' in scope
+      1 | Slider(value: $guess.red)
+        | `- error: cannot find 'Slider' in scope
+      2 |     .accentColor(.red)
+      3 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      
+      <snippet>:1:15: error: cannot find '$guess' in scope
+      1 | Slider(value: $guess.red)
+        |               `- error: cannot find '$guess' in scope
+      2 |     .accentColor(.red)
+      3 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      
+      <snippet>:3:36: error: cannot find 'guess' in scope
+      1 | Slider(value: $guess.red)
+      2 |     .accentColor(.red)
+      3 |     .accessibilityValue("red \(Int(guess.red * 255))")
+        |                                    `- error: cannot find 'guess' in scope
+      4 | 
+      5 | Image("decorative-background")
+      
+      <snippet>:5:1: error: cannot find 'Image' in scope
+      3 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      4 | 
+      5 | Image("decorative-background")
+        | `- error: cannot find 'Image' in scope
+      6 |     .resizable()
+      7 |     .accessibilityHidden(true)
+      --- mode: with-prior ---
+      <snippet>:1:1: error: expressions are not allowed at the top level
+      1 | Slider(value: $guess.red)
+        | `- error: expressions are not allowed at the top level
+      2 |     .accentColor(.red)
+      3 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      
+      <snippet>:5:1: error: expressions are not allowed at the top level
+      3 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      4 | 
+      5 | Image("decorative-background")
+        | `- error: expressions are not allowed at the top level
+      6 |     .resizable()
+      7 |     .accessibilityHidden(true)
+      
+      <snippet>:1:1: error: cannot find 'Slider' in scope
+      1 | Slider(value: $guess.red)
+        | `- error: cannot find 'Slider' in scope
+      2 |     .accentColor(.red)
+      3 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      
+      <snippet>:1:15: error: cannot find '$guess' in scope
+      1 | Slider(value: $guess.red)
+        |               `- error: cannot find '$guess' in scope
+      2 |     .accentColor(.red)
+      3 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      
+      <snippet>:3:36: error: cannot find 'guess' in scope
+      1 | Slider(value: $guess.red)
+      2 |     .accentColor(.red)
+      3 |     .accessibilityValue("red \(Int(guess.red * 255))")
+        |                                    `- error: cannot find 'guess' in scope
+      4 | 
+      5 | Image("decorative-background")
+      
+      <snippet>:5:1: error: cannot find 'Image' in scope
+      3 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      4 | 
+      5 | Image("decorative-background")
+        | `- error: cannot find 'Image' in scope
+      6 |     .resizable()
+      7 |     .accessibilityHidden(true)
+      --- mode: with-prior+ctx ---
+      <snippet>:2:1: error: cannot find 'Slider' in scope
+       1 | func __probe() async throws {
+       2 | Slider(value: $guess.red)
+         | `- error: cannot find 'Slider' in scope
+       3 |     .accentColor(.red)
+       4 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      
+      <snippet>:2:15: error: cannot find '$guess' in scope
+       1 | func __probe() async throws {
+       2 | Slider(value: $guess.red)
+         |               `- error: cannot find '$guess' in scope
+       3 |     .accentColor(.red)
+       4 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      
+      <snippet>:4:36: error: cannot find 'guess' in scope
+       2 | Slider(value: $guess.red)
+       3 |     .accentColor(.red)
+       4 |     .accessibilityValue("red \(Int(guess.red * 255))")
+         |                                    `- error: cannot find 'guess' in scope
+       5 | 
+       6 | Image("decorative-background")
+      
+      <snippet>:6:1: error: cannot find 'Image' in scope
+       4 |     .accessibilityValue("red \(Int(guess.red * 255))")
+       5 | 
+       6 | Image("decorative-background")
+         | `- error: cannot find 'Image' in scope
+       7 |     .resizable()
+       8 |     .accessibilityHidden(true)
+      --- mode: top-level ---
+      <snippet>:1:1: error: cannot find 'Slider' in scope
+      1 | Slider(value: $guess.red)
+        | `- error: cannot find 'Slider' in scope
+      2 |     .accentColor(.red)
+      3 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      
+      <snippet>:1:15: error: cannot find '$guess' in scope
+      1 | Slider(value: $guess.red)
+        |               `- error: cannot find '$guess' in scope
+      2 |     .accentColor(.red)
+      3 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      
+      <snippet>:3:36: error: cannot find 'guess' in scope
+      1 | Slider(value: $guess.red)
+      2 |     .accentColor(.red)
+      3 |     .accessibilityValue("red \(Int(guess.red * 255))")
+        |                                    `- error: cannot find 'guess' in scope
+      4 | 
+      5 | Image("decorative-background")
+      
+      <snippet>:5:1: error: cannot find 'Image' in scope
+      3 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      4 | 
+      5 | Image("decorative-background")
+        | `- error: cannot find 'Image' in scope
+      6 |     .resizable()
+      7 |     .accessibilityHidden(true)
+      --- mode: wrapped-in-func ---
+      <snippet>:2:1: error: cannot find 'Slider' in scope
+       1 | func __probe() async throws {
+       2 | Slider(value: $guess.red)
+         | `- error: cannot find 'Slider' in scope
+       3 |     .accentColor(.red)
+       4 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      
+      <snippet>:2:15: error: cannot find '$guess' in scope
+       1 | func __probe() async throws {
+       2 | Slider(value: $guess.red)
+         |               `- error: cannot find '$guess' in scope
+       3 |     .accentColor(.red)
+       4 |     .accessibilityValue("red \(Int(guess.red * 255))")
+      
+      <snippet>:4:36: error: cannot find 'guess' in scope
+       2 | Slider(value: $guess.red)
+       3 |     .accentColor(.red)
+       4 |     .accessibilityValue("red \(Int(guess.red * 255))")
+         |                                    `- error: cannot find 'guess' in scope
+       5 | 
+       6 | Image("decorative-background")
+      
+      <snippet>:6:1: error: cannot find 'Image' in scope
+       4 |     .accessibilityValue("red \(Int(guess.red * 255))")
+       5 | 
+       6 | Image("decorative-background")
+         | `- error: cannot find 'Image' in scope
+       7 |     .resizable()
+       8 |     .accessibilityHidden(true)
+  [FAIL] #2  @Environment(\.accessibilityReduceMotion) private var reduceMotion
+      imports tried: SwiftUI
+      --- mode: parse-as-library ---
+      <snippet>:2:1: error: property wrappers are not yet supported in top-level code
+      1 | import SwiftUI
+      2 | @Environment(\.accessibilityReduceMotion) private var reduceMotion
+        | `- error: property wrappers are not yet supported in top-level code
+      3 | 
+      4 | var body: some View {
+      
+      <snippet>:2:55: error: type annotation missing in pattern
+      1 | import SwiftUI
+      2 | @Environment(\.accessibilityReduceMotion) private var reduceMotion
+        |                                                       `- error: type annotation missing in pattern
+      3 | 
+      4 | var body: some View {
+      
+      <snippet>:5:28: error: cannot find 'staticGlyph' in scope
+      3 | 
+      4 | var body: some View {
+      5 |     reduceMotion ? AnyView(staticGlyph) : AnyView(animatedGlyph)
+        |                            `- error: cannot find 'staticGlyph' in scope
+      6 | }
+      7 | 
+      
+      <snippet>:5:51: error: cannot find 'animatedGlyph' in scope
+      3 | 
+      4 | var body: some View {
+      5 |     reduceMotion ? AnyView(staticGlyph) : AnyView(animatedGlyph)
+        |                                                   `- error: cannot find 'animatedGlyph' in scope
+      6 | }
+      7 |
+      --- mode: with-prior ---
+      <snippet>:2:1: error: property wrappers are not yet supported in top-level code
+      1 | import SwiftUI
+      2 | @Environment(\.accessibilityReduceMotion) private var reduceMotion
+        | `- error: property wrappers are not yet supported in top-level code
+      3 | 
+      4 | var body: some View {
+      
+      <snippet>:2:55: error: type annotation missing in pattern
+      1 | import SwiftUI
+      2 | @Environment(\.accessibilityReduceMotion) private var reduceMotion
+        |                                                       `- error: type annotation missing in pattern
+      3 | 
+      4 | var body: some View {
+      
+      <snippet>:5:28: error: cannot find 'staticGlyph' in scope
+      3 | 
+      4 | var body: some View {
+      5 |     reduceMotion ? AnyView(staticGlyph) : AnyView(animatedGlyph)
+        |                            `- error: cannot find 'staticGlyph' in scope
+      6 | }
+      7 | 
+      
+      <snippet>:5:51: error: cannot find 'animatedGlyph' in scope
+      3 | 
+      4 | var body: some View {
+      5 |     reduceMotion ? AnyView(staticGlyph) : AnyView(animatedGlyph)
+        |                                                   `- error: cannot find 'animatedGlyph' in scope
+      6 | }
+      7 |
+      --- mode: with-prior+ctx ---
+      <snippet>:3:43: error: attribute 'private' can only be used in a non-local scope
+       1 | import SwiftUI
+       2 | func __probe() async throws {
+       3 | @Environment(\.accessibilityReduceMotion) private var reduceMotion
+         |                                           `- error: attribute 'private' can only be used in a non-local scope
+       4 | 
+       5 | var body: some View {
+      
+      <snippet>:6:28: error: cannot find 'staticGlyph' in scope
+       4 | 
+       5 | var body: some View {
+       6 |     reduceMotion ? AnyView(staticGlyph) : AnyView(animatedGlyph)
+         |                            `- error: cannot find 'staticGlyph' in scope
+       7 | }
+       8 | 
+      
+      <snippet>:6:51: error: cannot find 'animatedGlyph' in scope
+       4 | 
+       5 | var body: some View {
+       6 |     reduceMotion ? AnyView(staticGlyph) : AnyView(animatedGlyph)
+         |                                                   `- error: cannot find 'animatedGlyph' in scope
+       7 | }
+       8 |
+      --- mode: top-level ---
+      <snippet>:2:1: error: property wrappers are not yet supported in top-level code
+      1 | import SwiftUI
+      2 | @Environment(\.accessibilityReduceMotion) private var reduceMotion
+        | `- error: property wrappers are not yet supported in top-level code
+      3 | 
+      4 | var body: some View {
+      
+      <snippet>:2:55: error: type annotation missing in pattern
+      1 | import SwiftUI
+      2 | @Environment(\.accessibilityReduceMotion) private var reduceMotion
+        |                                                       `- error: type annotation missing in pattern
+      3 | 
+      4 | var body: some View {
+      
+      <snippet>:5:28: error: cannot find 'staticGlyph' in scope
+      3 | 
+      4 | var body: some View {
+      5 |     reduceMotion ? AnyView(staticGlyph) : AnyView(animatedGlyph)
+        |                            `- error: cannot find 'staticGlyph' in scope
+      6 | }
+      7 | 
+      
+      <snippet>:5:51: error: cannot find 'animatedGlyph' in scope
+      3 | 
+      4 | var body: some View {
+      5 |     reduceMotion ? AnyView(staticGlyph) : AnyView(animatedGlyph)
+        |                                                   `- error: cannot find 'animatedGlyph' in scope
+      6 | }
+      7 |
+      --- mode: wrapped-in-func ---
+      <snippet>:3:43: error: attribute 'private' can only be used in a non-local scope
+       1 | import SwiftUI
+       2 | func __probe() async throws {
+       3 | @Environment(\.accessibilityReduceMotion) private var reduceMotion
+         |                                           `- error: attribute 'private' can only be used in a non-local scope
+       4 | 
+       5 | var body: some View {
+      
+      <snippet>:6:28: error: cannot find 'staticGlyph' in scope
+       4 | 
+       5 | var body: some View {
+       6 |     reduceMotion ? AnyView(staticGlyph) : AnyView(animatedGlyph)
+         |                            `- error: cannot find 'staticGlyph' in scope
+       7 | }
+       8 | 
+      
+      <snippet>:6:51: error: cannot find 'animatedGlyph' in scope
+       4 | 
+       5 | var body: some View {
+       6 |     reduceMotion ? AnyView(staticGlyph) : AnyView(animatedGlyph)
+         |                                                   `- error: cannot find 'animatedGlyph' in scope
+       7 | }
+       8 |
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/animation-taste.md   (1 swift blocks)
+  [PASS:parse-as-library] #1  struct ReconciledDragExample: View {
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/hig-foundations.md   (1 swift blocks)
+  [PASS:with-prior+ctx  ] #1  Text("Balance").font(.system(.title, design: .serif))  // New York, not 
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/hig-patterns.md   (0 swift blocks)
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/platform-idioms.md   (0 swift blocks)
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/swiftui-design-implementation.md   (0 swift blocks)
+
+TOTAL: 2/4 snippets typecheck clean

@@ -1,0 +1,12 @@
+$ git -C ~/Projects/StudioFixture ls-files
+StudioFixture.xcodeproj/project.pbxproj
+StudioFixture.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+StudioFixture.xcodeproj/xcuserdata/michaelfrenchfultonjr.xcuserdatad/xcschemes/xcschememanagement.plist
+StudioFixture/Assets.xcassets/AccentColor.colorset/Contents.json
+StudioFixture/Assets.xcassets/AppIcon.appiconset/Contents.json
+StudioFixture/Assets.xcassets/Contents.json
+StudioFixture/ContentView.swift
+StudioFixture/StudioFixtureApp.swift
+StudioFixtureTests/StudioFixtureTests.swift
+StudioFixtureUITests/StudioFixtureUITests.swift
+$ status --porcelain
