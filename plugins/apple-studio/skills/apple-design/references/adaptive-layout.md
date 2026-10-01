@@ -147,11 +147,11 @@ struct MessageDetail: View {
                     ToolbarItem(placement: .topBarPinnedTrailing) {
                         Button("Done", systemImage: "checkmark") {}
                     }
-                    ToolbarItem(placement: .secondaryAction) {
+                    ToolbarItem(placement: .primaryAction) {
                         Button("Reply", systemImage: "arrowshape.turn.up.left") {}
                     }
                     .visibilityPriority(.high)
-                    ToolbarItem(placement: .secondaryAction) {
+                    ToolbarItem(placement: .primaryAction) {
                         Button("Flag", systemImage: "flag") {}
                     }
                     .visibilityPriority(.low)
@@ -165,7 +165,7 @@ struct MessageDetail: View {
 }
 ```
 
-On iPhone Duo, `.secondaryAction` items start in the overflow menu on both displays, with or without a symbol. The runtime check set no `visibilityPriority`, so it does not show whether `.high` keeps Reply in the bar. (runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md).
+On iPhone Duo, `.secondaryAction` items start in the overflow menu on both displays, with or without a symbol. `visibilityPriority(.high)` does not bring one into the bar, even when the bar has room. For `.primaryAction` items the priority works: when the bar overflows, a `.high` item stays and a `.low` item leaves first. That is why the example puts Reply and Flag in `.primaryAction`. (runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md).
 
 **Opt out rarely.** Do not change the default bar placement in most apps. Apply `toolbarVerticalBehavior(.disabled)` only to full-screen media or a non-scrolling layout such as a calculator. Choose it once per screen, and do not toggle it from view state. To hide the bars instead, use `toolbarVisibility(_:for:)`. `NavigationStack` reads the behavior from its top view, `TabView` from the selected tab, and `NavigationSplitView` from its trailing column. On the inner display, `presentationPlacement(_:)` sets the side that a sheet uses, and so the axis of its bar. `axisBehavior(_:)` limits one item to `.horizontalOnly` or makes it `.verticalPreferred`. (toolbarVerticalBehavior(_:); axisBehavior(_:))
 

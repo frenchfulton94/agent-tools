@@ -76,3 +76,30 @@ Main display orientation: portraitUpsideDown, non-flat orientation: portraitUpsi
     • backlightState: backlight is off
 Main display backlight state: backlight is on and active
 Main display orientation: portrait, non-flat orientation: portrait, orientation not locked
+== r7-control 2026-10-01T15:33:47Z
+▿ 1: LCD (primary) (active):
+    • currentOrientation: rot0
+    • backlightState: backlight is on and active
+▿ 3: LCD-1:
+    • currentOrientation: rot90
+    • backlightState: backlight is off
+Main display backlight state: backlight is on and active
+Main display orientation: portrait, non-flat orientation: portrait, orientation not locked
+== r7-priority 2026-10-01T15:33:51Z
+▿ 1: LCD (primary) (active):
+    • currentOrientation: rot0
+    • backlightState: backlight is on and active
+▿ 3: LCD-1:
+    • currentOrientation: rot90
+    • backlightState: backlight is off
+Main display backlight state: backlight is on and active
+Main display orientation: portrait, non-flat orientation: portrait, orientation not locked
+== r7-messagedetail 2026-10-01T15:33:56Z
+▿ 1: LCD (primary) (active):
+    • currentOrientation: rot0
+    • backlightState: backlight is on and active
+▿ 3: LCD-1:
+    • currentOrientation: rot90
+    • backlightState: backlight is off
+Main display backlight state: backlight is on and active
+Main display orientation: portrait, non-flat orientation: portrait, orientation not locked

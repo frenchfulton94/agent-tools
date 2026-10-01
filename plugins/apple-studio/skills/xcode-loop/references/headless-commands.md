@@ -286,8 +286,8 @@ Three commands look like pose control but are not:
   rotate --device <udid> left`) prints `New Device Orientation: landscapeLeft`, but
   `orientation get` then prints `Current Device Orientation: portrait` and the screen does not
   rotate. Rotate in Device Hub.
-- `xcrun devicectl device motion hinge-angle --device <udid>` only reads the hinge
-  (`Angle:  0.0°` when closed, 180° fully open). It did not exit after `--session-timeout 3`;
-  do not wait on it in a script.
+- `xcrun devicectl device motion hinge-angle --device <udid>` only reads the hinge. It reads
+  `Angle:  0.0°` when closed; it reports `Range:0-180°`. It did not exit after
+  `--session-timeout 3`; do not wait on it in a script.
 - `xcrun simctl io <udid> screenConfig --display=1 power off` does not fold the device. After
   `power on`, the outer display stayed black until the device was shut down and booted again.
