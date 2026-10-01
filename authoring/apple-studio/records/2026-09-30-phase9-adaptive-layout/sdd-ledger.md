@@ -167,3 +167,4 @@ Final: parked — adaptive-layout.md:185 closest paraphrase of the HIG asymmetry
 Final: parked (nits) — hig-patterns:1 missing one confirmationDialog URL; LiveBadgeOverlay possible one-frame move on appear; "You can't undo this action." near Apple's stock text — Ruling: stay deferred
 Final: out-of-scope — spec Deliverables §1 item 4 and plan :615 still say "never inside NavigationSplitView" (original design input, superseded by the shipped reference) — Ruling: leave design inputs as written; the verification results record the change
 Final review clean. Workspace to be deleted after committing this ledger to the phase record.
+USER 2026-10-01: fix open issues, then PR. Resolved the three parked shipped-text minors: adaptive-layout.md:104 (Apple's reason — part of the view can become unreachable), :185 (reworded further from the HIG passage), hig-patterns.md:72 (scoped to offering choices about an intentional action, per the Action sheets page).
