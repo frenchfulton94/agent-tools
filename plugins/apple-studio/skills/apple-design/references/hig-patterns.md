@@ -1,4 +1,4 @@
-> verified: 2026-09 against https://developer.apple.com/design/human-interface-guidelines/navigation-and-search, https://developer.apple.com/design/human-interface-guidelines/search-fields, https://developer.apple.com/design/human-interface-guidelines/sidebars, https://developer.apple.com/design/human-interface-guidelines/tab-bars, https://developer.apple.com/design/human-interface-guidelines/token-fields, https://developer.apple.com/design/human-interface-guidelines/modality, https://developer.apple.com/design/human-interface-guidelines/feedback, https://developer.apple.com/design/human-interface-guidelines/entering-data, https://developer.apple.com/design/human-interface-guidelines/onboarding, https://developer.apple.com/design/human-interface-guidelines/settings, https://developer.apple.com/design/human-interface-guidelines/loading; re-checked 2026-09 against https://developer.apple.com/documentation/swiftui/view/sensoryfeedback(_:trigger:).md for the layered-feedback mechanism addition (Phase 7 Task 2)
+> verified: 2026-09 against https://developer.apple.com/design/human-interface-guidelines/navigation-and-search, https://developer.apple.com/design/human-interface-guidelines/search-fields, https://developer.apple.com/design/human-interface-guidelines/sidebars, https://developer.apple.com/design/human-interface-guidelines/tab-bars, https://developer.apple.com/design/human-interface-guidelines/token-fields, https://developer.apple.com/design/human-interface-guidelines/modality, https://developer.apple.com/design/human-interface-guidelines/feedback, https://developer.apple.com/design/human-interface-guidelines/entering-data, https://developer.apple.com/design/human-interface-guidelines/onboarding, https://developer.apple.com/design/human-interface-guidelines/settings, https://developer.apple.com/design/human-interface-guidelines/loading; re-checked 2026-09 against https://developer.apple.com/documentation/swiftui/view/sensoryfeedback(_:trigger:).md for the layered-feedback mechanism addition (Phase 7 Task 2); re-checked 2026-09 (Phase 9: pointer to adaptive-layout.md); re-checked 2026-10 against https://developer.apple.com/design/human-interface-guidelines/alerts, https://developer.apple.com/design/human-interface-guidelines/action-sheets, https://developer.apple.com/documentation/swiftui/view/confirmationdialog(_:ispresented:titlevisibility:actions:message:).md, https://developer.apple.com/documentation/swiftui/buttonrole/destructive.md, https://developer.apple.com/documentation/swiftui/button/init(_:role:action:).md for the destructive-action confirmation (Phase 9 final review), compiled against the macOS 27.0 SDK
 > sources: live HIG (DocC JSON)
 > note: HIG has no dedicated empty-states page as of 2026-08 (4 slug variants probed, all 404; full Patterns and Components indexes checked) — not covered here, not invented.
 
@@ -29,6 +29,8 @@ Size tab bars for restraint.
 - Reserve badges strictly for information that actually warrants interrupting attention. Overuse erodes their signal.
 - A tab bar is for navigating between top-level sections only — route in-context actions through a toolbar instead.
 (HIG: Tab Bars)
+
+Where bars move to a vertical edge — iPhone Duo's outer display and landscape inner display — item order, overflow, and toolbar-versus-tab-bar compression are in `adaptive-layout.md` § Bars that adapt to space.
 
 ## Search
 
@@ -63,6 +65,37 @@ Never stack modals.
 - Always give an obvious, platform-conventional dismissal (swipe-down or toolbar button, depending on platform), and title the modal so people can identify its task at a glance.
 - Gate dismissal with a confirmation only when closing would cause unexpected, irreversible loss of user-generated content. Don't add confirmation friction to expected, reversible dismissals.
 (HIG: Modality)
+
+Confirm a destructive action in proportion to what it destroys.
+
+- Do not confirm a common destructive action that people can undo, such as deleting one email. People mean to discard that data, and they can get it back. Confirm an uncommon destructive action that people cannot undo, because they may have started it by accident. § Feedback and Loading has the same rule for warnings in general. (HIG: Alerts § Best practices, https://developer.apple.com/design/human-interface-guidelines/alerts)
+- To offer choices about an action that people started on purpose, prefer an action sheet to an alert. An action sheet can offer other choices about the action, such as saving a draft instead of deleting it. An alert can only confirm or cancel, and people usually read an alert as news of a problem. In SwiftUI, present an action sheet with `confirmationDialog(_:isPresented:titleVisibility:actions:)`. (HIG: Action sheets, https://developer.apple.com/design/human-interface-guidelines/action-sheets; Alerts § iOS, iPadOS)
+- In an action sheet, give each destructive choice `role: .destructive`, so that the system styles it as destructive. The dialog includes a dismiss action by default, and a button with `role: .cancel` replaces it. In a regular size class on iOS, the dialog is a popover that a tap outside dismisses. (HIG: Action sheets; `confirmationDialog`)
+- In an alert, the HIG keeps the destructive style for a destructive button that people did not deliberately choose. When people choose Empty Trash, the alert's Empty Trash button stays in the default style. Always include a Cancel button with a destructive action, and do not make Cancel the default button. (HIG: Alerts § Buttons)
+- Title the destructive button with its result, such as "Delete" or "Erase", not "OK". On iOS, the dialog shows only the `Text` label of each button and omits any other label content. (HIG: Alerts § Buttons; `confirmationDialog`)
+
+```swift
+struct DeleteProjectButton: View {
+    @State private var isConfirming = false
+
+    var body: some View {
+        Button("Delete Project", role: .destructive) {
+            isConfirming = true
+        }
+        .confirmationDialog(
+            "Delete this project?",
+            isPresented: $isConfirming,
+            titleVisibility: .visible
+        ) {
+            Button("Delete Project", role: .destructive) {
+                // Delete the project here.
+            }
+        } message: {
+            Text("This deletes every file in the project. You can't undo this action.")
+        }
+    }
+}
+```
 
 ## Feedback and Loading
 

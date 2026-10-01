@@ -1,10 +1,10 @@
-> verified: 2026-08 against https://developer.apple.com/design/human-interface-guidelines/designing-for-ios, https://developer.apple.com/design/human-interface-guidelines/designing-for-ipados, https://developer.apple.com/design/human-interface-guidelines/designing-for-macos, https://developer.apple.com/design/human-interface-guidelines/windows, https://developer.apple.com/design/human-interface-guidelines/multitasking, https://developer.apple.com/design/human-interface-guidelines/pointing-devices, https://developer.apple.com/design/human-interface-guidelines/keyboards
+> verified: 2026-08 against https://developer.apple.com/design/human-interface-guidelines/designing-for-ios, https://developer.apple.com/design/human-interface-guidelines/designing-for-ipados, https://developer.apple.com/design/human-interface-guidelines/designing-for-macos, https://developer.apple.com/design/human-interface-guidelines/windows, https://developer.apple.com/design/human-interface-guidelines/multitasking, https://developer.apple.com/design/human-interface-guidelines/pointing-devices, https://developer.apple.com/design/human-interface-guidelines/keyboards; re-checked 2026-09 (Phase 9: layout-shape content moved to adaptive-layout.md)
 > sources: live HIG (DocC JSON)
 > note: organized by cross-platform decision, not per-platform encyclopedia — see the file body's opening paragraph. Scope is iOS/iPadOS/macOS; visionOS and watchOS idioms are out of scope. No book chapters feed this file (the SwiftUI book's macOS-adaptation chapters route to `swiftui-design-implementation.md` instead). All SwiftUI API symbols named below were individually confirmed against live Apple documentation JSON (exact name, signature, and platform availability) before this file was committed.
 
 # Platform Idioms
 
-This file is organized by decision, not by platform: for one SwiftUI codebase running on iPhone, iPad, and Mac, each section below covers a question that genuinely resolves differently per platform, and why. Skip anything here that SwiftUI already handles for you — see the "When to branch" section for the boundary between real platform differences and adaptivity you get for free. Scope is iOS/iPadOS/macOS; visionOS and watchOS idioms aren't covered.
+This file is organized by decision, not by platform: for one SwiftUI codebase running on iPhone, iPad, and Mac, each section below covers a question that genuinely resolves differently per platform, and why. Skip anything here that SwiftUI already handles for you — layout shape (containers that adapt, size classes, fluid widths) is in `adaptive-layout.md`; this file keeps the capabilities that genuinely differ by platform. Scope is iOS/iPadOS/macOS; visionOS and watchOS idioms aren't covered.
 
 ## Navigation structure: sidebar, tab bar, and the menu bar
 
@@ -15,7 +15,7 @@ Mechanics of choosing sidebar vs. tab bar vs. split view, sizing tab bars, and s
 - macOS makes the menu bar mandatory, not optional chrome: every command your app exposes must be reachable from it, even if you've also surfaced it as a toolbar button or a context-menu item. Toolbar and context menu are conveniences layered on the menu bar, never a replacement for it. `.commands { }` in your `App` scene is the one navigation-adjacent surface with no iOS/iPadOS equivalent at all — this is a genuine, required platform branch, not something adaptivity covers.
 (HIG: Designing for macOS, https://developer.apple.com/design/human-interface-guidelines/designing-for-macos; Designing for iPadOS, https://developer.apple.com/design/human-interface-guidelines/designing-for-ipados)
 
-Decision rule: build your primary navigation once — it already adapts by size class (see below) — and write menu-bar commands as a strictly additive macOS-only layer that calls into the same actions your UI already exposes, rather than a parallel command system.
+Decision rule: build your primary navigation once — it already adapts by size class (see `adaptive-layout.md` § What layout reads) — and write menu-bar commands as a strictly additive macOS-only layer that calls into the same actions your UI already exposes, rather than a parallel command system.
 
 ## Input assumptions: touch-only, touch+pointer, pointer+keyboard-primary
 
@@ -46,7 +46,7 @@ Decision rule: implement standard shortcuts once via `.keyboardShortcut()`; impl
 ## Windows and multitasking behavior
 
 - iOS has no window concept at all — one scene fills the screen at a time (aside from Picture in Picture). "Multitasking" on iOS means your app gets backgrounded or suspended without warning, not that it shares screen space with itself. Design for clean pause/resume, not for simultaneous views of your own content.
-- iPadOS has real windows, but your app doesn't choose or detect whether the person is running full screen or in freely resizable windowed mode — that's a system-level preference outside your control, and the API gives you no signal to branch on. The consequence is layout that must survive arbitrary width, not a fixed set of split-screen ratios: build fluid layout, not fixed breakpoints. Windowed iPad also draws system window controls at the toolbar's leading edge, so leading-edge toolbar buttons need to be inset rather than pinned flush, or the window controls will sit on top of them.
+- iPadOS has real windows, but your app doesn't choose or detect whether the person is running full screen or in freely resizable windowed mode — that's a system-level preference outside your control, and the API gives you no signal to branch on. For the layout consequence, see `adaptive-layout.md` § What layout reads. Windowed iPad also draws system window controls at the toolbar's leading edge, so leading-edge toolbar buttons need to be inset rather than pinned flush, or the window controls will sit on top of them.
 - macOS treats multitasking as the platform's default assumption, not an opt-in mode — many windows across many apps open at once is normal, not exceptional. Windows carry main/key/inactive state with distinct system-drawn appearance (colored vs. gray traffic-light controls, presence or absence of translucency) that people rely on to tell which window is listening for input. Never build custom window chrome that reimplements this by hand — use system window components and this comes for free; a custom chrome that gets it even slightly wrong reads as a broken app, not a stylistic choice.
 (HIG: Windows, https://developer.apple.com/design/human-interface-guidelines/windows; Multitasking, https://developer.apple.com/design/human-interface-guidelines/multitasking)
 
@@ -82,14 +82,7 @@ Because a pointer can select individual pixels but a finger can't, hit-target si
 
 ## When to branch code vs. when the system already adapts for you
 
-SwiftUI's structural containers already handle most of the iPhone/iPad/Mac shape difference without any platform branching:
-
-- `NavigationSplitView` collapses to a stacked single-column layout on iPhone or a compact-width iPad slot and expands to a real sidebar-plus-detail split on a regular-width iPad or Mac, automatically.
-- `List`/`Form` pick up each platform's native list or grouped style on their own.
-- Standard controls (`Button`, `Toggle`, `Picker`) already render each platform's idiomatic look — a macOS bordered button vs. an iOS filled or plain style — without per-platform styling code from you.
-- Dynamic Type and Dark Mode/appearance adapt identically everywhere as long as you use semantic colors and fonts and avoid hardcoded sizes; don't branch for these, and don't fight them with fixed frames.
-
-`@Environment(\.horizontalSizeClass)` already captures most of the iPhone-vs-iPad shape difference — an iPad in a narrow multitasking slot reports `.compact` exactly like an iPhone in portrait does. Prefer branching layout decisions on size class over `#if os(iOS)`; reserve OS-level conditionals for capabilities, not shapes.
+Layout shape — containers that adapt, size classes over platform checks, fluid widths — lives in `adaptive-layout.md` § What layout reads. What follows is the other half: the capabilities that genuinely differ by platform.
 
 Genuine reasons to branch with `#if os(macOS)` or an equivalent platform check:
 

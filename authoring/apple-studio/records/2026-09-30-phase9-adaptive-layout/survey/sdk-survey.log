@@ -1,0 +1,58 @@
+# SDK survey, 2026-09-30
+
+$ xcodebuild -version  (xcode-select: Xcode-beta.app)
+Xcode 27.0
+Build version 27A5228h
+$ /Applications/Xcode.app xcodebuild -version
+Xcode 27.0
+Build version 27A266a
+
+SDK: iPhoneOS27.0.sdk (both installs)
+== SwiftUI.swiftinterface (arm64e) — count of each Duo symbol found
+  ArrangementView                        0
+  ReservedRegion                         0
+  toolbarVerticalEdge                    0
+  ToolbarVerticalCompressionBehavior     0
+  toolbarVerticalBehavior                0
+  axisBehavior                           0
+  UIArrangementViewController            0
+  verticalBarEdge                        0
+  preferredVerticalBarBehavior           0
+  ToolbarOverflowMenu                    4
+  topBarPinnedTrailing                   2
+  visibilityPriority                     2
+  ToolbarItemVisibilityPriority          11
+  UIBarButtonItemVisibilityPriority      0
+  backgroundExtensionEffect              2
+== UIKit.swiftinterface (arm64e) — count of each Duo symbol found
+  ArrangementView                        0
+  ReservedRegion                         0
+  toolbarVerticalEdge                    0
+  ToolbarVerticalCompressionBehavior     0
+  toolbarVerticalBehavior                0
+  axisBehavior                           0
+  UIArrangementViewController            0
+  verticalBarEdge                        0
+  preferredVerticalBarBehavior           0
+  ToolbarOverflowMenu                    0
+  topBarPinnedTrailing                   0
+  visibilityPriority                     0
+  ToolbarItemVisibilityPriority          0
+  UIBarButtonItemVisibilityPriority      5
+  backgroundExtensionEffect              0
+== UIKit Headers containing any of UIArrangementViewController|ReservedRegion|verticalBarEdge|VerticalBarCompression|axisBehavior:
+  (none listed = absent)
+
+== Documented availability (docc.py PLATFORMS line)
+# ArrangementView   [struct] PLATFORMS: iOS 27.1 BETA, iPadOS 27.1 BETA, Mac Catalyst 27.1, macOS 27.1, tvOS 27.1, visionOS 27.1, watchOS 27.1 
+# ReservedRegion   [struct] PLATFORMS: iOS 27.1 BETA, iPadOS 27.1 BETA, Mac Catalyst 27.1, macOS 27.1, tvOS 27.1, visionOS 27.1, watchOS 27.1 
+# UIArrangementViewController   [class] PLATFORMS: iOS 27.1 BETA, iPadOS 27.1 BETA, Mac Catalyst 27.1, tvOS 27.1, visionOS 27.1 
+# UIView.ReservedRegion   [struct] PLATFORMS: iOS 27.1 BETA, iPadOS 27.1 BETA, Mac Catalyst 27.1 BETA, tvOS 27.1, visionOS 27.1 
+# ToolbarVerticalCompressionBehavior   [struct] PLATFORMS: iOS 27.1 BETA, iPadOS 27.1 BETA, Mac Catalyst 27.1, macOS 27.1, tvOS 27.1, visionOS 27.1, watchOS 27.1 
+# toolbarVerticalBehavior(_:)   [method] PLATFORMS: iOS 27.1 BETA, iPadOS 27.1 BETA, Mac Catalyst 27.1, macOS 27.1, tvOS 27.1, visionOS 27.1, watchOS 27.1 
+# toolbarVerticalEdge   [property] PLATFORMS: iOS 27.1 BETA, iPadOS 27.1 BETA, Mac Catalyst 27.1, macOS 27.1, tvOS 27.1, visionOS 27.1, watchOS 27.1 
+# axisBehavior(_:)   [method] PLATFORMS: iOS 27.1 BETA, iPadOS 27.1 BETA, Mac Catalyst 27.1, macOS 27.1, tvOS 27.1, visionOS 27.1, watchOS 27.1 
+# reservedRegions(kind:options:)   [method] PLATFORMS: iOS 27.1 BETA, iPadOS 27.1 BETA, Mac Catalyst 27.1 BETA, tvOS 27.1, visionOS 27.1 
+# ToolbarOverflowMenu   [struct] PLATFORMS: iOS 27.0, iPadOS 27.0, Mac Catalyst 27.0, visionOS 27.0 
+# ToolbarItemVisibilityPriority   [struct] PLATFORMS: iOS 27.0, iPadOS 27.0, Mac Catalyst 27.0, macOS 26.1, tvOS 27.0, visionOS 27.0, watchOS 27.0 
+# presentationPlacement(_:)   [method] PLATFORMS: iOS 27.0, iPadOS 27.0, Mac Catalyst 27.0, macOS 27.0, tvOS 27.0, visionOS 27.0, watchOS 27.0 

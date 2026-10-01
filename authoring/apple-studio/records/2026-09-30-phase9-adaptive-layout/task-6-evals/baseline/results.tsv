@@ -1,0 +1,17 @@
+id	skill	expect	fired	verdict	note	wrote	log
+fire-1	apple-design	FIRE	apple-design	PASS	max_turns		fire-1.log
+fire-2	apple-design	FIRE	apple-design	PASS			fire-2.log
+fire-3	apple-design	FIRE	apple-design	PASS			fire-3.log
+fire-4	apple-design	FIRE	apple-design	PASS	max_turns		fire-4.log
+fire-5	apple-design	FIRE	apple-design	PASS	max_turns	StudioFixture/MailboxScreen.swift	fire-5.log
+fire-6	apple-design	FIRE	apple-design	PASS			fire-6.log
+fire-7	apple-design	FIRE	(none)	FAIL			fire-7.log
+fire-8	apple-design	FIRE	xcode-loop	FAIL	max_turns		fire-8.log
+fire-9	apple-design	FIRE	(none)	FAIL			fire-9.log
+fire-10	apple-design	FIRE	(none)	FAIL			fire-10.log
+nofire-1	apple-design	NOFIRE	apple-design	FAIL	max_turns		nofire-1.log
+nofire-2	apple-design	NOFIRE	(none)	PASS	max_turns		nofire-2.log
+nofire-3	apple-design	NOFIRE	run	PASS	max_turns		nofire-3.log
+nofire-4	apple-design	NOFIRE	swift-architecture	PASS			nofire-4.log
+nofire-5	apple-design	NOFIRE	xcode-loop	PASS			nofire-5.log
+nofire-6	apple-design	NOFIRE	app-release	PASS			nofire-6.log

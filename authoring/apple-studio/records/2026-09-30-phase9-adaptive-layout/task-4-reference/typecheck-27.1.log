@@ -1,0 +1,33 @@
+$ DEVELOPER_DIR="/Applications/Xcode 27-1-beta.app/Contents/Developer" python3 authoring/apple-studio/pipeline/typecheck_snippets.py plugins/apple-studio/skills/apple-design/references/*.md
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/accessibility.md   (2 swift blocks)   target: macOS (default)
+  [PASS:parse-as-library] #1  struct ColorGuessRow: View {
+  [PASS:parse-as-library] #2  struct StatusGlyph: View {
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/adaptive-layout.md   (4 swift blocks)   target: ios 27.1
+  [PASS:parse-as-library] #1  struct LiveBadgeOverlay: View {
+  [PASS:parse-as-library] #2  struct TrackDetail: View {
+  [PASS:parse-as-library] #3  struct MessageDetail: View {
+  [PASS:parse-as-library] #4  struct FloatingPaletteHost: View {
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/animation-taste.md   (1 swift blocks)   target: macOS (default)
+  [PASS:parse-as-library] #1  struct ReconciledDragExample: View {
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/hig-foundations.md   (1 swift blocks)   target: macOS (default)
+  [PASS:with-prior+ctx  ] #1  Text("Balance").font(.system(.title, design: .serif))  // New York, not 
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/hig-patterns.md   (0 swift blocks)   target: macOS (default)
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/platform-idioms.md   (0 swift blocks)   target: macOS (default)
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/swiftui-design-implementation.md   (0 swift blocks)   target: macOS (default)
+
+TOTAL: 8/8 snippets typecheck clean
+[exit 0]

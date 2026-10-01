@@ -1,0 +1,28 @@
+ad-fire-1	apple-design	FIRE	Build the settings screen UI
+ad-fire-2	apple-design	FIRE	Does this screen feel native?
+ad-fire-3	apple-design	FIRE	What's the right navigation pattern for a three-level hierarchy?
+ad-fire-4	apple-design	FIRE	My layout breaks at larger text sizes - fix it
+ad-fire-5	apple-design	FIRE	Add a confirmation flow before deleting
+ad-fire-6	apple-design	FIRE	Review this screen for accessibility
+ad-fire-7	apple-design	FIRE	Make my app work on iPhone Duo
+ad-fire-8	apple-design	FIRE	My toolbar buttons disappear when the phone is closed
+ad-fire-9	apple-design	FIRE	Part of my list is hidden where the screen folds
+ad-fire-10	apple-design	FIRE	Should I use an arrangement view here?
+ad-nofire-1	apple-design	NOFIRE	Design our brand color palette
+ad-nofire-2	apple-design	NOFIRE	Fix this Sendable warning
+ad-nofire-3	apple-design	NOFIRE	Run the app and screenshot it
+ad-nofire-4	apple-design	NOFIRE	Should I use SwiftData or Core Data?
+ad-nofire-5	apple-design	NOFIRE	Screenshot the app on the iPhone Duo simulator
+ad-nofire-6	apple-design	NOFIRE	What screenshot sizes does the App Store need for iPhone Duo?
+ar-fire-1	app-release	FIRE	Set up TestFlight so external testers can try the beta
+ar-fire-2	app-release	FIRE	xcodebuild says 'No signing certificate iOS Distribution found'
+ar-fire-3	app-release	FIRE	What do I need in place before submitting to the App Store?
+ar-fire-4	app-release	FIRE	My app was rejected under guideline 2.1 - what now?
+ar-fire-5	app-release	FIRE	Set up push notifications - APNs keys, entitlements, the works
+ar-fire-6	app-release	FIRE	Automate our release builds with Xcode Cloud
+ar-fire-7	app-release	FIRE	How should I manage version and build numbers across releases?
+ar-fire-8	app-release	FIRE	What screenshot sizes does the App Store need for iPhone Duo?
+ar-nofire-1	app-release	NOFIRE	Build and run the app on the simulator
+ar-nofire-2	app-release	NOFIRE	Show a local notification when the timer ends
+ar-nofire-3	app-release	NOFIRE	Design the onboarding screens
+ar-nofire-4	app-release	NOFIRE	Should I use SwiftData or Core Data?

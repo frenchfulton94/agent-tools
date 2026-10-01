@@ -7,6 +7,7 @@
 - "Set up push notifications - APNs keys, entitlements, the works"
 - "Automate our release builds with Xcode Cloud"
 - "How should I manage version and build numbers across releases?"
+- "What screenshot sizes does the App Store need for iPhone Duo?"
 ## Should NOT fire
 - "Build and run the app on the simulator"      (xcode-loop)
 - "Show a local notification when the timer ends" (apple-frameworks primer)

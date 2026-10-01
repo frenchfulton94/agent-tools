@@ -1,0 +1,5 @@
+id	skill	expect	fired	verdict	note	wrote	log
+fire-7	apple-design	FIRE	(none)	FAIL			fire-7.log
+fire-8	apple-design	FIRE	xcode-loop	FAIL			fire-8.log
+fire-9	apple-design	FIRE	(none)	FAIL			fire-9.log
+fire-10	apple-design	FIRE	(none)	FAIL			fire-10.log

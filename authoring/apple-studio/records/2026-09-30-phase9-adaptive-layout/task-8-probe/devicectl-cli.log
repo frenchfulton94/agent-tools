@@ -1,0 +1,62 @@
+$ xcrun devicectl device orientation get --device <UDID>
+Current Device Orientation: portrait
+$ xcrun devicectl device info displays --device <UDID>
+Current Displays:
+▿ 1: LCD (primary) (active):
+    • bounds: (0.0, 0.0, 1398.0, 2034.0)
+    • currentOrientation: rot0
+    • displayId: 1
+    • name: LCD
+    • nativeOrientation: rot0
+    • pointScale: 3
+    • nativeSize: (1398.0, 2034.0)
+    • physicalSize: (3.039130449295044, 4.421739101409912)
+    • chromeIdentifier: com.apple.dt.devicekit.chrome.phone15
+    • framebufferMaskIdentifier: 1C896A2B-F0D7-405C-8D0F-66E4B80AD044
+    • primary: true
+    • active: true
+    • backlightState: backlight is on and active
+    • uniqueId: 05AFE437-B1A2-4901-9668-C5DC9D3946C1
+    • type: integrated
+▿ 3: LCD-1:
+    • bounds: (0.0, 0.0, 2007.0, 2853.0)
+    • currentOrientation: rot90
+    • displayId: 3
+    • name: LCD-1
+    • nativeOrientation: rot0
+    • pointScale: 3
+    • nativeSize: (2007.0, 2853.0)
+    • physicalSize: (4.363043308258057, 6.202173709869385)
+    • chromeIdentifier: com.apple.dt.devicekit.chrome.phone14
+    • framebufferMaskIdentifier: BF0DC480-5EE2-4EC1-B02B-C75E94759832
+    • primary: false
+    • active: false
+    • backlightState: backlight is off
+    • uniqueId: E001D309-F500-40BB-A9EE-B22324C09D35
+    • type: integrated
+Main display backlight state: backlight is on and active
+Main display orientation: portrait, non-flat orientation: portrait, orientation not locked
+$ xcrun devicectl device motion hinge-angle --device <UDID> --session-timeout 3
+Hinge angle monitoring started. 3 seconds remaining:
+• +0.000s : Angle:  0.0°  Mech:  0.0°  Velocity:+0.0°/s  AngleValid:Y  VelocityValid:N  Range:0-180°
+(hinge-angle did not exit after --session-timeout 3; stopped by hand after about 120 s. Only the reading above was printed: 0.0 degrees = closed.)
+$ xcrun devicectl device orientation set --device <UDID> landscapeLeft --timeout 30
+New Device Orientation: landscapeLeft
+exit=0
+$ xcrun devicectl device orientation get --device <UDID> --timeout 30
+Current Device Orientation: portrait
+$ xcrun devicectl device orientation set --device <UDID> landscapeRight --timeout 30
+New Device Orientation: landscapeRight
+$ xcrun devicectl device orientation get --device <UDID> --timeout 30
+Current Device Orientation: portrait
+$ xcrun devicectl device orientation rotate --device <UDID> left --timeout 30
+New Device Orientation: landscapeLeft
+$ xcrun devicectl device orientation get --device <UDID> --timeout 30
+Current Device Orientation: portrait
+$ xcrun devicectl device info displays --device <UDID> --timeout 30  (orientation lines)
+▿ 1: LCD (primary) (active):
+    • currentOrientation: rot0
+▿ 3: LCD-1:
+    • currentOrientation: rot90
+Main display backlight state: backlight is on and active
+Main display orientation: portrait, non-flat orientation: portrait, orientation not locked

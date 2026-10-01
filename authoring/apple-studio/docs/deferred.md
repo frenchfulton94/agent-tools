@@ -122,6 +122,17 @@ block Phase 2; each has an explicit trigger for when to act.
    stated above — a shipped real feature — remains unmet, so **no skill is
    cut this phase, regardless of the count.** The count is zero again, which
    is a repeat of the prior finding, not a new reason for the outcome.
+
+   **Phase 9 measurement (2026-09-30).** This re-runs the Phase 6/7 scan,
+   scoped to sessions since 2026-09-12 (the prior measurement date). It
+   found 2,168 transcripts and **0** genuine non-fixture invocations of an
+   `apple-studio:*` skill. All 60 excluded invocations came from a single
+   project directory, `StudioFixture`. Evidence:
+   `records/2026-09-30-phase9-adaptive-layout/task-0-sweep/killswitch.log`.
+
+   **Decision rule applied unchanged, not improvised:** the precondition —
+   a shipped real feature — remains unmet, so **no skill is cut this phase,
+   regardless of the count.**
 2. **Stop-gate session-start baseline (only on observed pain).** Add a
    session-start baseline build capture to `stop-gate` to avoid a one-turn
    false block on projects that were already red before the session started.
@@ -464,6 +475,15 @@ block Phase 2; each has an explicit trigger for when to act.
    `.superpowers/sdd/2026-09-12-phase7-fluid-interfaces/task-4-typecheck-repowide.log:4627`
    (the `TOTAL:` line), summarized in `task-4-typecheck-summary.txt:1-18`.
 
+   **Phase 9 (2026-09-30).** Item 7's trigger — triage in the phase after
+   Phase 7 — passed in Phase 8 unaddressed. Phase 9 triaged the two
+   `apple-design` failures. Both are framing artifacts, each paired with a
+   reference defect: a deprecated `accentColor`, and `AnyView` in a ternary.
+   Phase 9 fixed both. Evidence:
+   `records/2026-09-30-phase9-adaptive-layout/task-3-a11y/triage.md`. 17
+   failures remain, none in `apple-design`. The trigger stands: triage them
+   in the next phase.
+
 8. **The SDD tooling rewrites `.superpowers/sdd/.gitignore` to `*` on every
    invocation (found 2026-09-12, Phase 7 Task 0; root cause found Task 1).**
    `scripts/sdd-workspace:39` in the superpowers `subagent-driven-development`
@@ -630,6 +650,12 @@ block Phase 2; each has an explicit trigger for when to act.
     **Trigger: rewrite it the next time that reference is revised for any other
     reason.**
 
+    **Resolved 2026-09-30, Phase 9 Task 8.** Task 8 edited
+    `headless-commands.md` for the Duo pose section and rewrote the citation.
+    Line 6 now names the fixture with no machine-specific path. This item is
+    closed. Evidence:
+    `plugins/apple-studio/skills/xcode-loop/references/headless-commands.md:6-7`.
+
 13. **`apple-design`'s trigger evals fail in both directions (found 2026-09-12,
     Phase 8 final fix wave).** A sweep of the skill's own
     `evals/triggers.md` prompts scored 9/14. Four of seven should-fire rows
@@ -654,6 +680,199 @@ block Phase 2; each has an explicit trigger for when to act.
 
     **Trigger: before any phase that edits `apple-design`'s description, and
     before trusting a trigger-eval pass rate on a fixture with no real UI in it.**
+
+    **Phase 9 (2026-09-30).** The fixture now has a real screen.
+    `MailboxScreen.swift` adds a mailbox with `NavigationSplitView`,
+    `TabView`, and per-context toolbars. It is committed to StudioFixture at
+    `5287d2c`. `triggers.md` gained four Duo should-fire rows and two Duo
+    should-NOT-fire rows.
+
+    The baseline sweep, with the description unedited, scored 11/16 PASS.
+    Should-fire rows scored 6/10: fire-1 through fire-6 passed, and fire-7
+    through fire-10, the four Duo rows, all failed. Should-NOT rows scored
+    5/6: nofire-1 ("Design our brand color palette") failed, and the rest
+    passed.
+
+    Full evidence is in `task-6-evals/classification.md`. fire-7 and fire-10
+    are genuine Duo routing misses. The session never invokes the skill, and
+    it answers from priors or asks an avoidable clarifying question. fire-8
+    is a genuine Duo routing miss too. The session calls `xcode-loop`
+    instead of `apple-design`. fire-9 is a prompt-wording defect, not a
+    routing miss. The model reads "gets cut off" as a claim about its own
+    message and never engages the task. This reproduced outside the fixture
+    and outside the harness. nofire-1 reproduces the Phase 8 brand-color
+    finding unchanged.
+
+    Because fire-7, fire-8, and fire-10 are Duo routing misses, Step 8's
+    description edit was made. The post-edit sweep also scored 11/16. fire-7
+    and fire-8 were fixed. But two rows that passed in the baseline failed
+    after the edit. nofire-6 ("What screenshot sizes does the App Store need
+    for iPhone Duo?") now called `apple-design` first. The added "iPhone
+    Duo" wording pulled it in, before the session self-corrected to
+    `app-release`. fire-5 ("Add a confirmation flow before deleting")
+    stopped calling any skill at all, for reasons the wording change does
+    not explain. Per Step 9's rule, a regression on a previously-passing row
+    reverts the edit. **The description edit is reverted. SKILL.md carries
+    no diff from before Step 8.**
+
+    **Item 13 is not resolved.** Open should-fire rows are fire-7, fire-8,
+    and fire-10 — genuine Duo routing misses. fire-9 counts as non-routing
+    per its classification and does not block resolution. The open
+    should-NOT row is nofire-1, the pre-existing brand-color miss, unaffected
+    by this phase's edit.
+
+    **Trigger for the next try:** find a change that fixes fire-7,
+    fire-8, and fire-10. It must not pull `apple-design` ahead of
+    `app-release` on release-logistics questions that merely mention iPhone
+    Duo. Evidence: `records/2026-09-30-phase9-adaptive-layout/task-6-evals/`
+    (`prompts.tsv`, `baseline/results.tsv`, `after-edit/results.tsv`,
+    `classification.md`).
+
+    **Phase 9 Task 10 (2026-10-01).** A revised pair of description edits
+    was swept three times per row, not once as before. The `apple-design`
+    skill's description gained the Duo/pose/fold wording, plus an App
+    Store screenshots exclusion. The `app-release` skill's description
+    gained an App Store screenshots and metadata clause.
+
+    Row `ad-fire-9` no longer reads "Content gets cut off at the fold."
+    It now reads "Part of my list is hidden where the screen folds," a
+    fix for a prompt-corpus defect (not a routing question), per
+    `task-6-evals/classification.md`.
+
+    The `app-release` skill gained a matching should-fire row: "What
+    screenshot sizes does the App Store need for iPhone Duo?" It mirrors
+    `apple-design`'s existing should-NOT row of the same text.
+
+    All four Duo should-fire rows held at 3/3 PASS: `ad-fire-7`, `ad-fire-8`,
+    `ad-fire-9`, `ad-fire-10`. The baseline held none of them.
+
+    One candidate regression surfaced: `ad-fire-5`, "Add a confirmation
+    flow before deleting", scored 1/3 post-edit. A re-run baseline, against
+    the pre-Task-10 descriptions in a worktree at `9f3c3a6`, scored 3/3 for
+    the same row. The first pass treated this as a confirmed regression and
+    reverted both edits without running Step 6's revision round. **That
+    call was wrong and is corrected below.**
+
+    **Fix round 1 (2026-10-01).** A review found the revert premature. All
+    six `ad-fire-5` sessions, across the original sweep and the baseline
+    re-run, showed the same tool access. All six ran the same initial
+    `Bash` search, then a `Read` of `MailboxScreen.swift`. That shared
+    condition cannot explain why only two of the six skipped `Skill`.
+    "Tool leak" is not one of `.claude/rules/eval-harness.md`'s three
+    categories: `max_turns`, fixture-dependent, or routing miss. The two
+    failing sessions are routing misses by elimination
+    (`task-10-routing/run-1/ad-fire-5.log`, `run-2/ad-fire-5.log`). The
+    model chose `Bash`/`Edit` over `Skill` with turns still in budget. One
+    session even named "HIG for destructive actions" in its own plan text,
+    without ever routing to the skill that owns that guidance.
+
+    Pooled across both Duo-wording tries, the original description scored
+    4/4 on this row. That total is Task 6's single baseline run, plus
+    Task 10's three baseline runs. The two Duo-heavy edits scored 1/4 on
+    the same row. That total is Task 6's post-edit run, plus Task 10's
+    first post-edit sweep. The split is too wide to call noise. At the
+    time, no `apple-design` reference covered confirmation before a
+    destructive action; `references/hig-patterns.md` § Modality covered
+    alerts in general. The Phase 9 final review fix wave added that
+    guidance to § Modality. Neither edit's description named confirmation
+    dialogs, and both pushed "navigation and modality patterns" further
+    from the front. Step 6's revision round applied, and had not been
+    tried.
+
+    The `apple-design` description was revised. Its modality clause now
+    names "confirmation dialogs before destructive actions", and it gained
+    a matching "Use when" trigger. `app-release`'s description returned to
+    its Step 2 text, unchanged. The rows touching either skill's revised
+    wording or boundary were swept three more times
+    (`run-rev-1`..`run-rev-3`): the 16 `ad-*` rows, plus `ar-fire-8` and
+    `ar-nofire-3`. All 18 rows held at 2/3 or better. `ad-fire-5` held 3/3,
+    as did all four Duo rows. `ad-nofire-1` improved to 2/3, though it
+    stays open either way, under the brief's standing exception. No
+    candidate regression exists in the revision round. No row fell below
+    its hold threshold, except the excluded `ad-nofire-1`.
+
+    **Per the task's rule: no confirmed regression, and at least 1 of 4
+    Duo rows holding (here, all 4 do). Decision: KEEP.** The revised
+    `apple-design` description and the Step 2 `app-release` description
+    ship. Full tally in `task-10-routing/tally.md`:
+
+    - Original sweep: lines 1-41. Duo rows at lines 10-13 and 38-41.
+      `ad-fire-5` at line 8. `ad-nofire-1` at line 14.
+    - Baseline re-run (`ad-fire-5` only): lines 43-48.
+    - Revision round: lines 50-79. Duo rows at lines 59-62 and 76-79.
+      `ad-fire-5` at line 57. `ad-nofire-1` at line 63.
+
+    **Item 13 is resolved for the Duo should-fire rows.**
+
+    Rows `ad-fire-7`, `ad-fire-8`, `ad-fire-9`, and `ad-fire-10` all held
+    at 3/3 in the revision round. No confirmed regression exists.
+
+    Row `ad-fire-5` is no longer open. It held 3/3 under the revised
+    description. Row `ad-nofire-1`, the pre-existing brand-color miss, stays
+    open under its existing wording, per the brief's standing exception.
+    It held only 2/3 even in the revision round, and is not claimed as
+    fixed.
+
+    **Trigger for the next try:** find a change that fixes `ad-nofire-1`
+    (the brand-color miss). It must not lose any of `ad-fire-5`,
+    `ad-fire-7`, `ad-fire-8`, `ad-fire-9`, or `ad-fire-10` — the five rows
+    this round brought to a 3/3 hold. Evidence:
+    `records/2026-09-30-phase9-adaptive-layout/task-10-routing/`
+    (`prompts.tsv`, `run-1/`..`run-3/`, `run-rev-1/`..`run-rev-3/`,
+    `baseline-ad-fire-5-*/`, `tally.py`, `tally.md`, `task-10-report.md`).
+
+14. **Re-verify every iOS 27.1 claim at GA (found 2026-09-30, Phase 9).**
+    `adaptive-layout.md` was compiled against a 27.1 beta SDK — build
+    `27A9269`, recorded in `task-7-compile/sdk.log`. A beta API can be
+    renamed before it ships. **Trigger: the first Xcode release whose
+    iPhoneOS SDK is 27.1 non-beta** — re-run the gate and Task 8's probe.
+
+15. **A camera primer for direction-aware capture (found 2026-09-30, Phase
+    9).** Apple's "Choosing a camera by the direction it faces" and the
+    iPhone Duo camera-accessory article are cited once in
+    `adaptive-layout.md`. No AVFoundation primer exists in
+    `apple-frameworks`. **Trigger: the first real app that captures photos
+    or video on iPhone Duo.**
+
+16. **App Store Connect upload support for Duo screenshots (found
+    2026-09-30, Phase 9).** `app-store-submission.md` states that App Store
+    Connect does not yet accept iPhone Duo uploads. **Trigger: Apple's
+    screenshot specification page drops that note** — then delete the
+    caveat.
+
+17. **iPhone Duo pose control is GUI-only (found 2026-09-30/2026-10-01,
+    Phase 9 Task 8).** Task 8's discovery class is B. `simctl` and
+    `devicectl` can create, boot, and launch the Duo simulator. Neither
+    exposes a pose or rotation command. Device Hub set every pose and
+    rotation by hand, so the probe cannot run unattended. It did not cover
+    `landscapeLeft`, right-to-left layouts, or the camera occlusion regions.
+    **Trigger: the first `simctl` or `devicectl` release that sets iPhone
+    Duo poses from the command line.** Re-run the probe unattended, and
+    extend it to the uncovered cases. Evidence:
+    `records/2026-09-30-phase9-adaptive-layout/task-8-probe/discovery.log`,
+    `devicectl-cli.log`, `results.md`.
+
+18. **`docc.py` drops term lists and leaks blank lines from tables (found
+    2026-09-30/2026-10-01, Phase 9).** Two rendering gaps in
+    `pipeline/docc.py`. First, it does not render `termList` nodes. On
+    the SwiftUI and UIKit reserved-region pages, the list of region kinds
+    does not print, so the output loses both kinds. Task 4 read the two
+    kinds, `occlusion` and `division`, from the raw JSON. Second, its `table` branch keeps
+    the blank lines from the paragraphs inside each cell, so each row
+    breaks across several lines.
+    The final review saw this on a HIG change log. The final review fix
+    wave saw it again on four tables. Two are on the Alerts page: the
+    keyboard-shortcut table and the change log. One is the button-style
+    table on the Action sheets page. One is the change log on the
+    Designing for iPhone Duo page.
+    Before this item, the only standing record of the first gap was
+    `pipeline/maps/apple-design-duo-live.md:76-83` (Known rendering
+    gaps), beside a note in Task 4's report. The second gap had no
+    record. **Trigger: the next distillation that fetches a page with a
+    `termList` or a `table` node.** Render both node types, and add each
+    to `pipeline/test_docc.py`. Evidence:
+    `pipeline/maps/apple-design-duo-live.md:76-83`;
+    `records/2026-09-30-phase9-adaptive-layout/final-review-fixes.md`.
 
 ## Accepted (no action)
 

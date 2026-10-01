@@ -1,0 +1,8 @@
+$ python3 authoring/apple-studio/pipeline/docc.py --hig designing-for-iphone-duo | grep -c "reserved regions"
+5
+
+$ python3 authoring/apple-studio/pipeline/docc.py technologyoverviews/preparing-your-app-for-iphone-duo | grep -o "represent an [^,]*,"
+represent an *arrangement view*,
+
+$ python3 authoring/apple-studio/pipeline/docc.py "swiftui/view/accentcolor(_:)" | grep DEPRECATED
+DEPRECATED: iOS 27.2, iPadOS 27.2, Mac Catalyst 27.2, macOS 27.2, tvOS 27.2, visionOS 27.2, watchOS 27.2 — Use the asset catalog’s accent color or `tint(_:)` instead.

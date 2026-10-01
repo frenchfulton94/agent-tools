@@ -1,0 +1,4 @@
+Screenshot specifications (App Store Connect help), fetched 2026-09-30 via WebFetch:
+iPhone Duo — outer display 1398 x 2034 / 2034 x 1398 px; inner display 2007 x 2853 / 2853 x 2007 px.
+Note on page: 'Support for uploading assets for this device in App Store Connect will be available later this year.'
+URL: https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications

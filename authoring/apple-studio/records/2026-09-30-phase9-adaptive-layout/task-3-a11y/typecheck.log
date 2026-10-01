@@ -1,0 +1,24 @@
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/accessibility.md   (2 swift blocks)   target: macOS (default)
+  [PASS:parse-as-library] #1  struct ColorGuessRow: View {
+  [PASS:parse-as-library] #2  struct StatusGlyph: View {
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/animation-taste.md   (1 swift blocks)   target: macOS (default)
+  [PASS:parse-as-library] #1  struct ReconciledDragExample: View {
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/hig-foundations.md   (1 swift blocks)   target: macOS (default)
+  [PASS:with-prior+ctx  ] #1  Text("Balance").font(.system(.title, design: .serif))  // New York, not 
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/hig-patterns.md   (0 swift blocks)   target: macOS (default)
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/platform-idioms.md   (0 swift blocks)   target: macOS (default)
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/swiftui-design-implementation.md   (0 swift blocks)   target: macOS (default)
+
+TOTAL: 4/4 snippets typecheck clean

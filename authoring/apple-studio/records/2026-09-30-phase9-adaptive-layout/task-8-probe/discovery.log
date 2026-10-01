@@ -1,0 +1,151 @@
+# Task 8 Step 1 discovery — 2026-09-30
+# All commands run with DEVELOPER_DIR="/Applications/Xcode 27-1-beta.app/Contents/Developer" (xcode-select left on Xcode 27.0).
+
+$ xcodebuild -version
+Xcode 27.1
+Build version 27A9269
+
+$ xcrun simctl list devicetypes | grep -i -E "duo|fold"
+iPhone Duo (com.apple.CoreSimulator.SimDeviceType.iPhone-Duo)
+
+$ xcrun simctl list runtimes | grep -i ios
+iOS 26.5 (26.5 - 23F77) - com.apple.CoreSimulator.SimRuntime.iOS-26-5
+iOS 27.0 (27.0 - 24A5390f) - com.apple.CoreSimulator.SimRuntime.iOS-27-0
+iOS 27.0 (27.0 - 24A434) - com.apple.CoreSimulator.SimRuntime.iOS-27-0
+
+$ xcrun simctl help 2>&1 | grep -i -E "pose|posture|fold|hinge|display"
+(no match)
+
+$ xcrun simctl help io 2>&1 | grep -i -E "pose|posture|fold|display"
+	    --display    Specifies which display to record. Accepts:
+	recordVideo [--codec=<codec>] [--display=<display>] [--mask=<policy>] [--force] <file or url>
+	    Records the display to a QuickTime movie at the specified file or url.
+	    --mask       For non-rectangular displays, handle the mask by policy:
+	screenshot [--type=<type>] [--display=<display>] [--mask=<policy>] <file or url>
+	    --mask       For non-rectangular displays, handle the mask by policy:
+	screenConfig [--display=<display>] <subcommand> [arguments]
+
+# Follow-up (read-only) checks
+
+$ xcrun simctl list devicetypes -j  (iPhone Duo entry)
+{
+ "productFamily": "iPhone",
+ "bundlePath": "/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPhone Duo.simdevicetype",
+ "maxRuntimeVersion": 4294967295,
+ "maxRuntimeVersionString": "65535.255.255",
+ "identifier": "com.apple.CoreSimulator.SimDeviceType.iPhone-Duo",
+ "modelIdentifier": "iPhone19,4",
+ "minRuntimeVersionString": "27.1.0",
+ "minRuntimeVersion": 1769728,
+ "name": "iPhone Duo"
+}
+
+$ xcrun simctl runtime list
+== Disk Images ==
+-- iOS --
+iOS 27.0 (24A434) - 95D74703-768E-4D83-9023-53EDED31BB25 (Ready)
+iOS 26.5 (23F77) - 98BF12F6-77C3-4ACE-94C5-C0AE51B763F5 (Ready)
+iOS 27.0 (24A5390f) - FBD79A5C-6785-4EC8-A7B1-3353307F5423 (Ready)
+-- watchOS --
+watchOS 27.0 (24R362) - 7CFAE54D-AFD3-4BC1-A71C-35C6211A7A66 (Ready)
+
+Total Disk Images: 4 (26.5G)
+
+$ xcrun simctl runtime match list  (iphoneos27.1 entry)
+iphoneos27.1:
+    SDK Version: 27.1
+    SDK Build: 24A94403
+    Platform: com.apple.platform.iphoneos
+    Chosen Runtime: 24A94403
+        User Override: (null)
+        Preferred: (null)
+        Default: 24A94403
+
+
+$ xcrun simctl list runtimes -j  (supportedDeviceTypes containing "Duo", per runtime)
+iOS 26.5 23F77 []
+iOS 27.0 24A5390f []
+iOS 27.0 24A434 []
+watchOS 27.0 24R362 []
+
+# Classification: NOT YET DETERMINABLE (blocked before Step 2)
+#
+# - A Duo device type exists: com.apple.CoreSimulator.SimDeviceType.iPhone-Duo
+#   (model iPhone19,4), so the class is not C.
+# - Its minRuntimeVersionString is 27.1.0. No installed runtime is 27.1: the
+#   installed iOS runtimes are 26.5 (23F77) and 27.0 (24A5390f, 24A434), and
+#   none lists iPhone-Duo in supportedDeviceTypes. The iphoneos27.1 SDK
+#   (build 24A94403) expects runtime build 24A94403, which is not installed.
+# - Therefore `simctl create "Duo Probe" com.apple.CoreSimulator.SimDeviceType.iPhone-Duo <runtime>`
+#   has no valid runtime. Downloading one is a large side effect and was not done.
+# - Pose control, from help text only: `simctl help` and `simctl help io` name no
+#   pose, posture, fold, or hinge command. `simctl io` has `--display` on
+#   screenshot and recordVideo, `enumerate` to list screens, and
+#   `screenConfig [--display=<display>] power <on|off>` and `geometry`. Whether
+#   any of these changes the Duo pose can only be checked on a booted Duo device.
+#   Provisional reading: A-vs-B undecided; no documented pose command.
+#
+# Compile check (no runtime needed): DuoProbeView.swift in a scratch copy of the
+# fixture, deployment target 27.1, `xcodebuild ... -destination 'generic/platform=iOS Simulator' build`
+# -> ** BUILD SUCCEEDED ** with the 27.1 beta toolchain.
+
+# ---- Resumed 2026-09-30 after the iOS 27.1 simulator runtime was installed ----
+
+$ xcrun simctl list runtimes | grep -i ios
+iOS 26.5 (26.5 - 23F77) - com.apple.CoreSimulator.SimRuntime.iOS-26-5
+iOS 27.0 (27.0 - 24A5390f) - com.apple.CoreSimulator.SimRuntime.iOS-27-0
+iOS 27.0 (27.0 - 24A434) - com.apple.CoreSimulator.SimRuntime.iOS-27-0
+iOS 27.1 (27.1 - 24A94401) - com.apple.CoreSimulator.SimRuntime.iOS-27-1
+
+$ xcrun simctl list runtimes -j  (supportedDeviceTypes containing "Duo", per runtime)
+iOS 26.5 23F77 []
+iOS 27.0 24A5390f []
+iOS 27.0 24A434 []
+iOS 27.1 24A94401 ['com.apple.CoreSimulator.SimDeviceType.iPhone-Duo']
+watchOS 27.0 24R362 []
+
+$ xcrun simctl runtime match list  (iphoneos27.1 entry)
+iphoneos27.1:
+    SDK Version: 27.1
+    SDK Build: 24A94403
+    Platform: com.apple.platform.iphoneos
+    Chosen Runtime: iOS 27.1 (27.1 - 24A94401) - com.apple.CoreSimulator.SimRuntime.iOS-27-1
+        User Override: (null)
+        Preferred: (null)
+        Default: 24A94403
+
+# Runtime build 24A94401; SDK build 24A94403; simctl chooses the 24A94401 runtime for iphoneos27.1.
+
+$ xcrun simctl create "Duo Probe" com.apple.CoreSimulator.SimDeviceType.iPhone-Duo com.apple.CoreSimulator.SimRuntime.iOS-27-1
+B4066944-1CF0-46D6-90A4-5FD552B36FE4
+# Device created: "Duo Probe" UDID B4066944-1CF0-46D6-90A4-5FD552B36FE4 on iOS 27.1 (24A94401).
+# Creating and booting succeeded on the 24A94401 runtime. The SDK is 24A94403;
+# the build and install succeeded against it. The first `simctl bootstatus`
+# ended "Status=3 ... Data Migration Failed", but install and launch succeeded.
+#
+# Pose-control checks on the booted device (evidence: devicectl-cli.log):
+# - `simctl io <UDID> enumerate` lists two integrated screens: (1) "LCD",
+#   1398x2034 px, device name "primary" (the outer display), and (3) "LCD-1",
+#   2007x2853 px, "primary-1" (the inner display).
+# - `simctl io <UDID> screenConfig --display=1 power off` printed
+#   "Screen 1 power state set to off". The inner display stayed black, so this
+#   is not a fold. After `power on`, the outer display stayed black until the
+#   device was shut down and booted again. Do not use it.
+# - `xcrun devicectl device info displays` reports per-display `active` and
+#   `backlightState`. Closed pose: LCD active, LCD-1 "backlight is off".
+# - `xcrun devicectl device motion hinge-angle` reads the hinge
+#   (0.0 deg = closed). It only monitors; no command sets the hinge. It did not
+#   exit after --session-timeout 3.
+# - `xcrun devicectl device orientation set <UDID> landscapeLeft|landscapeRight`
+#   and `orientation rotate left` print "New Device Orientation: landscape...",
+#   but `orientation get` then prints "portrait", the displays stay rot0, and
+#   the screen does not rotate (cli-rotate-no-effect.png). Rotation has no
+#   effect from the command line on this device in the closed pose.
+# - Device Hub (Xcode 27.1 beta: Contents/Applications/DeviceHub.app) has the
+#   pose controls. Its DeviceKit plugin CoreDevicePopDeviceKitExtension
+#   contains action-bar controls for this product class (V68): "poses"
+#   (presets closed, partiallyOpen, openFlat, tent), a hinge slider, and
+#   rotate left/right. The labels come from the binary; nobody has seen the UI yet.
+#
+# Classification: B. A Duo device type exists. Poses (and, in practice,
+# rotation) are set only in Device Hub. There is no command-line pose control.

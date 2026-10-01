@@ -16,6 +16,6 @@ Rules:
 - Mac-target destinations (window/scene/menu-bar structure and mechanics) are covered by the `apple-macos` skill, not here.
 - Always pass `-quiet` for builds; full logs only when diagnosing a failure.
 - On failure, show the actual `error:` lines, not a summary of them.
-- Screenshots: boot → bootstatus → install → launch → `simctl io booted screenshot`.
+- Screenshots: boot → bootstatus → install → launch → `simctl io booted screenshot` (iPhone Duo: pass `--display`; see references/headless-commands.md § 9).
 - Builds, tests and runs; it does not explain *why* something is slow — profiling,
   hangs, memory growth and launch time are the `apple-performance` skill.

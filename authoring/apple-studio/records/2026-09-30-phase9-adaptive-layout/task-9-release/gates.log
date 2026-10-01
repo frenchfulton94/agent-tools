@@ -1,0 +1,249 @@
+=== GATES LOG - Thu Oct  1 11:40:04 EDT 2026 ===
+Branch: phase9-adaptive-layout, HEAD: 1cb4e31
+
+--- Gate 1: typecheck_snippets.py (apple-design refs, iOS 27.1 SDK) ---
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/accessibility.md   (2 swift blocks)   target: macOS (default)
+  [PASS:parse-as-library] #1  struct ColorGuessRow: View {
+  [PASS:parse-as-library] #2  struct StatusGlyph: View {
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/adaptive-layout.md   (4 swift blocks)   target: ios 27.1
+  [PASS:parse-as-library] #1  struct LiveBadgeOverlay: View {
+  [PASS:parse-as-library] #2  struct TrackDetail: View {
+  [PASS:parse-as-library] #3  struct MessageDetail: View {
+  [PASS:parse-as-library] #4  struct FloatingPaletteHost: View {
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/animation-taste.md   (1 swift blocks)   target: macOS (default)
+  [PASS:parse-as-library] #1  struct ReconciledDragExample: View {
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/hig-foundations.md   (1 swift blocks)   target: macOS (default)
+  [PASS:with-prior+ctx  ] #1  Text("Balance").font(.system(.title, design: .serif))  // New York, not 
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/hig-patterns.md   (0 swift blocks)   target: macOS (default)
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/platform-idioms.md   (0 swift blocks)   target: macOS (default)
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-design/references/swiftui-design-implementation.md   (0 swift blocks)   target: macOS (default)
+
+TOTAL: 8/8 snippets typecheck clean
+exit=0
+
+--- Gate 2: test_docc.py ---
+PASS test_docc.py
+exit=0
+
+--- Gate 3: test_typecheck_snippets.sh (default toolchain) ---
+xcode-select -p: /Applications/Xcode.app/Contents/Developer
+ok   ios-only.md -> 0
+ok   macos-default.md -> 1
+ok   invented.md -> 1
+ok   bad-directive.md -> 2
+ok   too-new.md -> 2
+ok   uikit.md -> 0
+exit=0
+
+--- Gate 4: test_run_evals.sh ---
+case 1 — scoring, fixture-write detection, and restore
+ok    exit code is 1 (one FAIL and one fixture write)
+ok    FIRE match passes
+ok    NOFIRE routed elsewhere passes
+ok    write attributed to its prompt
+ok    turn exhaustion noted, not scored as a clean miss
+ok    fixture restored after the write
+
+case 2 — a dirty fixture refuses the run before any session starts
+ok    exit code is 2
+ok    no session ran
+
+case 3 — the driver's own stdin must not reach the child
+ok    exit code is 0
+ok    no log records a stdin leak
+
+case 4 — a non-git fixture refuses the run
+ok    exit code is 2
+
+all cases passed
+exit=0
+
+--- Gate 5: bun test ---
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-animations: references/keyframe-and-phase-animators.md: 103 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-animations: references/scroll-and-visual-effects.md: 112 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-animations: references/transitions-and-matched-geometry.md: 194 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-design: references/accessibility.md: 151 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-design: references/adaptive-layout.md: 247 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-design: references/animation-taste.md: 125 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-design: references/hig-foundations.md: 203 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-design: references/hig-patterns.md: 148 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-design: references/platform-idioms.md: 104 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-frameworks: 16 files — nested deeper than one level below the skill root (references/primers/activitykit.md, references/primers/app-intents.md, and 14 more)
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-frameworks: 16 files — not referenced from SKILL.md (references/primers/activitykit.md, references/primers/app-intents.md, and 14 more)
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-frameworks: references/framework-catalog.md: 405 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-intelligence: references/app-intents-implementation.md: 267 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-intelligence: references/foundation-models-sessions.md: 254 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-intelligence: references/guided-generation-and-tools.md: 256 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-intelligence: references/safety-availability-and-errors.md: 310 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-macos: references/appkit-interop.md: 106 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-macos: references/mac-app-structure.md: 198 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-macos: references/mac-sandbox-and-files.md: 105 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-macos: references/mac-windows-menus-commands.md: 194 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-performance: references/memory-power-and-size.md: 141 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-performance: references/profiling-workflow.md: 253 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-performance: references/responsiveness-hangs-and-hitches.md: 260 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/apple-performance: references/swiftui-performance.md: 270 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/swift-architecture: references/architecture-patterns.md: 155 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/swift-architecture: references/existing-code.md: 184 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/swift-architecture: references/module-boundaries.md: 190 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/swift-architecture: references/persistence.md: 260 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/swift-concurrency: references/strict-concurrency.md: 277 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/swift-concurrency: references/structured-concurrency.md: 264 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/swift-testing: `description` has no 'Use when...' trigger clause
+  warn validate_skill.ts: plugins/apple-studio/skills/swift-testing: references/swift-testing-framework.md: 115 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/swift-testing: references/test-doubles.md: 242 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/swift-testing: references/what-to-test.md: 164 lines with no table of contents in the first 30 lines
+  warn validate_skill.ts: plugins/apple-studio/skills/xcode-loop: references/headless-commands.md: 293 lines with no table of contents in the first 30 lines
+
+ 198 pass
+ 0 fail
+ 429 expect() calls
+Ran 198 tests across 9 files. [8.17s]
+exit=0
+
+--- Gate 6: bun run audit ---
+- WARN: plugins/apple-studio/skills/xcode-loop: references/headless-commands.md: 293 lines with no table of contents in the first 30 lines
+
+0 error(s), 55 warning(s)
+Registration, name/directory agreement, versions, skill-name uniqueness, and description
+identity are the test suite's to check — run it too.
+exit=0
+
+--- Gate 7: bun run audit --since main ---
+$ bun plugins/meta-skills/skills/maintaining-plugin-marketplaces/scripts/audit_marketplace.ts . --since main
+# Marketplace audit: agent-tools
+
+- WARN: plugins/meta-skills/skills/controlled-engineering-english: SKILL.md body is 206 lines (consider splitting above 200)
+- WARN: plugins/meta-skills/skills/controlled-engineering-english: 9 files — nested deeper than one level below the skill root (scripts/tests/golden-glossary.yml, scripts/tests/sample-glossary.md, and 7 more)
+- WARN: plugins/meta-skills/skills/controlled-engineering-english: 6 files — not referenced from SKILL.md (scripts/tests/golden-glossary.yml, scripts/tests/sample-glossary.md, and 4 more)
+- WARN: plugins/frontend/skills/bem-css: SKILL.md body is 225 lines (consider splitting above 200)
+- WARN: plugins/frontend/skills/bits-ui: references/components.md: 108 lines with no table of contents in the first 30 lines
+- WARN: plugins/frontend/skills/bits-ui: references/dates.md: 145 lines with no table of contents in the first 30 lines
+- WARN: plugins/frontend/skills/bits-ui: references/patterns.md: 240 lines with no table of contents in the first 30 lines
+- WARN: plugins/frontend/skills/feature-sliced-design: SKILL.md body is 488 lines (consider splitting above 200)
+- WARN: plugins/frontend/skills/internationalized-date-time: references/zoned-date-time.md: 110 lines with no table of contents in the first 30 lines
+- WARN: plugins/design-engineering/skills/animating-interfaces: SKILL.md body is 253 lines (consider splitting above 200)
+- WARN: plugins/design-engineering/skills/fluid-interfaces: SKILL.md body is 229 lines (consider splitting above 200)
+- WARN: plugins/workflows/skills/setup: SKILL.md body is 390 lines (consider splitting above 200)
+- WARN: plugins/dokploy/skills/configuring-dokploy-enterprise: SKILL.md body is 205 lines (consider splitting above 200)
+- WARN: plugins/dokploy/skills/hardening-dokploy: SKILL.md body is 238 lines (consider splitting above 200)
+- WARN: plugins/apple-studio/skills/app-release: references/app-store-submission.md: 110 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/app-release: references/ci-release-automation.md: 210 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/app-release: references/push-notifications.md: 238 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/app-release: references/signing-and-provisioning.md: 115 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-animations: references/animation-fundamentals.md: 167 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-animations: references/fluid-interfaces.md: 218 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-animations: references/keyframe-and-phase-animators.md: 103 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-animations: references/scroll-and-visual-effects.md: 112 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-animations: references/transitions-and-matched-geometry.md: 194 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-design: references/accessibility.md: 151 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-design: references/adaptive-layout.md: 247 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-design: references/animation-taste.md: 125 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-design: references/hig-foundations.md: 203 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-design: references/hig-patterns.md: 148 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-design: references/platform-idioms.md: 104 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-frameworks: 16 files — nested deeper than one level below the skill root (references/primers/activitykit.md, references/primers/app-intents.md, and 14 more)
+- WARN: plugins/apple-studio/skills/apple-frameworks: 16 files — not referenced from SKILL.md (references/primers/activitykit.md, references/primers/app-intents.md, and 14 more)
+- WARN: plugins/apple-studio/skills/apple-frameworks: references/framework-catalog.md: 405 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-intelligence: references/app-intents-implementation.md: 267 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-intelligence: references/foundation-models-sessions.md: 254 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-intelligence: references/guided-generation-and-tools.md: 256 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-intelligence: references/safety-availability-and-errors.md: 310 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-macos: references/appkit-interop.md: 106 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-macos: references/mac-app-structure.md: 198 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-macos: references/mac-sandbox-and-files.md: 105 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-macos: references/mac-windows-menus-commands.md: 194 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-performance: references/memory-power-and-size.md: 141 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-performance: references/profiling-workflow.md: 253 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-performance: references/responsiveness-hangs-and-hitches.md: 260 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/apple-performance: references/swiftui-performance.md: 270 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/swift-architecture: references/architecture-patterns.md: 155 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/swift-architecture: references/existing-code.md: 184 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/swift-architecture: references/module-boundaries.md: 190 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/swift-architecture: references/persistence.md: 260 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/swift-concurrency: references/strict-concurrency.md: 277 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/swift-concurrency: references/structured-concurrency.md: 264 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/swift-testing: `description` has no 'Use when...' trigger clause
+- WARN: plugins/apple-studio/skills/swift-testing: references/swift-testing-framework.md: 115 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/swift-testing: references/test-doubles.md: 242 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/swift-testing: references/what-to-test.md: 164 lines with no table of contents in the first 30 lines
+- WARN: plugins/apple-studio/skills/xcode-loop: references/headless-commands.md: 293 lines with no table of contents in the first 30 lines
+
+0 error(s), 55 warning(s)
+Registration, name/directory agreement, versions, skill-name uniqueness, and description
+identity are the test suite's to check — run it too.
+exit=0
+
+--- Gate 8: claude plugin validate . --strict ---
+Validating marketplace manifest: /Users/michaelfrenchfultonjr/Projects/agent-tools/.claude-plugin/marketplace.json
+
+✔ Validation passed
+exit=0
+
+--- Gate 9: claude --plugin-dir load check (non-deterministic) ---
+(eval):4: command not found: timeout
+exit=127
+`plugins/apple-studio/skills/apple-design/references/` contains:
+
+- `accessibility.md`
+- `adaptive-layout.md`
+- `animation-taste.md`
+- `hig-foundations.md`
+- `hig-patterns.md`
+- `platform-idioms.md`
+- `swiftui-design-implementation.md`
+exit=0
+
+--- Gate 10: StudioFixture git status (must be empty) ---
+(empty = clean)
+
+--- Gate 11: no booted simulator ---
+== Devices ==
+-- iOS 26.5 --
+-- iOS 27.0 --
+-- iOS 27.0 --
+-- iOS 27.1 --
+-- watchOS 27.0 --
+
+=== SUMMARY ===
+1. typecheck_snippets.py (apple-design, ios 27.1)   PASS  TOTAL: 8/8 snippets typecheck clean
+2. test_docc.py                                      PASS  PASS test_docc.py
+3. test_typecheck_snippets.sh (default toolchain)    PASS  6/6 ok, exit 0
+4. test_run_evals.sh                                 PASS  all cases passed, exit 0
+5. bun test                                           PASS  198 pass, 0 fail, 429 expect() calls
+6. bun run audit                                      PASS  0 error(s), 55 warning(s), exit 0
+7. bun run audit --since main                         PASS  no unbumped-plugin warning
+8. claude plugin validate . --strict                  PASS  Validation passed
+9. claude --plugin-dir load check                     PASS  named adaptive-layout.md (non-deterministic gate; recorded as observed)
+10. git -C ~/Projects/StudioFixture status --porcelain PASS  empty
+11. xcrun simctl list devices booted                   PASS  no device
+
+=== RE-VERIFICATION after spec-append prose fixes (Vale pass) ===
+bun test: 198 pass, 0 fail
+bun run audit: 0 error(s), 55 warning(s)
+claude plugin validate . --strict: Validation passed
+
+Also found and fixed a latent markdown defect while checking the spec with
+Vale: docs/specs/2026-09-30-phase9-adaptive-layout-design.md:163 (pre-existing,
+Deliverables section) used a literal "```swift" inside a bullet instead of
+escaped/plain text, opening an unterminated code fence that corrupted Vale's
+sentence segmentation for the rest of the document. Reworded to "Every Swift
+code block..." (no literal triple-backtick). This is a one-line prose fix, no
+meaning change, needed so Vale could correctly check this task's own appended
+prose; also fixed the same anti-pattern that was about to be reintroduced in
+this task's own appended text (§3 of the Verification results, now reads
+"Every Swift code block typechecks...").

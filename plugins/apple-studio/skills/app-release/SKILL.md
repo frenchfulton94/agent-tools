@@ -1,6 +1,6 @@
 ---
 name: app-release
-description: Shipping iOS/macOS apps - code signing and provisioning, certificates and App Store Connect API keys, TestFlight beta distribution, App Store submission and rejection avoidance, privacy manifests and export compliance, version and build numbering, push notification (APNs) setup and delivery debugging, and CI release automation with Xcode Cloud. Use when archiving or distributing a build, fixing signing or provisioning errors, setting up TestFlight, preparing for or responding to App Review, configuring push infrastructure, or automating releases. Not for in-app feature work, UI, or local-notification API usage.
+description: Shipping iOS/macOS apps - code signing and provisioning, certificates and App Store Connect API keys, TestFlight beta distribution, App Store submission and rejection avoidance, App Store screenshots and metadata for every device size, privacy manifests and export compliance, version and build numbering, push notification (APNs) setup and delivery debugging, and CI release automation with Xcode Cloud. Use when archiving or distributing a build, fixing signing or provisioning errors, setting up TestFlight, preparing screenshots or metadata for App Store Connect, preparing for or responding to App Review, configuring push infrastructure, or automating releases. Not for in-app feature work, UI, or local-notification API usage.
 ---
 
 # App release (shipping and operating)

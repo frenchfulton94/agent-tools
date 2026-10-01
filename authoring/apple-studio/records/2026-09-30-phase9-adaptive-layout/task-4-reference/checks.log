@@ -1,0 +1,25 @@
+$ wc -l plugins/apple-studio/skills/apple-design/references/adaptive-layout.md
+     236 plugins/apple-studio/skills/apple-design/references/adaptive-layout.md
+[exit 0]
+
+$ grep -ci right-to-left plugins/apple-studio/skills/apple-design/references/adaptive-layout.md
+3
+[exit 0]
+
+$ grep -c '^## ' plugins/apple-studio/skills/apple-design/references/adaptive-layout.md
+8
+[exit 0]
+
+$ grep -n userInterfaceIdiom plugins/apple-studio/skills/apple-design/references/adaptive-layout.md
+12:Base every layout decision on two inputs: the size classes, and the bounds of the scene or the containing view. Never base a layout decision on `userInterfaceIdiom`, on the interface orientation, or on the screen dimensions. The idiom and the orientation do not tell you how much space your view has. The screen size is wrong whenever your app shares the display or runs on a second display. (HIG: Layout § Size classes; Preparing your app for iPhone Duo)
+[exit 0]
+
+$ grep -rn 'When to branch' plugins/apple-studio/skills/apple-design/
+plugins/apple-studio/skills/apple-design/references/platform-idioms.md:83:## When to branch code vs. when the system already adapts for you
+[exit 0]
+
+$ vale --config .claude/skills/controlled-engineering-english/scripts/vale/.vale.ini plugins/apple-studio/skills/apple-design/references/adaptive-layout.md
+✔ 0 errors, 0 warnings and 0 suggestions in 1 file.
+[exit 0]
+
+Note: the one "When to branch" hit is the section heading itself (kept per the brief), not a "see When to branch" pointer. No stale pointers remain.

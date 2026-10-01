@@ -45,8 +45,12 @@ out of scope — other tooling owns "does it look distinctively ours"; this plug
 
 ## Reference files (distilled knowledge)
 
-- Location: `plugins/apple-studio/skills/<skill>/references/<topic>.md`, 3–6 files per skill,
-  a few hundred lines each. Not book summaries — decision-grade guidance only.
+- Location: `plugins/apple-studio/skills/<skill>/references/<topic>.md`, one file per
+  decision area, a few hundred lines each. Most skills need 3–6. A reference file MUST NOT
+  be named for a device; name it for the decision it serves. (Amended 2026-09-30,
+  Phase 9: iPhone Duo guidance lives in `apple-design/references/adaptive-layout.md`,
+  because its APIs are documented for every platform.) Not book summaries —
+  decision-grade guidance only.
 - Every reference file starts with this header:
 
   ```
@@ -82,6 +86,12 @@ own shipped interface — is named alongside them:
   shipped SDK, and found two non-compiling samples in Apple's own
   documentation. Compilation, not fetch success, is the ship gate for any
   API-specific claim.
+  A reference whose APIs are iOS-only declares `> typecheck: ios <major>.<minor>`
+  in its header block; the script then compiles that file against the iPhoneOS
+  SDK. Without the directive a file compiles for macOS, which is correct for
+  cross-platform SwiftUI and wrong for UIKit or iOS-only SwiftUI. A malformed
+  directive, or one newer than the installed SDK, exits 2 rather than falling
+  back. (Amended 2026-09-30, Phase 9.)
 - **`pipeline/run_evals.py`** — runs the trigger-eval sweep against the fixture
   app. **`--allowedTools` does not stop an eval session from writing to the
   fixture.** Phase 6 left nine source files and a build directory in
@@ -141,6 +151,17 @@ ruling.)
   `.superpowers/` here is silently dropped. (Phase 8's own record predates
   this rule and lives in the archived `apple-studio` repository instead, at
   `.superpowers/sdd/2026-09-12-phase8-catalog-migration/`.)
+- Raw headless-session transcripts MUST NOT be committed: eval-sweep and probe
+  session logs carry the recording machine's environment. A Phase 9 eval
+  session ran `wrangler whoami` unprompted, and its output reached a public
+  branch. Keep transcripts compressed under the record's `raw/` directory,
+  which `.gitignore` excludes, and commit the summaries that cite them:
+  results tables, tallies, classifications, reports. A citation into a
+  transcript names the local archive. (Amended 2026-10-01, Phase 9.)
+- Commit only what the record needs. A task brief that is a verbatim section of
+  the committed plan is not copied. Keep a build log's result line and drop the
+  rest. Keep one copy of byte-identical screenshots, and record the others'
+  names in the record's README. (Amended 2026-10-01, Phase 9.)
 
 ## Subagents
 
