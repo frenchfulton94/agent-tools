@@ -475,6 +475,15 @@ block Phase 2; each has an explicit trigger for when to act.
    `.superpowers/sdd/2026-09-12-phase7-fluid-interfaces/task-4-typecheck-repowide.log:4627`
    (the `TOTAL:` line), summarized in `task-4-typecheck-summary.txt:1-18`.
 
+   **Phase 9 (2026-09-30).** Item 7's trigger — triage in the phase after
+   Phase 7 — passed in Phase 8 unaddressed. Phase 9 triaged the two
+   `apple-design` failures. Both are framing artifacts, each paired with a
+   reference defect: a deprecated `accentColor`, and `AnyView` in a ternary.
+   Phase 9 fixed both. Evidence:
+   `records/2026-09-30-phase9-adaptive-layout/task-3-a11y/triage.md`. 17
+   failures remain, none in `apple-design`. The trigger stands: triage them
+   in the next phase.
+
 8. **The SDD tooling rewrites `.superpowers/sdd/.gitignore` to `*` on every
    invocation (found 2026-09-12, Phase 7 Task 0; root cause found Task 1).**
    `scripts/sdd-workspace:39` in the superpowers `subagent-driven-development`
@@ -641,6 +650,12 @@ block Phase 2; each has an explicit trigger for when to act.
     **Trigger: rewrite it the next time that reference is revised for any other
     reason.**
 
+    **Resolved 2026-09-30, Phase 9 Task 8.** Task 8 edited
+    `headless-commands.md` for the Duo pose section and rewrote the citation.
+    Line 6 now names the fixture with no machine-specific path. This item is
+    closed. Evidence:
+    `plugins/apple-studio/skills/xcode-loop/references/headless-commands.md:6-7`.
+
 13. **`apple-design`'s trigger evals fail in both directions (found 2026-09-12,
     Phase 8 final fix wave).** A sweep of the skill's own
     `evals/triggers.md` prompts scored 9/14. Four of seven should-fire rows
@@ -712,6 +727,37 @@ block Phase 2; each has an explicit trigger for when to act.
     Duo. Evidence: `records/2026-09-30-phase9-adaptive-layout/task-6-evals/`
     (`prompts.tsv`, `baseline/results.tsv`, `after-edit/results.tsv`,
     `classification.md`).
+
+14. **Re-verify every iOS 27.1 claim at GA (found 2026-09-30, Phase 9).**
+    `adaptive-layout.md` was compiled against a 27.1 beta SDK — build
+    `27A9269`, recorded in `task-7-compile/sdk.log`. A beta API can be
+    renamed before it ships. **Trigger: the first Xcode release whose
+    iPhoneOS SDK is 27.1 non-beta** — re-run the gate and Task 8's probe.
+
+15. **A camera primer for direction-aware capture (found 2026-09-30, Phase
+    9).** Apple's "Choosing a camera by the direction it faces" and the
+    iPhone Duo camera-accessory article are cited once in
+    `adaptive-layout.md`. No AVFoundation primer exists in
+    `apple-frameworks`. **Trigger: the first real app that captures photos
+    or video on iPhone Duo.**
+
+16. **App Store Connect upload support for Duo screenshots (found
+    2026-09-30, Phase 9).** `app-store-submission.md` states that App Store
+    Connect does not yet accept iPhone Duo uploads. **Trigger: Apple's
+    screenshot specification page drops that note** — then delete the
+    caveat.
+
+17. **iPhone Duo pose control is GUI-only (found 2026-09-30/2026-10-01,
+    Phase 9 Task 8).** Task 8's discovery class is B. `simctl` and
+    `devicectl` can create, boot, and launch the Duo simulator. Neither
+    exposes a pose or rotation command. Device Hub set every pose and
+    rotation by hand, so the probe cannot run unattended. It did not cover
+    `landscapeLeft`, right-to-left layouts, or the camera occlusion regions.
+    **Trigger: the first `simctl` or `devicectl` release that sets iPhone
+    Duo poses from the command line.** Re-run the probe unattended, and
+    extend it to the uncovered cases. Evidence:
+    `records/2026-09-30-phase9-adaptive-layout/task-8-probe/discovery.log`,
+    `devicectl-cli.log`, `results.md`.
 
 ## Accepted (no action)
 

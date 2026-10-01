@@ -160,7 +160,7 @@ Sections, in order:
 
 Requirements:
 
-- Every ```swift block MUST typecheck under the `ios 27.1` directive.
+- Every Swift code block MUST typecheck under the `ios 27.1` directive.
 - Every behavioral claim in the runtime set (deliverable 6) MUST cite its
   probe result, or carry the marker "documented, not runtime-checked".
 - The file MUST NOT restate a rule that `platform-idioms.md` or
@@ -327,3 +327,226 @@ a deliberate edit to a standing document. Phase 7 took the same waiver.
 
 - Whether R1–R4 run in one probe screen or four. The plan decides by what the
   simulator's pose control allows.
+
+## Verification results (appended 2026-10-01, Phase 9 Task 9)
+
+Evidence root: `records/2026-09-30-phase9-adaptive-layout/`. Pointers are
+`<file>:<line-range>` per CONVENTIONS.md. Where this phase found one of its
+own claims wrong, the correction sits beside the claim. It does not replace
+the claim — the Phase 7 precedent.
+
+### 1. Kill-switch measured, gate correctly did not fire — PASS
+2,168 transcripts since 2026-09-12; **0 genuine non-fixture invocations** of
+an `apple-studio:*` skill. All 60 excluded hits came from `StudioFixture`.
+The precondition for cutting a skill — one real feature shipped through the
+plugin — stays unmet, so no skill is cut, the third consecutive zero.
+Evidence: `task-0-sweep/killswitch.log:1-3`;
+`docs/deferred.md:478-486` (item 1's Phase 9 paragraph).
+
+### 2. Charter amended — ML stays the one outstanding long-tail item — PASS
+`docs/specs/2026-08-03-apple-studio-design.md:195-198`. Phase 8 shipped the
+catalog migration, not ML, and left the "strongest Phase 8 candidate" line
+unamended. The new block states that, names Phase 9 as on-demand work, and
+does not move ML again. Evidence: `task-0-sweep/task-0-report.md:46-57`
+(inserted text, verbatim against the brief).
+
+### 3. New reference `adaptive-layout.md` shipped, three claims corrected — PASS
+`plugins/apple-studio/skills/apple-design/references/adaptive-layout.md`,
+247 lines, all eight sections in the spec's order. Every Swift code block
+typechecks under `> typecheck: ios 27.1`. Task 4 confirmed it while writing
+the file: 8/8 (`task-4-reference/typecheck-27.1.log:32`). Task 7 confirmed
+it again against build 27A9269: 8/8 (`task-7-compile/typecheck.log:31`).
+This task's own gate run confirms it a third time, unchanged: 8/8
+(`task-9-release/gates.log`, Gate 1). A deliberately invented symbol,
+`.toolbarVerticalBehavior(.alwaysVertical)`, fails to compile under the same
+directive. Routing added at `apple-design/SKILL.md`, not a new skill, as the
+Goal section required.
+
+**Three claims in this phase's own planning were wrong, and the docs
+corrected each during Task 4:**
+
+- **Right-to-left layout does not need manual handling for reserved
+  regions.** The brief said a manual layout MUST account for right-to-left,
+  because region frames sit in a fixed coordinate space. The SDK default,
+  `layoutDirectionBehavior: ... = .mirrors`, mirrors each frame into the
+  view's layout direction instead. A custom `Layout` written in leading and
+  trailing terms needs no right-to-left code as a result. Only `.fixed`
+  returns physical frames, and then the caller owns the flip. Corrected in
+  `adaptive-layout.md:51` and recorded in
+  `task-4-reference/task-4-report.md:65-73`.
+- **Floating controls align to the same edge as the vertical bar, not the
+  opposite one.** The plan's first version placed custom bars and floating
+  controls on the edge opposite the toolbar's vertical bar. Apple's own
+  example aligns the control to the *same* edge instead. The controller's
+  Ruling 9 withdrew the unsourced rule. `adaptive-layout.md:194` now states
+  the sourced one, and `FloatingPaletteHost` (`:174-192`) aligns to
+  `barEdge` rather than its opposite. Evidence:
+  `task-4-reference/task-4-report.md:191-197` (fix round 1, issue 3).
+- **The default `reservedRegions` query omits inactive regions.** The
+  `ReservedRegion` doc page reads as if the default query always returns
+  every intersecting region. Runtime says no: on a fully open device the
+  default query returns no fold. `.includeInactive` is needed to see it,
+  with `isActive: false`. `adaptive-layout.md:41` now states the runtime
+  behavior and keeps the "always check `isActive`" rule. Evidence:
+  `task-8-probe/results.md:41` (R5). The pre-runtime reading that flagged
+  the conflict is at `task-7-compile/task-7-report.md:74-81`.
+
+One deviation from the design spec's Deliverables §4 was decided in
+planning, not found wrong at runtime. The spec asked for preamble bindings
+for both `GeometryProxy` and `UIView` fragments. Only `GeometryProxy` was
+added — rebinding `view` would have broken snippets that depend on `view:
+__View`. The reference ships no UIKit snippets. UIKit names are verified by
+SDK header and interface search instead (Task 7), not by compiling a bound
+fragment. Evidence: `docs/plans/2026-09-30-phase9-adaptive-layout.md:27`.
+
+### 4. Snippet ship gate, repo-wide — PASS, with an environment regression caught and fixed
+Repo-wide (51 reference files, Task 2's own edits, no `adaptive-layout.md`
+yet), the gate moved **31/51 → 32/51**. One FAIL → PASS flip; zero PASS →
+FAIL flips. The flip is
+`apple-intelligence/references/app-intents-implementation.md` snippet #3
+(`IntentDefinitions`). Ruling 7 fixed it: the hardcoded `Xcode-beta.app`
+macOS framework search path no longer exists on this machine. The gate now
+derives it from `xcrun --sdk macosx --show-sdk-platform-path` instead. Per
+Ruling 3, a FAIL → PASS flip is recorded, not treated as a regression
+needing a fix. Evidence: `task-2-typecheck/catalog-diff.log:1-20`.
+
+This also means the 32/51 baseline from Phase 7 had silently regressed to
+31/51 between phases. The cause was an environment change, the beta
+Xcode's bundle name, not a code edit. Task 2 caught it only by chance,
+while re-deriving the path. No action is needed beyond the fix. The
+catalog-wide total is not this phase's gate; the `apple-design`-scoped one
+is. `docs/deferred.md` item 7 tracks the untriaged count separately.
+
+`apple-design`'s own subset moved from the Finding-4 baseline of **2/4** to
+**4/4** at Task 3. Both `accessibility.md` failures were framing artifacts,
+each paired with a reference defect: a deprecated `accentColor`, and an
+`AnyView` in a ternary. Task 3 triaged and fixed both, per `docs/deferred.md`
+item 7's rule. The item now records 17 untriaged failures left, none in
+`apple-design`. Evidence:
+`task-3-a11y/typecheck.log:24` (`TOTAL: 4/4`), `task-3-a11y/triage.md`,
+`docs/deferred.md:478-486`.
+
+### 5. `docc.py` offline test and `test_run_evals.sh` — PASS
+`pipeline/test_docc.py` passes offline against a fixture JSON, confirmed in
+this task's own gate run. Three live checks back it: emphasis/strong/
+newTerm nodes now render (`represent an *arrangement view*,` rather than a
+gap), `--hig designing-for-iphone-duo` reaches a real HIG page, and a
+deprecation now prints (`DEPRECATED: iOS 27.2`). `test_run_evals.sh`'s
+four offline cases (12 assertions) pass, confirmed again in this task's run.
+Evidence: `task-1-docc/task-1-report.md:71-84`; `task-9-release/gates.log`,
+Gates 2 and 4.
+
+### 6. R1–R7 runtime verdicts — PASS (R1–R4), with three claims extended beyond the spec's four
+The spec asked for four behavioral claims. Each one needed runtime evidence,
+or the "documented, not runtime-checked" marker. All four shipped
+CONFIRMED. Task 8 added three more (R5–R7) that the implementation needed
+along the way. `adaptive-layout.md`'s header note still names only R1–R4;
+R5–R7 carry their own inline citations instead.
+
+| Claim | Verdict | Evidence |
+|---|---|---|
+| R1. Vertical bar on the outer display in every orientation, and on the inner display in landscape only. | CONFIRMED. | `task-8-probe/results.md:37` |
+| R2. A title-only item never appears in a vertical bar. | CONFIRMED, by re-probe. | `task-8-probe/results.md:38` |
+| R3. The fold region is active only when the device is partly open. | CONFIRMED. | `task-8-probe/results.md:39` |
+| R4. An outer-display sheet gets vertical bars by default. `toolbarVerticalBehavior(_:)` disables them. | CONFIRMED. | `task-8-probe/results.md:40` |
+| R5. Does the default `reservedRegions` query include inactive regions? | The SDK-header reading holds, not the doc page's. | `task-8-probe/results.md:41` |
+| R6. Do `.secondaryAction` items start in the overflow menu? | Yes, on both displays. | `task-8-probe/results.md:42` |
+| R7. Does `visibilityPriority` change what stays in the vertical bar? | Yes for primary-action items. No visible effect for secondary-action items. | `task-8-probe/results.md:43` |
+
+R2's first walk was confounded. Both items were `.secondaryAction`, and
+both went to the overflow menu regardless of a symbol. It never tested the
+claim. The re-probe moved both to `.primaryAction` and settled it.
+
+R7 was added after the `MessageDetail` snippet taught a
+`visibilityPriority` with no observed effect. The probe measured it before
+the snippet shipped. It found priority inert on `.secondaryAction` items.
+The snippet was rewritten to put Reply and Flag on `.primaryAction`
+instead. Evidence: `task-8-probe/task-8-report.md:103-129` (fix round 1).
+
+**Discovery was class B, not class A.** `simctl` and `devicectl` can
+create, boot, and launch the Duo simulator. Neither exposes a pose or
+rotation command. Device Hub set every pose and rotation by hand, so the
+probe cannot run unattended. The probe also did not cover `landscapeLeft`,
+right-to-left layouts, or the camera occlusion regions. `unified.log` shows
+only transient `leading`-edge readings during launches and pose changes,
+never a settled one. Recorded as `docs/deferred.md` item 17, with a
+command-line-pose trigger. Evidence: `task-8-probe/discovery.log`,
+`task-8-probe/results.md:55` (the transient-edge note),
+`docs/deferred.md:750-761`.
+
+### 7. Trigger evals: both pass rates reported, fixture clean — PARTIAL
+The mechanical requirement is met: both sweeps ran through
+`pipeline/run_evals.py`, and both pass rates are reported here. The verdict
+is PARTIAL rather than PASS because the gap the sweep measured is still
+open, and a clean-sounding verdict would bury that.
+
+**Baseline, description unchanged: 11/16.** Should-fire 6/10 — `fire-1`
+through `fire-6` pass, all four Duo rows (`fire-7`–`fire-10`) fail.
+Should-NOT 5/6 — `nofire-1` ("Design our brand color palette") fails, the
+pre-existing Phase 8 finding, unrelated to Duo. Three of the four Duo
+failures are genuine routing misses: `fire-7`, `fire-8`, `fire-10`. The
+fourth, `fire-9`, is a prompt-wording defect, not a routing miss — the
+model reads "gets cut off" as a claim about its own message. This
+reproduced outside the fixture and outside the harness.
+
+**A description edit was tried and reverted.** The edit fixed `fire-7` and
+`fire-8`. It regressed two previously-passing rows. `nofire-6` ("What
+screenshot sizes does the App Store need for iPhone Duo?") started calling
+`apple-design`, before self-correcting to `app-release`. `fire-5` stopped
+calling any skill at all. Post-edit also scored 11/16, not the same
+11. Per the project's own revert rule, a regression on a previously-passing
+row reverts the edit; `SKILL.md` carries no diff from before the edit.
+`docs/deferred.md` item 13 stays open, with `fire-7`, `fire-8`, and
+`fire-10` as genuine Duo routing misses and `nofire-1` as the pre-existing
+one — none fixed this phase. Evidence: `task-6-evals/prompts.tsv`,
+`task-6-evals/baseline/results.tsv:1-17`,
+`task-6-evals/after-edit/results.tsv:1-17`,
+`task-6-evals/classification.md:9-183`, `docs/deferred.md:684-730`.
+
+`git -C ~/Projects/StudioFixture status --porcelain` is empty at close,
+confirmed in this task's own gate run (Gate 10). Both sweeps wrote to the
+fixture — the guard attributed every write to its prompt and restored the
+tree each time.
+
+### 8. `bun test`, `bun run audit`, `bun run audit --since main` — PASS
+`bun test`: 198 pass, 0 fail, 429 `expect()` calls. `bun run audit`: 0
+errors, 55 warnings — all pre-existing, none newly introduced by this
+phase's files. `bun run audit --since main` reports no unbumped plugin:
+`apple-studio` carries commits since `main` and its version moved 0.9.1 →
+0.10.0 in the same working tree the check reads. Evidence:
+`task-9-release/gates.log`, Gates 5–7.
+
+### 9. `claude plugin validate . --strict` and the plugin load check — PASS
+Clean: `✔ Validation passed`. The `--plugin-dir` load check (non-deterministic
+by the brief's own description) named `adaptive-layout.md` among
+`apple-design`'s reference files on this run. Version moved in
+`plugins/apple-studio/.claude-plugin/plugin.json` only, from 0.9.1 to
+0.10.0. The description gained "adaptive layout across sizes, poses, and
+foldables" in both `plugin.json` and `.claude-plugin/marketplace.json`. The
+marketplace file carries no `version` key. Evidence:
+`task-9-release/gates.log`, Gates 8–9.
+
+### 10. No simulator left booted — PASS
+`xcrun simctl list devices booted` lists no device, checked at the close of
+Task 8 and again in this task's own gate run. Evidence:
+`task-8-probe/task-8-report.md:70-75`; `task-9-release/gates.log`, Gate 11.
+
+### Carried forward
+- **`docs/deferred.md` item 7**: 17 untriaged snippet failures remain,
+  across 12 files, none in `apple-design`. Trigger unchanged: triage in the
+  next phase.
+- **Item 12** is closed: Task 8 rewrote the `~/Projects/StudioFixture`
+  citation in `headless-commands.md`.
+- **Item 13** stays open: three genuine Duo routing misses
+  (`fire-7`, `fire-8`, `fire-10`) and one pre-existing brand-color miss
+  (`nofire-1`). A new trigger asks for a fix that does not pull
+  `apple-design` ahead of `app-release` on Duo-adjacent release-logistics
+  questions.
+- **New items 14–17.** Item 14 asks to re-verify every 27.1 claim at GA.
+  Item 15 is a camera primer for direction-aware capture, out of this
+  phase's scope. Item 16 is App Store Connect upload support for Duo
+  screenshots. Item 17 records that iPhone Duo pose control is GUI-only,
+  which left `landscapeLeft`, right-to-left layouts, and the camera
+  occlusion regions unprobed.
+- **ML remains the charter's one outstanding long-tail item**, on-demand
+  rather than scheduled, per the amendment in item 2 above.
