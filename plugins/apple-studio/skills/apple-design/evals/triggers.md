@@ -8,7 +8,7 @@
 - "Review this screen for accessibility"
 - "Make my app work on iPhone Duo"
 - "My toolbar buttons disappear when the phone is closed"
-- "Content gets cut off at the fold"
+- "Part of my list is hidden where the screen folds"
 - "Should I use an arrangement view here?"
 ## Should NOT fire
 - "Design our brand color palette"        (branding - out of scope)

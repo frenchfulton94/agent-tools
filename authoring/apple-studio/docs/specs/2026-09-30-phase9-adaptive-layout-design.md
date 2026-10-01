@@ -550,3 +550,63 @@ Task 8 and again in this task's own gate run. Evidence:
   occlusion regions unprobed.
 - **ML remains the charter's one outstanding long-tail item**, on-demand
   rather than scheduled, per the amendment in item 2 above.
+
+### Addendum (2026-10-01, Task 10): Duo routing
+
+Task 9's Gate 7 verdict was PARTIAL. Three genuine Duo routing misses
+(`fire-7`, `fire-8`, `fire-10`) and the pre-existing brand-color miss
+(`nofire-1`) were open. A single-run description edit had already been
+tried, and reverted for a regression on one sample. Task 10 tried the fix
+again, with a sweep protocol the single run lacked. It ran three runs per
+row, applied a mechanical hold threshold, and re-ran the baseline for
+every candidate regression before deciding.
+
+**Protocol.** `apple-design` and `app-release` each received a revised
+description. `apple-design` gained Duo/pose/fold wording and an App Store
+Connect exclusion; `app-release` gained an "App Store screenshots and
+metadata" clause. `triggers.md` changed in both skills. `apple-design`'s
+`fire-9` row was reworded from "Content gets cut off at the fold" to "Part
+of my list is hidden where the screen folds". The old wording is a
+prompt-corpus defect, not a routing question, per
+`task-6-evals/classification.md:57-116`. `app-release` gained a
+should-fire row with the text of `apple-design`'s existing should-NOT row,
+"What screenshot sizes does the App Store need for iPhone Duo?" All 28
+rows of both files ran three times
+through `pipeline/run_evals.py` against the revised descriptions
+(`task-10-routing/run-1`..`run-3`). A row holds at 2 of 3 PASS or better.
+
+**Result.** All four Duo should-fire rows held at 3/3:
+`task-10-routing/tally.md:6,13-14` (`ad-fire-7`, `ad-fire-8`, `ad-fire-9`,
+`ad-fire-10`), against 0 of 4 at the Task 9 baseline. One other row
+failed to hold: `ad-fire-5` ("Add a confirmation flow before deleting"),
+1/3 PASS. It is neither a Duo row nor the pre-existing brand-color miss
+(`task-10-routing/tally.md:10`). A three-run baseline re-run, against the
+pre-Task-10 descriptions in a worktree at `9f3c3a6`, scored 3/3 PASS for
+the same row (`task-10-routing/tally.md:80-84`). Baseline holds and
+post-edit does not: this is a confirmed regression by the task's rule.
+
+The two failing post-edit sessions (`task-10-routing/run-1/ad-fire-5.log`,
+`run-2/ad-fire-5.log`) never called `Skill`. Both went straight to
+`Bash`/`Read`/`Edit` and implemented the change directly, under
+`--allowedTools "Skill Read"`. This is the same tool-permission leak
+(`docs/deferred.md` item 6) that `task-6-evals/classification.md:204-216`
+recorded for this identical prompt, before any Task 10 edit existed. The
+prompt shares no wording with either revised description. No rewording
+could plausibly address it, so no revision round was tried.
+`ad-nofire-1` failed all 3 runs again (`task-10-routing/tally.md:11`),
+reproducing the pre-existing brand-color miss unchanged.
+
+**Decision: REVERT.** Per the task's rule, a confirmed regression with no
+viable revision reverts both description edits. `apple-design` and
+`app-release`'s `SKILL.md` carry no diff from before Task 10. The
+`triggers.md` changes are kept regardless: the `fire-9` reword fixes a
+corpus defect independent of the description, and the new `app-release`
+row documents the boundary either way.
+
+This supersedes Gate 7's PARTIAL verdict only on the evidence quality, not
+its outcome. The Duo routing gap that Task 9 measured is still open. Task
+10 adds a tested and discarded fix, and a clearer account of why the fix
+cannot ship as written. `docs/deferred.md` item 13 stays open. Evidence:
+`records/2026-09-30-phase9-adaptive-layout/task-10-routing/` (`prompts.tsv`,
+`run-1/`..`run-3/`, `tally.py`, `tally.md`, `baseline-ad-fire-5-1/`..`-3/`,
+`task-10-report.md`).

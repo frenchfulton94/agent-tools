@@ -728,6 +728,49 @@ block Phase 2; each has an explicit trigger for when to act.
     (`prompts.tsv`, `baseline/results.tsv`, `after-edit/results.tsv`,
     `classification.md`).
 
+    **Phase 9 Task 10 (2026-10-01).** A revised pair of description edits
+    was swept three times per row, not once as before. The `apple-design`
+    skill's description gained the Duo/pose/fold wording, plus an App
+    Store screenshots exclusion. The `app-release` skill's description
+    gained an App Store screenshots and metadata clause.
+
+    Row `ad-fire-9` no longer reads "Content gets cut off at the fold."
+    It now reads "Part of my list is hidden where the screen folds," a
+    fix for a prompt-corpus defect (not a routing question), per
+    `task-6-evals/classification.md`.
+
+    The `app-release` skill gained a matching should-fire row: "What
+    screenshot sizes does the App Store need for iPhone Duo?" It mirrors
+    `apple-design`'s existing should-NOT row of the same text.
+
+    All four Duo should-fire rows held at 3/3 PASS: `ad-fire-7`, `ad-fire-8`,
+    `ad-fire-9`, `ad-fire-10`. The baseline held none of them.
+
+    One candidate regression surfaced: `ad-fire-5`, "Add a confirmation
+    flow before deleting", scored 1/3 post-edit. A re-run baseline, against
+    the pre-Task-10 descriptions in a worktree at `9f3c3a6`, scored 3/3 for
+    the same row. This is a confirmed regression by the task's mechanical
+    rule. The two failing sessions never called `Skill` at all. They went
+    straight to `Bash`/`Read`/`Edit` and implemented the change directly,
+    the same `--allowedTools` leak pattern (item 6) that Task 6 recorded
+    for this identical prompt. The prompt shares no wording with either
+    edited description, so no wording change could plausibly address it.
+    No revision round was tried.
+
+    **Per the task's rule, a confirmed regression with no viable revision
+    means REVERT. Both description edits are reverted; `SKILL.md` carries no
+    diff from before Task 10.** The `triggers.md` changes are kept: the
+    `ad-fire-9` reword fixes a corpus defect independent of the description,
+    and the new `app-release` row documents the boundary either way.
+
+    **Item 13 is not resolved.** All four Duo rows held in this sweep, but
+    the `ad-fire-5` confirmed regression blocks resolution per the task's
+    own rule. `nofire-1` (the pre-existing brand-color miss) also remains
+    open, unaffected by this task; it failed all 3/3 runs again, unchanged.
+    Evidence: `records/2026-09-30-phase9-adaptive-layout/task-10-routing/`
+    (`prompts.tsv`, `run-1/`..`run-3/`, `tally.md`, `baseline-ad-fire-5-*/`,
+    `task-10-report.md`).
+
 14. **Re-verify every iOS 27.1 claim at GA (found 2026-09-30, Phase 9).**
     `adaptive-layout.md` was compiled against a 27.1 beta SDK — build
     `27A9269`, recorded in `task-7-compile/sdk.log`. A beta API can be
