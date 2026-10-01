@@ -1,0 +1,19 @@
+id	skill	expect	fired	verdict	note	wrote	log
+ad-fire-1	apple-design	FIRE	apple-design	PASS	max_turns	StudioFixture/SettingsScreen.swift	ad-fire-1.log
+ad-fire-2	apple-design	FIRE	apple-design	PASS			ad-fire-2.log
+ad-fire-3	apple-design	FIRE	apple-design	PASS			ad-fire-3.log
+ad-fire-4	apple-design	FIRE	apple-design	PASS	max_turns		ad-fire-4.log
+ad-fire-5	apple-design	FIRE	apple-design	PASS	max_turns		ad-fire-5.log
+ad-fire-6	apple-design	FIRE	apple-design	PASS			ad-fire-6.log
+ad-fire-7	apple-design	FIRE	apple-design	PASS	max_turns	StudioFixture/MailboxScreen.swift	ad-fire-7.log
+ad-fire-8	apple-design	FIRE	apple-design	PASS	max_turns	StudioFixture/MailboxScreen.swift	ad-fire-8.log
+ad-fire-9	apple-design	FIRE	apple-design	PASS			ad-fire-9.log
+ad-fire-10	apple-design	FIRE	apple-design	PASS			ad-fire-10.log
+ad-nofire-1	apple-design	NOFIRE	(none)	PASS	max_turns	StudioFixture/Assets.xcassets/AccentColor.colorset/Contents.json;StudioFixture/MailboxScreen.swift;StudioFixture/Assets.xcassets/BrandSecondary.colorset/	ad-nofire-1.log
+ad-nofire-2	apple-design	NOFIRE	(none)	PASS	max_turns		ad-nofire-2.log
+ad-nofire-3	apple-design	NOFIRE	run	PASS	max_turns		ad-nofire-3.log
+ad-nofire-4	apple-design	NOFIRE	(none)	PASS			ad-nofire-4.log
+ad-nofire-5	apple-design	NOFIRE	xcode-loop	PASS	max_turns		ad-nofire-5.log
+ad-nofire-6	apple-design	NOFIRE	app-release	PASS			ad-nofire-6.log
+ar-fire-8	app-release	FIRE	app-release	PASS			ar-fire-8.log
+ar-nofire-3	app-release	NOFIRE	apple-design	PASS	max_turns		ar-nofire-3.log

@@ -749,27 +749,75 @@ block Phase 2; each has an explicit trigger for when to act.
     One candidate regression surfaced: `ad-fire-5`, "Add a confirmation
     flow before deleting", scored 1/3 post-edit. A re-run baseline, against
     the pre-Task-10 descriptions in a worktree at `9f3c3a6`, scored 3/3 for
-    the same row. This is a confirmed regression by the task's mechanical
-    rule. The two failing sessions never called `Skill` at all. They went
-    straight to `Bash`/`Read`/`Edit` and implemented the change directly,
-    the same `--allowedTools` leak pattern (item 6) that Task 6 recorded
-    for this identical prompt. The prompt shares no wording with either
-    edited description, so no wording change could plausibly address it.
-    No revision round was tried.
+    the same row. The first pass treated this as a confirmed regression and
+    reverted both edits without running Step 6's revision round. **That
+    call was wrong and is corrected below.**
 
-    **Per the task's rule, a confirmed regression with no viable revision
-    means REVERT. Both description edits are reverted; `SKILL.md` carries no
-    diff from before Task 10.** The `triggers.md` changes are kept: the
-    `ad-fire-9` reword fixes a corpus defect independent of the description,
-    and the new `app-release` row documents the boundary either way.
+    **Fix round 1 (2026-10-01).** A review found the revert premature. All
+    six `ad-fire-5` sessions, across the original sweep and the baseline
+    re-run, showed the same tool access. All six ran the same initial
+    `Bash` search, then a `Read` of `MailboxScreen.swift`. That shared
+    condition cannot explain why only two of the six skipped `Skill`.
+    "Tool leak" is not one of `.claude/rules/eval-harness.md`'s three
+    categories: `max_turns`, fixture-dependent, or routing miss. The two
+    failing sessions are routing misses by elimination
+    (`task-10-routing/run-1/ad-fire-5.log`, `run-2/ad-fire-5.log`). The
+    model chose `Bash`/`Edit` over `Skill` with turns still in budget. One
+    session even named "HIG for destructive actions" in its own plan text,
+    without ever routing to the skill that owns that guidance.
 
-    **Item 13 is not resolved.** All four Duo rows held in this sweep, but
-    the `ad-fire-5` confirmed regression blocks resolution per the task's
-    own rule. `nofire-1` (the pre-existing brand-color miss) also remains
-    open, unaffected by this task; it failed all 3/3 runs again, unchanged.
-    Evidence: `records/2026-09-30-phase9-adaptive-layout/task-10-routing/`
-    (`prompts.tsv`, `run-1/`..`run-3/`, `tally.md`, `baseline-ad-fire-5-*/`,
-    `task-10-report.md`).
+    Pooled across both Duo-wording tries, the original description scored
+    4/4 on this row. That total is Task 9's single baseline run, plus
+    Task 10's three baseline runs. The two Duo-heavy edits scored 1/4 on
+    the same row. That total is Task 9's post-edit run, plus Task 10's
+    first post-edit sweep. The split is too wide to call noise.
+    `apple-design` already documents confirmation dialogs, in
+    `references/hig-patterns.md` § Modality. Neither edit's description
+    named them, and both pushed "navigation and modality patterns" further
+    from the front. Step 6's revision round applied, and had not been
+    tried.
+
+    The `apple-design` description was revised. Its modality clause now
+    names "confirmation dialogs before destructive actions", and it gained
+    a matching "Use when" trigger. `app-release`'s description returned to
+    its Step 2 text, unchanged. The rows touching either skill's revised
+    wording or boundary were swept three more times
+    (`run-rev-1`..`run-rev-3`): the 16 `ad-*` rows, plus `ar-fire-8` and
+    `ar-nofire-3`. All 18 rows held at 2/3 or better. `ad-fire-5` held 3/3,
+    as did all four Duo rows. `ad-nofire-1` improved to 2/3, though it
+    stays open either way, under the brief's standing exception. No
+    candidate regression exists in the revision round. No row fell below
+    its hold threshold, except the excluded `ad-nofire-1`.
+
+    **Per the task's rule: no confirmed regression, and at least 1 of 4
+    Duo rows holding (here, all 4 do). Decision: KEEP.** The revised
+    `apple-design` description and the Step 2 `app-release` description
+    ship. Full tally in `task-10-routing/tally.md`:
+
+    - Original sweep: lines 1-41. Duo rows at lines 10-13 and 38-41.
+      `ad-fire-5` at line 8. `ad-nofire-1` at line 14.
+    - Baseline re-run (`ad-fire-5` only): lines 43-48.
+    - Revision round: lines 50-79. Duo rows at lines 59-62 and 76-79.
+      `ad-fire-5` at line 57. `ad-nofire-1` at line 63.
+
+    **Item 13 is resolved for the Duo should-fire rows.**
+
+    Rows `ad-fire-7`, `ad-fire-8`, `ad-fire-9`, and `ad-fire-10` all held
+    at 3/3 in the revision round. No confirmed regression exists.
+
+    Row `ad-fire-5` is no longer open. It held 3/3 under the revised
+    description. Row `nofire-1`, the pre-existing brand-color miss, stays
+    open under its existing wording, per the brief's standing exception.
+    It held only 2/3 even in the revision round, and is not claimed as
+    fixed.
+
+    **Trigger for the next try:** find a change that fixes `nofire-1`
+    (the brand-color miss). It must not lose any of `ad-fire-5`,
+    `ad-fire-7`, `ad-fire-8`, `ad-fire-9`, or `ad-fire-10` — the five rows
+    this round brought to a 3/3 hold. Evidence:
+    `records/2026-09-30-phase9-adaptive-layout/task-10-routing/`
+    (`prompts.tsv`, `run-1/`..`run-3/`, `run-rev-1/`..`run-rev-3/`,
+    `baseline-ad-fire-5-*/`, `tally.py`, `tally.md`, `task-10-report.md`).
 
 14. **Re-verify every iOS 27.1 claim at GA (found 2026-09-30, Phase 9).**
     `adaptive-layout.md` was compiled against a 27.1 beta SDK — build

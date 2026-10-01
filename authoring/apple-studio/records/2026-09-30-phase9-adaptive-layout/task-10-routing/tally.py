@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
-"""Tally three run-N/results.tsv files from the Task 10 Duo-routing sweep.
+"""Tally the Task 10 Duo-routing sweeps: the original 28-row sweep
+(run-1..3), the revision round (run-rev-1..3, 18 rows), and the
+single-row baseline re-runs (baseline-<id>-1..3).
 
-Usage: python3 tally.py [run-dir ...]
-Defaults to run-1 run-2 run-3 in the script's own directory.
+Usage: python3 tally.py
+Reads everything from the script's own directory; no arguments needed.
 """
 from __future__ import annotations
 
-import sys
 from pathlib import Path
 
 HEADER = ["id", "skill", "expect", "fired", "verdict", "note", "wrote", "log"]
+
+HERE = Path(__file__).resolve().parent
+
+DUO_ROWS = ("ad-fire-7", "ad-fire-8", "ad-fire-9", "ad-fire-10")
 
 
 def read_results(path: Path) -> dict[str, dict]:
@@ -24,16 +29,18 @@ def read_results(path: Path) -> dict[str, dict]:
     return rows
 
 
-def main() -> int:
-    here = Path(__file__).resolve().parent
-    run_dirs = [Path(a) for a in sys.argv[1:]] or [here / f"run-{n}" for n in (1, 2, 3)]
+def tally_group(title: str, run_dirs: list[Path], duo_note: bool = True) -> None:
     runs = [read_results(d / "results.tsv") for d in run_dirs]
-
+    n = len(runs)
     ids = list(runs[0].keys())
     for r in runs[1:]:
-        assert list(r.keys()) == ids, "row ids differ across runs"
+        assert list(r.keys()) == ids, f"row ids differ across runs in {title}"
 
-    print(f"{'id':<12} {'expect':<7} {'pass/3':<7} {'run1->fired':<16} {'run2->fired':<16} {'run3->fired':<16} notes")
+    print(f"## {title} ({n} run{'s' if n != 1 else ''}: "
+          f"{', '.join(d.name for d in run_dirs)})")
+    print()
+    cols = "  ".join(f"{'run%d->fired' % (i+1):<20}" for i in range(n))
+    print(f"{'id':<14} {'expect':<7} {'pass/' + str(n):<8} {cols} notes")
     for row_id in ids:
         rows = [r[row_id] for r in runs]
         expect = rows[0]["expect"]
@@ -41,33 +48,65 @@ def main() -> int:
         fired_cols = [f"{r['fired']}({r['verdict']})" for r in rows]
         notes = [r["note"] for r in rows if r["note"]]
         note_str = ",".join(notes) if notes else ""
-        print(
-            f"{row_id:<12} {expect:<7} {passes}/3{'':<4} "
-            f"{fired_cols[0]:<16} {fired_cols[1]:<16} {fired_cols[2]:<16} {note_str}"
-        )
+        cols_str = "  ".join(f"{c:<20}" for c in fired_cols)
+        print(f"{row_id:<14} {expect:<7} {passes}/{n}{'':<5} {cols_str} {note_str}")
 
     print()
-    print("Rows not holding (PASS count < 2/3):")
+    print(f"Rows not holding (PASS count < {(n // 2) + 1}/{n}):")
     any_fail = False
     for row_id in ids:
         rows = [r[row_id] for r in runs]
         passes = sum(1 for r in rows if r["verdict"] == "PASS")
-        if passes < 2:
+        holds = passes >= 2 if n == 3 else passes > n / 2
+        if not holds:
             any_fail = True
-            print(f"  {row_id}: {passes}/3 PASS  fired={[r['fired'] for r in rows]}  notes={[r['note'] for r in rows]}")
+            print(f"  {row_id}: {passes}/{n} PASS  fired={[r['fired'] for r in rows]}  "
+                  f"notes={[r['note'] for r in rows]}")
     if not any_fail:
         print("  (none)")
 
+    if duo_note:
+        print()
+        print(f"Duo FIRE rows ({', '.join(DUO_ROWS)}):")
+        for row_id in DUO_ROWS:
+            if row_id not in ids:
+                continue
+            rows = [r[row_id] for r in runs]
+            passes = sum(1 for r in rows if r["verdict"] == "PASS")
+            holds = "HOLDS" if passes >= 2 else "does not hold"
+            print(f"  {row_id}: {passes}/{n} PASS -> {holds}")
     print()
-    print("Duo FIRE rows (ad-fire-7, ad-fire-8, ad-fire-9, ad-fire-10):")
-    for row_id in ("ad-fire-7", "ad-fire-8", "ad-fire-9", "ad-fire-10"):
-        rows = [r[row_id] for r in runs]
-        passes = sum(1 for r in rows if r["verdict"] == "PASS")
-        holds = "HOLDS" if passes >= 2 else "does not hold"
-        print(f"  {row_id}: {passes}/3 PASS -> {holds}")
 
+
+def tally_baseline(row_id: str, run_dirs: list[Path]) -> None:
+    runs = [read_results(d / "results.tsv") for d in run_dirs]
+    print(f"## Baseline re-run: {row_id} ({len(run_dirs)} runs, "
+          f"{', '.join(d.name for d in run_dirs)})")
+    print()
+    passes = 0
+    for i, r in enumerate(runs, start=1):
+        row = r[row_id]
+        print(f"  baseline-{i}: {row['fired']}({row['verdict']})")
+        if row["verdict"] == "PASS":
+            passes += 1
+    holds = "HOLDS" if passes >= 2 else "does not hold"
+    print(f"  {passes}/{len(run_dirs)} PASS -> {holds} at baseline")
+    print()
+
+
+def main() -> int:
+    tally_group(
+        "Original sweep (28 rows, Step 1/2 descriptions)",
+        [HERE / f"run-{n}" for n in (1, 2, 3)],
+    )
+    tally_baseline("ad-fire-5", [HERE / f"baseline-ad-fire-5-{n}" for n in (1, 2, 3)])
+    tally_group(
+        "Revision round (18 rows: ad-fire-1..10, ad-nofire-1..6, "
+        "ar-fire-8, ar-nofire-3 — revised apple-design description)",
+        [HERE / f"run-rev-{n}" for n in (1, 2, 3)],
+    )
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())
