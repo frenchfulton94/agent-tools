@@ -38,13 +38,13 @@ A reserved region is an area of your view that another element owns. Your conten
 - `occlusion`: hardware covers the content, so the content is not visible. Cameras and the Dynamic Island are occlusions. Apple's definition also names window controls, so iPad's windowed mode is the familiar precedent.
 - `division`: the fold splits one area into two separate areas.
 
-A region is either active or inactive. Each `ReservedRegion` carries `isActive`, `frame`, and `margins`; the frame already includes the margins that interactive content needs. The query returns the regions that intersect your view. Add the `.includeInactive` option to also receive inactive ones. Always check `isActive` before you move content, because the docs and the SDK header do not agree on whether the default query includes inactive regions. (ReservedRegion; `UIViewReservedRegion.h`, iPhoneOS 27.1 SDK)
+A region is either active or inactive. Each `ReservedRegion` carries `isActive`, `frame`, and `margins`; the frame already includes the margins that interactive content needs. The default query returns only the active regions that intersect your view. Add the `.includeInactive` option to also receive inactive ones. On a fully open device, the default query returns no fold, and the `.includeInactive` query returns the fold with `isActive` false. The ReservedRegion docs say that the query returns regions whether or not they are active, but the runtime follows the SDK header. Check `isActive` before you move content anyway, so the code stays correct when a query adds `.includeInactive`. (ReservedRegion; `UIViewReservedRegion.h`, iPhoneOS 27.1 SDK; runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md)
 
 iPhone Duo has three regions:
 
 - The outer front camera. This occlusion is always active. It grows into the Dynamic Island for a Live Activity.
 - The inner front camera. This occlusion is active only while the camera runs. At other times the camera is not visible.
-- The fold. This division is active only when the device is partly open. It is inactive when the device is fully open. [R3]
+- The fold. This division is active only when the device is partly open. It is inactive when the device is fully open. [R3] (runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md).
 
 (HIG: Designing for iPhone Duo § Reserved regions)
 
@@ -108,13 +108,13 @@ With `.axes(.horizontal)`, a container that is taller than it is wide shows only
 
 ## Bars that adapt to space
 
-**Where bars go vertical.** On iPhone Duo, the system moves the navigation bar, the toolbar, and the tab bar to one edge. The outer display does this in every orientation, and the inner display does it in landscape. The inner display in portrait keeps horizontal bars. [R1] The vertical bar stays on the hardware side in right-to-left languages. When Split View multitasking puts two apps on the inner display, each app puts its bar on its own outer edge. (HIG: Designing for iPhone Duo § Vertical controls)
+**Where bars go vertical.** On iPhone Duo, the system moves the navigation bar, the toolbar, and the tab bar to one edge. The outer display does this in every orientation, and the inner display does it in landscape. The inner display in portrait keeps horizontal bars. [R1] (runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md). The vertical bar stays on the hardware side in right-to-left languages. When Split View multitasking puts two apps on the inner display, each app puts its bar on its own outer edge. (HIG: Designing for iPhone Duo § Vertical controls)
 
 Some contexts have their own rules (Preparing your app for iPhone Duo § Optimize bars for vertical presentation):
 
 - Inspectors: bars are always horizontal.
 - A split view that shows more than one column: the sidebar and content columns get horizontal bars, and the detail column gets a vertical bar.
-- Sheets on the outer display: bars are vertical by default. [R4]
+- Sheets on the outer display: bars are vertical by default. [R4] (runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md).
 - Sheets on the inner display: the toolbar is horizontal for a centered or leading sheet, and vertical for a trailing sheet.
 
 **Get the behavior for free.** Attach `toolbar(content:)` inside a `NavigationStack` or `NavigationSplitView`. A bar that you build as a custom view gets none of this behavior.
@@ -126,7 +126,7 @@ Some contexts have their own rules (Preparing your app for iPhone Duo § Optimiz
 - A vertical bar shows the symbol.
 - A horizontal bar shows the symbol or the title, and prefers the symbol.
 - The overflow menu shows both.
-- An item with a title and no symbol never goes into a vertical bar. [R2] An item with a custom view never goes into a vertical bar either.
+- An item with a title and no symbol never goes into a vertical bar. [R2] (runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md). An item with a custom view never goes into a vertical bar either.
 
 Keep text-only buttons rare, and use a symbol wherever one works.
 
@@ -164,6 +164,8 @@ struct MessageDetail: View {
     }
 }
 ```
+
+On iPhone Duo, `.secondaryAction` items start in the overflow menu on both displays, with or without a symbol. The runtime check set no `visibilityPriority`, so it does not show whether `.high` keeps Reply in the bar. (runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md).
 
 **Opt out rarely.** Do not change the default bar placement in most apps. Apply `toolbarVerticalBehavior(.disabled)` only to full-screen media or a non-scrolling layout such as a calculator. Choose it once per screen, and do not toggle it from view state. To hide the bars instead, use `toolbarVisibility(_:for:)`. `NavigationStack` reads the behavior from its top view, `TabView` from the selected tab, and `NavigationSplitView` from its trailing column. On the inner display, `presentationPlacement(_:)` sets the side that a sheet uses, and so the axis of its bar. `axisBehavior(_:)` limits one item to `.horizontalOnly` or makes it `.verticalPreferred`. (toolbarVerticalBehavior(_:); axisBehavior(_:))
 

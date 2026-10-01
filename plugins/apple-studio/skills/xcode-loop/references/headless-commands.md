@@ -1,12 +1,12 @@
-> verified: 2026-08 against Xcode 27.0 beta, by execution
+> verified: 2026-08 against Xcode 27.0 beta, by execution; § 9 verified 2026-10 against Xcode 27.1 beta (27A9269), by execution
 > sources: none (empirical)
 
 # Headless build/test/run/screenshot commands
 
-Verified against a Multiplatform SwiftUI app fixture (`~/Projects/StudioFixture`, scheme
-`StudioFixture`, one target for iOS + macOS, Swift Testing unit tests). Every command below
-was actually run and its representative output shape captured. Commands not verified here
-do not belong in this file — see `mcpbridge.md` for the non-headless alternative.
+Verified against a multiplatform SwiftUI fixture app (one target for iOS + macOS, Swift Testing
+unit tests). Every command below was actually run and its representative output shape captured.
+Commands not verified here do not belong in this file — see `mcpbridge.md` for the non-headless
+alternative.
 
 ## Known noise (harmless, do not treat as failure)
 
@@ -236,3 +236,58 @@ not just the app window — acceptable for a "did it draw" check; there is no ve
 window-only capture command here.
 
 Quit when done: `osascript -e 'tell application "StudioFixture" to quit'`.
+
+## 9. iPhone Duo — displays and poses
+
+Poses are not scriptable. In Xcode 27.1 beta, no `simctl` or `devicectl` command folds, opens,
+or rotates an iPhone Duo simulator. Open Device Hub (`Xcode.app/Contents/Applications/DeviceHub.app`)
+and select the device. Set each pose (closed, fully open, partly folded) and each rotation by
+hand with its pose and rotate controls. Then capture each display with the screenshot
+command from § 7, adding `--display`.
+
+Everything here needs the Xcode 27.1 beta toolchain. If `xcode-select` points at another Xcode,
+prefix each command with `DEVELOPER_DIR="/Applications/<Xcode 27.1 beta>.app/Contents/Developer"`.
+
+Create the device. The iPhone Duo device type needs the iOS 27.1 simulator runtime
+(`minRuntimeVersionString` 27.1.0 in `xcrun simctl list devicetypes -j`):
+
+```bash
+xcrun simctl create "Duo Probe" com.apple.CoreSimulator.SimDeviceType.iPhone-Duo \
+  com.apple.CoreSimulator.SimRuntime.iOS-27-1
+```
+
+Prints the new UDID. Boot, install, and launch as in § 6.
+
+The device has two displays. `xcrun simctl io <udid> enumerate` lists them as `(1) LCD`
+(outer, 1398x2034) and `(3) LCD-1` (inner, 2007x2853). Name the display in every screenshot:
+
+```bash
+xcrun simctl io booted screenshot --display=1 /tmp/duo-outer.png   # outer display
+xcrun simctl io booted screenshot --display=3 /tmp/duo-inner.png   # inner display
+```
+
+Each prints `Wrote screenshot to: <path>`. Without `--display`, the § 7 command prints
+`Note: No display specified. Defaulting to display: <uuid> (screenID: 1, name: LCD)` and
+captures the outer display. That display is black whenever the device is open.
+
+To see which display is on, and the orientation:
+
+```bash
+xcrun devicectl device info displays --device <udid>
+```
+
+The active display's heading ends in `(active)`, each display prints a `backlightState` line
+(`backlight is on and active` or `backlight is off`), and the last line is
+`Main display orientation: <orientation>, ...`.
+
+Three commands look like pose control but are not:
+
+- `xcrun devicectl device orientation set --device <udid> landscapeLeft` (and `orientation
+  rotate --device <udid> left`) prints `New Device Orientation: landscapeLeft`, but
+  `orientation get` then prints `Current Device Orientation: portrait` and the screen does not
+  rotate. Rotate in Device Hub.
+- `xcrun devicectl device motion hinge-angle --device <udid>` only reads the hinge
+  (`Angle:  0.0°` when closed, 180° fully open). It did not exit after `--session-timeout 3`;
+  do not wait on it in a script.
+- `xcrun simctl io <udid> screenConfig --display=1 power off` does not fold the device. After
+  `power on`, the outer display stayed black until the device was shut down and booted again.
