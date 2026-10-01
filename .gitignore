@@ -19,3 +19,10 @@ authoring/*/pipeline/tmp/
 # the run sheet beside them. Kept locally next to the report that cites them;
 # a report citing a .trace means "on the machine that recorded it".
 *.trace/
+
+# Raw headless-session transcripts from eval sweeps and probes. They carry the
+# recording machine's environment (connectors, paths, and whatever a session
+# chose to run), so they stay local to the machine that recorded them. The
+# committed record holds the summaries that cite them. See
+# authoring/apple-studio/CONVENTIONS.md § Verification records.
+authoring/*/records/*/raw/

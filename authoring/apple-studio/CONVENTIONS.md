@@ -151,6 +151,17 @@ ruling.)
   `.superpowers/` here is silently dropped. (Phase 8's own record predates
   this rule and lives in the archived `apple-studio` repository instead, at
   `.superpowers/sdd/2026-09-12-phase8-catalog-migration/`.)
+- Raw headless-session transcripts MUST NOT be committed: eval-sweep and probe
+  session logs carry the recording machine's environment. A Phase 9 eval
+  session ran `wrangler whoami` unprompted, and its output reached a public
+  branch. Keep transcripts compressed under the record's `raw/` directory,
+  which `.gitignore` excludes, and commit the summaries that cite them:
+  results tables, tallies, classifications, reports. A citation into a
+  transcript names the local archive. (Amended 2026-10-01, Phase 9.)
+- Commit only what the record needs. A task brief that is a verbatim section of
+  the committed plan is not copied. Keep a build log's result line and drop the
+  rest. Keep one copy of byte-identical screenshots, and record the others'
+  names in the record's README. (Amended 2026-10-01, Phase 9.)
 
 ## Subagents
 

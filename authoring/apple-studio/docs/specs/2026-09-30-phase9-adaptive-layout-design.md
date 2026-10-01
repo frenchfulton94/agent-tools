@@ -335,6 +335,11 @@ Evidence root: `records/2026-09-30-phase9-adaptive-layout/`. Pointers are
 own claims wrong, the correction sits beside the claim. It does not replace
 the claim — the Phase 7 precedent.
 
+Pointers into raw session transcripts (`.log` files under Task 6's and Task
+10's sweep directories) resolve only on the recording machine. Those
+transcripts stay in the record's local `raw/` archives and are never
+published. The record's `README.md` explains why.
+
 ### 1. Kill-switch measured, gate correctly did not fire — PASS
 2,168 transcripts since 2026-09-12; **0 genuine non-fixture invocations** of
 an `apple-studio:*` skill. All 60 excluded hits came from `StudioFixture`.
