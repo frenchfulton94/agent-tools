@@ -1,7 +1,7 @@
-> verified: 2026-09 against https://developer.apple.com/design/human-interface-guidelines/designing-for-iphone-duo, https://developer.apple.com/design/human-interface-guidelines/layout, https://developer.apple.com/design/human-interface-guidelines/designing-for-games, https://developer.apple.com/documentation/technologyoverviews/preparing-your-app-for-iphone-duo.md, https://developer.apple.com/documentation/swiftui/reservedregion.md, https://developer.apple.com/documentation/swiftui/geometryproxy/reservedregions(kind:options:layoutdirectionbehavior:).md, https://developer.apple.com/documentation/swiftui/arrangementview.md, https://developer.apple.com/documentation/swiftui/view/arrangementviewstyle(_:).md, https://developer.apple.com/documentation/swiftui/view/toolbarverticalbehavior(_:).md, https://developer.apple.com/documentation/swiftui/toolbarcontent/axisbehavior(_:).md, https://developer.apple.com/documentation/swiftui/environmentvalues/toolbarverticaledge.md; compiled against iPhoneOS 27.1 SDK (27A9269)
+> verified: 2026-09 against https://developer.apple.com/design/human-interface-guidelines/designing-for-iphone-duo, https://developer.apple.com/design/human-interface-guidelines/layout, https://developer.apple.com/design/human-interface-guidelines/designing-for-games, https://developer.apple.com/documentation/technologyoverviews/preparing-your-app-for-iphone-duo.md, https://developer.apple.com/documentation/swiftui/reservedregion.md, https://developer.apple.com/documentation/swiftui/geometryproxy/reservedregions(kind:options:layoutdirectionbehavior:).md, https://developer.apple.com/documentation/swiftui/arrangementview.md, https://developer.apple.com/documentation/swiftui/view/arrangementviewstyle(_:).md, https://developer.apple.com/documentation/swiftui/view/toolbarverticalbehavior(_:).md, https://developer.apple.com/documentation/swiftui/toolbarcontent/axisbehavior(_:).md, https://developer.apple.com/documentation/swiftui/environmentvalues/toolbarverticaledge.md; compiled against iPhoneOS 27.1 SDK (27A9269); re-checked 2026-10 against https://developer.apple.com/documentation/swiftui/view/ongeometrychange(for:of:action:).md and the `ReservedRegion` frame and margins in the iPhoneOS 27.1 SDK `UIViewReservedRegion.h` (Phase 9 final review: badge snippet, arrangement-view nesting, vertical-bar asymmetry)
 > sources: live HIG and developer documentation (DocC JSON)
 > typecheck: ios 27.1
-> note: iPhone Duo APIs are iOS 27.1 beta as of 2026-09. Re-verify at 27.1 GA (docs/deferred.md). Behavioral claims R1–R4 cite runtime evidence in records/2026-09-30-phase9-adaptive-layout/task-8-probe/.
+> note: iPhone Duo APIs are iOS 27.1 beta as of 2026-09. Re-verify at 27.1 GA (docs/deferred.md). Behavioral claims R1–R7 cite runtime evidence in records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md. Each citation carries its label in brackets.
 
 # Adaptive Layout
 
@@ -38,17 +38,17 @@ A reserved region is an area of your view that another element owns. Your conten
 - `occlusion`: hardware covers the content, so the content is not visible. Cameras and the Dynamic Island are occlusions. Apple's definition also names window controls, so iPad's windowed mode is the familiar precedent.
 - `division`: the fold splits one area into two separate areas.
 
-A region is either active or inactive. Each `ReservedRegion` carries `isActive`, `frame`, and `margins`; the frame already includes the margins that interactive content needs. The default query returns only the active regions that intersect your view. Add the `.includeInactive` option to also receive inactive ones. On a fully open device, the default query returns no fold, and the `.includeInactive` query returns the fold with `isActive` false. The ReservedRegion docs say that the query returns regions whether or not they are active, but the runtime follows the SDK header. Check `isActive` before you move content anyway, so the code stays correct when a query adds `.includeInactive`. (ReservedRegion; `UIViewReservedRegion.h`, iPhoneOS 27.1 SDK; runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md)
+A region is either active or inactive. Each `ReservedRegion` carries `isActive`, `frame`, and `margins`; the frame already includes the margins that interactive content needs. The default query returns only the active regions that intersect your view. Add the `.includeInactive` option to also receive inactive ones. On a fully open device, the default query returns no fold, and the `.includeInactive` query returns the fold with `isActive` false. The ReservedRegion docs say that the query returns regions whether or not they are active, but the runtime follows the SDK header [R5]. Check `isActive` before you move content anyway, so the code stays correct when a query adds `.includeInactive`. (ReservedRegion; `UIViewReservedRegion.h`, iPhoneOS 27.1 SDK; runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md)
 
 iPhone Duo has three regions:
 
 - The outer front camera. This occlusion is always active. It grows into the Dynamic Island for a Live Activity.
 - The inner front camera. This occlusion is active only while the camera runs. At other times the camera is not visible.
-- The fold. This division is active only when the device is partly open. It is inactive when the device is fully open. [R3] (runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md).
+- The fold. This division is active only when the device is partly open. It is inactive when the device is fully open [R3] (runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md).
 
 (HIG: Designing for iPhone Duo § Reserved regions)
 
-Right-to-left layout needs care. The hardware does not move for the language: the camera stays in the same physical corner in right-to-left languages. By default, `reservedRegions(kind:options:layoutDirectionBehavior:)` mirrors each frame into the view's layout direction. Because of this, a custom `Layout` and a check written in leading and trailing terms work in both directions with no extra code. Pass `LayoutDirectionBehavior.fixed` only when you must position against the physical hardware. Then your code must handle right-to-left itself. (ReservedRegion § Overview)
+Right-to-left layout needs care. The hardware does not move for the language: the camera stays in the same physical corner in right-to-left languages. By default, `reservedRegions(kind:options:layoutDirectionBehavior:)` mirrors each frame into the view's layout direction. Because of this, a custom `Layout` or a leading-and-trailing check needs no extra code for right-to-left (documented, not runtime-checked). Pass `LayoutDirectionBehavior.fixed` only when you must position against the physical hardware. Then your code must handle right-to-left itself. (ReservedRegion § Overview)
 
 Two layout rules follow from the fold:
 
@@ -57,26 +57,36 @@ Two layout rules follow from the fold:
 
 ```swift
 struct LiveBadgeOverlay: View {
+    @State private var badgeSize = CGSize.zero
+    private let inset: CGFloat = 16
+
     var body: some View {
         GeometryReader { proxy in
-            let cameraRegions = proxy.reservedRegions(kind: .occlusion)
-            let topTrailingBlocked = cameraRegions.contains { region in
-                region.isActive
-                    && region.frame.minY < 80
-                    && region.frame.maxX > proxy.size.width - 160
-            }
+            // Where the badge sits when nothing blocks it.
+            let restingFrame = CGRect(
+                x: proxy.size.width - inset - badgeSize.width,
+                y: inset,
+                width: badgeSize.width,
+                height: badgeSize.height
+            )
+            // The lowest edge of any active occlusion over that spot.
+            let blockedUntil = proxy.reservedRegions(kind: .occlusion)
+                .filter { $0.isActive && $0.frame.intersects(restingFrame) }
+                .map(\.frame.maxY)
+                .max()
             Text("Live")
                 .padding(8)
                 .background(.thinMaterial, in: .capsule)
-                .padding()
-                .frame(maxWidth: .infinity, maxHeight: .infinity,
-                       alignment: topTrailingBlocked ? .bottomTrailing : .topTrailing)
+                .onGeometryChange(for: CGSize.self) { $0.size } action: { badgeSize = $0 }
+                .padding(.top, blockedUntil ?? inset)
+                .padding(.trailing, inset)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
         }
     }
 }
 ```
 
-This is the manual fallback. System components already avoid reserved regions, so use this only in a custom view that the system does not move. The predicate checks `isActive`, so an inactive camera does not move the badge. The badge makes one small move, from the top corner to the bottom corner. The frames are mirrored by default, so the trailing check is correct in right-to-left languages.
+This is the manual fallback. System components already avoid reserved regions, so use this only in a custom view that the system does not move. The badge stays in its top trailing corner. It moves down only when an active occlusion overlaps its resting spot, and only as far as the bottom edge of that region. The region frame already includes the margins that interactive content needs, so the badge needs no extra gap. The filter checks `isActive`, so an inactive camera does not move the badge. The test uses the resting spot, not the moved badge, so the badge does not move back and forth. `inset` is the badge's distance from the top and trailing edges; any value works. The frames are mirrored by default, so the trailing position is correct in right-to-left languages (documented, not runtime-checked).
 
 ## Arrangement views
 
@@ -89,7 +99,9 @@ The default style, `.automatic`, resolves to `split`. Limit the axes that a styl
 
 Choose the style from the layout you already have. An `HStack` or `VStack` of two views maps to `split`. A `ZStack` that layers one view over another maps to `overlay`.
 
-An arrangement view lays out content; it does not navigate. Put `NavigationStack`, `NavigationSplitView`, and `TabView` around an arrangement view, never inside it. Never put an arrangement view inside a `List`, a `ScrollView`, or a `NavigationSplitView`, where part of its content can become unreachable. (HIG: Designing for iPhone Duo § Arrangement views)
+An arrangement view lays out content; it does not navigate. Put navigation containers, such as `NavigationStack` and `TabView`, around an arrangement view, not inside it. (HIG: Designing for iPhone Duo § Arrangement views)
+
+Apple's two pages differ on `NavigationSplitView`. The HIG names navigation split views among the containers that go around an arrangement view. The developer overview says to avoid an arrangement view inside a navigation split view, a list, or a scroll view. It says the same of any other container that can hide part of the view. Follow the developer overview: avoid an arrangement view in a `NavigationSplitView` column. The split view already adapts its columns to the fold (see § System containers first), so the arrangement view adds nothing there. For the same reason, avoid an arrangement view inside a `List` or a `ScrollView`. (HIG: Designing for iPhone Duo § Arrangement views; Preparing your app for iPhone Duo § Arrange views in different poses)
 
 ```swift
 struct TrackDetail: View {
@@ -108,13 +120,13 @@ With `.axes(.horizontal)`, a container that is taller than it is wide shows only
 
 ## Bars that adapt to space
 
-**Where bars go vertical.** On iPhone Duo, the system moves the navigation bar, the toolbar, and the tab bar to one edge. The outer display does this in every orientation, and the inner display does it in landscape. The inner display in portrait keeps horizontal bars. [R1] (runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md). The vertical bar stays on the hardware side in right-to-left languages. When Split View multitasking puts two apps on the inner display, each app puts its bar on its own outer edge. (HIG: Designing for iPhone Duo § Vertical controls)
+**Where bars go vertical.** On iPhone Duo, the system moves the navigation bar, the toolbar, and the tab bar to one edge. The outer display does this in every orientation, and the inner display does it in landscape. The inner display in portrait keeps horizontal bars [R1] (runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md). The vertical bar stays on the hardware side in right-to-left languages (documented, not runtime-checked). When Split View multitasking puts two apps on the inner display, each app puts its bar on its own outer edge. (HIG: Designing for iPhone Duo § Vertical controls)
 
 Some contexts have their own rules (Preparing your app for iPhone Duo § Optimize bars for vertical presentation):
 
 - Inspectors: bars are always horizontal.
 - A split view that shows more than one column: the sidebar and content columns get horizontal bars, and the detail column gets a vertical bar.
-- Sheets on the outer display: bars are vertical by default. [R4] (runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md).
+- Sheets on the outer display: bars are vertical by default [R4] (runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md).
 - Sheets on the inner display: the toolbar is horizontal for a centered or leading sheet, and vertical for a trailing sheet.
 
 **Get the behavior for free.** Attach `toolbar(content:)` inside a `NavigationStack` or `NavigationSplitView`. A bar that you build as a custom view gets none of this behavior.
@@ -126,7 +138,7 @@ Some contexts have their own rules (Preparing your app for iPhone Duo § Optimiz
 - A vertical bar shows the symbol.
 - A horizontal bar shows the symbol or the title, and prefers the symbol.
 - The overflow menu shows both.
-- An item with a title and no symbol never goes into a vertical bar. [R2] (runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md). An item with a custom view never goes into a vertical bar either.
+- An item with a title and no symbol never goes into a vertical bar [R2] (runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md). An item with a custom view never goes into a vertical bar either.
 
 Keep text-only buttons rare, and use a symbol wherever one works.
 
@@ -159,17 +171,20 @@ struct MessageDetail: View {
                         Button("Print", systemImage: "printer") {}
                     }
                 }
+                // Takes effect when a TabView shares the vertical bar with this toolbar.
                 .toolbarVerticalCompressionBehavior(.prefersToolbarItems)
         }
     }
 }
 ```
 
-On iPhone Duo, `.secondaryAction` items start in the overflow menu on both displays, with or without a symbol. `visibilityPriority(.high)` does not bring one into the bar, even when the bar has room. For `.primaryAction` items the priority works: when the bar overflows, a `.high` item stays and a `.low` item leaves first. That is why the example puts Reply and Flag in `.primaryAction`. (runtime-checked 2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md).
+On iPhone Duo, `.secondaryAction` items start in the overflow menu on both displays, with or without a symbol [R6]. `visibilityPriority(.high)` does not bring one into the bar, even when the bar has room [R7]. For `.primaryAction` items the priority works: when the bar overflows, a `.high` item stays and a `.low` item leaves first [R7]. For this reason, the example puts Reply and Flag in `.primaryAction`. R6 and R7 are runtime-checked (2026-10, iOS 27.1 simulator: records/2026-09-30-phase9-adaptive-layout/task-8-probe/results.md).
 
 **Opt out rarely.** Do not change the default bar placement in most apps. Apply `toolbarVerticalBehavior(.disabled)` only to full-screen media or a non-scrolling layout such as a calculator. Choose it once per screen, and do not toggle it from view state. To hide the bars instead, use `toolbarVisibility(_:for:)`. `NavigationStack` reads the behavior from its top view, `TabView` from the selected tab, and `NavigationSplitView` from its trailing column. On the inner display, `presentationPlacement(_:)` sets the side that a sheet uses, and so the axis of its bar. `axisBehavior(_:)` limits one item to `.horizontalOnly` or makes it `.verticalPreferred`. (toolbarVerticalBehavior(_:); axisBehavior(_:))
 
-**Custom views.** Read `toolbarVerticalEdge` to learn which edge holds the vertical bar. It reports the system's preferred edge even while the bar is hidden. It is `nil` on hardware and in contexts that never use a vertical bar. To extend a hero image or background under the vertical bar, apply `backgroundExtensionEffect()` to it.
+**Custom views.** The vertical bar sits on one edge, so the space for content is not symmetric. Use safe areas so that no bar covers your content. This includes a bar on the opposite edge, as when two apps share the inner display in Split View multitasking. (HIG: Designing for iPhone Duo § Vertical controls)
+
+Read `toolbarVerticalEdge` to learn which edge holds the vertical bar. It reports the system's preferred edge even while the bar is hidden. It is `nil` on devices without a vertical bar, and in contexts that never use one. To extend a hero image or background under the vertical bar, apply `backgroundExtensionEffect()` to it.
 
 ```swift
 struct FloatingPaletteHost: View {

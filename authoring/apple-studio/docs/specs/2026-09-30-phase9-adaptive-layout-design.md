@@ -341,7 +341,7 @@ an `apple-studio:*` skill. All 60 excluded hits came from `StudioFixture`.
 The precondition for cutting a skill — one real feature shipped through the
 plugin — stays unmet, so no skill is cut, the third consecutive zero.
 Evidence: `task-0-sweep/killswitch.log:1-3`;
-`docs/deferred.md:478-486` (item 1's Phase 9 paragraph).
+`docs/deferred.md:126-135` (item 1's Phase 9 paragraph).
 
 ### 2. Charter amended — ML stays the one outstanding long-tail item — PASS
 `docs/specs/2026-08-03-apple-studio-design.md:195-198`. Phase 8 shipped the
@@ -362,8 +362,9 @@ This task's own gate run confirms it a third time, unchanged: 8/8
 directive. Routing added at `apple-design/SKILL.md`, not a new skill, as the
 Goal section required.
 
-**Three claims in this phase's own planning were wrong, and the docs
-corrected each during Task 4:**
+**Three claims in this phase's own planning were wrong. The docs corrected
+the first two during Task 4, and the Task 8 runtime probe corrected the
+third (R5):**
 
 - **Right-to-left layout does not need manual handling for reserved
   regions.** The brief said a manual layout MUST account for right-to-left,
@@ -378,8 +379,8 @@ corrected each during Task 4:**
   opposite one.** The plan's first version placed custom bars and floating
   controls on the edge opposite the toolbar's vertical bar. Apple's own
   example aligns the control to the *same* edge instead. The controller's
-  Ruling 9 withdrew the unsourced rule. `adaptive-layout.md:194` now states
-  the sourced one, and `FloatingPaletteHost` (`:174-192`) aligns to
+  Ruling 9 withdrew the unsourced rule. `adaptive-layout.md:209` now states
+  the sourced one, and `FloatingPaletteHost` (`:189-207`) aligns to
   `barEdge` rather than its opposite. Evidence:
   `task-4-reference/task-4-report.md:191-197` (fix round 1, issue 3).
 - **The default `reservedRegions` query omits inactive regions.** The
@@ -440,8 +441,10 @@ Gates 2 and 4.
 The spec asked for four behavioral claims. Each one needed runtime evidence,
 or the "documented, not runtime-checked" marker. All four shipped
 CONFIRMED. Task 8 added three more (R5–R7) that the implementation needed
-along the way. `adaptive-layout.md`'s header note still names only R1–R4;
-R5–R7 carry their own inline citations instead.
+along the way. At Task 9, `adaptive-layout.md`'s header note named only
+R1–R4, and R5–R7 carried their own inline citations. The final review fix
+wave extended the note to R1–R7 (`adaptive-layout.md:4`) and labeled each
+inline citation with its claim.
 
 | Claim | Verdict | Evidence |
 |---|---|---|
@@ -472,7 +475,7 @@ only transient `leading`-edge readings during launches and pose changes,
 never a settled one. Recorded as `docs/deferred.md` item 17, with a
 command-line-pose trigger. Evidence: `task-8-probe/discovery.log`,
 `task-8-probe/results.md:55` (the transient-edge note),
-`docs/deferred.md:750-761`.
+`docs/deferred.md:843-853`.
 
 ### 7. Trigger evals: both pass rates reported, fixture clean — PARTIAL
 The mechanical requirement is met: both sweeps ran through
@@ -541,13 +544,17 @@ Task 8 and again in this task's own gate run. Evidence:
   (`fire-7`, `fire-8`, `fire-10`) and one pre-existing brand-color miss
   (`nofire-1`). A new trigger asks for a fix that does not pull
   `apple-design` ahead of `app-release` on Duo-adjacent release-logistics
-  questions.
+  questions. **Superseded by the Task 10 addendum below:** item 13 is
+  resolved for the Duo should-fire rows, and only `ad-nofire-1` stays
+  open.
 - **New items 14–17.** Item 14 asks to re-verify every 27.1 claim at GA.
   Item 15 is a camera primer for direction-aware capture, out of this
   phase's scope. Item 16 is App Store Connect upload support for Duo
   screenshots. Item 17 records that iPhone Duo pose control is GUI-only,
   which left `landscapeLeft`, right-to-left layouts, and the camera
   occlusion regions unprobed.
+- **Item 18**, added in the final review fix wave: `docc.py` does not
+  render `termList` nodes, and its `table` branch leaks blank lines.
 - **ML remains the charter's one outstanding long-tail item**, on-demand
   rather than scheduled, per the amendment in item 2 above.
 
@@ -563,7 +570,7 @@ every candidate regression before deciding.
 
 **Protocol.** `apple-design` and `app-release` each received a revised
 description. `apple-design` gained Duo/pose/fold wording and an App Store
-Connect exclusion; `app-release` gained an "App Store screenshots and
+screenshots exclusion; `app-release` gained an "App Store screenshots and
 metadata" clause. `triggers.md` changed in both skills. `apple-design`'s
 `fire-9` row was reworded from "Content gets cut off at the fold" to "Part
 of my list is hidden where the screen folds". The old wording is a
@@ -577,7 +584,7 @@ row holds at 2 of 3 PASS or better.
 
 **Result.** All four Duo should-fire rows held at 3/3:
 `task-10-routing/tally.md:10-13,38-41` (`ad-fire-7`, `ad-fire-8`,
-`ad-fire-9`, `ad-fire-10`), against 0 of 4 at the Task 9 baseline. One
+`ad-fire-9`, `ad-fire-10`), against 0 of 4 at the Task 6 baseline. One
 other row failed to hold: `ad-fire-5` ("Add a confirmation flow before
 deleting"), 1/3 PASS (`task-10-routing/tally.md:8`). It is neither a Duo
 row nor the pre-existing brand-color miss. A three-run baseline re-run,
@@ -601,15 +608,16 @@ even named "HIG for destructive actions" in its own plan text, without
 ever consulting the skill that owns that guidance.
 
 Pooled across both Duo-wording tries to date, the original description
-scored 4/4 on this row. That total is Task 9's baseline, plus Task 10's
+scored 4/4 on this row. That total is Task 6's baseline, plus Task 10's
 three-run baseline. The two Duo-heavy edits scored 1/4 on the same row.
-That total is Task 9's single post-edit run, plus Task 10's first
-post-edit sweep. The split is too wide to call noise. `apple-design`
-already documents confirmation dialogs (`references/hig-patterns.md` §
-Modality), but neither edit's
-description named them, and both pushed "navigation and modality
-patterns" further back. Step 6's revision round applied and had not been
-tried.
+That total is Task 6's single post-edit run, plus Task 10's first
+post-edit sweep. The split is too wide to call noise. At the time, no
+`apple-design` reference covered confirmation before a destructive
+action; `references/hig-patterns.md` § Modality covered alerts in
+general. The final review fix wave added that guidance to § Modality.
+Neither edit's description named confirmation dialogs, and both pushed
+"navigation and modality patterns" further back. Step 6's revision round
+applied and had not been tried.
 
 **Revision round.** `apple-design`'s description was revised to name
 "confirmation dialogs before destructive actions" in its modality clause

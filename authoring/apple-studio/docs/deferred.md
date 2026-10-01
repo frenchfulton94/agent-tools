@@ -767,13 +767,15 @@ block Phase 2; each has an explicit trigger for when to act.
     without ever routing to the skill that owns that guidance.
 
     Pooled across both Duo-wording tries, the original description scored
-    4/4 on this row. That total is Task 9's single baseline run, plus
+    4/4 on this row. That total is Task 6's single baseline run, plus
     Task 10's three baseline runs. The two Duo-heavy edits scored 1/4 on
-    the same row. That total is Task 9's post-edit run, plus Task 10's
-    first post-edit sweep. The split is too wide to call noise.
-    `apple-design` already documents confirmation dialogs, in
-    `references/hig-patterns.md` § Modality. Neither edit's description
-    named them, and both pushed "navigation and modality patterns" further
+    the same row. That total is Task 6's post-edit run, plus Task 10's
+    first post-edit sweep. The split is too wide to call noise. At the
+    time, no `apple-design` reference covered confirmation before a
+    destructive action; `references/hig-patterns.md` § Modality covered
+    alerts in general. The Phase 9 final review fix wave added that
+    guidance to § Modality. Neither edit's description named confirmation
+    dialogs, and both pushed "navigation and modality patterns" further
     from the front. Step 6's revision round applied, and had not been
     tried.
 
@@ -806,12 +808,12 @@ block Phase 2; each has an explicit trigger for when to act.
     at 3/3 in the revision round. No confirmed regression exists.
 
     Row `ad-fire-5` is no longer open. It held 3/3 under the revised
-    description. Row `nofire-1`, the pre-existing brand-color miss, stays
+    description. Row `ad-nofire-1`, the pre-existing brand-color miss, stays
     open under its existing wording, per the brief's standing exception.
     It held only 2/3 even in the revision round, and is not claimed as
     fixed.
 
-    **Trigger for the next try:** find a change that fixes `nofire-1`
+    **Trigger for the next try:** find a change that fixes `ad-nofire-1`
     (the brand-color miss). It must not lose any of `ad-fire-5`,
     `ad-fire-7`, `ad-fire-8`, `ad-fire-9`, or `ad-fire-10` — the five rows
     this round brought to a 3/3 hold. Evidence:
@@ -849,6 +851,28 @@ block Phase 2; each has an explicit trigger for when to act.
     extend it to the uncovered cases. Evidence:
     `records/2026-09-30-phase9-adaptive-layout/task-8-probe/discovery.log`,
     `devicectl-cli.log`, `results.md`.
+
+18. **`docc.py` drops term lists and leaks blank lines from tables (found
+    2026-09-30/2026-10-01, Phase 9).** Two rendering gaps in
+    `pipeline/docc.py`. First, it does not render `termList` nodes. On
+    the SwiftUI and UIKit reserved-region pages, the list of region kinds
+    does not print, so the output loses both kinds. Task 4 read the two
+    kinds, `occlusion` and `division`, from the raw JSON. Second, its `table` branch keeps
+    the blank lines from the paragraphs inside each cell, so each row
+    breaks across several lines.
+    The final review saw this on a HIG change log. The final review fix
+    wave saw it again on four tables. Two are on the Alerts page: the
+    keyboard-shortcut table and the change log. One is the button-style
+    table on the Action sheets page. One is the change log on the
+    Designing for iPhone Duo page.
+    Before this item, the only standing record of the first gap was
+    `pipeline/maps/apple-design-duo-live.md:76-83` (Known rendering
+    gaps), beside a note in Task 4's report. The second gap had no
+    record. **Trigger: the next distillation that fetches a page with a
+    `termList` or a `table` node.** Render both node types, and add each
+    to `pipeline/test_docc.py`. Evidence:
+    `pipeline/maps/apple-design-duo-live.md:76-83`;
+    `records/2026-09-30-phase9-adaptive-layout/final-review-fixes.md`.
 
 ## Accepted (no action)
 
