@@ -203,6 +203,32 @@ function hashesFor(names, toPath) {
 }
 
 /**
+ * `{ changeName: schemaName | null }` for every open change: each directory under
+ * openspec/changes except `archive`. Read straight off `.openspec.yaml` rather than through
+ * the CLI, for the same reason the machine config is: every subcommand writes and transmits.
+ * Retirement (plan.mjs) needs one answer from this — does an open change still resolve
+ * against a schema setup is about to offer for deletion — and `null` (no file, or no
+ * `schema:` line) is "cannot tell", which plan.mjs treats as "it might".
+ */
+function openChangeSchemas(openspecDir) {
+	const out = {};
+	for (const name of dirNames(join(openspecDir, 'changes'))) {
+		if (name === 'archive') continue;
+		let schema = null;
+		try {
+			const match = readFileSync(join(openspecDir, 'changes', name, '.openspec.yaml'), 'utf8').match(
+				/^schema:\s*['"]?([^'"\s#]+)/m,
+			);
+			if (match) schema = match[1];
+		} catch {
+			// No .openspec.yaml: the change names no schema of its own.
+		}
+		out[name] = schema;
+	}
+	return out;
+}
+
+/**
  * `run` is injectable so tests can exercise the machine-profile branch without
  * shelling out. Every real call site defaults to `defaultRun`, so production
  * behaviour is unchanged; only tests pass a stub.
@@ -240,6 +266,7 @@ export function detect(repoRoot, { run = defaultRun } = {}) {
 			// re-run) from one the user wrote or edited (never replaced without approval).
 			schemaHashes: hashesFor(schemas, (name) => join(openspecDir, 'schemas', name)),
 			configPath: existsSync(configYaml) ? configYaml : existsSync(configYml) ? configYml : null,
+			changeSchemas: openChangeSchemas(openspecDir),
 		},
 		agents: {
 			files: agentFiles,

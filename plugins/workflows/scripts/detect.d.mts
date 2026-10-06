@@ -16,6 +16,12 @@ export interface OpenspecDetection {
 	/** `{ schemaName: hash }` for every directory in `schemas`, for the ownership check in plan.mjs. */
 	schemaHashes: Record<string, string>;
 	configPath: string | null;
+	/**
+	 * `{ changeName: schemaName | null }` for each open change (every directory under
+	 * openspec/changes except `archive`), read from its `.openspec.yaml`. `null` means the
+	 * change names no schema, so plan.mjs keeps every retired schema it might be using.
+	 */
+	changeSchemas: Record<string, string | null>;
 }
 
 export interface AgentsDetection {
