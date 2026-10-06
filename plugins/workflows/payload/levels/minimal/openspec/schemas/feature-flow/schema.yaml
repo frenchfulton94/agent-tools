@@ -205,6 +205,10 @@ artifacts:
       6. Keep the template's Ship group. Where a surface consumes this
          change and must ship with it, add a Ship box
          `- [ ] Surface hand-off: impeccable builds <surface> against <seam>`.
+         Where design.md has a Presentation seam block, the slice that
+         builds the seam carries the acceptance criterion
+         `- [ ] N.M One fixture per emitted state in design.md's Presentation seam block`,
+         so impeccable can render every state.
 
       Done when every slice has a group, and every multi-session group
       names a real tracker reference.

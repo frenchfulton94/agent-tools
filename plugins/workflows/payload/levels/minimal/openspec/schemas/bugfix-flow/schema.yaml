@@ -113,7 +113,9 @@ artifacts:
       test item with "Record the missing seam in the commit message", and
       keep the Ship group's /improve-codebase-architecture item.
 
-      Where the fix makes the surface show a new state, add a Ship box
+      Where the fix makes the surface show a new state, add the item
+      `- [ ] N.M Fixture for <state> at <seam>` to the fix's group, so
+      impeccable can render the state, and the Ship box
       `- [ ] Surface hand-off: impeccable presents <state> from <seam>`.
     requires:
       - specs
