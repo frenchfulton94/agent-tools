@@ -1,136 +1,119 @@
 name: bugfix-flow
-version: 1
+version: 2
 description: >
   Defect fixes, where the problem is known and the cause is not.
-  diagnose -> specs -> tasks.
-
-  A companion to mattpocock-bridge, selected per change by naming it —
-  `/opsx:new <what is broken>, using bugfix-flow`, or in a terminal
-  `openspec new change <name> --schema bugfix-flow`. It drops the interview and the
-  proposal — a defect needs no case made for fixing it — and gates everything behind a
-  written root cause, so the fix cannot be written before the cause is understood.
-
-  Requires the mattpocock skills. Only model-invoked skills are invoked from these
-  instructions.
+  diagnose -> specs -> tasks -> apply. The fix waits for a red feedback
+  loop and a confirmed hypothesis: diagnosing-bugs' phases 1 to 4 run in
+  diagnose, and phases 5 and 6 run at apply. Incidents arrive here after
+  someone has mitigated them. Written against mattpocock-skills 1.3.1.
 
 artifacts:
   - id: diagnose
     generates: diagnose.md
-    description: Reproduction, root cause, the layer to fix at, and the seam the regression test sits at
+    description: Red feedback loop, minimised reproduction, confirmed cause, fix layer, and the regression seam
     template: diagnose.md
     instruction: |
-      Find the cause before anyone writes a fix. This artifact exists to make that
-      order structural rather than a good intention.
+      Find the cause before anyone writes a fix.
 
-      Invoke `diagnosing-bugs`. It reproduces the fault, builds a feedback loop
-      tight enough to iterate against, and narrows to the cause by bisecting the
-      pipeline rather than by reading code and guessing. Take the commands that loop
-      runs from TOOLS.md rather than from habit — a feedback loop built on the wrong
-      package manager or a script that no longer exists costs the session before the
-      diagnosis starts.
+      Route first:
+      - A raw incoming report nobody has verified goes to /triage before a
+        change exists. Offer it to the human.
+      - A fix that changes behaviour the product promises, rather than
+        restoring it, is a feature. Say so and offer
+        /opsx:new <the change>, using feature-flow.
+      - Layout, contrast, copy, and polish problems belong to impeccable,
+        not to this flow.
 
-      Record four things:
+      Call the Skill tool with "diagnosing-bugs". Work its phases 1 to 4
+      here and stop when phase 4 confirms a cause; phases 5 and 6 run at
+      apply. Follow its Redact rule in everything this file records.
 
-      - **Reproduction** — the smallest reliable way to trigger the fault, and what
-        is observed versus expected. A reproduction someone else can run is what
-        makes the rest of this checkable.
-      - **Root cause** — what actually produces the fault, at the level of the code
-        or data that is wrong. "The date parsed in the wrong timezone" is a cause;
-        "the date was wrong" is the symptom restated.
-      - **Fix layer** — symptom or cause, with the reasoning. Fixing at the symptom
-        is sometimes right, under a deadline or where the cause sits behind a
-        migration, and saying so plainly is what makes it a decision rather than an
-        accident. Where you fix at the symptom, say what would have to happen to
-        fix it properly, so the next person inherits the choice rather than the
-        surprise.
-      - **Seam** — the public boundary the regression test will sit at, and what it
-        exposes. Prefer a seam the codebase already has and one the reproduction
-        can drive directly. `/tdd` writes tests only at agreed seams, so put this to
-        the user and get their agreement before this artifact is done.
+      Fill the template:
+      - Incident: only when production broke and someone already
+        mitigated. Record the timeline, the mitigation, and who approved
+        it. Delete the section otherwise.
+      - Feedback loop: the one command, already run, and its red output.
+        Tick the skill's four bars. No red command means no phase 2.
+      - Minimised reproduction: observed versus expected, cut until every
+        remaining element is load-bearing.
+      - Hypotheses: three to five, ranked and falsifiable. Show the list to
+        the user before testing. Mark the survivor and the evidence that
+        confirmed it.
+      - Debug tag: the [DEBUG-xxxx] prefix your instrumentation used, so
+        cleanup is one grep even after a /clear.
+      - Fix layer: symptom or cause, with the reasoning. A symptom fix
+        states what the cause fix needs, so the next person inherits the
+        choice rather than the surprise.
+      - Seam: a correct seam exercises the real bug pattern the way its
+        call site does. Agree it with the user; AskUserQuestion suits the
+        approve-or-adjust. Where none exists, write "No correct seam" and
+        why. That is a finding, not a gap.
+      - Also found: faults that share this cause become task groups.
+        Unrelated faults get their own change; file them and note the
+        reference.
 
-      Where the diagnosis opens a genuine fork — the cause sits under a design
-      decision worth revisiting, or the right fix would change behaviour the product
-      cares about — put that fork to the user rather than choosing for them. A fault
-      whose fix is a redesign belongs in a full change under `mattpocock-bridge`
-      instead; say so and stop.
-
-      Where a term the diagnosis depends on is fuzzy or overloaded, invoke
-      `domain-modeling` and write it to CONTEXT.md as you go.
+      Where a term the diagnosis depends on is fuzzy, call the Skill tool
+      with "domain-modeling" and write the term to GLOSSARY.md as it
+      settles. Then fill Domain terms settled from the git diff of
+      GLOSSARY.md and docs/adr/. Delete that section when the skill did
+      not run.
     requires: []
 
   - id: specs
     generates: "specs/**/*.md"
-    description: The case the spec was silent about, as a requirement that stops the fault returning
+    description: The case the spec missed or got wrong, with the reproduction as its scenario
     template: spec.md
     instruction: |
-      Decide whether this fault changes what the system promises, and write the
-      delta when it does.
+      Decide whether this fault changes what the system promises, and
+      write the delta when it does. Read the capability's spec under
+      openspec/specs/ and compare it with the fault:
+      - The spec covered the case and the code disagreed: no delta is
+        owed. Set skip_specs: true in the change's .openspec.yaml and write
+        no file here. The regression test holds the line.
+      - The spec was silent about the case that broke: add the case as an
+        ADDED requirement. Expect this outcome most often.
+      - The spec said something the fault proves wrong: use MODIFIED. Copy
+        the whole requirement block from the main spec, header included,
+        then edit it. Archive replaces the block by matching that header.
 
-      Read the capability's spec under `openspec/specs/` and compare it against the
-      fault:
+      Write to specs/<capability-path>/spec.md at the exact existing path.
+      A fix that seems to need a new capability is probably a feature.
 
-      - **The spec covered this case and the code disagreed.** The spec was right,
-        no delta is owed. Set `skip_specs: true` in the change's `.openspec.yaml`
-        and move on — the regression test in tasks.md is what holds the line here.
-      - **The spec was silent about the case that broke.** That silence is the bug
-        behind the bug. Add the missing case as an ADDED requirement with a scenario
-        covering it, and expect this to be the common outcome: faults cluster where
-        nobody wrote down what should happen.
-      - **The spec said something the fault proves wrong.** Use MODIFIED, copying
-        the entire existing requirement block from the main spec, header included,
-        then editing it. Archive replaces the whole block by matching that header,
-        so a partial copy silently drops what was left out.
-
-      Write to `specs/<capability-path>/spec.md`, preserving the exact existing path.
-      A defect fix rarely creates a capability; where it seems to, the fault is
-      probably larger than a bugfix and belongs in a full change.
-
-      Format:
-      - `### Requirement: <name>`, described with SHALL or MUST.
-      - `#### Scenario: <name>` with WHEN/THEN bullets, at exactly four hashtags —
-        the parser skips three-hashtag scenarios without reporting an error, so a
-        mis-levelled one is lost at archive with no warning.
-      - Write the scenario so the reproduction from diagnose.md satisfies it. That
-        correspondence is the whole point: the scenario is the reproduction, made
-        permanent.
+      Format: "### Requirement: <name>" stated with SHALL or MUST, then
+      "#### Scenario: <name>" with WHEN and THEN bullets. Scenarios take
+      exactly four hashtags; the parser drops other levels without a
+      warning. Write the scenario so the minimised reproduction satisfies
+      it: the scenario is the reproduction made permanent. Assert the error
+      kind, never the wording a user reads.
     requires:
       - diagnose
 
   - id: tasks
     generates: tasks.md
-    description: The failing test, the fix, and anything the diagnosis showed also needs doing
+    description: Failing test, fix, cleanup, and the Ship group
     template: tasks.md
     instruction: |
-      Write the work as checkboxes, in the order a test-first fix happens.
+      Write the work as checkboxes in test-first order. Most fixes are one
+      group: the failing test at the seam from diagnose.md, the fix, any
+      same-cause extras, and cleanup. Checkboxes take the exact "- [ ] "
+      form; apply cannot see any other shape.
 
-      Most defect fixes are one slice, and one `##` group is the right shape for
-      them. Open it with the regression test, since a test written after a passing
-      fix proves only that the code does what it currently does:
+      Add a second group only when the cause spans modules, or when a
+      symptom fix ships now and the cause fix follows. Give the cause fix
+      its own tracker issue so it outlives the urgency.
 
-      ```
-      ## 1. <what is being fixed> (<tracker reference>)
+      Write the session shape on the Session line. A fix that fits one
+      context window is single-session and needs no tracker issue. For a
+      multi-session fix, read docs/agents/issue-tracker.md and publish one
+      issue per group, labelled ready-for-agent, in dependency order. If
+      that file is missing, ask the human to run /setup-matt-pocock-skills.
 
-      - [ ] 1.1 Failing test at <seam from diagnose.md> reproducing the fault
-      - [ ] 1.2 <the fix>
-      - [ ] 1.3 <anything the diagnosis showed is also broken or missing>
-      ```
+      Where diagnose.md's Seam says "No correct seam", replace the failing
+      test item with "Record the missing seam in the commit message", and
+      keep the Ship group's /improve-codebase-architecture item.
 
-      Checkboxes take the exact `- [ ] X.Y ` form; apply parses them to track
-      progress and a line in any other shape is invisible to it.
-
-      Split into more than one group when the diagnosis found the cause spans
-      modules, or when a symptom fix ships now and the cause fix follows — give the
-      cause fix its own group and its own tracker issue so it survives the urgency
-      that produced the symptom fix.
-
-      Read `docs/agents/issue-tracker.md` for where issues live, and publish one
-      issue per group with the `ready-for-agent` label, in dependency order. Each
-      group names its tracker reference; the detail lives in the issue and tasks.md
-      indexes it.
-
-      Where the diagnosis surfaced faults beyond the one reported, list them here as
-      their own groups only when they share the cause. An unrelated fault found
-      along the way belongs in its own change, filed rather than folded in.
+      Where the fix makes the surface show a new state, add the Ship item
+      "Surface hand-off: impeccable presents <state> from <seam>".
     requires:
       - specs
 
@@ -138,23 +121,35 @@ apply:
   requires: [tasks]
   tracks: tasks.md
   instruction: |
-    Fix it test-first, at the seam the diagnosis agreed.
+    Fix it test-first at the agreed seam. Read diagnose.md first: the
+    reproduction tells you when you are done, and the fix layer tells you
+    where you may work. This is diagnosing-bugs' phases 5 and 6.
 
-    Read diagnose.md before the code. The reproduction tells you when you are done,
-    and the fix-layer decision tells you where you are allowed to work.
+    1. Note the start commit. Call the Skill tool with "tdd". Turn the
+       minimised reproduction into a failing test at the seam, and watch it
+       fail for the diagnosed reason, not a nearby one.
+    2. Make the smallest fix at the agreed layer. Watch the test pass.
+    3. Re-run the feedback-loop command against the original, unminimised
+       scenario.
+    4. Clean up: grep the debug tag until nothing remains, and delete any
+       throwaway harness.
+    5. Typecheck and run the full suite.
+    6. Commit. The message names the hypothesis that turned out correct.
+    7. Call the Skill tool with "code-review". The fixed point is the start
+       commit; the spec source is diagnose.md and the delta specs. Fix the
+       findings in one follow-up commit; do not loop the review.
+    8. Tick tasks.md and update any issue.
 
-    1. Invoke `tdd`. Write the failing test first, at the seam diagnose.md names,
-       driving it with the recorded reproduction. Watch it fail for the reason the
-       diagnosis gave rather than for an unrelated one — a test that fails for the
-       wrong reason passes for the wrong reason too.
-    2. Write the smallest fix that makes it pass, staying at the agreed layer.
-    3. Typecheck and run the affected tests as you go, using the commands TOOLS.md
-       records; run the full suite once the fix is in. A defect fix touching shared
-       code is exactly where a regression hides.
-    4. Invoke `code-review` with the slice's start commit as the fixed point and the
-       change's specs as the spec source. Act on its findings before committing.
-    5. Tick the boxes in tasks.md, update the issue, and commit.
+    Where diagnose.md says "No correct seam", skip the test in step 1 and
+    record why in the commit message; the feedback loop still proves the
+    fix.
 
-    Pause and ask when the fix does not hold — when the reproduction still triggers,
-    or the cause turns out to be elsewhere. That means diagnose.md is wrong, and the
-    artifact to update is diagnose.md, not the code.
+    When the work goes up as a pull request, call the Skill tool with "pr"
+    and give it diagnose.md and the delta specs as well as the diff.
+
+    When the fix does not hold, diagnose.md is wrong. Update it, not the
+    code. code-review judges best from a fresh session on a strong model;
+    tell the user so. Finish by offering the human /retro in this session,
+    framed as "what would have prevented this bug?". Where there was no
+    correct seam, also offer /improve-codebase-architecture. Run neither
+    yourself.
