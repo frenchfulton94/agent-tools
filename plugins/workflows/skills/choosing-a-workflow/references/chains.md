@@ -60,8 +60,10 @@ between them.
 - **Hatch:** a one-line `grill.md` stub when the user waives the interview.
 - **Dispatches:** `flow-design` at `design`.
 - **Apply:** `tdd` at agreed seams → full suite → **commit** → `code-review` from the
-  slice's start commit → one follow-up commit for findings. Multi-session slices each take a
-  fresh session; the human may run `/implement-spec` instead.
+  slice's start commit → one follow-up commit for findings. `tasks.md`'s Session line sets
+  the window: single-session apply continues in the planning window, with no `/clear`;
+  multi-session runs each slice in a fresh session, or the human runs `/implement-spec`
+  instead.
 - **Reroute:** a defect → `bugfix-flow`; one decision wide → `rapid-flow`; a question →
   `spike-flow`; fog → `/wayfinder`.
 
@@ -319,13 +321,15 @@ the task list.
   time. Both `continue` and `apply` infer it from the conversation when the name is omitted
   and have to ask when they cannot, and `continue` is also how a change is resumed in a
   brand-new session — it reads the filesystem, not the history.
-- **Clear the window before implementing.** Once the planning artifacts exist they are
-  files; apply reads them off disk and needs the room, and OpenSpec's own guidance is to
-  clear context before implementation. The order is `/clear`, then `/model` (model up/down,
-  its effort left/right) or `/effort`, then `/opsx:apply <change>` — clearing **first**,
-  because a switch made inside a full window still drags that window along, and with the
-  name, because clearing is exactly what removes what `apply` would have inferred it from.
-  Nothing is lost: status is filesystem existence.
+- **In the `standard` and `advanced` chains, clear the window before implementing.** A
+  `minimal` flow follows its own apply instruction instead (see `feature-flow`). Once the
+  planning artifacts exist they are files; apply reads them off disk and needs the room,
+  and OpenSpec's own guidance is to clear context before implementation. The order is
+  `/clear`, then `/model` (model up/down, its effort left/right) or `/effort`, then
+  `/opsx:apply <change>` — clearing **first**, because a switch made inside a full window
+  still drags that window along, and with the name, because clearing is exactly what
+  removes what `apply` would have inferred it from. Nothing is lost: status is filesystem
+  existence.
 - **Whether to clear *between planning artifacts* is per chain, not general.** Re-picking
   model and effort at an artifact boundary is always free. Clearing there is not:
   `feature-flow` wants `grill` through `tasks` in one unbroken window and, at a phase

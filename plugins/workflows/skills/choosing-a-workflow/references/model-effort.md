@@ -163,12 +163,14 @@ subscription tier only if it changes the answer — on Pro it does, at the two f
    omitted, and clearing is precisely what removes what they infer from.
 
 The biggest single switch in any chain is the gap between the last planning artifact and
-the first line of code — rules 1 and 2 above are that gap, and clearing there is universal.
-Between *planning* artifacts, only step 2 travels alone: re-picking is always free, while
-clearing is per chain — `feature-flow` wants its planning run in one unbroken window,
-`feature` says to compact at artifact boundaries. Clearing costs the chain nothing either
-way, because artifact status is pure filesystem existence. Confirm the result on the status
-line rather than assuming it.
+the first line of code — rules 1 and 2 above are that gap. The `standard` and `advanced`
+chains clear there. A `minimal` flow follows `tasks.md`'s Session line: single-session
+apply continues in the planning window, so skip step 1, and multi-session runs each slice
+in a fresh session. Between *planning* artifacts, only step 2 travels alone: re-picking is
+always free, while clearing is per chain — `feature-flow` wants its planning run in one
+unbroken window, `feature` says to compact at artifact boundaries. Clearing costs the
+chain nothing either way, because artifact status is pure filesystem existence. Confirm
+the result on the status line rather than assuming it.
 
 One piece of general tier advice does **not** apply in a repository this plugin configured:
 setting `CLAUDE_CODE_SUBAGENT_MODEL=claude-sonnet-5` for cheap fan-out would collapse the
