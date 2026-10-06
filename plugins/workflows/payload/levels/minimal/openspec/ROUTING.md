@@ -12,6 +12,9 @@ time.
 
 ## Decision tree (first match wins)
 
+Check "Work that never becomes a change" below first: UI/UX work, however
+small, goes to impeccable and never becomes a change.
+
 1. **Production is broken now.** Mitigate first: roll back or flip the flag.
    Then open `bugfix-flow` and fill its Incident section.
 2. **A new project bootstrap** → `setup-flow`.
