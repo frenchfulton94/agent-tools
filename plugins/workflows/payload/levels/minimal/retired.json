@@ -1,0 +1,4 @@
+{
+	"schemas": ["mattpocock-bridge"],
+	"agents": ["bridge-design-gate.md", "code-review-spec.md", "code-review-standards.md"]
+}

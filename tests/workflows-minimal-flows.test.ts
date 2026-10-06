@@ -258,3 +258,51 @@ describe('flow-design agent', () => {
 		expect(RETIRED_TERMS.filter((t) => text.includes(t))).toEqual([]);
 	});
 });
+
+describe('minimal level as shipped', () => {
+	const EXPECTED = ['bugfix-flow', 'feature-flow', 'rapid-flow', 'refactor-flow', 'setup-flow', 'spike-flow', 'upgrade-flow'];
+
+	test('ships exactly the seven flows', () => {
+		expect(subdirs(SCHEMAS)).toEqual(EXPECTED);
+	});
+
+	test('ships exactly the flow-design agent', () => {
+		expect(readdirSync(AGENTS).sort()).toEqual(['flow-design.md']);
+	});
+
+	test('the config default exists, defines proposal, and carries the one proposal rule', () => {
+		const cfg = Bun.YAML.parse(readFileSync(join(MINIMAL, 'openspec', 'config.yaml.example'), 'utf8')) as {
+			schema: string;
+			rules: Record<string, string[]>;
+		};
+		expect(cfg.schema).toBe('feature-flow');
+		expect(readSchema(cfg.schema).artifacts.map((a) => a.id)).toContain('proposal');
+		expect(Object.keys(cfg.rules)).toEqual(['proposal']);
+	});
+
+	test('retired.json lists what the level no longer ships', () => {
+		const retired = JSON.parse(readFileSync(join(MINIMAL, 'retired.json'), 'utf8'));
+		expect(retired).toEqual({
+			schemas: ['mattpocock-bridge'],
+			agents: ['bridge-design-gate.md', 'code-review-spec.md', 'code-review-standards.md'],
+		});
+		expect(retired.schemas.filter((s: string) => subdirs(SCHEMAS).includes(s))).toEqual([]);
+	});
+
+	test('no file outside retired.json names a retired term', () => {
+		const hits: string[] = [];
+		for (const p of filesUnder(MINIMAL)) {
+			if (p.endsWith('retired.json')) continue;
+			const text = readFileSync(p, 'utf8');
+			for (const t of RETIRED_TERMS) if (text.includes(t)) hits.push(`${relative(MINIMAL, p)}: ${t}`);
+		}
+		expect(hits).toEqual([]);
+	});
+
+	test('the router offers only allowed commands and names every shipped flow and no other', () => {
+		const text = readFileSync(join(MINIMAL, 'openspec', 'ROUTING.md'), 'utf8');
+		expect(slashCommands(text).filter((c) => !isAllowedCommand(c))).toEqual([]);
+		const named = [...text.matchAll(/`([a-z]+-flow)`/g)].map((m) => m[1]);
+		expect([...new Set(named)].sort()).toEqual(EXPECTED);
+	});
+});
