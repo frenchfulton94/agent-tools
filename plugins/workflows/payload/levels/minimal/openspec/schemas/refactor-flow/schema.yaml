@@ -121,20 +121,21 @@ apply:
     For each slice:
     1. Note the start commit. Call the Skill tool with "tdd" for new tests
        at the seam design.md agreed.
-    2. Run the guard tests and the affected tests as you go. A guard
-       assertion that has to change means behaviour moved: stop, revert
-       the slice, and offer /opsx:new <the change>, using feature-flow.
+    2. Typecheck and run the guard tests and the affected tests as you
+       go. A guard assertion that has to change means behaviour moved:
+       stop, revert the slice, and offer /opsx:new <the change>, using
+       feature-flow.
     3. Delete a shallow test only once its replacement at the new interface
        passes.
     4. Run the full suite, then commit.
     5. Call the Skill tool with "code-review". The fixed point is the start
        commit; the spec source is grill.md and design.md. It judges best
        from a fresh session on a strong model; tell the user so. Fix the
-       findings in one follow-up commit.
+       findings in one follow-up commit. Do not loop the review.
     6. Tick the slice and update its issue.
 
     A refactor that leaves both the old and the new form is unfinished;
     the contract slice deletes the old one. When the work goes up as a pull
-    request, call the Skill tool with "pr". After the last slice, tick the
-    Ship boxes you completed and offer the human /retro; never run it
-    yourself.
+    request, call the Skill tool with "pr" and give it grill.md and
+    design.md as well as the diff. After the last slice, tick the Ship
+    boxes you completed and offer the human /retro; never run it yourself.

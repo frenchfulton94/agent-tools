@@ -1,6 +1,10 @@
 ## Question
 
-<!-- One primary question, and the decision it informs. -->
+<!-- One primary question. -->
+
+## Decision it informs
+
+<!-- The decision this answer feeds. -->
 
 ## Timebox
 

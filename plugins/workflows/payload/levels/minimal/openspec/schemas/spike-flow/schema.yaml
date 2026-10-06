@@ -62,9 +62,10 @@ apply:
   instruction: |
     Run the experiments and stop at the timebox.
 
-    - A prototype experiment: call the Skill tool with "prototype". A logic
-      question gets one self-contained HTML file around a pure module;
-      feasibility code goes on a prototype/<name> branch. It never merges.
+    - A prototype experiment: call the Skill tool with "prototype". Every
+      prototype, logic or feasibility, goes on a prototype/<name> branch
+      and never merges. A logic question gets one self-contained HTML file
+      around a pure module.
     - A research experiment: call the Skill tool with "research". It runs
       as a background agent; save its file at
       openspec/changes/<change>/research/<topic>.md.
