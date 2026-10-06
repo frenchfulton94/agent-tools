@@ -217,9 +217,13 @@ function openChangeSchemas(openspecDir) {
 		let schema = null;
 		try {
 			const match = readFileSync(join(openspecDir, 'changes', name, '.openspec.yaml'), 'utf8').match(
-				/^schema:\s*['"]?([^'"\s#]+)/m,
+				/^schema:[ \t]*['"]?([^'"\s#]+)/m,
 			);
-			if (match) schema = match[1];
+			if (match) {
+				// YAML null values: ~ and null yield null ('cannot tell').
+				const value = match[1];
+				schema = value === '~' || value === 'null' ? null : value;
+			}
 		} catch {
 			// No .openspec.yaml: the change names no schema of its own.
 		}

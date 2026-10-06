@@ -105,6 +105,15 @@ describe('open change schemas', () => {
 		expect(changeSchemas(root)).toEqual({ bare: null, 'no-line': null });
 	});
 
+	test('a valueless schema: line names null', () => {
+		const root = repo((r) => {
+			change(r, 'schema-newline', 'schema:\ncreated: 2026-10-06\n');
+			change(r, 'schema-tilde', 'schema: ~\n');
+			change(r, 'schema-null', 'schema: null\n');
+		});
+		expect(changeSchemas(root)).toEqual({ 'schema-newline': null, 'schema-tilde': null, 'schema-null': null });
+	});
+
 	test('archived changes are not open', () => {
 		const root = repo((r) => {
 			change(r, join('archive', '2026-01-01-old'), 'schema: mattpocock-bridge\n');
