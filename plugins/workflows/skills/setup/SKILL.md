@@ -207,17 +207,24 @@ the user that **every** invocation this plugin makes sets them. Two of them are 
    with the same `overwrite` rules — the plan's name lists already include the apple names,
    so nothing else changes.
 
-   **Then retired names.** Leave every `plan.retire.*.keep` entry alone and report its
-   reason. Ask about each name in `plan.retire.schemas.retire` and
+   **Then retired names, schemas first.** Leave every `plan.retire.*.keep` entry alone and
+   report its reason. Ask about each name in `plan.retire.schemas.retire` individually,
+   and delete only the ones the user approves:
+
+   ```bash
+   rm -r "$REPO/openspec/schemas/${NAME:?}"     # an approved retired schema
+   ```
+
+   Then the agents. If any retired schema stays, whether the user declined it or it is in
+   `plan.retire.schemas.keep`, do not offer the retired agents: the old schemas dispatch
+   them. Keep every retired agent and tell the user why. Otherwise ask about each name in
    `plan.retire.agents.retire` individually, and delete only the ones the user approves:
 
    ```bash
-   rm -r "$REPO/openspec/schemas/$NAME"     # an approved retired schema
-   rm "$REPO/.claude/agents/$NAME"          # an approved retired agent file
+   rm "$REPO/.claude/agents/${NAME:?}"          # an approved retired agent file
    ```
 
-   When the user keeps a retired schema, keep every retired agent too: the old schemas
-   dispatch them. Step 8 drops the deleted names from the record by itself.
+   Step 8 drops the deleted names from the record by itself.
 4. **TOOLS.md.** Invoke `mapping-project-tooling`. Do this before the config, because the
    config text points at TOOLS.md and is worth less if it points at nothing. In an
    Apple-native repository, confirm the build, test, and simulator commands land in
