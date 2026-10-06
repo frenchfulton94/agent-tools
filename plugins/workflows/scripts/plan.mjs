@@ -100,6 +100,56 @@ function classify(shipped, existingNames, hashes, recorded) {
 }
 
 /**
+ * Names this level used to ship and no longer does, from `levels/<level>/retired.json`.
+ * Setup deletes nothing on its own, so without this a renamed schema or a dropped agent
+ * stays on disk indefinitely — and a dropped agent keeps loading, its description still
+ * telling the model to reach for it. A retired name is offered for deletion only when the
+ * record says this plugin wrote it, its bytes still match what was written, and nothing
+ * still needs it. Everything else is kept with its reason, because a file the user edited,
+ * or one an in-flight change resolves against, is theirs to delete.
+ *
+ * An open change whose schema detection could not read (`null`) might be any of them, and
+ * a detection with no `changeSchemas` at all never looked; both keep every retired schema.
+ * Retired agents stay while any retired schema stays, because the old schemas dispatch them.
+ */
+function planRetirement(levelDir, detection) {
+	const retired = readJson(join(levelDir, 'retired.json'));
+	const changes = detection.openspec?.changeSchemas;
+
+	const sweep = (names, onDisk, hashes, recorded, blocker) => {
+		const out = { retire: [], keep: [] };
+		for (const name of names ?? []) {
+			if (!(onDisk ?? []).includes(name)) continue;
+			let reason;
+			if (!recorded?.[name]) reason = 'not installed by this plugin';
+			else if (!hashes?.[name] || hashes[name] !== recorded[name]) reason = 'edited since this plugin installed it';
+			else reason = blocker(name);
+			if (reason) out.keep.push({ name, reason });
+			else out.retire.push(name);
+		}
+		return out;
+	};
+
+	const schemas = sweep(
+		retired.schemas,
+		detection.openspec?.schemas,
+		detection.openspec?.schemaHashes,
+		detection.prior?.schemas,
+		(name) => {
+			if (!changes) return 'open changes were not checked, so one may use it';
+			const open = Object.values(changes);
+			if (open.includes(name)) return 'an open change uses it';
+			if (open.includes(null)) return 'an open change names no schema, so it may use this one';
+			return null;
+		},
+	);
+	const agents = sweep(retired.agents, detection.agents?.files, detection.agents?.hashes, detection.prior?.agents, () =>
+		schemas.keep.length > 0 ? 'a retired schema it serves is being kept' : null,
+	);
+	return { schemas, agents };
+}
+
+/**
  * Consumes `Detection` (Task 7) and produces the single artifact a user approves before setup
  * writes anything. Computes schema collisions from `detection.openspec.schemas` directly, never
  * touching the filesystem itself, so this stays pure and testable.
@@ -241,6 +291,7 @@ export function buildPlan(detection, { level, payloadRoot = PAYLOAD }) {
 		openspecInit: !detection.openspec.present,
 		schemas,
 		agents,
+		retire: planRetirement(levelDir, detection),
 		config: {
 			action: configExists ? 'replace' : 'create',
 			// `backupPath` (config-facts.mjs) owns the collision-resistance guarantee — a

@@ -6,6 +6,8 @@ import { describe, expect, test } from 'bun:test';
 import { buildPlan } from '../plugins/workflows/scripts/plan.mjs';
 // @ts-expect-error untyped .mjs module
 import { detect } from '../plugins/workflows/scripts/detect.mjs';
+// @ts-expect-error untyped .mjs module
+import { recordRun } from '../plugins/workflows/scripts/record.mjs';
 
 /** Minimal valid detection; override per test. Workflows include new/continue so no profile warning noise. */
 export function makeDetection(overrides: Record<string, unknown> = {}) {
@@ -134,5 +136,92 @@ describe('integration: detect → buildPlan on a real fixture (spec §12 e2e sta
 		expect(plan.schemas.copy).toContain('app-release');
 		expect(plan.agents.copy).toContain('apple-design-gate.md');
 		expect(plan.humanSteps.join('\n')).toContain('xcrun mcpbridge');
+	});
+});
+
+describe('retirement', () => {
+	const RETIRED_AGENTS = ['bridge-design-gate.md', 'code-review-spec.md', 'code-review-standards.md'];
+	const ourAgents = Object.fromEntries(RETIRED_AGENTS.map((a) => [a, 'a1']));
+	const onDisk = (o: { schemaHash?: string; recorded?: boolean; changes?: Record<string, string | null> | null } = {}) =>
+		makeDetection({
+			openspec: {
+				present: true,
+				hasSpecs: false,
+				hasChanges: false,
+				schemas: ['mattpocock-bridge'],
+				schemaHashes: { 'mattpocock-bridge': o.schemaHash ?? 'h1' },
+				configPath: null,
+				...(o.changes === null ? {} : { changeSchemas: o.changes ?? {} }),
+			},
+			agents: { files: RETIRED_AGENTS, hashes: ourAgents },
+			priorRun: true,
+			prior: o.recorded === false ? { schemas: {}, agents: {} } : { schemas: { 'mattpocock-bridge': 'h1' }, agents: ourAgents },
+		});
+	const keptFor = (reason: string) => RETIRED_AGENTS.map((name) => ({ name, reason }));
+
+	test('recorded, untouched, and unused: the schema and its agents retire', () => {
+		const plan = buildPlan(onDisk(), { level: 'minimal' });
+		expect(plan.retire.schemas).toEqual({ retire: ['mattpocock-bridge'], keep: [] });
+		expect(plan.retire.agents).toEqual({ retire: RETIRED_AGENTS, keep: [] });
+	});
+
+	test('edited since install: kept, and its agents with it', () => {
+		const plan = buildPlan(onDisk({ schemaHash: 'h2' }), { level: 'minimal' });
+		expect(plan.retire.schemas).toEqual({
+			retire: [],
+			keep: [{ name: 'mattpocock-bridge', reason: 'edited since this plugin installed it' }],
+		});
+		expect(plan.retire.agents).toEqual({ retire: [], keep: keptFor('a retired schema it serves is being kept') });
+	});
+
+	test("never recorded: kept as the user's own", () => {
+		const plan = buildPlan(onDisk({ recorded: false }), { level: 'minimal' });
+		expect(plan.retire.schemas.keep).toEqual([{ name: 'mattpocock-bridge', reason: 'not installed by this plugin' }]);
+		expect(plan.retire.agents.keep).toEqual(keptFor('not installed by this plugin'));
+	});
+
+	test('an open change uses it: kept', () => {
+		const plan = buildPlan(onDisk({ changes: { 'add-x': 'mattpocock-bridge' } }), { level: 'minimal' });
+		expect(plan.retire.schemas.keep).toEqual([{ name: 'mattpocock-bridge', reason: 'an open change uses it' }]);
+	});
+
+	test('an open change naming no schema keeps it', () => {
+		const plan = buildPlan(onDisk({ changes: { 'add-x': null } }), { level: 'minimal' });
+		expect(plan.retire.schemas.keep).toEqual([
+			{ name: 'mattpocock-bridge', reason: 'an open change names no schema, so it may use this one' },
+		]);
+	});
+
+	test('a detection without changeSchemas keeps retired schemas', () => {
+		const plan = buildPlan(onDisk({ changes: null }), { level: 'minimal' });
+		expect(plan.retire.schemas.keep).toEqual([
+			{ name: 'mattpocock-bridge', reason: 'open changes were not checked, so one may use it' },
+		]);
+	});
+
+	test('an open change on another schema does not block', () => {
+		const plan = buildPlan(onDisk({ changes: { 'add-x': 'feature-flow' } }), { level: 'minimal' });
+		expect(plan.retire.schemas.retire).toEqual(['mattpocock-bridge']);
+	});
+
+	test('a retired name not on disk is not mentioned', () => {
+		const plan = buildPlan(makeDetection(), { level: 'minimal' });
+		expect(plan.retire).toEqual({ schemas: { retire: [], keep: [] }, agents: { retire: [], keep: [] } });
+	});
+
+	test('a level with no retired.json retires nothing', () => {
+		const plan = buildPlan(onDisk(), { level: 'standard' });
+		expect(plan.retire).toEqual({ schemas: { retire: [], keep: [] }, agents: { retire: [], keep: [] } });
+	});
+
+	test('integration: a recorded retired schema an open change uses is kept', () => {
+		const root = mkd(j(tmp(), 'wf-retire-'));
+		mk(j(root, 'openspec', 'schemas', 'mattpocock-bridge'), { recursive: true });
+		wf(j(root, 'openspec', 'schemas', 'mattpocock-bridge', 'schema.yaml'), 'name: mattpocock-bridge\n');
+		recordRun(root, { level: 'minimal', schemas: ['mattpocock-bridge'], date: '2026-10-06T00:00:00.000Z' });
+		mk(j(root, 'openspec', 'changes', 'add-x'), { recursive: true });
+		wf(j(root, 'openspec', 'changes', 'add-x', '.openspec.yaml'), 'schema: mattpocock-bridge\n');
+		const plan = buildPlan(detect(root, { run: () => null }), { level: 'minimal' });
+		expect(plan.retire.schemas).toEqual({ retire: [], keep: [{ name: 'mattpocock-bridge', reason: 'an open change uses it' }] });
 	});
 });
