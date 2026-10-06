@@ -50,7 +50,8 @@ artifacts:
         why. That is a finding, not a gap.
       - Also found: faults that share this cause become task groups.
         Unrelated faults get their own change; file them and note the
-        reference.
+        reference. A fix that needs the surface to show a new state lists
+        that state here too.
 
       Where a term the diagnosis depends on is fuzzy, call the Skill tool
       with "domain-modeling" and write the term to GLOSSARY.md as it

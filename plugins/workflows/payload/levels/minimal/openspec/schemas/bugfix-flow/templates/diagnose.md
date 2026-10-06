@@ -50,7 +50,7 @@
 ## Also found
 
 <!-- Same-cause faults, which become task groups; unrelated faults, filed with
-     their references. Delete if none. -->
+     their references; a new state the surface must show. Delete if none. -->
 
 ## Domain terms settled
 
