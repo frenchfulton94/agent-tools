@@ -151,6 +151,36 @@ export function classifyRules(userRules, knownIds) {
 }
 
 /**
+ * Splits a project's parsed `rules:` map (artifact id → rules) and `operations.*.guidance`
+ * map (operation → guidance) into `kept` and `dropped`, against the config text the
+ * previous release of this level shipped (`retired.json`'s `config`). Without it, a
+ * reconcile reads the old example's text as the user's own: rules carry forward under ids
+ * the new schemas still define, where they now fire in flows they were never written for,
+ * and old guidance is appended after the new example's.
+ *
+ * A line is dropped only when it equals shipped text under the same key after trimming.
+ * Anything else, including shipped text moved to another key or edited by one character,
+ * may be the user's and is kept. A missing `retired` drops nothing. A key whose lines are
+ * all dropped is absent from `kept`, so `classifyRules` never carries an empty list.
+ */
+export function splitRetiredConfig({ rules, guidance } = {}, retired) {
+	const split = (map, shipped) => {
+		const kept = {};
+		const dropped = {};
+		for (const [key, value] of Object.entries(map ?? {})) {
+			const known = new Set((shipped?.[key] ?? []).map((line) => String(line).trim()));
+			const lines = Array.isArray(value) ? value : value == null ? [] : [value];
+			for (const line of lines) {
+				const into = known.has(String(line).trim()) ? dropped : kept;
+				(into[key] ??= []).push(line);
+			}
+		}
+		return { kept, dropped };
+	};
+	return { rules: split(rules, retired?.rules), guidance: split(guidance, retired?.guidance) };
+}
+
+/**
  * Renders `classifyRules`'s `unmatched` map as a trailing YAML comment block, matching
  * the shape skills/setup/SKILL.md §5 documents. Every unmatched rule's original text is
  * preserved verbatim, JSON-encoded so it stays on one line — an unescaped literal newline

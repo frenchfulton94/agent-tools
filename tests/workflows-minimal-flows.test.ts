@@ -280,11 +280,37 @@ describe('minimal level as shipped', () => {
 		expect(Object.keys(cfg.rules)).toEqual(['proposal']);
 	});
 
+	/**
+	 * `config` is the 0.7.0 example's rules and apply guidance, verbatim. Setup drops a user's
+	 * entry only on an exact match, so one edited character here silently stops the drop.
+	 */
 	test('retired.json lists what the level no longer ships', () => {
 		const retired = JSON.parse(readFileSync(join(MINIMAL, 'retired.json'), 'utf8'));
 		expect(retired).toEqual({
 			schemas: ['mattpocock-bridge'],
 			agents: ['bridge-design-gate.md', 'code-review-spec.md', 'code-review-standards.md'],
+			config: {
+				rules: {
+					diagnose: ['Confirm the seam for the regression test with the user before marking this artifact done.'],
+					surface: ['Name the visitor mode from the surface itself, not from what the product sells.'],
+					design: [
+						'Confirm the Seams table with the user before marking this artifact done.',
+						'Check TOOLS.md for a local wrapper or an already-installed library covering this capability before proposing a new dependency.',
+					],
+					tasks: [
+						'Apply the ready-for-agent label to every published slice.',
+						'A slice changing a command, script, dependency, package manager, runtime version, directory convention, or deploy target updates TOOLS.md in the same slice and refreshes its Last verified date. Documentation deferred to a later slice is documentation that does not land.',
+					],
+				},
+				guidance: {
+					apply: [
+						'Take commands from TOOLS.md rather than from habit; the package manager it records is the one the lockfile resolved.',
+						'Run the affected test files as you go; run the full suite once the slice is done.',
+						'Where the slice changed TOOLS.md facts, run the mapping-project-tooling drift check before committing.',
+						'On a UI slice, run the impeccable detector before review and fix what it reports.',
+					],
+				},
+			},
 		});
 		expect(retired.schemas.filter((s: string) => subdirs(SCHEMAS).includes(s))).toEqual([]);
 	});

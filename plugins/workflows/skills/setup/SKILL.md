@@ -344,17 +344,34 @@ installs plus the built-in `spec-driven` ids (`proposal`, `specs`, `design`, `ta
 
   Treat `capBytes` as a ceiling to stay far below, not a budget to spend. On a reconcile,
   regenerate the generic half from the example and preserve the project-specific slots.
-- `rules:` — parse the old file's `rules:` map yourself (there is no YAML dependency in
-  this plugin; reading and structuring it is judgment work), then classify it against the
-  ids from the step above — never against "exists in the default schema":
+- **Text the previous release shipped** — parse the old file's `rules:` map and its
+  `operations.*.guidance` lists yourself (there is no YAML dependency in this plugin;
+  reading and structuring them is judgment work). A file an earlier run wrote still holds
+  that release's example text, which reads as the user's own unless it is split out first:
+  carried forward, an old rule fires in flows it was never written for. Split both maps
+  against the level's `retired.json` before the two steps below touch them:
+
+  ```bash
+  node -e 'const fs=require("node:fs"),{pathToFileURL}=require("node:url");import(pathToFileURL(process.argv[1]).href).then(({splitRetiredConfig})=>{const p=process.argv[2],retired=fs.existsSync(p)?JSON.parse(fs.readFileSync(p,"utf8")).config:null;console.log(JSON.stringify(splitRetiredConfig({rules:JSON.parse(process.argv[3]),guidance:JSON.parse(process.argv[4])},retired),null,2))})' \
+    "${CLAUDE_PLUGIN_ROOT}/scripts/config-facts.mjs" "${CLAUDE_PLUGIN_ROOT}/payload/levels/$LEVEL/retired.json" "$OLD_RULES_JSON" "$OLD_GUIDANCE_JSON"
+  ```
+
+  `$OLD_RULES_JSON` is the old `rules:` map as JSON; `$OLD_GUIDANCE_JSON` maps each
+  operation to its `guidance` list, as in `{"apply":["…"]}`, or is `{}`. A line is dropped
+  only on an exact match with the text that level's previous example shipped, and a level
+  with no `retired.json` drops nothing. Only the two `kept` maps go on. Name every
+  `dropped` line, verbatim, in the diff below and in the report as "dropped: shipped by
+  the previous minimal level"; if the user asks to keep one, move it back into `kept`.
+- `rules:` — classify `rules.kept` from the split above against the ids from the
+  artifact-id step — never against "exists in the default schema":
 
   ```bash
   node -e 'const {pathToFileURL}=require("node:url");import(pathToFileURL(process.argv[1]).href).then(({classifyRules,commentBlock})=>{const {carried,unmatched}=classifyRules(JSON.parse(process.argv[2]),JSON.parse(process.argv[3]));console.log(JSON.stringify({carried,unmatched,commentBlock:commentBlock(unmatched)}))})' \
     "${CLAUDE_PLUGIN_ROOT}/scripts/config-facts.mjs" "$USER_RULES_JSON" "$KNOWN_IDS_JSON"
   ```
 
-  `$USER_RULES_JSON` is the `rules:` map you parsed, as JSON; `$KNOWN_IDS_JSON` is the
-  prior step's `ids` array, verbatim. This is a union across the installed set: a rule
+  `$USER_RULES_JSON` is `rules.kept`, as JSON; `$KNOWN_IDS_JSON` is the
+  artifact-id step's `ids` array, verbatim. This is a union across the installed set: a rule
   keyed to `diagnose` is valid at `minimal` because `bugfix-flow` defines it, even though
   that level's default schema is `feature-flow` — `classifyRules` carries it either
   way, because membership is checked against the whole union, not the default schema.
@@ -371,8 +388,8 @@ installs plus the built-in `spec-driven` ids (`proposal`, `specs`, `design`, `ta
   #     - "…the user's original text, verbatim…"
   ```
 
-- `operations.*.guidance` — append the user's entries after the example's, unless they
-  contradict each other; say so when they do rather than silently picking one.
+- `operations.*.guidance` — append `guidance.kept` after the example's entries, unless
+  they contradict each other; say so when they do rather than silently picking one.
 
 **Invoke `improving-prompts` for the `context:` and `rules:` text you author here.** These
 are not config values, they are prompts: `context` is injected into every artifact request
@@ -388,6 +405,8 @@ State plainly:
 
 - what was created, updated, replaced, backed up, and retired, with paths — and which
   schemas and agents were left alone because they are the user's, naming each;
+- each `config.yaml` line dropped as "dropped: shipped by the previous minimal level",
+  verbatim;
 - which plugins installed, which were skipped and why, and which were blocked and why —
   `install-plugins.mjs` reports the CLI's own stderr as the reason, not a guess, so pass it
   through verbatim rather than paraphrasing it into "blocked by managed settings";
