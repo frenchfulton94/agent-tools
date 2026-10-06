@@ -97,7 +97,7 @@ export function readRecord(repoRoot) {
  * hash, because a hash that matches nothing would claim ownership of whatever appears at
  * that name later.
  */
-export function recordRun(repoRoot, { level, schemas = [], agents = [], version = pluginVersion(), date = new Date() } = {}) {
+export function recordRun(repoRoot, { level, schemas = [], agents = [], retired = {}, version = pluginVersion(), date = new Date() } = {}) {
 	const prior = readRecord(repoRoot);
 
 	/**
@@ -110,8 +110,11 @@ export function recordRun(repoRoot, { level, schemas = [], agents = [], version 
 	 * been deleted is inert, because `classify` (plan.mjs) requires the name in *detection's*
 	 * hashes before it can promote anything — a record alone never claims a file.
 	 */
-	const merged = (previous, names, toPath) => {
+	const merged = (previous, names, toPath, drop = []) => {
 		const out = { ...previous };
+		// A retired name setup deleted is gone from disk, so it leaves the record. One the
+		// user chose to keep is still there and still ours, so it stays.
+		for (const name of drop) if (!hashEntry(toPath(repoRoot, name))) delete out[name];
 		for (const name of [...names].sort()) {
 			const hash = hashEntry(toPath(repoRoot, name));
 			if (hash) out[name] = hash;
@@ -124,8 +127,8 @@ export function recordRun(repoRoot, { level, schemas = [], agents = [], version 
 		version,
 		date: date instanceof Date ? date.toISOString() : String(date),
 		installed: {
-			schemas: merged(prior?.schemas, schemas, schemaPath),
-			agents: merged(prior?.agents, agents, agentPath),
+			schemas: merged(prior?.schemas, schemas, schemaPath, retired.schemas),
+			agents: merged(prior?.agents, agents, agentPath, retired.agents),
 		},
 	};
 
@@ -175,6 +178,9 @@ export function ownedFromPlan(plan, approved = []) {
 		level: plan.level,
 		schemas: [...schemas.copy, ...schemas.update, ...schemaApproved],
 		agents: [...agents.copy, ...agents.update, ...agentApproved],
+		// Read from the plan, never from the caller: what setup may delete was decided when the
+		// plan was built, and a plan from before retirement existed simply retires nothing.
+		retired: { schemas: plan.retire?.schemas?.retire ?? [], agents: plan.retire?.agents?.retire ?? [] },
 		ignored: approved.filter((name) => !honoured.has(name)),
 	};
 }
@@ -193,6 +199,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
 			level: owned.level,
 			schemas: owned.schemas,
 			agents: owned.agents,
+			retired: owned.retired,
 		});
 		console.log(JSON.stringify({ path, record, approved, ignored: owned.ignored }, null, 2));
 	} catch (err) {

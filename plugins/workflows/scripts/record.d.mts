@@ -17,6 +17,11 @@ export interface RecordRunOptions {
 	schemas?: string[];
 	/** Subagent filenames this run owns, same rule. */
 	agents?: string[];
+	/**
+	 * Names the plan offered for retirement. Each one that is gone from disk leaves the record;
+	 * one the user kept is still on disk and stays recorded.
+	 */
+	retired?: { schemas?: string[]; agents?: string[] };
 	/** Prefer `ownedFromPlan` to derive both from the approved plan rather than passing lists. */
 	/** Defaults to this plugin's manifest version. */
 	version?: string | null;
@@ -50,6 +55,8 @@ export interface OwnedFromPlan {
 	level: string;
 	schemas: string[];
 	agents: string[];
+	/** `plan.retire.*.retire`, or empty lists for a plan built before retirement existed. */
+	retired: { schemas: string[]; agents: string[] };
 	/** Approved names the plan never listed as collisions — reported, and recorded for nothing. */
 	ignored: string[];
 }
