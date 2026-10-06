@@ -141,8 +141,7 @@ apply:
     7. Call the Skill tool with "code-review". The fixed point is the start
        commit; the spec source is diagnose.md and the delta specs. Fix the
        findings in one follow-up commit; do not loop the review.
-    8. Tick tasks.md and update any issue. Leave Surface hand-off for the
-       human until impeccable has presented the state.
+    8. Tick the group's boxes and update any issue.
 
     Where diagnose.md says "No correct seam", skip the test in step 1 and
     record why in the commit message; the feedback loop still proves the
@@ -156,4 +155,5 @@ apply:
     tell the user so. Finish by offering the human /retro in this session,
     framed as "what would have prevented this bug?". Where there was no
     correct seam, also offer /improve-codebase-architecture. Run neither
-    yourself.
+    yourself. Then tick the Ship boxes you completed. Leave Surface
+    hand-off for the human until impeccable has presented the state.

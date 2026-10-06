@@ -137,5 +137,5 @@ apply:
     A refactor that leaves both the old and the new form is unfinished;
     the contract slice deletes the old one. When the work goes up as a pull
     request, call the Skill tool with "pr" and give it grill.md and
-    design.md as well as the diff. After the last slice, tick the Ship
-    boxes you completed and offer the human /retro; never run it yourself.
+    design.md as well as the diff. After the last slice, offer the human
+    /retro; never run it yourself. Then tick the Ship boxes you completed.

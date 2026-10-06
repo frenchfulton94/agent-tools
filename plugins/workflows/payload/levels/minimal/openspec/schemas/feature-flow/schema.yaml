@@ -249,8 +249,8 @@ apply:
     When the work goes up as a pull request, call the Skill tool with "pr"
     and give it the delta specs as well as the diff.
 
-    After the last slice, tick the Ship boxes you completed and offer the
-    human /retro; never run it yourself. Leave Surface hand-off for the
+    After the last slice, offer the human /retro; never run it yourself.
+    Then tick the Ship boxes you completed. Leave Surface hand-off for the
     human until impeccable has built the surface. Pause and ask when a
     slice is unclear, when the design proves wrong (name the artifact to
     update), or when an error will not resolve.

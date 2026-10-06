@@ -110,7 +110,6 @@ apply:
     request, call the Skill tool with "pr" and give it inventory.md and
     surfaces.md as well as the diff. The pull request's evidence is the
     equivalence checks' before and after output, and a migrated data format
-    makes the merge a one-way door. After the last group, tick the Ship
-    boxes you completed, and leave for the human any box that waits on
-    someone else. Finish by offering the human /retro; never run it
-    yourself.
+    makes the merge a one-way door. After the last group, offer the human
+    /retro; never run it yourself. Then tick the Ship boxes you completed,
+    and leave for the human any box that waits on someone else.

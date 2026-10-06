@@ -81,6 +81,6 @@ apply:
     whole bootstrap, from the first commit, with decisions.md as the spec
     source. It judges best from a fresh session on a strong model; tell the
     user so. Fix the findings in one follow-up commit. Do not loop the
-    review. Tick the Ship boxes you completed, and offer the human /retro;
-    never run it yourself. Tick the Surface hand-off box only once the
+    review. Offer the human /retro; never run it yourself. Then tick the
+    Ship boxes you completed. Tick the Surface hand-off box only once the
     human confirms they ran /impeccable init and /impeccable document.
