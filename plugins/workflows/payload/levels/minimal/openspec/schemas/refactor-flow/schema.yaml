@@ -113,6 +113,11 @@ apply:
   instruction: |
     Restructure one slice at a time, with the guard tests green throughout.
 
+    Read tasks.md's Session line. Single-session: continue in this window.
+    Multi-session: work one slice per fresh session, and fetch its tracker
+    issue for the acceptance criteria. Take any slice whose blockers are
+    done.
+
     For each slice:
     1. Note the start commit. Call the Skill tool with "tdd" for new tests
        at the seam design.md agreed.
@@ -123,8 +128,9 @@ apply:
        passes.
     4. Run the full suite, then commit.
     5. Call the Skill tool with "code-review". The fixed point is the start
-       commit; the spec source is grill.md and design.md. Fix the findings
-       in one follow-up commit.
+       commit; the spec source is grill.md and design.md. It judges best
+       from a fresh session on a strong model; tell the user so. Fix the
+       findings in one follow-up commit.
     6. Tick the slice and update its issue.
 
     A refactor that leaves both the old and the new form is unfinished;
