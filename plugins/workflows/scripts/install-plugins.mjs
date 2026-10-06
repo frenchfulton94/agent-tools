@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { pathToFileURL } from 'node:url';
+import { isMain } from './lib/cli.mjs';
 import { runCommand } from './lib/run.mjs';
 
 /**
@@ -73,7 +73,7 @@ export function installPlugins(plan, { run = defaultRun } = {}) {
 	return { installed, blocked, skipped: plan.plugins.skip };
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (isMain(import.meta.url)) {
 	const plan = JSON.parse(readFileSync(0, 'utf8'));
 	console.log(JSON.stringify(installPlugins(plan), null, 2));
 }

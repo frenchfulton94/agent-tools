@@ -1,4 +1,4 @@
-import { pathToFileURL } from 'node:url';
+import { isMain } from './lib/cli.mjs';
 import { runCommand } from './lib/run.mjs';
 
 /**
@@ -189,7 +189,7 @@ export function contextSize(text) {
 	return { bytes, capBytes: CONTEXT_CAP_BYTES, overCap: bytes > CONTEXT_CAP_BYTES };
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (isMain(import.meta.url)) {
 	const repoRoot = process.argv[2] ?? process.cwd();
 	const result = artifactIds(repoRoot);
 	console.log(JSON.stringify({ ...result, ids: result.ids ? [...result.ids].sort() : null }, null, 2));

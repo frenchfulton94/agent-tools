@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
+import { isMain } from './lib/cli.mjs';
 import { hashEntry } from './lib/tree.mjs';
 
 /**
@@ -185,7 +186,7 @@ export function ownedFromPlan(plan, approved = []) {
 	};
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (isMain(import.meta.url)) {
 	// The plan arrives on stdin, exactly as `install-plugins.mjs` takes it. Nothing in argv
 	// parses JSON any more: the old two-slot form died on `""` — a legitimately empty shell
 	// variable meaning "nothing owned" — because a default only fires on `undefined`, and it

@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { isMain } from './lib/cli.mjs';
 import { runCommand } from './lib/run.mjs';
 import { hashTree } from './lib/tree.mjs';
 
@@ -166,7 +166,7 @@ export function verify(repoRoot, { before, expectRules = [], expectPlugins = [],
 	return { checks, ok: checks.every((c) => c.ok) };
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (isMain(import.meta.url)) {
 	const repoRoot = process.argv[2] ?? process.cwd();
 	const result = verify(repoRoot, { before: { specs: '', changes: '' } });
 	console.log(JSON.stringify(result, null, 2));

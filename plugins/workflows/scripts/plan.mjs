@@ -1,7 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { backupPath } from './config-facts.mjs';
+import { isMain } from './lib/cli.mjs';
 import { mergeManifests, planInstalls } from './lib/settings.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -307,7 +308,7 @@ export function buildPlan(detection, { level, payloadRoot = PAYLOAD }) {
 	};
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (isMain(import.meta.url)) {
 	// A pipeline consumer must never receive JSON it could mistake for a real plan, so nothing
 	// is written to stdout unless buildPlan actually succeeds — every failure goes to stderr
 	// only, with a non-zero exit. But a user typo and a genuine defect are not the same problem:

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { isMain } from './lib/cli.mjs';
 import { runCommand } from './lib/run.mjs';
 import { decidedPlugins, readSettingsFile } from './lib/settings.mjs';
 import { hashEntry } from './lib/tree.mjs';
@@ -301,6 +301,6 @@ export function detect(repoRoot, { run = defaultRun } = {}) {
 	};
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (isMain(import.meta.url)) {
 	console.log(JSON.stringify(detect(process.argv[2] ?? process.cwd()), null, 2));
 }
