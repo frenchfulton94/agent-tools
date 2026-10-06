@@ -68,8 +68,11 @@ commits. Fold in what step 1 already detected: whether this is a web project, an
 `openspec/` and its schemas are already here.
 
 - **Two or three kinds, mostly features and defects** → `minimal` or `standard`.
-- **Five or more kinds, especially dependency bumps or incidents** → `advanced`. Those two
-  are the ones that get mangled when a repository only knows how to do features and bugs.
+- **Five or more kinds, especially dependency bumps or incidents** → `minimal` or
+  `advanced`. Both route each kind to its own chain. `advanced` adds written plans, a
+  pre-implementation review gate, verification evidence, and a dedicated `hotfix` chain;
+  recommend it when the history shows that ceremony already happening (reviewed design
+  docs, postmortems), and `minimal` otherwise.
 - **Between `minimal` and `standard`** — does work here usually start from an unclear idea
   that needs interviewing, or from a surface someone can already picture? Interview →
   `minimal`. Surface → `standard`. A repo detected as web leans `standard`, but the history
@@ -88,14 +91,14 @@ counted, and in how many commits.
 
 | Level | What to say it is |
 |---|---|
-| `minimal` | `mattpocock-bridge` and `bugfix-flow`. Features and defects, where a piece of work usually starts as an unclear idea and an interview is what turns it into a plan |
+| `minimal` | One `-flow` chain per kind of work (features, defects, cleanups, spikes, upgrades, bootstraps, small changes), all driven by Matt Pocock's skills, with a router between them. Work usually starts as an unclear idea that an interview turns into a plan; impeccable owns UI/UX |
 | `standard` | `craft-driven` and `surface-driven`. The same two kinds of work, but it usually starts from a surface someone can already picture, so design leads and behaviour follows |
 | `advanced` | Eight schemas and a router that picks between them — features, defects, cleanups, dependency bumps, incidents, spikes, bootstraps. For repositories where the work comes in too many kinds for one chain to fit |
 
 Recommend; do not decide. If they pick another level, use it without arguing — **choosing
-wrong is cheap.** Setup deletes nothing, so a later run at a different level adds that
-level's schemas beside the first set and merges the run record rather than orphaning
-anything.
+wrong is cheap.** Setup deletes nothing without asking, so a later run at a different
+level adds that level's schemas beside the first set and merges the run record rather than
+orphaning anything.
 
 For the numbers behind these — schemas, longest chain, router, plugin counts — see
 `plugins/workflows/README.md`. They belong in the plan you present at step 3, not in the
@@ -128,6 +131,9 @@ story — say which is which, by name:
 - `collide` — the user's own file, or one of ours they have since changed. Never replaced
   unless they approve that specific name. Ask about each one individually; "approve all"
   is not an answer to this question.
+- `retire` — names this level used to ship and no longer does, from its `retired.json`.
+  `retire.*.retire` lists the ones safe to delete: recorded as ours, unedited, and used
+  by no open change. `retire.*.keep` lists the rest, each with its reason. Name both.
 
 A warning that `.claude/settings.json` could not be read invalidates the plugin and
 status-line sections of the plan you are showing. Lead with it, and say plainly that the
@@ -200,13 +206,29 @@ the user that **every** invocation this plugin makes sets them. Two of them are 
    `${CLAUDE_PLUGIN_ROOT}/payload/levels/advanced/apple/agents` into `$REPO/.claude/agents`,
    with the same `overwrite` rules — the plan's name lists already include the apple names,
    so nothing else changes.
+
+   **Then retired names.** Leave every `plan.retire.*.keep` entry alone and report its
+   reason. Ask about each name in `plan.retire.schemas.retire` and
+   `plan.retire.agents.retire` individually, and delete only the ones the user approves:
+
+   ```bash
+   rm -r "$REPO/openspec/schemas/$NAME"     # an approved retired schema
+   rm "$REPO/.claude/agents/$NAME"          # an approved retired agent file
+   ```
+
+   When the user keeps a retired schema, keep every retired agent too: the old schemas
+   dispatch them. Step 8 drops the deleted names from the record by itself.
 4. **TOOLS.md.** Invoke `mapping-project-tooling`. Do this before the config, because the
    config text points at TOOLS.md and is worth less if it points at nothing. In an
    Apple-native repository, confirm the build, test, and simulator commands land in
    TOOLS.md — the verification templates delegate to it.
 5. **`openspec/config.yaml`.** See section 5 — it is the one destructive step.
-6. **CLAUDE.md.** Invoke `managing-project-memory`. On `advanced`, let it decide where
-   `ROUTING.md` belongs; the router only works from somewhere memory reliably loads it.
+6. **Router and CLAUDE.md.** On `minimal`, install the router at `openspec/ROUTING.md`:
+   copy `${CLAUDE_PLUGIN_ROOT}/payload/levels/minimal/openspec/ROUTING.md` when the file
+   is absent; when it exists and differs, show the diff and replace it only if the user
+   approves. Then invoke `managing-project-memory`. On `minimal`, it adds one line to
+   `CLAUDE.md` that points at `openspec/ROUTING.md`; on `advanced`, it decides where
+   `ROUTING.md` belongs. The router only works from somewhere memory reliably loads it.
 7. **Plugins.**
 
    ```bash
@@ -238,6 +260,9 @@ the user that **every** invocation this plugin makes sets them. Two of them are 
    switch does not orphan the files the previous level installed — they are still on disk
    and still ours, and returning to that level updates them instead of reporting a
    collision that never happened.
+
+   Retired names step 3 deleted leave the record; a retired name the user kept is still
+   on disk, so it stays recorded as ours.
 
    This runs **before** verification, deliberately. Verification exits non-zero on a
    failed check, and a legitimately blocked plugin is one — so with the order reversed, a
@@ -324,7 +349,7 @@ installs plus the built-in `spec-driven` ids (`proposal`, `specs`, `design`, `ta
   `$USER_RULES_JSON` is the `rules:` map you parsed, as JSON; `$KNOWN_IDS_JSON` is the
   prior step's `ids` array, verbatim. This is a union across the installed set: a rule
   keyed to `diagnose` is valid at `minimal` because `bugfix-flow` defines it, even though
-  that level's default schema is `mattpocock-bridge` — `classifyRules` carries it either
+  that level's default schema is `feature-flow` — `classifyRules` carries it either
   way, because membership is checked against the whole union, not the default schema.
 - **Unmatched ids** — never drop them, and never leave them under `rules:`, where OpenSpec
   warns about them on every command. The call above already rendered the trailing comment
@@ -354,8 +379,8 @@ before writing the file.
 
 State plainly:
 
-- what was created, updated, replaced, and backed up, with paths — and which schemas and
-  agents were left alone because they are the user's, naming each;
+- what was created, updated, replaced, backed up, and retired, with paths — and which
+  schemas and agents were left alone because they are the user's, naming each;
 - which plugins installed, which were skipped and why, and which were blocked and why —
   `install-plugins.mjs` reports the CLI's own stderr as the reason, not a guess, so pass it
   through verbatim rather than paraphrasing it into "blocked by managed settings";

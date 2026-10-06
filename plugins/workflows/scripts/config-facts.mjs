@@ -123,7 +123,7 @@ export function backupPath(configPath) {
  * reports — every schema the chosen level installs, plus the built-ins — never just the
  * ids of the level's *default* schema. A rule keyed to `diagnose` is valid at `minimal`
  * because `bugfix-flow` defines it, even though that level's default schema is
- * `mattpocock-bridge`; testing membership against only the default schema's ids would
+ * `feature-flow`; testing membership against only the default schema's ids would
  * silently discard that rule as "unmatched".
  *
  * `knownIds` is required to be a real iterable (a `Set` or array of strings) — passing
