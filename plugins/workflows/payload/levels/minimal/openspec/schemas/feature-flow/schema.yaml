@@ -203,8 +203,8 @@ artifacts:
          "- [ ] N.M <acceptance criterion>" lines. Apply tracks only the
          exact "- [ ] " form.
       6. Keep the template's Ship group. Where a surface consumes this
-         change and must ship with it, add
-         "Surface hand-off: impeccable builds <surface> against <seam>".
+         change and must ship with it, add a Ship box
+         `- [ ] Surface hand-off: impeccable builds <surface> against <seam>`.
 
       Done when every slice has a group, and every multi-session group
       names a real tracker reference.
@@ -245,7 +245,8 @@ apply:
     When the work goes up as a pull request, call the Skill tool with "pr"
     and give it the delta specs as well as the diff.
 
-    After the last slice, tick the Ship group and offer the human /retro;
-    never run it yourself. Pause and ask when a slice is unclear, when the
-    design proves wrong (name the artifact to update), or when an error
-    will not resolve.
+    After the last slice, tick the Ship boxes you completed and offer the
+    human /retro; never run it yourself. Leave Surface hand-off for the
+    human until impeccable has built the surface. Pause and ask when a
+    slice is unclear, when the design proves wrong (name the artifact to
+    update), or when an error will not resolve.

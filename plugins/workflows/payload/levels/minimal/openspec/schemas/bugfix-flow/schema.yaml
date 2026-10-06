@@ -113,8 +113,8 @@ artifacts:
       test item with "Record the missing seam in the commit message", and
       keep the Ship group's /improve-codebase-architecture item.
 
-      Where the fix makes the surface show a new state, add the Ship item
-      "Surface hand-off: impeccable presents <state> from <seam>".
+      Where the fix makes the surface show a new state, add a Ship box
+      `- [ ] Surface hand-off: impeccable presents <state> from <seam>`.
     requires:
       - specs
 
@@ -139,7 +139,8 @@ apply:
     7. Call the Skill tool with "code-review". The fixed point is the start
        commit; the spec source is diagnose.md and the delta specs. Fix the
        findings in one follow-up commit; do not loop the review.
-    8. Tick tasks.md and update any issue.
+    8. Tick tasks.md and update any issue. Leave Surface hand-off for the
+       human until impeccable has presented the state.
 
     Where diagnose.md says "No correct seam", skip the test in step 1 and
     record why in the commit message; the feedback loop still proves the
