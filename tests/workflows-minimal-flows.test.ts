@@ -230,3 +230,31 @@ describe.each(flows)('%s', (name) => {
 		expect(RETIRED_TERMS.filter((t) => text.includes(t))).toEqual([]);
 	});
 });
+
+describe('flow-design agent', () => {
+	const path = join(AGENTS, 'flow-design.md');
+
+	test('exists', () => {
+		expect(existsSync(path)).toBe(true);
+	});
+
+	test('frontmatter pins the top model and names its tools', () => {
+		const raw = readFileSync(path, 'utf8');
+		const fm = Bun.YAML.parse(raw.split(/^---$/m)[1]) as Record<string, string>;
+		expect(fm.name).toBe('flow-design');
+		expect(fm.description.length).toBeGreaterThan(0);
+		expect(fm.tools).toContain('Read');
+		expect(fm.tools).toContain('Skill');
+		expect(fm.model).toBe('opus');
+		expect(fm.effort).toBe('xhigh');
+	});
+
+	test('calls only model-invoked Pocock skills and names no retired term', () => {
+		const text = readFileSync(path, 'utf8');
+		expect(nonCanonicalSkillCalls(text)).toEqual([]);
+		expect(skillCalls(text).filter((s) => !ROSTER.modelInvoked.includes(s))).toEqual([]);
+		expect(text.match(/\binvoke\b/gi) ?? []).toEqual([]);
+		expect(slashCommands(text).filter((c) => !isAllowedCommand(c))).toEqual([]);
+		expect(RETIRED_TERMS.filter((t) => text.includes(t))).toEqual([]);
+	});
+});
