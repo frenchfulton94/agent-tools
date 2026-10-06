@@ -48,4 +48,5 @@ apply:
     lands, and the Ship boxes you completed at the end; leave for the human
     any box that waits on someone else. If the change grew a contract or a
     real decision on the way, stop and recreate it under feature-flow.
-    Offer the human /retro only if the change went sideways.
+    Offer the human /retro only if the change went sideways; never run it
+    yourself.

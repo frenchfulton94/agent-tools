@@ -112,4 +112,5 @@ apply:
     equivalence checks' before and after output, and a migrated data format
     makes the merge a one-way door. After the last group, tick the Ship
     boxes you completed, and leave for the human any box that waits on
-    someone else. Finish by offering the human /retro.
+    someone else. Finish by offering the human /retro; never run it
+    yourself.
