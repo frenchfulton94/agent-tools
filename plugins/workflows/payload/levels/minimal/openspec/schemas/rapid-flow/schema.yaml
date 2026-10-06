@@ -1,0 +1,51 @@
+name: rapid-flow
+version: 1
+description: >
+  A small code change, one decision wide, touching no contract, done in
+  one context window. proposal -> tasks -> apply. No specs artifact.
+  Typos, docs, and lint fixes need no change at all. Written against
+  mattpocock-skills 1.3.1.
+
+artifacts:
+  - id: proposal
+    generates: proposal.md
+    description: What and why, plus the contract check
+    template: proposal.md
+    instruction: |
+      Write one or two paragraphs on what changes and why. Then fill the
+      Contract check line. Recreate the change under feature-flow when
+      either holds:
+      - a decision here has real alternatives worth weighing;
+      - the change touches a contract: specified behaviour in
+        openspec/specs/, a public API, a data schema, or a config key.
+    requires: []
+
+  - id: tasks
+    generates: tasks.md
+    description: The steps, each with its acceptance criterion, and the Ship group
+    template: tasks.md
+    instruction: |
+      List the steps as checkboxes, each with an acceptance criterion, and
+      a test where the behaviour is testable. A copy or configuration change
+      may have none; say so. Checkboxes take the exact "- [ ] " form. Keep
+      the template's Ship group.
+    requires:
+      - proposal
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Do it in this window. Note the start commit. Where behaviour is
+    testable, call the Skill tool with "tdd" and write the test first.
+    Typecheck and run the affected tests as you go. Run the full suite,
+    then commit. Call the Skill tool with "code-review", with the start
+    commit as the fixed point and proposal.md as the spec source. It judges
+    best from a fresh session on a strong model; tell the user so. Fix the
+    findings in one follow-up commit. Do not loop the review. When the
+    change goes up as a pull request, call the Skill tool with "pr" and
+    give it proposal.md as well as the diff. Tick each step's box as it
+    lands, and the Ship boxes you completed at the end; leave for the human
+    any box that waits on someone else. If the change grew a contract or a
+    real decision on the way, stop and recreate it under feature-flow.
+    Offer the human /retro only if the change went sideways.

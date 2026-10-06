@@ -1,0 +1,115 @@
+name: upgrade-flow
+version: 1
+description: >
+  A dependency, framework, or platform version change, where success
+  means behaviour does not change. inventory -> surfaces -> tasks ->
+  apply. No specs artifact. Written against mattpocock-skills 1.3.1.
+
+artifacts:
+  - id: inventory
+    generates: inventory.md
+    description: The version jump and its breaking changes, from cited primary sources
+    template: inventory.md
+    instruction: |
+      Record what changes between the versions, from sources, never from
+      memory.
+
+      Call the Skill tool with "research". Point it at primary sources only:
+      official release notes, changelogs, migration guides, and source code
+      for every version between current and target. Save its file at
+      openspec/changes/<change>/research/<package>-<from>-<to>.md. It runs
+      as a background agent; wait for the file before writing any verdict.
+      Facts are the agent's job, never the user's.
+
+      Record the current and target versions, the motivation (end of life,
+      a CVE, a needed feature), any stepping-stone versions across several
+      majors, and one row per breaking change with an applies-to-us verdict
+      and a link into the research file.
+
+      A breaking change that forces a behaviour change users would see is a
+      feature-flow change of its own: note it and split it out.
+    requires: []
+
+  - id: surfaces
+    generates: surfaces.md
+    description: Search-verified call sites per breaking change, each classified
+    template: surfaces.md
+    instruction: |
+      Find where each applicable break lands, by search, with paths and
+      counts. Memory of a codebase is not evidence.
+
+      Classify each surface:
+      - mechanical: a codemod or a find-and-replace handles it;
+      - behavioural: it needs an equivalence check at a named seam. Prefer
+        a differential loop: run the same input through the old and the new
+        version and diff the output. Name the command;
+      - unknown: answer it with a spike-flow change before this one goes on.
+
+      List any step only a human can take, such as rotating a credential,
+      a provider dashboard, or a CI secret. Apply turns those into a wizard
+      script.
+    requires:
+      - inventory
+
+  - id: tasks
+    generates: tasks.md
+    description: Bump, codemods, surface batches, and shim removal, each green
+    template: tasks.md
+    instruction: |
+      Sequence the upgrade so every group lands green:
+      1. Bump, or run both versions side by side when the jump is large.
+      2. Run the codemods.
+      3. Fix the mechanical surfaces in batches sized by blast radius.
+      4. Fix each behavioural surface with its equivalence check written
+         and run first.
+      5. Delete the compatibility shims once nothing needs them.
+      6. The Ship group.
+
+      Fill the template's Rollback section: the revert procedure, usually
+      the lockfile, and any point of no return, such as a migrated data
+      format. Write the session shape on the Session line. Single-session
+      work continues in this window. Multi-session work publishes one issue
+      per group to the tracker in docs/agents/issue-tracker.md, labelled
+      ready-for-agent, with blocking edges; ask the human to run
+      /setup-matt-pocock-skills if that file is missing. Get the groups
+      approved through AskUserQuestion. Checkboxes take the exact "- [ ] "
+      form.
+    requires:
+      - surfaces
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Upgrade in tasks.md order, with behaviour held still.
+
+    Read tasks.md's Session line. Single-session: continue in this window.
+    Multi-session: work one group per fresh session, and fetch its tracker
+    issue for the acceptance criteria. Take the first group whose blockers
+    are done.
+
+    For each group:
+    1. Note the start commit. For a behavioural surface, call the Skill
+       tool with "tdd" and write its equivalence check first.
+    2. Make the change. Typecheck and run the affected tests and checks as
+       you go.
+    3. Run the full suite, then commit, with the lockfile in the same
+       commit as the code it resolves.
+    4. Call the Skill tool with "code-review". The fixed point is the start
+       commit; the spec source is inventory.md and surfaces.md. It judges
+       best from a fresh session on a strong model; tell the user so. Fix
+       the findings in one follow-up commit. Do not loop the review.
+    5. Tick the group and update its issue.
+
+    Where a step needs a human, call the Skill tool with "wizard" to
+    generate the script, and hand it over; never run it yourself.
+
+    An unexplained behavioural diff stops the upgrade: fix forward or roll
+    back per tasks.md. A deliberate behaviour change is a feature-flow
+    change, never part of an upgrade. When the work goes up as a pull
+    request, call the Skill tool with "pr" and give it inventory.md and
+    surfaces.md as well as the diff. The pull request's evidence is the
+    equivalence checks' before and after output, and a migrated data format
+    makes the merge a one-way door. After the last group, tick the Ship
+    boxes you completed, and leave for the human any box that waits on
+    someone else. Finish by offering the human /retro.
