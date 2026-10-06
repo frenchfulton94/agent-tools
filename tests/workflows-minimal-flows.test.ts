@@ -60,14 +60,35 @@ const readSchema = (name: string): Schema =>
 const textOf = (paths: string[]): string => paths.map((p) => readFileSync(p, 'utf8')).join('\n');
 const schemaText = (name: string): string => textOf(filesUnder(join(SCHEMAS, name)));
 
-/** Every skill a text calls, read from the one phrasing minimal schemas may use. */
+const SKILL_NAME = '"[a-z0-9-]+"';
+/**
+ * The one phrase a minimal schema may use to call a skill. Every other mention of the Skill
+ * tool is a defect: a call this phrase does not match would drop out of the roster check
+ * unseen, so skillCalls and nonCanonicalSkillCalls both read this single pattern.
+ */
+const CALL_PHRASE = new RegExp(
+	`[Cc]all the Skill tool (?:with|twice, for|three times, for) (${SKILL_NAME}(?:(?:,| and|, and) ${SKILL_NAME})*)`,
+	'g',
+);
+const flatten = (text: string): string => text.replace(/\s+/g, ' ');
+
+/** Every skill a text calls through the canonical phrase. */
 function skillCalls(text: string): string[] {
-	const flat = text.replace(/\s+/g, ' ');
-	const calls: string[] = [];
-	for (const m of flat.matchAll(/[Cc]all the Skill tool (?:with|twice, for|three times, for) ((?:"[a-z0-9-]+"(?:,? (?:and )?)?)+)/g)) {
-		for (const n of m[1].matchAll(/"([a-z0-9-]+)"/g)) calls.push(n[1]);
+	return [...flatten(text).matchAll(CALL_PHRASE)].flatMap((m) =>
+		[...m[1].matchAll(/"([a-z0-9-]+)"/g)].map((n) => n[1]),
+	);
+}
+
+/** A snippet for every mention of the Skill tool that no canonical call phrase covers. */
+function nonCanonicalSkillCalls(text: string): string[] {
+	const flat = flatten(text);
+	const covered = [...flat.matchAll(CALL_PHRASE)].map((m) => [m.index ?? 0, (m.index ?? 0) + m[0].length]);
+	const stray: string[] = [];
+	for (const m of flat.matchAll(/Skill tool/g)) {
+		const at = m.index ?? 0;
+		if (!covered.some(([from, to]) => at >= from && at < to)) stray.push(flat.slice(Math.max(0, at - 9), at + 60).trim());
 	}
-	return calls;
+	return stray;
 }
 
 /**
@@ -94,6 +115,28 @@ describe('the scanners themselves', () => {
 			'domain-modeling',
 			'tdd',
 		]);
+	});
+
+	test('nonCanonicalSkillCalls flags every phrasing skillCalls would drop', () => {
+		const probes = [
+			'Call the Skill tool with `grill-with-docs`.',
+			"Call the Skill tool with 'tdd'.",
+			'Call the Skill tool with tdd.',
+			'Call the Skill tool with "mattpocock-skills:retro".',
+			'Call the Skill tool four times, for "tdd" and "pr".',
+		];
+		for (const probe of probes) expect(nonCanonicalSkillCalls(probe)).toHaveLength(1);
+	});
+
+	test('nonCanonicalSkillCalls passes the canonical forms, across line breaks', () => {
+		const canonical = [
+			'Call the Skill tool with "tdd".',
+			'call the Skill tool with\n      "tdd".',
+			'Call the Skill tool twice, for "grilling" and\n      "domain-modeling".',
+			'Call the Skill tool three times, for "tdd", "pr", and\n"wizard".',
+		];
+		for (const text of canonical) expect(nonCanonicalSkillCalls(text)).toEqual([]);
+		expect(skillCalls(canonical[3])).toEqual(['tdd', 'pr', 'wizard']);
 	});
 
 	test('slashCommands finds commands and ignores paths and URLs', () => {
@@ -172,6 +215,7 @@ describe.each(flows)('%s', (name) => {
 
 	test('calls only model-invoked Pocock skills, in the canonical phrasing', () => {
 		const text = schemaText(name);
+		expect(nonCanonicalSkillCalls(text)).toEqual([]);
 		expect(skillCalls(text).filter((s) => !ROSTER.modelInvoked.includes(s))).toEqual([]);
 		expect(text.match(/\binvoke\b/gi) ?? []).toEqual([]);
 		expect(text.match(/Skill tool with "impeccable"/g) ?? []).toEqual([]);
