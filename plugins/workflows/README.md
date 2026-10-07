@@ -31,7 +31,7 @@ stops. `configuring-openspec` covers the configuration surfaces themselves.
 
 | Level | Schemas | Longest chain | Router |
 |---|---|---|---|
-| `minimal` | 2 | 6 artifacts | no |
+| `minimal` | 7 | 5 artifacts | yes |
 | `standard` | 2 | 7 artifacts | no |
 | `advanced` | 8 (9 in Apple-native app repos) | 10 artifacts | yes |
 
@@ -44,9 +44,9 @@ stops. `configuring-openspec` covers the configuration surfaces themselves.
 2. Reads the repo's recent commit subjects, sorts them into kinds, and asks one question:
    which level — with a recommendation and the evidence for it. It recommends; you decide.
 3. Shows a plan and waits. Nothing is written before you approve it.
-4. Applies, in order: `openspec init` (only if absent) → schemas → agents → TOOLS.md →
-   `config.yaml` → CLAUDE.md → plugins → verification → records what it
-   installed in `.claude/workflows.json`.
+4. Applies, in order: `openspec init` (only if absent) → schemas → agents → retired names,
+   each approved → TOOLS.md → `config.yaml` → router and CLAUDE.md → plugins →
+   verification → records what it installed in `.claude/workflows.json`.
 5. Reports what happened, what was skipped and why, and which human steps remain.
 
 ## What it will not do

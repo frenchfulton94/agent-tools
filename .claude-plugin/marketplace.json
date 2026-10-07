@@ -51,7 +51,7 @@
       "name": "workflows",
       "source": "./plugins/workflows",
       "category": "workflow",
-      "description": "Sets up or reconciles a project's OpenSpec workflow in one command: schemas and subagents for a chosen complexity level, a rewritten openspec/config.yaml that carries forward what you wrote, and guarded plugin installation. Re-runnable, with --check for read-only drift reporting. Also routes a piece of work to the right schema among the twelve it installs, detects Apple-native repos and adds the apple-studio layer plus an app-release workflow at the advanced level, and ships a self-paced learning package covering installation, routing, and every workflow end to end."
+      "description": "Sets up or reconciles a project's OpenSpec workflow in one command: schemas and subagents for a chosen complexity level, a rewritten openspec/config.yaml that carries forward what you wrote, and guarded plugin installation. Re-runnable, with --check for read-only drift reporting. Also routes a piece of work to the right schema among the seventeen it installs, detects Apple-native repos and adds the apple-studio layer plus an app-release workflow at the advanced level, and ships a self-paced learning package covering installation, routing, and every workflow end to end."
     },
     {
       "name": "unraid-ops",

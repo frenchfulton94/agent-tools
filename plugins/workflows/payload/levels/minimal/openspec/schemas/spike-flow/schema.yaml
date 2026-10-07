@@ -1,0 +1,75 @@
+name: spike-flow
+version: 1
+description: >
+  A timeboxed question answered by building or reading: logic, state,
+  feasibility, library choice, or outside facts. question -> findings,
+  with apply tracking question.md. Prototype code never merges. A "what
+  should it look like" question belongs to impeccable. Written against
+  mattpocock-skills 1.3.1.
+
+artifacts:
+  - id: question
+    generates: question.md
+    description: One question, the decision it informs, a timebox, and the experiments
+    template: question.md
+    instruction: |
+      Frame one question and the decision it informs.
+
+      Route first. A "what should it look like" question goes to
+      impeccable's generate or live variants; say so and stop. A question
+      that turns out to be an already-settled decision is a feature-flow or
+      rapid-flow change.
+
+      Where the question is fuzzy, call the Skill tool twice, for
+      "grilling" and "domain-modeling", to sharpen it. Then fill Domain
+      terms settled from the git diff of GLOSSARY.md and docs/adr/; delete
+      that section when the skills did not run.
+
+      Record:
+      - the question, and the decision it informs;
+      - a hard timebox. At expiry, findings get written with whatever
+        evidence exists;
+      - the answer criteria: what evidence would count as an answer;
+      - the experiments, as checkboxes, each tagged prototype, research, or
+        measurement.
+      Keep the template's last box, "Write findings.md". Archive warns while
+      it is open, which is what stops a spike ending with no findings.
+      Checkboxes take the exact "- [ ] " form.
+    requires: []
+
+  - id: findings
+    generates: findings.md
+    description: Answer, evidence, recommendation, and disposition
+    template: findings.md
+    instruction: |
+      Write this after the experiments end or the timebox expires, and
+      before archive. Lead with the answer. Back it with evidence: branch
+      links, research files, and measurements. Then recommend.
+
+      The disposition is mandatory:
+      - the prototype stays on its prototype/<name> branch as a primary
+        source and never merges;
+      - name any validated pure module worth lifting into real code;
+      - name the follow-up change, usually feature-flow, or record a
+        decision not to proceed.
+      Tick question.md's last box only once this file exists.
+    requires:
+      - question
+
+apply:
+  requires: [question]
+  tracks: question.md
+  instruction: |
+    Run the experiments and stop at the timebox.
+
+    - A prototype experiment: call the Skill tool with "prototype". Every
+      prototype, logic or feasibility, goes on a prototype/<name> branch
+      and never merges. A logic question gets one self-contained HTML file
+      around a pure module.
+    - A research experiment: call the Skill tool with "research". It runs
+      as a background agent; save its file at
+      openspec/changes/<change>/research/<topic>.md.
+    - A measurement: record the command and its output.
+
+    Tick each experiment as its evidence lands. At the timebox, stop
+    building, write findings.md, and only then tick the last box.

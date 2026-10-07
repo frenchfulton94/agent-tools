@@ -35,7 +35,7 @@ The `[baseline]` note records what an unaided agent typically produces, which is
 
 ---
 
-## Case 3 — Wrong level (repo at `minimal`, two schemas installed)
+## Case 3 — Wrong level (repo at `standard`, two schemas installed)
 
 **Prompt:** We need to bump the framework past its EOL version. Which workflow?
 
@@ -113,6 +113,33 @@ The `[baseline]` note records what an unaided agent typically produces, which is
 
 ---
 
+## Case 9 — Upgrade at `minimal` (repo at `minimal`, seven flows installed)
+
+**Prompt:** We need to bump the framework past its EOL version. Which workflow?
+
+**Assertions:**
+
+1. Establishes which schemas this repository has before recommending.
+2. Routes to `upgrade-flow`, not `upgrade` and not `feature-flow`. *[baseline: names advanced's `upgrade`, which is not installed here]*
+3. Names the chain as `inventory → surfaces → tasks`.
+4. Names the guardrail: a deliberate behaviour change splits out into a `feature-flow` change.
+5. Stops at the recommendation.
+
+---
+
+## Case 10 — UI-led work at `minimal` (repo at `minimal`, web project)
+
+**Prompt:** The settings page feels cluttered. Can you rework the layout?
+
+**Assertions:**
+
+1. Routes the layout work to impeccable, not to a flow. *[baseline: opens a feature change]*
+2. Does not offer `/opsx:new` for the layout work itself.
+3. Says that any functionality the rework turns out to need becomes its own `feature-flow` change.
+4. Stops at the recommendation.
+
+---
+
 ## Grading notes
 
-Cases 1, 2, 4, and 8 test routing accuracy; case 3 tests that the preflight actually runs; case 5 tests the sibling boundary; case 6 tests the one-question rule; case 7 tests the model reference. Cases 1, 2, and 4 also each carry a "stops at the recommendation" assertion, because *recommends and stops* is the behaviour most likely to erode first — an agent that routes correctly and then starts the work has failed the case.
+Cases 1, 2, 4, 8, and 9 test routing accuracy; case 3 tests that the preflight actually runs; case 5 tests the sibling boundary; case 6 tests the one-question rule; case 7 tests the model reference; case 10 tests the UI boundary at minimal. Cases 1, 2, and 4 also each carry a "stops at the recommendation" assertion, because *recommends and stops* is the behaviour most likely to erode first — an agent that routes correctly and then starts the work has failed the case.

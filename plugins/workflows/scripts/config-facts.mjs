@@ -1,4 +1,4 @@
-import { pathToFileURL } from 'node:url';
+import { isMain } from './lib/cli.mjs';
 import { runCommand } from './lib/run.mjs';
 
 /**
@@ -123,7 +123,7 @@ export function backupPath(configPath) {
  * reports — every schema the chosen level installs, plus the built-ins — never just the
  * ids of the level's *default* schema. A rule keyed to `diagnose` is valid at `minimal`
  * because `bugfix-flow` defines it, even though that level's default schema is
- * `mattpocock-bridge`; testing membership against only the default schema's ids would
+ * `feature-flow`; testing membership against only the default schema's ids would
  * silently discard that rule as "unmatched".
  *
  * `knownIds` is required to be a real iterable (a `Set` or array of strings) — passing
@@ -148,6 +148,36 @@ export function classifyRules(userRules, knownIds) {
 		else unmatched[id] = rules;
 	}
 	return { carried, unmatched };
+}
+
+/**
+ * Splits a project's parsed `rules:` map (artifact id → rules) and `operations.*.guidance`
+ * map (operation → guidance) into `kept` and `dropped`, against the config text the
+ * previous release of this level shipped (`retired.json`'s `config`). Without it, a
+ * reconcile reads the old example's text as the user's own: rules carry forward under ids
+ * the new schemas still define, where they now fire in flows they were never written for,
+ * and old guidance is appended after the new example's.
+ *
+ * A line is dropped only when it equals shipped text under the same key after trimming.
+ * Anything else, including shipped text moved to another key or edited by one character,
+ * may be the user's and is kept. A missing `retired` drops nothing. A key whose lines are
+ * all dropped is absent from `kept`, so `classifyRules` never carries an empty list.
+ */
+export function splitRetiredConfig({ rules, guidance } = {}, retired) {
+	const split = (map, shipped) => {
+		const kept = {};
+		const dropped = {};
+		for (const [key, value] of Object.entries(map ?? {})) {
+			const known = new Set((shipped?.[key] ?? []).map((line) => String(line).trim()));
+			const lines = Array.isArray(value) ? value : value == null ? [] : [value];
+			for (const line of lines) {
+				const into = known.has(String(line).trim()) ? dropped : kept;
+				(into[key] ??= []).push(line);
+			}
+		}
+		return { kept, dropped };
+	};
+	return { rules: split(rules, retired?.rules), guidance: split(guidance, retired?.guidance) };
 }
 
 /**
@@ -189,7 +219,7 @@ export function contextSize(text) {
 	return { bytes, capBytes: CONTEXT_CAP_BYTES, overCap: bytes > CONTEXT_CAP_BYTES };
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (isMain(import.meta.url)) {
 	const repoRoot = process.argv[2] ?? process.cwd();
 	const result = artifactIds(repoRoot);
 	console.log(JSON.stringify({ ...result, ids: result.ids ? [...result.ids].sort() : null }, null, 2));

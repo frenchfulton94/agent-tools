@@ -1,0 +1,141 @@
+name: refactor-flow
+version: 1
+description: >
+  Structure changes while behaviour at the external seam does not:
+  deepening a module, in codebase-design's deep-module vocabulary.
+  grill -> design -> tasks -> apply. No specs artifact, so changes archive
+  without a spec merge. Coverage backfill is a refactor with no
+  restructure. Written against mattpocock-skills 1.3.1.
+
+artifacts:
+  - id: grill
+    generates: grill.md
+    description: The deepening candidate, what moves behind the seam, and the behaviour that must not change
+    template: grill.md
+    instruction: |
+      Settle what is being deepened and what must not move.
+
+      Guard first: if behaviour a caller can observe at the external seam
+      has to change, this is a feature. Say so and offer
+      /opsx:new <the change>, using feature-flow.
+
+      Read the change's source first: a candidate from the human's
+      /improve-codebase-architecture report, a bugfix that found no correct
+      seam, or the request itself. When /improve-codebase-architecture
+      already grilled this candidate in this window, record its decisions
+      here instead of asking again.
+
+      Otherwise call the Skill tool twice, for "grilling" and
+      "domain-modeling", and call the Skill tool with "codebase-design" for
+      the vocabulary. Settle, in rounds:
+      - the module being deepened, and what moves behind its seam;
+      - the dependency category: in-process, local-substitutable, ports and
+        adapters, or mock;
+      - the external behaviour that must not change, stated so a test can
+        pin it.
+      Coverage backfill with no restructure is valid here: say so, and the
+      guard tests become the whole deliverable.
+
+      Done when the user confirms you share an understanding, and Domain
+      terms settled matches the git diff of GLOSSARY.md and docs/adr/, or
+      says "none".
+    requires: []
+
+  - id: design
+    generates: design.md
+    description: Target interface, seam and adapters, the guard tests, and the tests to replace
+    template: design.md
+    instruction: |
+      Design the deepened module and the tests that prove nothing moved.
+
+      When the user wants alternative interfaces, run codebase-design's
+      design-it-twice here in the main session before anything else. It
+      fans out its own parallel sub-agents, so it cannot run inside an
+      agent. Record the chosen interface in grill.md's Decisions.
+
+      Run the flow-design agent (.claude/agents/flow-design.md). Its prompt
+      names the change directory and says the schema is refactor-flow. Write
+      its draft here. Then:
+      1. Put each ADR candidate to the user as a yes or no. For each one
+         accepted, call the Skill tool with "domain-modeling" and write it
+         to docs/adr/.
+      2. Put the Guard tests and the Seam and adapters section to the user
+         through AskUserQuestion: approve, or adjust.
+      3. Resolve every returned question that would change the tasks.
+
+      If the agent is missing or fails, say so, call the Skill tool with
+      "codebase-design", and draft the same sections inline.
+
+      Two rules from codebase-design bind this design. One adapter means a
+      hypothetical seam and two mean a real one, so introduce no seam that
+      nothing varies across. And replace, don't layer: list the shallow
+      tests that the new interface tests make redundant, for deletion once
+      their replacements pass. Fill Domain terms settled from the git diff,
+      or write "none".
+    requires:
+      - grill
+
+  - id: tasks
+    generates: tasks.md
+    description: Ordered slices, each green and committable, ending in deletion of the old form
+    template: tasks.md
+    instruction: |
+      Sequence the restructure so the guard tests stay green after every
+      slice.
+
+      Write the session shape on the Session line. Single-session work
+      continues in this window. Multi-session work publishes one issue per
+      slice to the tracker in docs/agents/issue-tracker.md, labelled
+      ready-for-agent, with native blocking edges; ask the human to run
+      /setup-matt-pocock-skills if that file is missing.
+
+      Order:
+      1. Guard tests first, where design.md says they are missing.
+      2. Prefactoring that makes the move easy.
+      3. The deepening itself: vertical slices where it can be, or expand,
+         migrate, contract where one mechanical change fans out. Expand adds
+         the new interface beside the old. Migrate moves call sites in
+         batches sized by blast radius, each blocked by the expand. Contract
+         deletes the old form and the replaced shallow tests, blocked by
+         every batch.
+      4. The Ship group.
+
+      Every slice's last criterion is "Guard tests green, no guard
+      assertion changed". Present the slices as a numbered list and get
+      them approved through AskUserQuestion. Checkboxes take the exact
+      "- [ ] " form.
+    requires:
+      - design
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Restructure one slice at a time, with the guard tests green throughout.
+
+    Read tasks.md's Session line. Single-session: continue in this window.
+    Multi-session: work one slice per fresh session, and fetch its tracker
+    issue for the acceptance criteria. Take any slice whose blockers are
+    done.
+
+    For each slice:
+    1. Note the start commit. Call the Skill tool with "tdd" for new tests
+       at the seam design.md agreed.
+    2. Typecheck and run the guard tests and the affected tests as you
+       go. A guard assertion that has to change means behaviour moved:
+       stop, revert the slice, and offer /opsx:new <the change>, using
+       feature-flow.
+    3. Delete a shallow test only once its replacement at the new interface
+       passes.
+    4. Run the full suite, then commit.
+    5. Call the Skill tool with "code-review". The fixed point is the start
+       commit; the spec source is grill.md and design.md. It judges best
+       from a fresh session on a strong model; tell the user so. Fix the
+       findings in one follow-up commit. Do not loop the review.
+    6. Tick the slice and update its issue.
+
+    A refactor that leaves both the old and the new form is unfinished;
+    the contract slice deletes the old one. When the work goes up as a pull
+    request, call the Skill tool with "pr" and give it grill.md and
+    design.md as well as the diff. After the last slice, offer the human
+    /retro; never run it yourself. Then tick the Ship boxes you completed.

@@ -1,0 +1,86 @@
+name: setup-flow
+version: 1
+description: >
+  Bootstrapping a new project: stack decisions, the first glossary terms,
+  standards, guardrails, and a walking skeleton green in CI.
+  decisions -> tasks -> apply. No specs artifact, because no behaviour
+  exists yet. Written against mattpocock-skills 1.3.1.
+
+artifacts:
+  - id: decisions
+    generates: decisions.md
+    description: Stack choices with ADRs, the glossary seed, standards, guardrails, and human-only steps
+    template: decisions.md
+    instruction: |
+      Decide the foundations with the user, and write each where it lives.
+
+      Call the Skill tool twice, for "grilling" and "domain-modeling". Ask
+      in grilling's rounds, each question carrying a recommended default.
+      Cover the language, framework, datastore, test framework, package
+      manager, and deploy target. At bootstrap nearly every stack choice
+      passes the ADR test (hard to reverse, surprising without context, and
+      a real trade-off), so write each to docs/adr/ in the round that
+      settles it.
+
+      Record:
+      - Stack: each choice, linked to its ADR.
+      - Glossary seed: the first domain terms, written to GLOSSARY.md.
+      - Standards: judgement calls only, for CODING_STANDARDS.md, which
+        code-review's Standards axis reads.
+      - Guardrails: the lint, typecheck, and test commands, wired into a
+        pre-commit hook or CI. A mechanical rule becomes a check, not a
+        standard.
+      - Human-only steps: provisioning, credentials, CI secrets, and
+        dashboards. Each becomes a wizard stage.
+      - Deferred decisions, and what will trigger each.
+
+      Done when the user confirms, and Domain terms settled matches the git
+      diff of GLOSSARY.md and docs/adr/, or says "none".
+    requires: []
+
+  - id: tasks
+    generates: tasks.md
+    description: Bootstrap checklist through a walking skeleton green in CI
+    template: tasks.md
+    instruction: |
+      List the bootstrap as checkboxes, in the template's order. The first
+      task asks the human to run /setup-matt-pocock-skills; no task
+      publishes to a tracker before it has run. The exit criterion is a
+      walking skeleton: the thinnest end-to-end slice, with one real test,
+      building and passing in CI. Keep the impeccable hand-off item only
+      when the project has a user interface. Checkboxes take the exact
+      "- [ ] " form.
+    requires:
+      - decisions
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Bootstrap per decisions.md, in tasks.md order.
+
+    - Ask the human to run /setup-matt-pocock-skills first. It writes the
+      tracker, label, and domain-doc configuration the other flows read,
+      and only a human can run it.
+    - Scaffold the project and its manifest.
+    - Call the Skill tool with "tdd" for the walking skeleton's one real
+      test, at a seam you agree with the user.
+    - Wire the guardrails from decisions.md into pre-commit or CI, and
+      prove each one fails on a deliberate violation before it passes.
+    - Call the Skill tool with "wizard" for the human-only steps. Hand the
+      script over and never run it.
+    - Write CODING_STANDARDS.md from the Standards section.
+    - Add navigation pointers to CLAUDE.md, and only pointers: to
+      GLOSSARY.md, docs/adr/, CODING_STANDARDS.md, and openspec/ROUTING.md.
+    - On a project with a user interface, ask the human to run
+      /impeccable init and then /impeccable document. Impeccable owns the
+      files they write.
+
+    Commit as each task lands. Prove the skeleton green in CI before
+    ticking its box. Then call the Skill tool with "code-review" over the
+    whole bootstrap, from the first commit, with decisions.md as the spec
+    source. It judges best from a fresh session on a strong model; tell the
+    user so. Fix the findings in one follow-up commit. Do not loop the
+    review. Offer the human /retro; never run it yourself. Then tick the
+    Ship boxes you completed. Tick the Surface hand-off box only once the
+    human confirms they ran /impeccable init and /impeccable document.

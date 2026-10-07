@@ -1,7 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { backupPath } from './config-facts.mjs';
+import { isMain } from './lib/cli.mjs';
 import { mergeManifests, planInstalls } from './lib/settings.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -97,6 +98,56 @@ function classify(shipped, existingNames, hashes, recorded) {
 		else collide.push(name);
 	}
 	return { copy, update, collide };
+}
+
+/**
+ * Names this level used to ship and no longer does, from `levels/<level>/retired.json`.
+ * Setup deletes nothing on its own, so without this a renamed schema or a dropped agent
+ * stays on disk indefinitely — and a dropped agent keeps loading, its description still
+ * telling the model to reach for it. A retired name is offered for deletion only when the
+ * record says this plugin wrote it, its bytes still match what was written, and nothing
+ * still needs it. Everything else is kept with its reason, because a file the user edited,
+ * or one an in-flight change resolves against, is theirs to delete.
+ *
+ * An open change whose schema detection could not read (`null`) might be any of them, and
+ * a detection with no `changeSchemas` at all never looked; both keep every retired schema.
+ * Retired agents stay while any retired schema stays, because the old schemas dispatch them.
+ */
+function planRetirement(levelDir, detection) {
+	const retired = readJson(join(levelDir, 'retired.json'));
+	const changes = detection.openspec?.changeSchemas;
+
+	const sweep = (names, onDisk, hashes, recorded, blocker) => {
+		const out = { retire: [], keep: [] };
+		for (const name of names ?? []) {
+			if (!(onDisk ?? []).includes(name)) continue;
+			let reason;
+			if (!recorded?.[name]) reason = 'not installed by this plugin';
+			else if (!hashes?.[name] || hashes[name] !== recorded[name]) reason = 'edited since this plugin installed it';
+			else reason = blocker(name);
+			if (reason) out.keep.push({ name, reason });
+			else out.retire.push(name);
+		}
+		return out;
+	};
+
+	const schemas = sweep(
+		retired.schemas,
+		detection.openspec?.schemas,
+		detection.openspec?.schemaHashes,
+		detection.prior?.schemas,
+		(name) => {
+			if (!changes) return 'open changes were not checked, so one may use it';
+			const open = Object.values(changes);
+			if (open.includes(name)) return 'an open change uses it';
+			if (open.includes(null)) return 'an open change names no schema, so it may use this one';
+			return null;
+		},
+	);
+	const agents = sweep(retired.agents, detection.agents?.files, detection.agents?.hashes, detection.prior?.agents, () =>
+		schemas.keep.length > 0 ? 'a retired schema it serves is being kept' : null,
+	);
+	return { schemas, agents };
 }
 
 /**
@@ -241,6 +292,7 @@ export function buildPlan(detection, { level, payloadRoot = PAYLOAD }) {
 		openspecInit: !detection.openspec.present,
 		schemas,
 		agents,
+		retire: planRetirement(levelDir, detection),
 		config: {
 			action: configExists ? 'replace' : 'create',
 			// `backupPath` (config-facts.mjs) owns the collision-resistance guarantee — a
@@ -256,7 +308,7 @@ export function buildPlan(detection, { level, payloadRoot = PAYLOAD }) {
 	};
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (isMain(import.meta.url)) {
 	// A pipeline consumer must never receive JSON it could mistake for a real plan, so nothing
 	// is written to stdout unless buildPlan actually succeeds — every failure goes to stderr
 	// only, with a non-zero exit. But a user typo and a genuine defect are not the same problem:

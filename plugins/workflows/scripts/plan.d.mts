@@ -20,6 +20,11 @@ export interface PlanDetectionOpenspec {
 	 */
 	schemaHashes?: Record<string, string>;
 	configPath: string | null;
+	/**
+	 * `{ changeName: schemaName | null }` for each open change. Optional so an older detection
+	 * still type-checks; absent is treated as "not checked", which keeps every retired schema.
+	 */
+	changeSchemas?: Record<string, string | null>;
 }
 
 export interface PlanDetectionAgents {
@@ -108,6 +113,23 @@ export interface PlanEntries {
 	collide: string[];
 }
 
+export interface PlanRetireKeep {
+	name: string;
+	reason: string;
+}
+
+/** `retire`: safe to offer for deletion at the gate. `keep`: left on disk, each with its reason. */
+export interface PlanRetireSide {
+	retire: string[];
+	keep: PlanRetireKeep[];
+}
+
+/** Names this level no longer ships (`levels/<level>/retired.json`), split for the gate. */
+export interface PlanRetirement {
+	schemas: PlanRetireSide;
+	agents: PlanRetireSide;
+}
+
 export interface PlanConfig {
 	action: 'create' | 'replace';
 	backupTo: string | null;
@@ -149,6 +171,7 @@ export interface Plan {
 	openspecInit: boolean;
 	schemas: PlanEntries;
 	agents: PlanEntries;
+	retire: PlanRetirement;
 	config: PlanConfig;
 	plugins: PlanPlugins;
 	humanSteps: string[];

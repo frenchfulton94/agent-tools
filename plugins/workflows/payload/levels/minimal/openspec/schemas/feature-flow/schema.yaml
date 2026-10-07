@@ -1,0 +1,256 @@
+name: feature-flow
+version: 1
+description: >
+  A new capability or an intentional behaviour change, in the shape of
+  Matt Pocock's main flow: grill -> proposal -> specs -> design -> tasks
+  -> apply. The flows own functionality up to a presentation seam;
+  impeccable owns UI/UX. The config default. Written against
+  mattpocock-skills 1.3.1.
+
+artifacts:
+  - id: grill
+    generates: grill.md
+    description: Decision log from the interview, with the glossary and ADRs written inline
+    template: grill.md
+    instruction: |
+      Interview the user until you share an understanding, then record what
+      was settled.
+
+      Classify the work first, and reroute when it is not a feature:
+      - a defect: /opsx:new <what is broken>, using bugfix-flow;
+      - one decision wide, touching no contract: recreate under rapid-flow;
+      - a question in disguise: recreate under spike-flow;
+      - too big and foggy for one change: stop and offer the human
+        /wayfinder. Its cleared map re-enters this flow at the proposal.
+      Read the source the change started from before asking anything: a
+      /triage agent brief, a wayfinder map, or an impeccable brief.
+
+      Call the Skill tool twice, for "grilling" and "domain-modeling". Ask
+      in grilling's own rounds. Write each term to GLOSSARY.md, and each ADR
+      to docs/adr/, in the round that settles it: a term pinned in round
+      one is one that rounds two and three can use precisely.
+
+      Two detours leave files; put them where they survive:
+      - A logic or state question that needs a runnable answer: call the
+        Skill tool with "prototype". It keeps the code on a prototype/<name>
+        branch. Record the verdict, the question it settled, and the branch.
+      - A question that needs facts from outside the repository: call the
+        Skill tool with "research". Save its file at
+        openspec/changes/<change>/research/<topic>.md and cite it.
+
+      Look and feel belong to impeccable. When the change has a surface,
+      write "look and feel: impeccable" under Handed downstream and ask
+      only behaviour questions.
+
+      Ask what changes the shape of the problem. Module placement, typing,
+      and seams belong to design; slicing and sequencing belong to tasks.
+      Record each such question under Handed downstream with the artifact
+      that owns it, and move on.
+
+      Done when the user confirms you share an understanding, and Domain
+      terms settled matches the git diff of GLOSSARY.md and docs/adr/, or
+      says "none". The human may run /grill-with-docs instead; save what it
+      settles here. Where the user waives the interview, write grill.md as
+      one line holding the reason and the date.
+    requires: []
+
+  - id: proposal
+    generates: proposal.md
+    description: Why and what, in the /to-spec shape, kept inside the change
+    template: proposal.md
+    instruction: |
+      Synthesise grill.md into the proposal without a new interview. A
+      statement the user never made is a defect: every statement must trace
+      to grill.md.
+
+      Sections:
+      - Problem and Solution, from the user's perspective.
+      - User Stories: a long numbered list, "As a <actor>, I want <feature>,
+        so that <benefit>", covering every behaviour this change adds. Specs
+        turns each story into requirements, so a missing story is a missing
+        requirement.
+      - Capabilities: read openspec/specs/ first. Each new capability
+        becomes specs/<capability-path>/spec.md, kebab-case, following the
+        existing layout. Each modified capability names its exact existing
+        path and which requirement changes or goes. A change with no
+        capability to add or modify belongs in refactor-flow or rapid-flow.
+      - Out of Scope.
+      - Impact: affected modules and systems. Name any ADR this contradicts
+        and make the case for reopening it.
+
+      Use GLOSSARY.md's terms. Describe modules and behaviour, not file
+      paths, which go stale. Inline a prototype snippet only when it encodes
+      a decision more precisely than prose can. Keep it to one or two
+      pages: why and what, never how.
+
+      This is /to-spec's shape, kept in the change folder so it archives
+      with the change. Do not offer /to-spec here: it publishes a
+      ready-for-agent issue that AFK pollers would build.
+    requires:
+      - grill
+
+  - id: specs
+    generates: "specs/**/*.md"
+    description: Delta specs, the behaviour contract this change adds, modifies, or removes
+    template: spec.md
+    instruction: |
+      Turn the proposal into delta specs: what the system must do,
+      observably, once this change lands. Write one file per capability in
+      the proposal, at specs/<capability-path>/spec.md. The CLI reports this
+      output as the glob specs/**/*.md; expand it to real files.
+
+      Two sources:
+      - ADDED requirements come from the user stories. Every story maps to
+        at least one requirement, and every ADDED requirement traces to a
+        story. Walk both directions before finishing.
+      - MODIFIED and REMOVED requirements come from the main spec at
+        openspec/specs/<capability-path>/spec.md.
+
+      A spec states observable behaviour: inputs, outputs, error kinds, and
+      constraints such as security and compatibility. If the implementation
+      can change without changing what a caller observes, it belongs in
+      design. For a change a surface consumes, specify the states the module
+      emits, such as empty, error, and permission denied, and its error
+      kinds. How a state looks and reads belongs to impeccable: never assert
+      wording a user reads.
+
+      Format:
+      - Group under ## ADDED, ## MODIFIED, ## REMOVED, or ## RENAMED
+        Requirements.
+      - "### Requirement: <name>", stated with SHALL or MUST.
+      - "#### Scenario: <name>" with WHEN and THEN bullets. Exactly four
+        hashtags; the parser drops other levels without a warning.
+      - Every requirement carries at least one scenario.
+      - MODIFIED copies the whole requirement block from the main spec,
+        header included. Archive replaces the block by its header.
+      - REMOVED gives a Reason and a Migration. When it removes a
+        capability's last requirement, set retire_capabilities: true in the
+        change's .openspec.yaml and tell the user archive will delete that
+        main spec.
+      - RENAMED uses FROM: and TO: lines.
+      - A new capability opens with ## Purpose, at least 50 characters.
+
+      Write each scenario so it could become a test at a seam.
+    requires:
+      - proposal
+
+  - id: design
+    generates: design.md
+    description: Module shape, the seams tests are written at, and the decisions behind both
+    template: design.md
+    instruction: |
+      Decide how to build it and where it is tested from.
+
+      Run the flow-design agent (.claude/agents/flow-design.md). Its prompt
+      names the change directory and says the schema is feature-flow; an
+      agent inherits nothing else. It returns a design.md draft, ADR
+      candidates, and caller actions. Then:
+      1. Write the draft here.
+      2. Put each ADR candidate to the user as a yes or no. For each one
+         accepted, call the Skill tool with "domain-modeling" and write it
+         to docs/adr/ in that skill's format.
+      3. Resolve with the user every returned question that would change
+         the specs or the tasks. Only questions that change neither may stay
+         under Open Questions.
+      4. Put the Seams table to the user through AskUserQuestion: approve,
+         or adjust. tdd writes tests only at agreed seams.
+      5. Where a surface consumes this change, confirm the Presentation seam
+         block names the consumer surface and its brief path.
+
+      If the agent is missing or fails, say so, call the Skill tool with
+      "codebase-design", and draft the same sections inline.
+
+      Never skip this artifact. A one-module change shrinks design.md to the
+      Seams table, because apply cannot test without agreed seams. Fill
+      Domain terms settled from the git diff of GLOSSARY.md and docs/adr/,
+      or write "none".
+    requires:
+      - proposal
+      - specs
+
+  - id: tasks
+    generates: tasks.md
+    description: Tracer-bullet slices, published when the build spans sessions, mirrored as checkboxes
+    template: tasks.md
+    instruction: |
+      Break the work into tracer-bullet slices, agree them with the user,
+      and mirror them here as checkboxes.
+
+      1. Choose the session shape and write it on the Session line.
+         Single-session: the whole build fits one fresh context window;
+         apply continues in this window and tasks live only here.
+         Multi-session: anything larger; slices go to the tracker.
+      2. Draft slices. Each cuts a narrow, complete path through every layer
+         it touches, so a finished slice is demoable alone. Size each to one
+         fresh context window. Put prefactoring first: make the change easy,
+         then make the easy change. Give each slice its blocking edges. A
+         wide refactor, one mechanical change whose blast radius fans out,
+         runs expand, migrate, contract instead; batches that cannot stay
+         green alone share an integration branch, and a final
+         integrate-and-verify slice, blocked by every batch, promises green.
+      3. Present the slices as a numbered list: title, blocked by, and what
+         it delivers. Put the verdict to the user through AskUserQuestion:
+         approve, or name what to merge, split, or resequence. Iterate until
+         approved.
+      4. Multi-session only: read docs/agents/issue-tracker.md, or ask the
+         human to run /setup-matt-pocock-skills if it is missing. Publish one
+         issue per slice in dependency order, labelled ready-for-agent, with
+         the tracker's native blocking edges. When the change started from
+         an issue, make each slice its sub-issue. The human may run
+         /to-tickets instead; then mirror what it published.
+      5. Mirror the slices here in the same order, as
+         "## N. <title> (<tracker reference, or local>)" with
+         "- [ ] N.M <acceptance criterion>" lines. Apply tracks only the
+         exact "- [ ] " form.
+      6. Keep the template's Ship group. Where a surface consumes this
+         change and must ship with it, add a Ship box
+         `- [ ] Surface hand-off: impeccable builds <surface> against <seam>`.
+         Where design.md has a Presentation seam block, the slice that
+         builds the seam carries the acceptance criterion
+         `- [ ] N.M One fixture per emitted state in design.md's Presentation seam block`,
+         so impeccable can render every state.
+
+      Done when every slice has a group, and every multi-session group
+      names a real tracker reference.
+    requires:
+      - specs
+      - design
+
+apply:
+  requires: [tasks]
+  tracks: tasks.md
+  instruction: |
+    Build one slice at a time, test-first, reviewed before it lands.
+
+    Read tasks.md's Session line. Single-session: continue in this window.
+    Multi-session: work one slice per fresh session, and fetch its tracker
+    issue for the acceptance criteria. Take any slice whose blockers are
+    done. The human may run /implement-spec over the whole ticket graph
+    instead; after it returns, tick tasks.md from the closed tickets. For
+    most unattended work, Matt Pocock recommends a deterministic loop that
+    runs one slice per fresh session over /implement-spec.
+
+    For each slice:
+    1. Note the start commit. Call the Skill tool with "tdd". Write tests
+       only at seams design.md agreed. A wrong seam stops the slice: agree
+       a new one with the user and update design.md first.
+    2. Typecheck and run the affected tests as you go.
+    3. Run the full suite.
+    4. Commit.
+    5. Call the Skill tool with "code-review". The fixed point is the start
+       commit; the spec source is proposal.md and the delta specs. It
+       judges best from a fresh session on a strong model; tell the user so.
+    6. Fix the findings in one follow-up commit. Do not loop the review.
+    7. Tick the slice's boxes and update its issue.
+
+    Surface work is impeccable's. Build up to the presentation seam and
+    leave the surface to the hand-off item.
+
+    When the work goes up as a pull request, call the Skill tool with "pr"
+    and give it the delta specs as well as the diff.
+
+    After the last slice, offer the human /retro; never run it yourself.
+    Then tick the Ship boxes you completed. Leave Surface hand-off for the
+    human until impeccable has built the surface. Pause and ask when a
+    slice is unclear, when the design proves wrong (name the artifact to
+    update), or when an error will not resolve.

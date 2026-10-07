@@ -1,4 +1,4 @@
-# The twelve chains (thirteen in Apple-native app repos)
+# The seventeen chains (eighteen in Apple-native app repos)
 
 Everything needed to fill in the chain, gate, and hatch lines of a routing answer, and to
 drive the chain afterwards. Read only the section for the schema you routed to.
@@ -6,7 +6,7 @@ drive the chain afterwards. Read only the section for the schema you routed to.
 Contents:
 
 - [How to read these](#how-to-read-these)
-- [`minimal` — mattpocock-bridge, bugfix-flow](#minimal)
+- [`minimal` — the seven flows](#minimal)
 - [`standard` — craft-driven, surface-driven](#standard)
 - [`advanced` — the everyday four](#advanced--the-everyday-four)
 - [`advanced` — the situational four](#advanced--the-situational-four)
@@ -35,54 +35,111 @@ manually". A schema that names a skill the session does not have degrades; it do
 fail. Skill names are written `pack:skill`, and installation prefixes vary — confirm the
 exact name in the agent's skill list.
 
+The `minimal` flows are the exception. They call only mattpocock-skills, which that level
+installs, so they carry no fallback chain beyond the `flow-design` agent's inline one.
+
 ## `minimal`
 
-### `mattpocock-bridge` — 6 artifacts, the config default
+Seven flows, every artifact driven by a skill from mattpocock-skills 1.3.1. Impeccable owns
+UI/UX; the flows own functionality up to a presentation seam. `openspec/ROUTING.md` routes
+between them.
 
-`grill → proposal → surface → specs → design → tasks`, then `apply`.
+### `feature-flow` — 5 artifacts, the config default
+
+`grill → proposal → specs → design → tasks`, then `apply`.
 
 | Artifact | `requires` | Carries |
 |---|---|---|
-| `grill` | — | Interview in rounds; `CONTEXT.md` and ADRs written inline |
-| `proposal` | `grill` | Problem / Solution / User Stories, plus the Capabilities contract |
-| `surface` | `proposal` | Design brief: visitor mode, states and ranges, direction, boundaries |
-| `specs` | `proposal`, `surface` | Delta specs. `ADDED` from the user stories; `MODIFIED`/`REMOVED` from the existing main spec |
-| `design` | `proposal`, `specs` | Deep-module vocabulary and the **Seams** table, every scenario covered by name |
-| `tasks` | `specs`, `design` | Tracer-bullet slices published to the tracker, mirrored as checkboxes |
+| `grill` | — | Interview in grilling's rounds; `GLOSSARY.md` and ADRs written inline and listed under Domain terms settled |
+| `proposal` | `grill` | Problem / Solution / User Stories / Capabilities, every statement traceable to the grill |
+| `specs` | `proposal` | Delta specs: `ADDED` from the stories, `MODIFIED`/`REMOVED` from the main spec |
+| `design` | `proposal`, `specs` | The Seams table, every scenario covered; a Presentation seam block when a surface consumes the change |
+| `tasks` | `specs`, `design` | Session shape, tracer-bullet slices (published when multi-session), and the Ship group |
 
 - **Gate:** the grill. Facts are the agent's job; decisions are the user's.
-- **Hatches:** `skip_grill` and `skip_surface` (stub file required — the CLI does not read
-  either key), `skip_specs` (the CLI does read this), and `design` skipped deliberately
-  when the change is one module with no new dependency and no security, performance, or
-  migration question.
-- **Config rule:** confirm the Seams table with the user before marking `design` done.
-- **Dispatches:** `bridge-design-gate` at `design`; `code-review-standards` and
-  `code-review-spec` in parallel at each slice's review.
-- **Apply:** one slice per session. Failing test at an agreed seam → smallest code to pass
-  → affected tests as you go, full suite at the end → the design pass on visible surfaces →
-  the two-axis review → tick and commit. Then stop; a session degrades past roughly 150k
-  tokens and each slice is self-contained by construction.
-- **Reopen:** if the grill realises this is a defect, offer
-  `/opsx:new <what the fix really is>, using bugfix-flow` — or the terminal form,
-  `openspec new change <name> --schema bugfix-flow`.
+- **Hatch:** a one-line `grill.md` stub when the user waives the interview.
+- **Dispatches:** `flow-design` at `design`.
+- **Apply:** `tdd` at agreed seams → full suite → **commit** → `code-review` from the
+  slice's start commit → one follow-up commit for findings. `tasks.md`'s Session line sets
+  the window: single-session apply continues in the planning window, with no `/clear`;
+  multi-session runs each slice in a fresh session, or the human runs `/implement-spec`
+  instead.
+- **Reroute:** a defect → `bugfix-flow`; one decision wide → `rapid-flow`; a question →
+  `spike-flow`; fog → `/wayfinder`.
 
-### `bugfix-flow` — 3 artifacts, selected per change
+### `bugfix-flow` — 3 artifacts
 
 `diagnose → specs → tasks`, then `apply`.
 
 | Artifact | `requires` | Carries |
 |---|---|---|
-| `diagnose` | — | Reproduction, root cause, fix layer with reasoning, and the seam the regression test sits at |
-| `specs` | `diagnose` | The case the spec was silent about, as an `ADDED` requirement whose scenario is the reproduction made permanent |
-| `tasks` | `specs` | Failing test first, then the fix |
+| `diagnose` | — | diagnosing-bugs phases 1–4: the red feedback loop, minimised reproduction, ranked hypotheses, debug tag, fix layer, and seam; an optional Incident section |
+| `specs` | `diagnose` | The case the spec missed or got wrong; the scenario is the reproduction made permanent |
+| `tasks` | `specs` | Failing test, fix, cleanup, Ship |
 
-- **Gate:** a written root cause. Nothing is written until it is.
-- **Hatch:** `skip_specs` where the spec already covered the case and the code simply
-  disagreed — the regression test holds the line.
-- **Apply:** watch the test fail *for the reason the diagnosis gave*, not an unrelated one.
-- **Reopen:** a fault whose fix is a redesign is a change, not a bugfix — reopen under
-  `mattpocock-bridge`. If the reproduction still triggers after the fix, the artifact to
-  update is `diagnose.md`, not the code.
+- **Gate:** a red feedback loop. No red command, no hypotheses.
+- **Hatch:** `skip_specs` when the spec already covered the case.
+- **Apply:** phases 5–6. Watch the test fail *for the diagnosed reason*, fix at the agreed
+  layer, re-run the loop on the original scenario, and grep the debug tag away. Offers
+  `/retro`, and `/improve-codebase-architecture` when there was no correct seam.
+- **Reroute:** a fix that changes promised behaviour → `feature-flow`. If the fix does not
+  hold, update `diagnose.md`, not the code.
+
+### `refactor-flow` — 3 artifacts
+
+`grill → design → tasks`, then `apply`. No `specs` artifact.
+
+| Artifact | `requires` | Carries |
+|---|---|---|
+| `grill` | — | The module being deepened, its dependency category, and the external behaviour that must not change |
+| `design` | `grill` | Target interface, seam and adapters, guard tests, and tests to replace |
+| `tasks` | `design` | Guard tests first, then slices, or expand → migrate → contract |
+
+- **Gate:** agreed guard tests at the external seam.
+- **Dispatches:** `flow-design` at `design`; design-it-twice runs in the main session first
+  when the user wants alternatives.
+- **Apply:** replace, don't layer. A shallow test goes only once its replacement passes.
+- **Reroute:** a guard assertion that has to change → `feature-flow`.
+
+### `spike-flow` — 2 artifacts
+
+`question → findings`; `apply` tracks `question.md`.
+
+- **Gate:** a hard timebox and answer criteria.
+- **Apply:** `prototype` and `research` experiments. The prototype stays on its branch and
+  never merges.
+- **Post-apply:** `findings.md`, gated by `question.md`'s last checkbox.
+- **Scope:** "what should it look like" goes to impeccable, not here.
+
+### `upgrade-flow` — 3 artifacts
+
+`inventory → surfaces → tasks`, then `apply`. No `specs` artifact.
+
+| Artifact | `requires` | Carries |
+|---|---|---|
+| `inventory` | — | Breaking changes from `research` over primary sources, each with an applies-to-us verdict |
+| `surfaces` | `inventory` | Search-verified call sites, classed mechanical / behavioural / unknown |
+| `tasks` | `surfaces` | Bump → codemods → batches → behavioural surfaces with equivalence checks → shims deleted |
+
+- **Gate:** the research file. Verdicts wait for it.
+- **Apply:** the lockfile commits with its code; `wizard` scripts the human-only steps.
+- **Reroute:** an unknown surface → `spike-flow`; a deliberate behaviour change →
+  `feature-flow`.
+
+### `setup-flow` — 2 artifacts
+
+`decisions → tasks`, then `apply`. No `specs` artifact.
+
+- **Gate:** the stack decisions, each with its ADR.
+- **Apply:** the human runs `/setup-matt-pocock-skills` first; a walking skeleton with one
+  real `tdd` test green in CI; guardrails wired; `wizard` for secrets and provisioning.
+
+### `rapid-flow` — 2 artifacts
+
+`proposal → tasks`, then `apply`, in one window. No `specs` artifact.
+
+- **Gate:** the contract check in `proposal.md`.
+- **Reroute:** a contract or a real decision → `feature-flow`.
 
 ## `standard`
 
@@ -264,35 +321,37 @@ the task list.
   time. Both `continue` and `apply` infer it from the conversation when the name is omitted
   and have to ask when they cannot, and `continue` is also how a change is resumed in a
   brand-new session — it reads the filesystem, not the history.
-- **Clear the window before implementing.** Once the planning artifacts exist they are
-  files; apply reads them off disk and needs the room, and OpenSpec's own guidance is to
-  clear context before implementation. The order is `/clear`, then `/model` (model up/down,
-  its effort left/right) or `/effort`, then `/opsx:apply <change>` — clearing **first**,
-  because a switch made inside a full window still drags that window along, and with the
-  name, because clearing is exactly what removes what `apply` would have inferred it from.
-  Nothing is lost: status is filesystem existence.
+- **In the `standard` and `advanced` chains, clear the window before implementing.** A
+  `minimal` flow follows its own apply instruction instead (see `feature-flow`). Once the
+  planning artifacts exist they are files; apply reads them off disk and needs the room,
+  and OpenSpec's own guidance is to clear context before implementation. The order is
+  `/clear`, then `/model` (model up/down, its effort left/right) or `/effort`, then
+  `/opsx:apply <change>` — clearing **first**, because a switch made inside a full window
+  still drags that window along, and with the name, because clearing is exactly what
+  removes what `apply` would have inferred it from. Nothing is lost: status is filesystem
+  existence.
 - **Whether to clear *between planning artifacts* is per chain, not general.** Re-picking
   model and effort at an artifact boundary is always free. Clearing there is not:
-  `mattpocock-bridge` wants `grill` through `tasks` in one unbroken window and says to
-  compact at the nearest boundary instead, while `feature`'s own session discipline is to
-  compact at artifact boundaries. Follow the chain, and default to not clearing when the
-  chain is silent.
+  `feature-flow` wants `grill` through `tasks` in one unbroken window and, at a phase
+  boundary, prefers continuing, then `/clear`, `/handoff`, a subagent, and `/compact` last,
+  while `feature`'s own session discipline is to compact at artifact boundaries. Follow the
+  chain, and default to not clearing when the chain is silent.
 - **Delta spec format.** Scenarios need exactly four hashes (`#### Scenario:`) — three, or
   a bullet, does not parse. A `MODIFIED` requirement replaces the whole block, so it must
   carry every surviving scenario.
-- **Post-apply artifacts are gated by checkboxes, not files.** `spike`'s `findings` and
-  `hotfix`'s `postmortem` are written after the work, and the archive warning counts
-  *tracked checkboxes*. Ticking the last box before writing the artifact is how one
-  quietly never happens.
+- **Post-apply artifacts are gated by checkboxes, not files.** `spike`'s and
+  `spike-flow`'s `findings` and `hotfix`'s `postmortem` are written after the work, and the
+  archive warning counts *tracked checkboxes*. Ticking the last box before writing the
+  artifact is how one quietly never happens.
 - **Escape hatches live in the change's `.openspec.yaml`.** The CLI reads `skip_specs` and
-  `retire_capabilities`; it does not read `skip_grill` or `skip_surface`, so those need a
-  one-line stub file to unblock the graph.
+  `retire_capabilities`; it reads no other skip key, so `skip_grill` needs a one-line stub
+  file to unblock the graph.
 - **Archiving non-interactively** needs the change name and `--yes`, or it exits 1.
 - **A subagent inherits nothing** — no conversation, no files read, no skills invoked, and
   no `AskUserQuestion`. Its prompt names every input, and a gate that needs a human answer
   drafts and returns the question for the caller to ask.
 
-Sources: the twelve `schema.yaml` files under
-`payload/levels/*/openspec/schemas/*/`, `payload/levels/advanced/openspec/ROUTING.md`, the
-eight agent files under `payload/levels/*/agents/`, and
-`skills/configuring-openspec/references/`.
+Sources: the seventeen `schema.yaml` files under
+`payload/levels/*/openspec/schemas/*/`, `payload/levels/minimal/openspec/ROUTING.md`,
+`payload/levels/advanced/openspec/ROUTING.md`, the six agent files under
+`payload/levels/*/agents/`, and `skills/configuring-openspec/references/`.

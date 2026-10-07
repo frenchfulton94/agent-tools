@@ -64,6 +64,35 @@ export interface ClassifiedRules {
  */
 export function classifyRules(userRules: RulesMap | null | undefined, knownIds: Set<string> | string[]): ClassifiedRules;
 
+/** The config text a level's previous release shipped: `retired.json`'s `config`. */
+export interface RetiredConfig {
+	/** Artifact id → rule strings. */
+	rules?: RulesMap;
+	/** Operation → `operations.<op>.guidance` strings. */
+	guidance?: RulesMap;
+}
+
+export interface KeptAndDropped {
+	kept: RulesMap;
+	dropped: RulesMap;
+}
+
+export interface SplitRetiredConfigResult {
+	rules: KeptAndDropped;
+	guidance: KeptAndDropped;
+}
+
+/**
+ * Splits a parsed `rules:` map and `operations.*.guidance` map into `kept` and `dropped`
+ * against `retired`. A line is dropped only when it equals shipped text under the same key
+ * after trimming; a missing `retired` drops nothing. A key whose lines are all dropped is
+ * absent from `kept`.
+ */
+export function splitRetiredConfig(
+	config: { rules?: RulesMap | null; guidance?: RulesMap | null } | undefined,
+	retired: RetiredConfig | null | undefined,
+): SplitRetiredConfigResult;
+
 /**
  * Renders `unmatched` as a trailing YAML comment block (every rule's text JSON-encoded
  * onto one line, so an embedded newline cannot break a line out of the comment). Returns

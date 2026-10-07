@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { isMain } from './lib/cli.mjs';
 import { runCommand } from './lib/run.mjs';
 import { decidedPlugins, readSettingsFile } from './lib/settings.mjs';
 import { hashEntry } from './lib/tree.mjs';
@@ -203,6 +203,36 @@ function hashesFor(names, toPath) {
 }
 
 /**
+ * `{ changeName: schemaName | null }` for every open change: each directory under
+ * openspec/changes except `archive`. Read straight off `.openspec.yaml` rather than through
+ * the CLI, for the same reason the machine config is: every subcommand writes and transmits.
+ * Retirement (plan.mjs) needs one answer from this — does an open change still resolve
+ * against a schema setup is about to offer for deletion — and `null` (no file, or no
+ * `schema:` line) is "cannot tell", which plan.mjs treats as "it might".
+ */
+function openChangeSchemas(openspecDir) {
+	const out = {};
+	for (const name of dirNames(join(openspecDir, 'changes'))) {
+		if (name === 'archive') continue;
+		let schema = null;
+		try {
+			const match = readFileSync(join(openspecDir, 'changes', name, '.openspec.yaml'), 'utf8').match(
+				/^schema:[ \t]*['"]?([^'"\s#]+)/m,
+			);
+			if (match) {
+				// YAML null values: ~ and null yield null ('cannot tell').
+				const value = match[1];
+				schema = value === '~' || value === 'null' ? null : value;
+			}
+		} catch {
+			// No .openspec.yaml: the change names no schema of its own.
+		}
+		out[name] = schema;
+	}
+	return out;
+}
+
+/**
  * `run` is injectable so tests can exercise the machine-profile branch without
  * shelling out. Every real call site defaults to `defaultRun`, so production
  * behaviour is unchanged; only tests pass a stub.
@@ -240,6 +270,7 @@ export function detect(repoRoot, { run = defaultRun } = {}) {
 			// re-run) from one the user wrote or edited (never replaced without approval).
 			schemaHashes: hashesFor(schemas, (name) => join(openspecDir, 'schemas', name)),
 			configPath: existsSync(configYaml) ? configYaml : existsSync(configYml) ? configYml : null,
+			changeSchemas: openChangeSchemas(openspecDir),
 		},
 		agents: {
 			files: agentFiles,
@@ -270,6 +301,6 @@ export function detect(repoRoot, { run = defaultRun } = {}) {
 	};
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (isMain(import.meta.url)) {
 	console.log(JSON.stringify(detect(process.argv[2] ?? process.cwd()), null, 2));
 }

@@ -6,7 +6,7 @@ two settings that silently defeat every pin.
 Contents:
 
 - [The rule](#the-rule)
-- [The eight pins](#the-eight-pins)
+- [The six pins](#the-six-pins)
 - [What is recommended](#what-is-recommended)
 - [Tier changes the budget, not the pick](#tier-changes-the-budget-not-the-pick)
 - [Two silent defeats](#two-silent-defeats)
@@ -31,16 +31,14 @@ Contents:
 Effort values are `low`, `medium`, `high`, `xhigh`, `max`; available levels depend on the
 model. Model values are `haiku`, `sonnet`, `opus`, `fable`, a full model id, or `inherit`.
 
-## The eight pins
+## The six pins
 
 These are `model:` and `effort:` lines in agent files this plugin installs. They execute
 whether or not anyone reads this file.
 
 | Level | Agent | Runs at | Model | Effort |
 |---|---|---|---|---|
-| `minimal` | `bridge-design-gate` | `mattpocock-bridge` · design | `opus` | `xhigh` |
-| `minimal` | `code-review-standards` | apply · review, Standards axis | `opus` | `high` |
-| `minimal` | `code-review-spec` | apply · review, Spec axis | `sonnet` | `medium` |
+| `minimal` | `flow-design` | `feature-flow` and `refactor-flow` · design | `opus` | `xhigh` |
 | `standard` | `craft-design-gate` | `craft-driven` · design | `opus` | `xhigh` |
 | `standard` | `verification-reviewer` | `craft-driven` · verification step 3 | `opus` | `xhigh` |
 | `advanced` | `design-gate` | `feature` · design | `opus` | `xhigh` |
@@ -52,27 +50,44 @@ Three patterns, all deliberate:
 - **Every design gate is top tier at `xhigh`.** The `design` artifact only exists when the
   change is cross-cutting, adds a dependency, or carries security or migration complexity —
   so the trigger *is* the tier signal. When the artifact exists at all, it is the hard case.
-- **Review splits by axis onto different tiers.** Diff-versus-spec is mechanical; judging
-  code as code against a standards baseline is judgement. One review, two jobs.
+  At `minimal`, design always exists but shrinks to the Seams table for a one-module change;
+  `flow-design` stays pinned because the hard cases still arrive there.
+- **Review splits differently per level.** At `advanced`, `taste-preflight` is a cheap
+  mechanical pass and the review gate is judgement. At `minimal`, review is `code-review`'s
+  own two sub-agents on the session's model, which is why apply tells the user to review
+  from a fresh session on a strong model.
 - **The expensive work is pushed out of the main session on purpose.** The schemas say so:
   dispatch the gate "so this session can stay on the cheap tier".
 
 ## What is recommended
 
-For `minimal` and `standard`, a per-artifact recommendation exists and agrees with the pins
-above almost exactly:
+For `standard`, a per-artifact recommendation exists and agrees with the pins above almost
+exactly:
 
-| Artifact | `mattpocock-bridge` | `bugfix-flow` | `craft-driven` | `surface-driven` |
-|---|---|---|---|---|
-| opening | grill · Opus high | **diagnose · Opus xhigh** | brainstorm · Opus high | design-brief · Opus high for a new visual world, Sonnet medium for a refinement |
-| proposal | Opus high | — | Opus high | Sonnet medium |
-| surface / design-brief | Sonnet medium, Opus high for a new world | — | Sonnet medium, Opus high for a new world | (leads) |
-| specs | Opus high | Sonnet medium | Opus high | Sonnet medium, Opus high if the surface is broad |
-| design | top tier xhigh | — | top tier xhigh | — |
-| tasks | Opus high | Sonnet low–medium | Opus high | Opus high |
-| apply | Sonnet medium | Sonnet medium | Sonnet workers, Haiku mechanical, Opus on BLOCKED | Sonnet medium; surface tasks stay off Haiku |
-| review | split, matching the two pins | Sonnet, Opus high when the fix touched shared code | (in verification) | (in quality) |
-| closing gate | — | — | verification Sonnet medium plus an Opus xhigh reviewer | quality Sonnet medium, Opus high verdict on a large redesign |
+| Artifact | `craft-driven` | `surface-driven` |
+|---|---|---|
+| opening | brainstorm · Opus high | design-brief · Opus high for a new visual world, Sonnet medium for a refinement |
+| proposal | Opus high | Sonnet medium |
+| surface / design-brief | Sonnet medium, Opus high for a new world | (leads) |
+| specs | Opus high | Sonnet medium, Opus high if the surface is broad |
+| design | top tier xhigh | — |
+| tasks | Opus high | Opus high |
+| apply | Sonnet workers, Haiku mechanical, Opus on BLOCKED | Sonnet medium; surface tasks stay off Haiku |
+| review | (in verification) | (in quality) |
+| closing gate | verification Sonnet medium plus an Opus xhigh reviewer | quality Sonnet medium, Opus high verdict on a large redesign |
+
+For the `minimal` seven, the rows follow the `advanced` table below for the same kind of
+work, plus the `flow-design` pin:
+
+| Flow | Planning | Implementation |
+|---|---|---|
+| `feature-flow` | Opus high — **xhigh at design, through the `flow-design` pin** | Sonnet medium; review from a fresh session on Opus high |
+| `bugfix-flow` | **Opus xhigh at diagnose** — root cause | Sonnet medium; Opus high review when the fix touched shared code |
+| `refactor-flow` | Opus high — **xhigh at design, through the pin** | Sonnet medium; Haiku for mechanical migrate batches |
+| `upgrade-flow` | Opus high; `research` runs in the background | Sonnet medium; Haiku for codemod batches |
+| `setup-flow` | Opus high | Sonnet medium |
+| `spike-flow` | Sonnet low–medium | Sonnet medium |
+| `rapid-flow` | Sonnet low–medium | Sonnet medium |
 
 For the `advanced` eight, a per-schema table exists in Claude model names. Source pins
 three points of it — `design-gate`, `review-gate`, `taste-preflight`, all in `feature`;
@@ -113,9 +128,9 @@ transport errors are all excluded from the fallback machinery.
 ## Two silent defeats
 
 - **`CLAUDE_CODE_SUBAGENT_MODEL`** sits at the top of the resolution order, above the
-  per-invocation model and above frontmatter `model:`. Set it and all eight pins collapse to
-  one tier, with no warning — the per-axis review split stops being a split. `inherit` is
-  equivalent to unset.
+  per-invocation model and above frontmatter `model:`. Set it and all six pins collapse to
+  one tier, with no warning — the review split at `advanced` stops being a split. `inherit`
+  is equivalent to unset.
 - **The organisation's model allowlist.** A `model:` value is checked against
   `availableModels`, and an excluded value is *skipped*: the agent runs on the inherited
   model instead. If `opus` is unavailable, a design gate runs on the session's model while
@@ -148,22 +163,25 @@ subscription tier only if it changes the answer — on Pro it does, at the two f
    omitted, and clearing is precisely what removes what they infer from.
 
 The biggest single switch in any chain is the gap between the last planning artifact and
-the first line of code — rules 1 and 2 above are that gap, and clearing there is universal.
-Between *planning* artifacts, only step 2 travels alone: re-picking is always free, while
-clearing is per chain — `mattpocock-bridge` wants its planning run in one unbroken window,
-`feature` says to compact at artifact boundaries. Clearing costs the chain nothing either
-way, because artifact status is pure filesystem existence. Confirm the result on the status
-line rather than assuming it.
+the first line of code — rules 1 and 2 above are that gap. The `standard` and `advanced`
+chains clear there. A `minimal` flow follows `tasks.md`'s Session line: single-session
+apply continues in the planning window, so skip step 1, and multi-session runs each slice
+in a fresh session. Between *planning* artifacts, only step 2 travels alone: re-picking is
+always free, while clearing is per chain — `feature-flow` wants its planning run in one
+unbroken window, `feature` says to compact at artifact boundaries. Clearing costs the
+chain nothing either way, because artifact status is pure filesystem existence. Confirm
+the result on the status line rather than assuming it.
 
 One piece of general tier advice does **not** apply in a repository this plugin configured:
 setting `CLAUDE_CODE_SUBAGENT_MODEL=claude-sonnet-5` for cheap fan-out would collapse the
-pinned gates. The plugin already achieves that saving per agent — `code-review-spec` and
-`taste-preflight` are `sonnet` by design, the gates are not. Say so if the user raises it.
+pinned gates. The plugin already achieves that saving per agent — `taste-preflight` is
+`sonnet` by design; the gates and `flow-design` are not. Say so if the user raises it.
 
-Sources: the eight agent files under `payload/levels/*/agents/`;
+Sources: the six agent files under `payload/levels/*/agents/`;
 `plugins/meta-skills/skills/authoring-subagents/references/frontmatter.md` for the
 resolution order, allowlist behaviour, and the `AskUserQuestion` restriction; the
-`minimal`/`standard` table from the mattpocock model-and-effort guide; and the
-`advanced` table, tier adaptation, and burn-control facts from the Claude Code
-subscription-tier guide. Usage limits, prices and promotional windows in that guide are
-dated — point the user at `/usage` and Anthropic's own pages rather than quoting figures.
+`standard` table from the mattpocock model-and-effort guide; the `minimal` table, derived
+from the `advanced` one for the same kinds of work; and the `advanced` table, tier
+adaptation, and burn-control facts from the Claude Code subscription-tier guide. Usage
+limits, prices and promotional windows in that guide are dated — point the user at
+`/usage` and Anthropic's own pages rather than quoting figures.
