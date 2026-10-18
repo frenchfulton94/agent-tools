@@ -191,6 +191,50 @@ class CrawlCorpusTests(unittest.TestCase):
         self.assertEqual(len(cc.crawl(seeds, Stub({}))), 1)
 
 
+    def test_recursive_scope_wins_over_a_shallower_depth1_seed(self):
+        fetch = Stub({"/documentation/Other/games": "attr-d1-seed.md",
+                      "/documentation/metal": "rec-seed.md",
+                      "/documentation/metal/in-framework": "rec-in-framework.md",
+                      "/documentation/metal/deeper": "rec-deeper.md",
+                      "/documentation/metal/orphan": "rec-deeper.md",
+                      "/documentation/swiftui/x": "rec-swiftui-x.md"})
+        # The depth1 seed is first in map order and reaches both pages at depth 1; only
+        # `deeper` is also reached by the recursive seed.
+        seeds = [cc.Seed("/documentation/Other/games", "depth1", "apple-games"),
+                 cc.Seed("/documentation/metal", "recursive", "apple-metal")]
+        rows = {r.path.lower(): r for r in cc.crawl(seeds, fetch)}
+        deeper = rows["/documentation/metal/deeper"]
+        self.assertEqual((deeper.dest, deeper.seed, deeper.depth),
+                         ("apple-metal", "/documentation/metal", 2))
+        # A recursive seed that covers the scope but never reached the page does not claim it.
+        orphan = rows["/documentation/metal/orphan"]
+        self.assertEqual((orphan.dest, orphan.seed, orphan.depth),
+                         ("apple-games", "/documentation/Other/games", 1))
+        self.assertEqual(rows["/documentation/other/games"].dest, "apple-games")
+
+    def test_depth1_tie_prefers_the_seed_in_the_pages_scope(self):
+        mapping = {"/documentation/Games/overview": "tb-games.md",
+                   "/documentation/Xcode/distribution": "tb-xcode.md",
+                   "/documentation/Xcode/shared-page": "tb-shared.md"}
+        games = cc.Seed("/documentation/Games/overview", "depth1", "apple-games")
+        xcode = cc.Seed("/documentation/Xcode/distribution", "depth1", "app-release")
+        for seeds in ([games, xcode], [xcode, games]):
+            rows = {r.path.lower(): r for r in cc.crawl(seeds, Stub(mapping))}
+            shared = rows["/documentation/xcode/shared-page"]
+            self.assertEqual((shared.dest, shared.seed, shared.depth),
+                             ("app-release", "/documentation/Xcode/distribution", 1))
+
+    def test_depth1_tie_without_scope_match_takes_the_earliest(self):
+        mapping = {"/documentation/Games/overview": "tb-games.md",
+                   "/documentation/Other/page": "tb-xcode.md",
+                   "/documentation/Xcode/shared-page": "tb-shared.md"}
+        a = cc.Seed("/documentation/Games/overview", "depth1", "apple-games")
+        b = cc.Seed("/documentation/Other/page", "depth1", "app-release")
+        for seeds, dest in (([a, b], "apple-games"), ([b, a], "app-release")):
+            rows = {r.path.lower(): r for r in cc.crawl(seeds, Stub(mapping))}
+            self.assertEqual(rows["/documentation/xcode/shared-page"].dest, dest)
+
+
 class StubFetcher(cc.Fetcher):
     """A real Fetcher whose network is a dict: path -> (code, body)."""
 

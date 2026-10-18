@@ -770,7 +770,7 @@ path	seed	bound	depth	documentType	role	words	http	dest
 /documentation/GameKit/troubleshooting-matchmaking-rules-using-metrics	/documentation/gamekit	recursive	2	article	article	666	200	apple-games
 /documentation/Metal/about-synchronization-events	/documentation/metal	recursive	2	article	article	318	200	apple-metal
 /documentation/Metal/accelerating-ray-tracing-and-motion-blur-using-metal	/documentation/metal	recursive	2	article	sampleCode	95	200	apple-metal
-/documentation/Metal/accelerating-ray-tracing-using-metal	/documentation/TechnologyOverviews/games-technologies	depth1	1	article	sampleCode	87	200	apple-games
+/documentation/Metal/accelerating-ray-tracing-using-metal	/documentation/metal	recursive	2	article	sampleCode	87	200	apple-metal
 /documentation/Metal/achieving-smooth-frame-rates-with-a-metal-display-link	/documentation/metal	recursive	2	article	sampleCode	73	200	apple-metal
 /documentation/Metal/adapting-your-game-interface-for-smaller-screens	/documentation/metal	recursive	1	article	article	947	200	apple-metal
 /documentation/Metal/adding-mipmap-filtering-to-samplers	/documentation/metal	recursive	2	article	article	249	200	apple-metal
@@ -822,7 +822,7 @@ path	seed	bound	depth	documentType	role	words	http	dest
 /documentation/Metal/dynamically-adjusting-texture-level-of-detail	/documentation/metal	recursive	2	article	article	508	200	apple-metal
 /documentation/Metal/encoding-argument-buffers-on-the-gpu	/documentation/metal	recursive	2	article	sampleCode	1124	200	apple-metal
 /documentation/Metal/encoding-indirect-command-buffers-on-the-cpu	/documentation/metal	recursive	2	article	sampleCode	1270	200	apple-metal
-/documentation/Metal/encoding-indirect-command-buffers-on-the-gpu	/documentation/xcode/analyzing-the-performance-of-your-metal-app	depth1	1	article	sampleCode	1435	200	apple-metal
+/documentation/Metal/encoding-indirect-command-buffers-on-the-gpu	/documentation/metal	recursive	2	article	sampleCode	1435	200	apple-metal
 /documentation/Metal/estimating-how-often-a-texture-region-is-accessed	/documentation/metal	recursive	2	article	article	612	200	apple-metal
 /documentation/Metal/finding-multiple-gpus-on-an-intel-based-mac	/documentation/metal	recursive	3	article	article	626	200	apple-metal
 /documentation/Metal/generating-and-loading-a-metal-library-symbol-file	/documentation/metal	recursive	3	article	article	806	200	apple-metal
@@ -887,7 +887,7 @@ path	seed	bound	depth	documentType	role	words	http	dest
 /documentation/Metal/rendering-a-curve-primitive-in-a-ray-tracing-scene	/documentation/metal	recursive	2	article	sampleCode	83	200	apple-metal
 /documentation/Metal/rendering-a-scene-with-deferred-lighting-in-c++	/documentation/metal	recursive	2	article	sampleCode	3289	200	apple-metal
 /documentation/Metal/rendering-a-scene-with-deferred-lighting-in-objective-c	/documentation/metal	recursive	2	article	sampleCode	3252	200	apple-metal
-/documentation/Metal/rendering-a-scene-with-deferred-lighting-in-swift	/documentation/xcode/monitoring-your-metal-apps-graphics-performance	depth1	1	article	sampleCode	3070	200	apple-metal
+/documentation/Metal/rendering-a-scene-with-deferred-lighting-in-swift	/documentation/metal	recursive	2	article	sampleCode	3070	200	apple-metal
 /documentation/Metal/rendering-a-scene-with-forward-plus-lighting-using-tile-shaders	/documentation/metal	recursive	2	article	sampleCode	92	200	apple-metal
 /documentation/Metal/rendering-at-different-rasterization-rates	/documentation/metal	recursive	2	article	article	541	200	apple-metal
 /documentation/Metal/rendering-reflections-in-real-time-using-ray-tracing	/documentation/metal	recursive	2	article	sampleCode	130	200	apple-metal
@@ -908,7 +908,7 @@ path	seed	bound	depth	documentType	role	words	http	dest
 /documentation/Metal/selecting-device-objects-for-graphics-rendering	/documentation/metal	recursive	2	article	sampleCode	1863	200	apple-metal
 /documentation/Metal/setting-load-and-store-actions	/documentation/metal	recursive	2	article	article	1008	200	apple-metal
 /documentation/Metal/setting-resource-storage-modes	/documentation/metal	recursive	2	article	article	398	200	apple-metal
-/documentation/Metal/setting-up-a-command-structure	/documentation/TechnologyOverviews/games-technologies	depth1	1	article	article	1105	200	apple-games
+/documentation/Metal/setting-up-a-command-structure	/documentation/metal	recursive	2	article	article	1105	200	apple-metal
 /documentation/Metal/shader-libraries	/documentation/metal	recursive	1	article	collectionGroup	1500	200	apple-metal
 /documentation/Metal/shader-library-and-archive-creation	/documentation/metal	recursive	2	article	collectionGroup	450	200	apple-metal
 /documentation/Metal/simplifying-gpu-resource-management-with-residency-sets	/documentation/metal	recursive	2	article	article	1114	200	apple-metal
@@ -1087,7 +1087,7 @@ path	seed	bound	depth	documentType	role	words	http	dest
 /documentation/Xcode/measuring-your-app-s-power-use-with-power-profiler	/documentation/xcode/addressing-cpu-bottlenecks	depth1	1	article	article	1287	200	apple-performance
 /documentation/Xcode/organizing-tests-to-improve-feedback	/documentation/xcode/diagnosing-performance-issues-early	depth1	1	article	article	2397	200	apple-performance
 /documentation/Xcode/packaging-mac-software-for-distribution	/documentation/xcode/distribution	depth1	1	article	article	1863	200	app-release
-/documentation/Xcode/preparing-your-app-for-distribution	/documentation/TechnologyOverviews/games-technologies	depth1	1	article	article	1790	200	apple-games
+/documentation/Xcode/preparing-your-app-for-distribution	/documentation/xcode/distribution	depth1	1	article	article	1790	200	app-release
 /documentation/Xcode/preventing-memory-use-regressions	/documentation/xcode/reducing-your-app-s-memory-use	depth1	1	article	article	178	200	apple-performance
 /documentation/Xcode/resetting-access-to-protected-resources-in-macOS	/documentation/xcode/command-line-tools	depth1	1	article	article	938	200	app-release
 /documentation/Xcode/responding-to-low-memory-warnings	/documentation/xcode/reducing-your-app-s-memory-use	depth1	1	article	article	440	200	apple-performance
@@ -1139,7 +1139,7 @@ path	seed	bound	depth	documentType	role	words	http	dest
 /documentation/os/os-activity-t	/documentation/os/logging	depth1	1	article	collectionGroup	247	200	apple-performance
 /documentation/os/os-log-t	/documentation/os/logging	depth1	1	article	collectionGroup	181	200	apple-performance
 /documentation/os/reading-unix-manual-pages	/documentation/Security/notarizing-macos-software-before-distribution	depth1	1			0	404	app-release
-/documentation/os/recording-performance-data	/documentation/xcode/analyzing-cpu-profiles-with-call-tree-views	depth1	1	article	article	739	200	apple-performance
+/documentation/os/recording-performance-data	/documentation/os/logging	depth1	1	article	article	739	200	apple-performance
 /documentation/os/viewing-log-messages	/documentation/os/logging	depth1	1	article	article	208	200	apple-performance
 /documentation/os/workgroups	/documentation/os/workgroups	recursive	0	article	collectionGroup	552	200	apple-games
 /documentation/phase	/documentation/phase	recursive	0	symbol	Framework	1135	200	apple-games

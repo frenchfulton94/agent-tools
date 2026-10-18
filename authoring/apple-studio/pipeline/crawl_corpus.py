@@ -172,6 +172,30 @@ def _is_signature(path: str) -> bool:
     return "(" in path.rsplit("/", 1)[-1]
 
 
+def _attribute(lk: str, reach: dict, seeds: list):
+    """Pick the seed a page's row belongs to. Returns (seed index, depth).
+
+    `reach` maps each seed that reached the page to the shallowest depth.
+    1. A seed keeps its own row (depth 0, earliest identical seed).
+    2. A `recursive` seed that reached the page and whose scope (first two path
+       segments) contains it, ordered by depth then map order. A recursive seed
+       that merely covers the scope without reaching the page does not count:
+       `os/workgroups` covers all of `/documentation/os`, which would otherwise
+       claim the logging pages that only `os/logging` reaches.
+    3. The shallowest reaching seed; at equal depth, one whose own scope is the
+       page's scope; then the earliest.
+    """
+    own = [i for i, s in enumerate(seeds) if s.path.lower() == lk]
+    if own:
+        return own[0], 0
+    scope = _scope(lk)
+    covering = [i for i in reach
+                if seeds[i].bound == "recursive" and _scope(seeds[i].path) == scope]
+    pool = covering or list(reach)
+    idx = min(pool, key=lambda i: (reach[i], _scope(seeds[i].path) != scope, i))
+    return idx, reach[idx]
+
+
 def crawl(seeds: list, fetch: Callable, status: Optional[Callable] = None,
           prefetch: Optional[Callable] = None) -> list:
     """Breadth-first crawl. Each seed is crawled under its own bound.
@@ -184,11 +208,16 @@ def crawl(seeds: list, fetch: Callable, status: Optional[Callable] = None,
     A page is expanded when it is a seed, or an article, or a collectionGroup,
     and its seed's bound allows it. A `recursive` seed follows only links that
     share its first two path segments. A non-seed symbol that is not a
-    collectionGroup is left out. A page reached by several seeds gets one row,
-    attributed to the shallowest, then earliest, seed; a seed always keeps its
-    own row. Paths compare case-insensitively and keep the first spelling seen.
+    collectionGroup is left out. Paths compare case-insensitively and keep the
+    first spelling seen.
+
+    A page reached by several seeds gets one row, attributed (see `_attribute`)
+    so that `dest` is topical: a seed keeps its own row; otherwise a `recursive`
+    seed whose scope contains the page wins, shallowest then earliest; otherwise
+    the shallowest seed, preferring at equal depth a seed that shares the page's
+    first two path segments, then the earliest.
     """
-    rows = {}
+    found = {}  # lowercased path -> [spelling, (documentType, role, words, http), {seed: depth}]
     visited = set()
     frontier = [(s.path, 0, i) for i, s in enumerate(seeds)]
     while frontier:
@@ -211,17 +240,17 @@ def crawl(seeds: list, fetch: Callable, status: Optional[Callable] = None,
             text = fetch(path)
             if text is None:
                 code = status(path) if status else 404
-                rows.setdefault(path.lower(), Row(path, seed.path, seed.bound, depth,
-                                                  "", "", 0, code, seed.dest))
+                ob = found.setdefault(path.lower(), [path, ("", "", 0, code), {}])
+                ob[2][idx] = min(depth, ob[2].get(idx, depth))
                 continue
             meta = page_meta(text)
             dtype = str(meta.get("documentType", ""))
             role = str(meta.get("role", ""))
             expandable = dtype == "article" or role == "collectionGroup"
             if depth == 0 or expandable:
-                rows.setdefault(path.lower(), Row(path, seed.path, seed.bound, depth,
-                                                  dtype, role, page_words(text), 200,
-                                                  seed.dest))
+                ob = found.setdefault(path.lower(),
+                                      [path, (dtype, role, page_words(text), 200), {}])
+                ob[2][idx] = min(depth, ob[2].get(idx, depth))
             if not (depth == 0 or expandable):
                 continue
             if seed.bound == "page" or (seed.bound == "depth1" and depth >= 1):
@@ -234,7 +263,12 @@ def crawl(seeds: list, fetch: Callable, status: Optional[Callable] = None,
                     continue
                 nxt.append((link, depth + 1, idx))
         frontier = nxt
-    return sorted(rows.values(), key=lambda r: r.path)
+    rows = []
+    for lk, (spelling, info, reach) in found.items():
+        idx, depth = _attribute(lk, reach, seeds)
+        seed = seeds[idx]
+        rows.append(Row(spelling, seed.path, seed.bound, depth, *info[:3], info[3], seed.dest))
+    return sorted(rows, key=lambda r: r.path)
 
 
 def parse_map(text: str) -> list:
