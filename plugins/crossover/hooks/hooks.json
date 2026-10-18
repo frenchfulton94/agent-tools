@@ -1,0 +1,18 @@
+{
+  "description": "Blocks raw filesystem deletion of a CrossOver bottle, its C: drive, or its registry; asks before cxbottle --delete, cxuninstall, and the Removal Tool, whose own confirmations do not appear in a non-interactive shell",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "perl",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/crossover-guard.pl"],
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

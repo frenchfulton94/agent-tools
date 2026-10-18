@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "crossover",
+  "displayName": "CrossOver",
+  "version": "0.1.0",
+  "description": "Running Windows applications and games on a Mac with CodeWeavers CrossOver — bottles, installing listed and unlisted applications, the command-line tools, registry and Wine Configuration changes, Advanced Settings per CrossOver version (23.7–24, 25, 26), debug logs, locale and keyboard fixes, and controllers, anti-cheat, and mods — built from the CodeWeavers Mac knowledge base. Ships a log-triage agent for .cxlog files and a guard against irreversible bottle deletion.",
+  "author": {
+    "name": "Agent Tools",
+    "email": "michael@frenchfultonjr.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "crossover",
+    "codeweavers",
+    "wine",
+    "macos",
+    "windows-apps",
+    "gaming"
+  ]
+}

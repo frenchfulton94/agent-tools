@@ -67,6 +67,7 @@
 		"swift-architecture",
 		"swift-concurrency",
 		"swift-testing",
+		"using-crossover-mac",
 		"using-paraglide-js",
 		"xcode-loop"
 	]
