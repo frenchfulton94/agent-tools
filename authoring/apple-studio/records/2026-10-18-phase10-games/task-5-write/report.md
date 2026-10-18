@@ -117,7 +117,7 @@ changes:
   ledger lists each location, so that Task 8 can restore the `apple-games`
   pointers.
 - **Contradictions resolved:**
-  - The Metal 3 baseline is `.apple7`, because the SDK deprecates `.mac2`.
+  - Gate on Apple GPU families (`.apple7` and later), `.metal4`, and per-feature properties, not on the Mac family: the SDK deprecates `.mac2` in favor of `.apple7`.
   - Drawable and present mechanics belong to `display-and-upscaling.md`.
     Frame pacing policy is outside this skill.
 - **Cross-skill pointers** use the form `<skill>/references/<file>.md`
@@ -132,3 +132,19 @@ changes:
 - **Runtime evidence** for every "Measured" claim is now in
   `runtime/<stem>/runs.txt`: commands, key output, machine, and OS (ruling
   P32).
+
+## Fix round 2
+
+Commit `9792a9f` fixed two more problems:
+
+- **Silent wrong dispatch size.** The dispatch helper's fallback sized a
+  threadgroup as 32×8 for a kernel that the MSL attribute pins to 16×16, and
+  neither validation layer reported it (measured). The helper now requires
+  the pin on the pipeline descriptor, and calls `precondition` when it is
+  missing. Kernels that pin nothing keep the fallback; the docs label it for
+  that case only.
+- **Unreadable log.** The guidance said to read Shader Validation reports
+  with `log stream`, but the log replaces the report text with `<private>`.
+  The guidance now says to set `MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1`.
+
+The evidence is in `runtime/compute-and-gpu-driven/runs.txt`.
