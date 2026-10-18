@@ -39,9 +39,10 @@ Every command spelling in this file was checked on 2026-10-18 against its
 So did an ad hoc signature of an app bundle, the architecture builds, and the
 Swift smoke test. Those results are marked "Measured".
 
-**The notarization steps are R6 pending: not yet runtime-checked.** This
-machine had no Developer ID identity when the file was written. Nothing here
-was signed with Developer ID, submitted, stapled, or accepted by Gatekeeper.
+**The notarization steps are not runtime-checked: needs a Developer ID identity (deferred item 24).** Neither of
+this machine's two teams could create a Developer ID certificate. Nothing
+here was signed with Developer ID, submitted, stapled, or accepted by
+Gatekeeper. The checks listed above were run, and they stand.
 
 ## Developer ID identities
 
@@ -54,8 +55,18 @@ There are two Developer ID certificate types:
 
 Apple's pages write the name as `Developer ID Application: <Team ID>`. The
 account help says the keychain name holds the team name and the Team ID.
-Match on the Team ID. When two names collide, sign with the identity's SHA-1
-hash.
+**Do not take the Team ID from an identity name.** Measured on this machine,
+two `Apple Development` identities had the Apple ID and the IDs `RTC3TK2XFJ`
+and `G4MYV6D63X` in their names. Their Team IDs, in the certificate subject's
+OU field, were `ULQJ329QSN` and `2F7J72JV48`. No Developer ID name was
+available to check. Read the OU, and the O field for the team name:
+
+```bash
+security find-certificate -c "<part of the identity name>" -p > cert.pem
+openssl x509 -noout -subject -in cert.pem
+```
+
+When two names collide, sign with the identity's SHA-1 hash.
 
 **Only the Account Holder creates a Developer ID certificate.** The account
 help gives the required role as Account Holder. The one exception is a
@@ -68,6 +79,12 @@ Holder must *sign* with Developer ID. Read that as "create": a teammate signs
 with an identity the Account Holder exported as a `.p12`. Send the file and
 its password over different channels, as `signing-and-provisioning.md`
 explains.
+
+When the team cannot create a Developer ID certificate, Xcode's Manage
+Certificates menu offers only "Apple Development". That happens on a free
+team, or when you are not the team's Account Holder. The cause is the role
+rule on the account help page. The menu itself is the user's observation on
+this machine for two teams, and is not runtime-checked here.
 
 List the identities before you sign:
 
@@ -288,10 +305,9 @@ syspolicy_check notary-submission "MyGame.app"
 These are the commands for one app, in order. Steps 1 and 2 are one-time
 setup. Step 1 prompts for a password, and step 2 prints the identity name
 that step 3 needs, so run them by hand first. Steps 3 to 8 are one block
-that R6, the Phase 10 runtime check, runs verbatim after you set the
-variables at its top.
+that you run as written, after you set the variables at its top.
 
-**R6 pending: not yet runtime-checked.** Each spelling matches its `--help`
+**The notarization steps are not runtime-checked: needs a Developer ID identity (deferred item 24).** Each spelling matches its `--help`
 text or man page on this machine. The expected results come from Apple's
 pages and from those help texts, except where a comment says otherwise.
 
@@ -303,7 +319,9 @@ One-time setup:
 xcrun notarytool store-credentials "<profile name>" --apple-id "<Apple ID>" --team-id "<Team ID>"
 
 # 2. Find the Developer ID Application identity. Copy its full name, or its
-#    SHA-1 hash, into IDENTITY below. The name ends with the Team ID.
+#    SHA-1 hash, into IDENTITY below. Its Team ID is the certificate's
+#    subject OU field (see "Developer ID identities"), and it must be the
+#    team that step 1 stored.
 security find-identity -v -p codesigning
 ```
 
@@ -329,7 +347,8 @@ ditto -c -k --keepParent "$APP" "$ZIP"
 
 # 6. Submit and wait, keep the JSON result, then fetch the log, also when
 #    the status is Accepted. The help documents -f json, but not the keys in
-#    the result: the "id" and "status" keys are unverified until R6.
+#    the result: the "id" and "status" keys are not runtime-checked
+#    (needs a Developer ID identity, deferred item 24).
 #    plutil exits 1 if the key is missing.
 xcrun notarytool submit "$ZIP" --keychain-profile "$PROFILE" --wait -f json > "$SUBMIT_JSON"
 plutil -extract status raw -o - "$SUBMIT_JSON"
@@ -340,8 +359,9 @@ xcrun notarytool log "$SUBMISSION_ID" --keychain-profile "$PROFILE" "$LOG"
 xcrun stapler staple "$APP"
 xcrun stapler validate "$APP"
 
-# 8. Expected (task brief, not an Apple page; R6 pending): "accepted",
-#    with source "Notarized Developer ID".
+# 8. Expected (from the task brief, not an Apple page; not runtime-checked:
+#    needs a Developer ID identity, deferred item 24): "accepted", with
+#    source "Notarized Developer ID".
 spctl --assess -vv --type execute "$APP"
 ```
 
@@ -561,6 +581,16 @@ an entitlements file returns false.
   puts the app's entitlements on every nested item.
 - **Leaving a development profile in the bundle** after a manual export, or
   copying in the Developer ID profile after signing.
+- **An Apple ID and a Team ID that do not belong together.**
+  `notarytool store-credentials` validates them, and a mismatch returns
+  "Error: HTTP status code: 403. Invalid or inaccessible developer team ID
+  for the provided Apple ID." The user hit this on this machine with Apple
+  ID 1 and team `ULQJ329QSN`, which is Apple ID 2's team. Take the Team ID
+  from the subject OU of a certificate that belongs to the same Apple ID.
+- **Taking the Team ID from the identity name.** On this machine the
+  parenthesised IDs in the `Apple Development` names were not Team IDs.
+- **Expecting Developer ID on a team where you are not the Account Holder.**
+  Xcode then offers only "Apple Development" (the user's observation).
 - **Reading `Accepted` as clean.** The log can carry warnings that become
   errors on the next submission.
 - **Assuming the Mac App Store and Developer ID builds share privacy

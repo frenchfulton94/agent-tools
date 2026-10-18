@@ -1,6 +1,8 @@
 #!/bin/bash
 # Wraps the release MetalProbe in an app bundle, build/MetalProbe.app, for the
 # Phase 10 R6 notarization run (app-release/references/direct-distribution.md).
+# R6 was skipped in Phase 10 for lack of a Developer ID identity (deferred.md
+# item 24); the script stays for that run.
 #
 #   bundle.sh        # builds release, writes build/MetalProbe.app, prints its path
 #

@@ -22,7 +22,7 @@ Xcode, and rustup's cargo. CMake is not used. Nothing here is installed.
 | `check_verbatim.py` | Checks that the pasted blocks still match the references |
 | `run.sh` | Runs one claim and prints its log |
 | `heaviest_under_interval.py` | Names the heaviest symbol inside a signpost interval, from an `xctrace` export (R4) |
-| `bundle.sh` | Wraps the release `MetalProbe` in `build/MetalProbe.app` for the notarization run (R6). It signs nothing |
+| `bundle.sh` | Wraps the release `MetalProbe` in `build/MetalProbe.app` for a notarization run (R6, skipped in Phase 10; deferred item 24). It signs nothing |
 
 ## Pasted blocks
 
@@ -124,5 +124,7 @@ build/MetalProbe.app/Contents/MacOS/MetalProbe render --frames 1
 version. The bundle keeps only the linker's ad hoc signature. The Developer ID
 signature, notarization, and stapling are the steps in
 `plugins/apple-studio/skills/app-release/references/direct-distribution.md`,
-run by hand. The evidence is in
+run by hand. Phase 10 did not run them: neither team on the recording machine
+could create a Developer ID certificate (`authoring/apple-studio/docs/deferred.md`,
+item 24). The evidence is in
 `authoring/apple-studio/records/2026-10-18-phase10-games/task-10-r6/`.

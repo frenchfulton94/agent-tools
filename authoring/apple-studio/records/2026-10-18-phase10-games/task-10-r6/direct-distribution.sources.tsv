@@ -55,15 +55,15 @@ Signing by hand	Pre-flight: codesign -vvv --deep --strict; syspolicy_check notar
 The release sequence	store-credentials prompts for the password when --password is omitted	help.log notarytool store-credentials lines 19-21
 The release sequence	find-identity -v -p codesigning	help.log security(1) section
 The release sequence	codesign --force --sign --options runtime --timestamp; --verify --strict --verbose=2	help.log codesign(1); bundle.log "Verify the ad hoc signature" (same verify form, exit 0)
-The release sequence	spctl on signed-not-notarized app: rejected, exit 3 (R6 pending for Developer ID)	help.log spctl(8) exit-code lines 172-175; bundle.log "Gatekeeper on the ad hoc bundle" (ad hoc, rejected, exit 3)
+The release sequence	spctl on signed-not-notarized app: rejected, exit 3 (Developer ID case not runtime-checked: needs a Developer ID identity (deferred item 24))	help.log spctl(8) exit-code lines 172-175; bundle.log "Gatekeeper on the ad hoc bundle" (ad hoc, rejected, exit 3)
 The release sequence	Notary service rejects a bare .app; ditto -c -k --keepParent	r01.md:31; packaging.log "Zip for upload"
 The release sequence	submit --keychain-profile --wait; log <id> [path] with auth	help.log notarytool submit and log sections; notarytool log --help lists -p (line 28 of its help)
 The release sequence	submit -f json writes one result at the end (incompatible with --progress)	help.log notarytool submit lines 30-34
-The release sequence	The id and status keys of the submit JSON are unverified until R6	not in help.log; stated as unverified in the block's comment
+The release sequence	The id and status keys of the submit JSON are not runtime-checked: needs a Developer ID identity (deferred item 24)	not in help.log; stated in the block's comment
 The release sequence	plutil -extract <key> raw -o - reads a JSON file, prints the string, exits 1 on a missing key	task-10-r6/submit-json.log (submit-json-check.sh, invented sample JSON)
 The release sequence	Steps 1-2 are one-time setup: store-credentials prompts; find-identity prints the IDENTITY value	help.log notarytool store-credentials lines 19-21; security(1) section
 The release sequence	stapler staple / validate; zip cannot be stapled	help.log stapler usage; r01.md:40
-The release sequence	Final spctl accepted with source Notarized Developer ID	expected (task brief); R6 pending. No corpus page or help text has the string
+The release sequence	Final spctl accepted with source Notarized Developer ID	expected (task brief); not runtime-checked: needs a Developer ID identity (deferred item 24). No corpus page or help text has the string
 notarytool details	altool stopped 2023-11-01; Xcode 13 and earlier refused	r01.md:34,52
 notarytool details	Three auth forms; --issuer for Team keys only	help.log notarytool store-credentials and submit sections; r01.md:35
 notarytool details	--validate default; --keychain; --sync not with --keychain	help.log notarytool store-credentials section; r01.md:36
@@ -102,3 +102,8 @@ A release smoke test in code	kSecCodeInfoEntitlementsDict is a generic key, abse
 A release smoke test in code	true with get-task-allow, false without, using default flags	task-10-r6/selfcheck/runs.txt (selfcheck/run.sh extracts the block verbatim)
 Classic pitfalls	Standalone binary gets a ticket but cannot be stapled	r01.md:40
 Where else to look	Notary API for Xcode-free pipelines	r01.md:39
+Developer ID identities	Identity-name IDs RTC3TK2XFJ and G4MYV6D63X are not Team IDs; subject OU gives ULQJ329QSN and 2F7J72JV48	task-10-r6/identity.log (security find-certificate -p, openssl x509 -subject)
+Developer ID identities	security find-certificate -c <name> -p, then openssl x509 -noout -subject reads OU and O	task-10-r6/identity.log
+Developer ID identities	Manage Certificates offers only Apple Development when the team cannot create Developer ID (free team, or not Account Holder)	$TMP/r06-extra/create-developer-id-certificates.txt:13 (role rule); the user's observation for teams 2F7J72JV48 and ULQJ329QSN (Task 10 report, Closed without R6); labelled as observation
+Classic pitfalls	store-credentials with a mismatched Apple ID and Team ID returns HTTP 403 Invalid or inaccessible developer team ID	the user's report (Task 10 report, Closed without R6): Apple ID 1 with team ULQJ329QSN; identity.log shows ULQJ329QSN is Apple ID 2's team
+The release sequence	Step 2's Team ID comes from the subject OU and must match step 1's team	task-10-r6/identity.log; the user's 403 report

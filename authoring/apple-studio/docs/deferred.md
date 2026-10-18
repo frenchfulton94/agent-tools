@@ -987,6 +987,38 @@ block Phase 2; each has an explicit trigger for when to act.
     section "`conc-fire`", and `rerun-conc-fire/` and `diagnostic/` beside
     it.
 
+24. **R6, the real notarization run, was skipped (found 2026-10-18,
+    Phase 10 Task 10; SDD ruling P44).** R6 needs a Developer ID
+    Application identity, and only a paid team's Account Holder can create
+    one. Neither of the user's teams offered that certificate type in
+    Xcode's Manage Certificates (team `2F7J72JV48` under Apple ID 1, team
+    `ULQJ329QSN` under Apple ID 2). Most likely neither is a paid membership
+    on which the user is the Account Holder. The machine has two `Apple
+    Development` identities and no Developer ID identity. A
+    `notarytool store-credentials` call returned HTTP 403, because it
+    paired Apple ID 1 with Apple ID 2's team. Nothing was signed with
+    Developer ID or submitted. `app-release/references/direct-distribution.md`
+    marks the notarization steps "not runtime-checked: needs a Developer ID
+    identity (deferred item 24)". The help-text spellings, `bundle.sh`, the
+    ad hoc signature, the `spctl` rejection, and the packaging and ARCHS logs
+    were checked and stand. These stay unverified:
+    - the `id` and `status` keys of `notarytool submit -f json`, which the
+      release block's step 6 reads with `plutil`;
+    - the "Notarized Developer ID" source string in the final `spctl`
+      assessment, which only the task brief gives;
+    - the stapled `spctl --assess` acceptance itself;
+    - whether the notary service accepts the `ditto -c -k --keepParent` zip
+      with its AppleDouble `._` entries.
+
+    **Trigger: the user has a Developer ID Application identity.** Then run
+    the reference's one-time setup and release block on
+    `pipeline/fixtures/metal-probe/build/MetalProbe.app`, per the Task 10
+    brief's R6 sequence. That includes the stop before `notarytool submit`
+    to confirm the team on screen. Reconcile the reference with the results,
+    and replace the markers. Evidence:
+    `records/2026-10-18-phase10-games/task-10-r6/report.md`, section
+    "Closed without R6 (P44)"; `task-10-r6/identity.log`.
+
 ## Accepted (no action)
 
 Phase 3 minors reviewed and accepted as-is — no follow-up action needed:
