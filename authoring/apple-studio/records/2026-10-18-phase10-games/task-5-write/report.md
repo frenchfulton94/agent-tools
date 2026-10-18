@@ -16,16 +16,16 @@ split. Line counts include the Contents lists described below.
 
 | File | Lines | Swift blocks | Native blocks | Native target |
 |---|---:|---:|---:|---|
-| `apple-gpu-tbdr.md` | 678 | 7 | 3 | `-std=metal4.0` |
-| `command-model.md` | 750 | 8 | 1 | `-std=metal4.0` |
-| `compute-and-gpu-driven.md` | 893 | 9 | 4 | `-std=metal4.0` |
-| `cpp-and-rust.md` | 767 | 0 | 6 | metal-cpp 26.4 with `-std=c++20`; cargo check with objc2 0.6.5, objc2-foundation 0.3.2, objc2-metal 0.3.2 |
-| `display-and-upscaling.md` | 632 | 6 | 1 | `-std=metal4.0` |
-| `gpu-debugging-and-profiling.md` | 787 | 9 | 1 | `-std=metal4.0` |
-| `pipelines-and-render-passes.md` | 852 | 10 | 2 | `-std=metal4.0` |
-| `resources-and-memory.md` | 680 | 9 | 2 | `-std=metal4.0` |
-| `shading-language.md` | 676 | 4 | 7 | `-std=metal4.1` |
-| **Total** | **6,715** | **62** | **27** | |
+| `apple-gpu-tbdr.md` | 672 | 7 | 3 | `-std=metal4.0` |
+| `command-model.md` | 764 | 8 | 1 | `-std=metal4.0` |
+| `compute-and-gpu-driven.md` | 886 | 9 | 4 | `-std=metal4.0` |
+| `cpp-and-rust.md` | 773 | 0 | 6 | metal-cpp 26.4 with `-std=c++20`; cargo check with objc2 0.6.5, objc2-foundation 0.3.2, objc2-metal 0.3.2 |
+| `display-and-upscaling.md` | 658 | 6 | 1 | `-std=metal4.0` |
+| `gpu-debugging-and-profiling.md` | 780 | 9 | 1 | `-std=metal4.0` |
+| `pipelines-and-render-passes.md` | 845 | 10 | 2 | `-std=metal4.0` |
+| `resources-and-memory.md` | 667 | 9 | 2 | `-std=metal4.0` |
+| `shading-language.md` | 666 | 4 | 7 | `-std=metal4.1` |
+| **Total** | **6,711** | **62** | **27** | |
 
 The Swift gate targets `macos 26.0` for every file. `display-and-upscaling.md`
 targets `macos 26.0, ios 26.0`.
@@ -99,14 +99,36 @@ references changed.
   apple-metal.
 - `claude plugin validate . --strict`: passed.
 
-## Open items carried to the task review
+## Task review and fix round 1
 
-- The description names `apple-games` in a form the
-  catalog-integrity test does not match. `apple-games` does not exist yet.
-  The controller has ruled that the description name no unshipped skill
-  (ruling P29).
-- Cross-skill paths are inconsistent. `display-and-upscaling.md` writes
-  `apple-games/game-loop-and-threading.md`, while the catalog convention is
-  `<skill>/references/<file>.md` (ruling P30).
-- `command-model.md` says `display-and-upscaling.md` covers frame pacing,
-  while `display-and-upscaling.md` gives frame pacing to apple-games.
+The opus task review traced 27 claims: 25 were supported and 2 misstated,
+with none unsupported. It checked 16 symbols named in prose against the SDK,
+and all 16 exist. It found no invented API. Fix round 1 (`df65d1a`) made these
+changes:
+
+- **Shader Validation claims.** Two claims said Shader Validation stayed
+  silent when an attachment was missing from every residency set. It does not
+  stay silent: it reports to the unified log, and also to stderr when
+  `MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1` is set. All files now agree, and
+  pair the two environment variables. The probes were re-run before the text
+  changed.
+- **No pointers to an unshipped skill** (ruling P29). The description and
+  body name no skill for frame pacing, input, audio, or Game Center. The SDD
+  ledger lists each location, so that Task 8 can restore the `apple-games`
+  pointers.
+- **Contradictions resolved:**
+  - The Metal 3 baseline is `.apple7`, because the SDK deprecates `.mac2`.
+  - Drawable and present mechanics belong to `display-and-upscaling.md`.
+    Frame pacing policy is outside this skill.
+- **Cross-skill pointers** use the form `<skill>/references/<file>.md`
+  (ruling P30).
+- **About 70 lines of duplication and generic material cut.**
+- **Four snippets corrected** (ruling P31):
+  - a renderer that committed a command buffer it never began;
+  - an early return that left a debug group pushed;
+  - dispatch sizing that depended on a pinned value. That value reads back
+    as zero when only the MSL attribute pins it (measured).
+  - OS 27-only pipeline properties, now gated.
+- **Runtime evidence** for every "Measured" claim is now in
+  `runtime/<stem>/runs.txt`: commands, key output, machine, and OS (ruling
+  P32).
