@@ -1,0 +1,7 @@
+path	words	read_in_full	fed
+pdf:msl-4.1#ch6	37675	yes	shading-language.md;apple-gpu-tbdr.md;compute-and-gpu-driven.md;pipelines-and-render-passes.md;gpu-debugging-and-profiling.md
+pdf:msl-4.1#ch7	3795	yes	compute-and-gpu-driven.md
+pdf:msl-4.1#ch8	3705	yes	shading-language.md
+pdf:msl-4.1#ch9	437	yes	shading-language.md
+pdf:fst#all	6587	yes	command-model.md;pipelines-and-render-passes.md;apple-gpu-tbdr.md;resources-and-memory.md;shading-language.md;compute-and-gpu-driven.md;display-and-upscaling.md;gpu-debugging-and-profiling.md
+book:metal-by-tutorials/chapters/ch01-hello-metal.md	1592	yes	command-model.md;pipelines-and-render-passes.md;display-and-upscaling.md;apple-games/assets.md

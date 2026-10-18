@@ -888,6 +888,19 @@ block Phase 2; each has an explicit trigger for when to act.
     `pipeline/maps/apple-design-duo-live.md:76-83`;
     `records/2026-09-30-phase9-adaptive-layout/final-review-fixes.md`.
 
+19. **One unfetchable `apple-metal` page: a broken figure link (found
+    2026-10-18, Phase 10 Task 4).** The manifest row
+    `/documentation/metal/compute_passes/creating_threads_and_threadgroups`
+    returns HTTP 404 for its `.md` file. The bare URL redirects (301) to
+    `/documentation/metal/creating-threads-and-threadgroups`. That page is
+    the real article. It is slice m01's row, and a reader read it in full.
+    The underscore spelling is a broken figure link inside Apple's own
+    article. No content is lost. The ledger row in
+    `records/2026-10-18-phase10-games/ledger/m05.tsv` records the 404 and
+    points here. **Trigger: Apple publishes a page at the underscore path.**
+    Then fetch it, read it in full, and replace the ledger row. Evidence:
+    `records/2026-10-18-phase10-games/task-1-manifest/manifest.tsv`.
+
 ## Accepted (no action)
 
 Phase 3 minors reviewed and accepted as-is — no follow-up action needed:
