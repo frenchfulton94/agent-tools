@@ -20,10 +20,28 @@ curl -fsSL "https://developer.apple.com/tutorials/data/documentation/technologie
   echo "> generated: $(date +%Y-%m-%d) from the developer.apple.com Technologies index"
   echo "> regenerate: authoring/apple-studio/pipeline/generate_catalog.sh (rerun each phase and after WWDC)"
   echo
-  jq -r '
+  # Page-form /documentation/ links end in ".md" (the Phase 8 rule); the HIG
+  # entry and the pinned exceptions stay bare. The $bare list below must equal
+  # KNOWN_PAGE_FORM_EXCEPTIONS in tests/apple-doc-links.test.ts, which is the
+  # source of truth: when one changes, change the other in the same commit.
+  jq -r --argjson bare '[
+    "https://developer.apple.com/documentation/applicationservices",
+    "https://developer.apple.com/documentation/cloudkit/cksyncengine",
+    "https://developer.apple.com/documentation/corelocation/clbackgroundactivitysession",
+    "https://developer.apple.com/documentation/coreservices",
+    "https://developer.apple.com/documentation/installer_js",
+    "https://developer.apple.com/documentation/iokit",
+    "https://developer.apple.com/documentation/kernel",
+    "https://developer.apple.com/documentation/playgroundbluetooth",
+    "https://developer.apple.com/documentation/playgroundsupport",
+    "https://developer.apple.com/documentation/tvmljs",
+    "https://developer.apple.com/documentation/webkitjs"
+  ]' '
     .references[]
     | select(.type == "topic" and (.title // "") != "" and (.url // "") != "")
-    | "- **\(.title)** — \((.abstract // []) | map(.text // "") | join("")) — https://developer.apple.com\(.url)"
+    | ("https://developer.apple.com" + .url) as $u
+    | (if ($u | startswith("https://developer.apple.com/documentation/")) and (($u | endswith(".md")) | not) and (($bare | index($u)) == null) then $u + ".md" else $u end) as $link
+    | "- **\(.title)** — \((.abstract // []) | map(.text // "") | join("")) — \($link)"
   ' "$TMP" | sort -fu
 } > "$OUT"
 rm -f "$TMP"
