@@ -1,29 +1,29 @@
 # Task 8 report: the apple-games skill
 
-Date: 2026-10-18. Branch: `apple-studio-phase10-games`. Commit `408b1df`. The controller writes this file from the finisher's returned text (ruling P10).
+Date: 2026-10-18. Branch: `apple-studio-phase10-games`. Commits: `408b1df` (the skill), `911dc44` (this report, written by the controller), and `2c9f786` (fix round 1). The controller writes this file from the finisher's returned text (ruling P10).
 
 Six writers each wrote one reference and its claims sidecar (`<stem>.sources.tsv`), ran the runtime checks they cite, and ran both gates on their own file until they were clean. The finisher then wrote the skill files, made the routing and catalog edits and the apple-metal restorations, gated, verified, and committed.
 
 ## References
 
-There are six files, as spec Deliverable 2 lists them. None was merged or split.
+There are six files, as spec Deliverable 2 lists them. None was merged or split. Line counts are after fix round 1.
 
 | File | Lines | Swift blocks | Native blocks | Swift target | Native target |
 |---|---:|---:|---:|---|---|
-| `assets.md` | 582 | 6 | 0 | `macos 26.0` | — |
-| `audio-and-haptics.md` | 909 | 7 | 3 | `macos 26.0, ios 26.0` | metal-cpp 26.4, `-std=c++20` |
-| `game-center-and-online.md` | 670 | 9 | 1 | `macos 26.0` | metal-cpp 26.4, `-std=c++20` |
-| `game-design.md` | 600 | 5 | 0 | `macos 26.0, ios 26.0` | — |
-| `game-loop-and-threading.md` | 915 | 12 | 0 | `macos 26.0, ios 26.0` | — |
+| `assets.md` | 583 | 6 | 0 | `macos 26.0` | — |
+| `audio-and-haptics.md` | 910 | 7 | 3 | `macos 26.0, ios 26.0` | metal-cpp 26.4, `-std=c++20` |
+| `game-center-and-online.md` | 678 | 9 | 1 | `macos 26.0` | metal-cpp 26.4, `-std=c++20` |
+| `game-design.md` | 599 | 5 | 0 | `macos 26.0, ios 26.0` | — |
+| `game-loop-and-threading.md` | 916 | 12 | 0 | `macos 26.0, ios 26.0` | — |
 | `input.md` | 658 | 11 | 0 | `macos 26.0, ios 26.0` | — |
-| **Total** | **4,334** | **50** | **4** | | |
+| **Total** | **4,344** | **50** | **4** | | |
 
 As the brief requires, `game-loop-and-threading.md` and `input.md` declare `> typecheck: macos 26.0, ios 26.0`. Every file is over 300 lines and has a Contents list near its top.
 
 ## Gates
 
-- `typecheck.log`: `typecheck_snippets.py` over all six files. Exit 0, `TOTAL: 50/50 snippets typecheck clean`.
-- `native.log`: `typecheck_native.py` over all six files. Exit 0, `TOTAL: 4/4 snippets compile clean`.
+- `typecheck.log`: `typecheck_snippets.py` over all six files. Exit 0, `TOTAL: 50/50 snippets typecheck clean`. It was re-run after fix round 1.
+- `native.log`: `typecheck_native.py` over all six files. Exit 0, `TOTAL: 4/4 snippets compile clean`. It was re-run after fix round 1.
 - The edited apple-metal files (`display-and-upscaling.md`, `gpu-debugging-and-profiling.md`, `command-model.md`), re-gated:
   - Swift 23/23 clean, exit 0.
   - Native 3/3 clean, exit 0.
@@ -31,7 +31,7 @@ As the brief requires, `game-loop-and-threading.md` and `input.md` declare `> ty
 
 ## Runtime-check index
 
-All runs used one Apple M4 Pro with macOS 27.0.1 (26A434), Xcode 27.1, and the MacOSX 27.0 SDK. No simulator was booted, no process was left running, and StudioFixture was not touched. Each log records its commands, the key output, and the machine.
+All runs used one Apple M4 Pro MacBook Pro (Mac16,8, with a Force Touch trackpad), macOS 27.0.1 (26A434), Xcode 27.1, and the MacOSX 27.0 SDK. No simulator was booted, no process was left running, and StudioFixture was not touched. Each log records its commands, the key output, and the machine.
 
 - `runtime/game-loop-and-threading/runs.txt`:
   - §1 the mach timebase on native arm64 (125/3 ns per tick) and under Rosetta (1/1).
@@ -46,12 +46,12 @@ All runs used one Apple M4 Pro with macOS 27.0.1 (26A434), Xcode 27.1, and the M
 - `runtime/audio-and-haptics/runs.txt`, which `run.sh` reproduces:
   - §1 and §1b: vDSP real-FFT scaling (forward ×2, inverse ×n), and which DFT lengths are accepted.
   - §2–2g: `CA_REALTIME_API` violations are silent under the default flags and warn under `-Wfunction-effects`. The reference's `GainKernel` produces zero warnings.
-  - §3: the Mac mini reports `supportsHaptics=false`, and `CHHapticEngine()` throws -4809.
+  - §3: on the MacBook Pro, despite its Force Touch trackpad, `supportsHaptics=false`, and `CHHapticEngine()` throws -4809. A machine-model block (`system_profiler`) and a re-run of §3 were added in fix round 1.
 - `runtime/game-center-and-online/runs.txt`: the GameKit party-code alphabet (20 characters) and the format validation.
 - `runtime/assets/runs.txt`:
   - §1 Compression: which algorithms the stream API accepts, decode truncation, small-input encode, and ratio and throughput.
   - §2 the UTIs that game-asset extensions resolve to.
-  - §3 KTX against KTX2 through `MTKTextureLoader`.
+  - §3 KTX against KTX2 through `MTKTextureLoader`, at `--compression_quality=Normal`.
   - §4 AppleArchive.
   - §5 Model I/O import and export by extension.
   - §6 a read-only read of the Background Assets tool help.
@@ -80,6 +80,7 @@ In every case the SDK or the runtime result wins, and the reference says so.
   - Two pages disagree on biquad filter form.
 - **`game-center-and-online.md`:**
   - `GKGameCenterViewController`, `GKAccessPoint.showHighlights`, and the `.challenges` state are deprecated in the 26 SDKs, although pages and samples still use them.
+  - `GKScore` (deprecated in iOS 14 and macOS 11) and the two old view controllers (deprecated in iOS 7 and macOS 10.10) are still in the SDK.
   - The Swift `DTLS` type is OS 27, not OS 26.
   - The class and instance `submitScore` behave differently on an occurrence that has ended.
   - The matchmaking articles have two errors: the thresholds array comes before the ages array, and the party-code rule uses the `/v1/gameCenterMatchmakingRules` endpoint.
@@ -97,13 +98,13 @@ In every case the SDK or the runtime result wins, and the reference says so.
 
 ## Skill files
 
-- **`SKILL.md`, 101 lines:**
+- **`SKILL.md`, 102 lines:**
   - A scope line: Mac first, then iPhone and iPad; Apple silicon; SpriteKit, SceneKit, RealityKit, GameplayKit, Unity, Unreal, Godot, visionOS, tvOS, Apple Arcade, and engine architecture are out of scope.
   - Six routing lines, one per reference.
   - The symptom split as five rules, mirroring apple-metal's: pacing, the fixed step, threads and QoS, input, audio, Game Center, saves, and assets are here. GPU frame time and display-link mechanics go to apple-metal, CPU tick cost to apple-performance, general HIG layout to apple-design, and signing and notarization to app-release.
   - The OS floor block: 26.0 holds, OS 27 symbols are gated, and the compiler does not gate LZMESH or LZRAVEN.
   - Ten rules that always apply. They include the Developer ID rule pointing to `references/game-center-and-online.md` and the GUI-only rule, which names `ba-package` and `ba-serve` as the real command-line tools.
-- **The description (998 characters, limit 1024):**
+- **The description (998 characters; the limit is `DESC_MAX = 1024` in `authoring-skills/scripts/validate_skill.ts`):**
   - It names every term the brief requires: the Metal game loop, `CAMetalDisplayLink`, fixed-step simulation, `os_workgroup`, Game Mode, Game Controller, Touch Controller, PHASE, AVAudioEngine, Core Haptics, GameKit / Game Center, game saves, Background Assets, and the HIG for games.
   - It ends: "Not for GPU frame time or Metal code (apple-metal), CPU profiling or launch time (apple-performance), general HIG layout (apple-design), signing and notarization (app-release), or SpriteKit and third-party engine questions."
 - **`evals/triggers.md`:** 8 should-fire rows and 6 should-not rows, all how-to questions, none with "build X" wording. The should-not rows are the brief's six:
@@ -116,7 +117,7 @@ In every case the SDK or the runtime result wins, and the reference says so.
 
 ## P29 restorations in apple-metal
 
-- **`SKILL.md:3`:** the description now ends "…or frame pacing, input, audio, and Game Center (apple-games)." The integrity test now guards that name.
+- **`SKILL.md:3`:** the description now ends "…or frame pacing, input, audio, and Game Center (apple-games)." The integrity test now guards that name. The description is 960 characters.
 - **`SKILL.md:50–53`:** "Frame pacing policy goes to apple-games … Fixed or variable step, frame budgets, and render-thread QoS belong to its game loop."
 - **`references/display-and-upscaling.md`:**
   - Scope paragraph (lines 23–27) → `apple-games/references/game-loop-and-threading.md`.
@@ -134,7 +135,7 @@ In `display-and-upscaling.md`, `RenderLoopThread.init` now sets `name = "Render"
 
 - **`apple-design/SKILL.md`:** "Game-specific HIG (game controls, text on a game screen, pause, Game Center presentation) → `apple-games` skill, its `game-design.md`".
 - **`apple-macos/SKILL.md`:** "Hosting a Metal view for a game, Game Mode, game full screen and cursor → `apple-games` skill".
-- **Neither line uses the `apple-games/references/…` form.** The skill validator's referenced-path regex would read it as a local `references/` file that does not exist, and report an error.
+- **Neither line uses the `apple-games/references/…` form.** The skill validator's referenced-path regex would read it as a local `references/` file that does not exist, and report an error. P30's form is used inside reference files only.
 - **Root `README.md`:** the apple-studio skills column lists `apple-games`, in alphabetical order.
 - **`plugins/apple-studio/README.md`:** a new `apple-games` component row after `apple-metal`. Task 13 rewrites the summary text.
 - **`reviewing-code-security/evals/manifest.json`:** `apple-games` is added to `acknowledgedOmissions`, in alphabetical order (ruling P4).
@@ -143,9 +144,29 @@ In `display-and-upscaling.md`, `RenderLoopThread.init` now sets `name = "Render"
 
 - **Vale:** 0 errors over all 17 new and edited files.
   - `SKILL.md` and `evals/triggers.md` have 0 warnings.
-  - Every edited file keeps its HEAD warning count, except `plugins/apple-studio/README.md`: 7 → 8, the same sentence-length warning as the apple-metal row.
-  - The six writer-authored references carry 106 warnings, all sentence length or core-word choice. They were not rewritten here.
+  - Every edited apple-metal and catalog file keeps its HEAD warning count, except `plugins/apple-studio/README.md`: 7 → 8, the same sentence-length warning as the apple-metal row.
+  - The six writer-authored references carry about 105 warnings, all sentence length or core-word choice. They were not rewritten.
 - **`bun test --timeout 30000`:** 542 pass, 0 fail.
 - **`bun run audit`:** exit 0, 0 errors, 55 warnings, none about apple-games or apple-metal.
 - **`claude plugin validate . --strict`:** passed.
 - **Clean state:** no probe processes, no booted simulator, and StudioFixture is clean.
+
+## Fix round 1
+
+The task review returned "Needs fixes" with 2 Important and 7 Minor findings. Commit `2c9f786` made these changes:
+
+- **I1, the haptics machine was misnamed.** The record said "Mac mini". `system_profiler` shows a MacBook Pro (Mac16,8) with a Force Touch trackpad.
+  - `audio-and-haptics.md`, `SKILL.md`, `runtime/audio-and-haptics/runs.txt`, `run.sh`, and the sidecar now name it correctly.
+  - The false sentence "not checked on a laptop" is cut.
+  - The text now says that Core Haptics reports no haptics support despite the trackpad, and that trackpad feedback goes through `NSHapticFeedbackManager`.
+  - `runs.txt` gained the `system_profiler` model lines and a re-run of §3 with the same result (P34).
+  - No other runtime log had the mislabel.
+- **I2, the DTLS connection leaked (P31).** The OS 26 branch of `sendOverDTLS` now awaits its send through a checked continuation and cancels the connection with `defer`. Prose now says that game traffic keeps one connection per peer. The snippet compiles.
+- **M1, cross-references to missing content.** Game Center artwork sizes now point to the HIG Game Center page, not to `assets.md` or `game-design.md`. visionOS access-point placement points to GameKit's "Adding an access point to your game".
+- **M2, P30 form.** Pointers into apple-metal in `game-loop-and-threading.md`, prose and code comments, and into apple-design in `game-design.md`, now use `<skill>/references/<file>.md`.
+- **M3:** declined by ruling P38.
+- **M4:** removed a dead `definition.leaderboards` fetch from `hostParty`.
+- **M5:** "the pre-26 types are gone" is now "deprecated, but still in the SDK", with the SDK versions.
+- **M6:** cut the Unity Dynamic Type sentence.
+- **M7:** the KTX lead-in now states `--compression_quality=Normal`, as the log does.
+- **Verification after the round:** both gates re-run (Swift 50/50, native 4/4, exit 0). Vale shows 0 errors and no warning increase on any edited file. `bun test` 542/0. Audit 0 errors and 55 warnings. `claude plugin validate . --strict` passed.
