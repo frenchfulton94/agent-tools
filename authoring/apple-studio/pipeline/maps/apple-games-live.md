@@ -43,7 +43,8 @@ the tile-based rendering article, the notarization and hardened-runtime articles
 Game technologies overview came from the Game technologies page
 (`/documentation/TechnologyOverviews/games-technologies`). Paths use the spelling that
 page uses. Touch Controller and GameSave are not linked from that page; their framework
-roots are `/documentation/touchcontroller` and `/documentation/gamesave`.
+roots are `/documentation/touchcontroller` (recursive) and `/documentation/gamesave`
+(depth1). Touch Controller is the only recursive Finding 8 addition.
 
 ## Probe status
 
@@ -68,11 +69,11 @@ record). The Finding 8 additions were probed the same day and are all 200.
 - recursive apple-games https://developer.apple.com/documentation/compression.md
 - recursive apple-games https://developer.apple.com/documentation/uniformtypeidentifiers.md
 - recursive apple-games https://developer.apple.com/documentation/accelerate.md
-- recursive apple-games https://developer.apple.com/documentation/gamesave.md
 
 <!-- Design, overview, and Apple silicon pages (depth1) -->
 - depth1 apple-games https://developer.apple.com/design/human-interface-guidelines/designing-for-games.md
 - depth1 apple-games https://developer.apple.com/documentation/TechnologyOverviews/games-technologies.md
+- depth1 apple-games https://developer.apple.com/documentation/gamesave.md
 - depth1 apple-games https://developer.apple.com/documentation/BackgroundAssets.md
 - depth1 apple-games https://developer.apple.com/documentation/Apple-Silicon/tuning-your-code-s-performance-for-apple-silicon.md
 - depth1 apple-games https://developer.apple.com/documentation/Apple-Silicon/addressing-architectural-differences-in-your-macos-code.md

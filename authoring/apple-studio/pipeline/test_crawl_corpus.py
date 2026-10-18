@@ -7,8 +7,11 @@ The survey's prototype crawler truncated links at the first ")" and keyed the
 seen-set on exact case, so a page was read twice or reported missing. These
 tests pin both, plus the bound rules the manifest depends on.
 """
+import contextlib
 import importlib.util
+import io
 import pathlib
+import tempfile
 import unittest
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -152,6 +155,144 @@ class CrawlCorpusTests(unittest.TestCase):
                          [("/documentation/metal", "recursive", "apple-metal"),
                           ("/design/human-interface-guidelines/designing-for-games",
                            "depth1", "app-release")])
+
+
+    def test_doc_scheme_links(self):
+        links = cc.extract_links((FIXTURES / "doc-forms.md").read_text())
+        self.assertEqual(links, [
+            "/documentation/Metal/MTLDevice/makeBuffer(length:options:)",
+            "/documentation/Metal/using-metal-to-draw-a-view's-contents",
+            "/documentation/GameController",
+            "/design/human-interface-guidelines/offering-help",
+            "/design/human-interface-guidelines/designing-for-games",
+            "/design/human-interface-guidelines/apple-pay",
+            "/documentation/Metal/shared",
+        ])
+
+    def test_doc_scheme_links_are_followed(self):
+        fetch = Stub({"/documentation/Foo/seed": "doc-forms.md"})
+        seeds = [cc.Seed("/documentation/Foo/seed", "depth1", "apple-games")]
+        cc.crawl(seeds, fetch)
+        self.assertIn("/documentation/GameController", fetch.fetched)
+        self.assertIn("/design/human-interface-guidelines/apple-pay", fetch.fetched)
+        self.assertNotIn("/videos/play/wwdc2023/10073", fetch.fetched)
+
+
+    def test_signature_links_are_not_fetched(self):
+        fetch = Stub({"/documentation/Metal/paren-seed": "paren-seed.md",
+                      "/documentation/Metal/plain": "case-a.md"})
+        seeds = [cc.Seed("/documentation/Metal/paren-seed", "depth1", "apple-metal")]
+        rows = cc.crawl(seeds, fetch)
+        self.assertIn("/documentation/Metal/plain", paths(rows))
+        self.assertFalse([p for p in fetch.fetched if "(" in p])
+        self.assertFalse([r.path for r in rows if "(" in r.path])
+        # A seed is never skipped, even with a signature-shaped path.
+        seeds = [cc.Seed("/documentation/Metal/x(y)", "page", "apple-metal")]
+        self.assertEqual(len(cc.crawl(seeds, Stub({}))), 1)
+
+
+class StubFetcher(cc.Fetcher):
+    """A real Fetcher whose network is a dict: path -> (code, body)."""
+
+    def __init__(self, cache_dir, offline=False, served=None):
+        super().__init__(cache_dir, offline)
+        self.served = served or {}
+        self.downloads = []
+
+    def _download(self, path):
+        self.downloads.append(path)
+        code, name = self.served.get(path.lower(), (0, None))
+        body = (FIXTURES / name).read_bytes() if name else None
+        return code, body
+
+
+class MainExitCodeTests(unittest.TestCase):
+    SEED = "/documentation/Foo/seed"
+    MAP = ("## Seeds\n\n- depth1 apple-games https://developer.apple.com"
+           + SEED + ".md\n")
+
+    def run_main(self, served, offline=False, map_text=None):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        root = pathlib.Path(tmp.name)
+        (root / "m.md").write_text(map_text or self.MAP)
+        out = root / "manifest.tsv"
+        made = []
+
+        def factory(cache, off):
+            f = StubFetcher(cache, off, served)
+            made.append(f)
+            return f
+
+        argv = [str(root / "m.md"), "--out", str(out),
+                "--cache", str(root / "cache")]
+        if offline:
+            argv.append("--offline")
+        err = io.StringIO()
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(err):
+            code = cc.main(argv, fetcher_factory=factory)
+        return code, out, err.getvalue(), made[0]
+
+    def test_non_200_seed_exits_1(self):
+        code, out, err, _ = self.run_main({self.SEED.lower(): (404, None)})
+        self.assertEqual(code, 1)
+        self.assertIn("seed not 200", err)
+        rows = out.read_text().splitlines()
+        self.assertEqual(rows[1].split("\t")[7], "404")
+
+    def test_transport_failure_of_child_fails_the_run(self):
+        served = {self.SEED.lower(): (200, "d1-seed.md"),
+                  "/documentation/foo/child": (0, None)}
+        code, out, err, _ = self.run_main(served)
+        self.assertEqual(code, 2)
+        self.assertIn("/documentation/Foo/child", err)
+        self.assertFalse(out.exists())
+
+    def test_server_error_of_child_fails_the_run(self):
+        served = {self.SEED.lower(): (200, "d1-seed.md"),
+                  "/documentation/foo/child": (503, None)}
+        code, out, _, _ = self.run_main(served)
+        self.assertEqual(code, 2)
+        self.assertFalse(out.exists())
+
+    def test_offline_cache_miss_fails_the_run(self):
+        code, out, err, fetcher = self.run_main({}, offline=True)
+        self.assertNotEqual(code, 0)
+        self.assertIn("fetch failed", err)
+        self.assertEqual(fetcher.downloads, [])
+        self.assertFalse(out.exists())
+
+    def test_real_404_child_stays_a_row(self):
+        served = {self.SEED.lower(): (200, "d1-seed.md"),
+                  "/documentation/foo/child": (404, None)}
+        code, out, _, _ = self.run_main(served)
+        self.assertEqual(code, 0)
+        rows = [l.split("\t") for l in out.read_text().splitlines()[1:]]
+        self.assertEqual([(r[0], r[7]) for r in rows],
+                         [("/documentation/Foo/child", "404"), (self.SEED, "200")])
+
+    def test_real_404_is_remembered_for_offline_reruns(self):
+        served = {self.SEED.lower(): (200, "d1-seed.md"),
+                  "/documentation/foo/child": (404, None)}
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        root = pathlib.Path(tmp.name)
+        (root / "m.md").write_text(self.MAP)
+        args = [str(root / "m.md"), "--cache", str(root / "cache")]
+        outs = []
+        for offline in (False, True):
+            out = root / ("offline.tsv" if offline else "online.tsv")
+            argv = args + ["--out", str(out)] + (["--offline"] if offline else [])
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                code = cc.main(argv, fetcher_factory=lambda c, o: StubFetcher(c, o, served))
+            self.assertEqual(code, 0)
+            outs.append(out.read_bytes())
+        self.assertEqual(outs[0], outs[1])
+
+    def test_crawl_keeps_code_zero(self):
+        rows = cc.crawl([cc.Seed("/documentation/Foo/x", "page", "apple-games")], Stub({}),
+                        status=lambda p: 0)
+        self.assertEqual(rows[0].http, 0)
 
 
 if __name__ == "__main__":

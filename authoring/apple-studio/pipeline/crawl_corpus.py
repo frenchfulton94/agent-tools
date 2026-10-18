@@ -16,7 +16,10 @@ Every later reader and the ledger checker key off that manifest, so link
 extraction and de-duplication are exact: a link is taken whole up to its closing
 parenthesis, and paths are compared case-insensitively.
 
-Exit 0 when the manifest is written, 1 when any seed returns non-200.
+Exit 0 when the manifest is written and no seed is non-200. Exit 1 when a seed
+returns non-200 (the manifest is still written). Exit 2, with no manifest, when any
+fetch fails for a reason other than a real 404 or 410: a transport error, a 403,
+429, or 5xx, or an `--offline` cache miss.
 """
 import argparse
 import concurrent.futures as cf
@@ -36,7 +39,8 @@ BOUNDS = ("recursive", "depth1", "page")
 DESTS = ("apple-metal", "apple-games", "apple-performance", "app-release")
 HEADER = ("path", "seed", "bound", "depth", "documentType", "role", "words", "http", "dest")
 THREADS = 8
-LINK_STARTS = ("](/documentation/", "](/design/")
+GONE = (404, 410)
+LINK_STARTS = ("](/documentation/", "](/design/", "](doc://", "<doc://")
 
 
 class Seed(NamedTuple):
@@ -63,40 +67,72 @@ def key(path: str) -> str:
     return re.sub(r"[^a-z0-9_.()'-]", "_", k)
 
 
+_DOC_HOST = re.compile(r"\Adoc://[^/\s]+")
+_HIG = re.compile(r"\A/design/human-interface-guidelines(?=/|\Z)", re.I)
+
+
+def _doc_path(target: str):
+    """Map a link target to a /documentation/... or /design/... path, or None.
+
+    Accepts site-relative paths and `doc://<bundle>/...` URLs, whatever the
+    bundle (`com.apple.documentation`, `com.apple.metal`, `com.apple.HIG`).
+    Human Interface Guidelines links are spelled `/design/Human-Interface-
+    Guidelines/...` in the `doc://` form; they map to the lowercase spelling
+    the site paths use.
+    """
+    m = _DOC_HOST.match(target)
+    if m:
+        target = target[m.end():]
+    target = target.split("#", 1)[0]
+    if not (target.startswith("/documentation/") or target.startswith("/design/")):
+        return None
+    return _HIG.sub("/design/human-interface-guidelines", target, count=1)
+
+
 def extract_links(md: str) -> list:
     """Return documentation and design link targets in order, without duplicates.
 
-    A target runs from the "(" after "](" to the ")" that closes it, tracking
-    nested parentheses so `makeBuffer(length:options:)` stays whole. A target
-    also ends at whitespace, which a path never contains. Fragments are dropped.
+    Three forms are followed: `[t](/documentation/p)`, `[t](doc://bundle/documentation/p)`,
+    and the autolink `<doc://bundle/documentation/p>`. A `](` target runs to the
+    `)` that closes it, tracking nested parentheses so `makeBuffer(length:options:)`
+    stays whole. An autolink runs to `>`. Either also ends at whitespace, which a
+    path never contains. Fragments are dropped, and `doc://` targets map to the
+    `/documentation/` or `/design/` path.
     """
     links = []
     seen = set()
     i = 0
     n = len(md)
     while i < n:
-        hits = [j for j in (md.find(s, i) for s in LINK_STARTS) if j != -1]
+        hits = [(j, s) for s in LINK_STARTS for j in [md.find(s, i)] if j != -1]
         if not hits:
             break
-        start = min(hits) + 2  # first character of the path
-        depth = 1
-        j = start
-        while j < n:
-            c = md[j]
-            if c == "(":
-                depth += 1
-            elif c == ")":
-                depth -= 1
-                if depth == 0:
+        pos, starter = min(hits)
+        if starter == "<doc://":
+            start = pos + 1
+            j = start
+            while j < n and md[j] != ">" and not md[j].isspace():
+                j += 1
+        else:
+            start = pos + 2
+            depth = 1
+            j = start
+            while j < n:
+                c = md[j]
+                if c == "(":
+                    depth += 1
+                elif c == ")":
+                    depth -= 1
+                    if depth == 0:
+                        break
+                elif c.isspace():
                     break
-            elif c.isspace():
-                break
-            j += 1
-        target = md[start:j].split("#", 1)[0]
+                j += 1
+        target = _doc_path(md[start:j])
         if target and target not in seen:
             seen.add(target)
             links.append(target)
-        i = max(j, start)
+        i = max(j, pos + 1)
     return links
 
 
@@ -122,6 +158,18 @@ def page_words(text: str) -> int:
 def _scope(path: str) -> str:
     """First two path segments, lowercased: /documentation/metal."""
     return "/" + "/".join(path.lower().strip("/").split("/")[:2])
+
+
+def _is_signature(path: str) -> bool:
+    """True for a callable-signature path such as `.../expm1(_:)-mfq5`.
+
+    Such a path names a function, method, or initializer symbol. Across the
+    13,859 pages of the first full crawl, all 445 pages with "(" in the last
+    segment were symbols and none was a collectionGroup, so the crawler does not
+    fetch them. This also avoids Apple's edge, which answers 403 for some of them
+    (the `expm1` family in Accelerate). A seed is never skipped.
+    """
+    return "(" in path.rsplit("/", 1)[-1]
 
 
 def crawl(seeds: list, fetch: Callable, status: Optional[Callable] = None,
@@ -164,7 +212,7 @@ def crawl(seeds: list, fetch: Callable, status: Optional[Callable] = None,
             if text is None:
                 code = status(path) if status else 404
                 rows.setdefault(path.lower(), Row(path, seed.path, seed.bound, depth,
-                                                  "", "", 0, code or 404, seed.dest))
+                                                  "", "", 0, code, seed.dest))
                 continue
             meta = page_meta(text)
             dtype = str(meta.get("documentType", ""))
@@ -180,6 +228,8 @@ def crawl(seeds: list, fetch: Callable, status: Optional[Callable] = None,
                 continue
             scope = _scope(seed.path)
             for link in extract_links(text):
+                if _is_signature(link):
+                    continue
                 if seed.bound == "recursive" and _scope(link) != scope:
                     continue
                 nxt.append((link, depth + 1, idx))
@@ -251,6 +301,9 @@ class Fetcher:
         if os.path.exists(f):
             with open(f, encoding="utf-8", errors="replace") as fh:
                 text = fh.read()
+        elif os.path.exists(f + ".gone"):
+            with open(f + ".gone", encoding="utf-8") as fh:
+                code = int(fh.read().strip())
         elif self.offline:
             code = 0
         else:
@@ -261,6 +314,10 @@ class Fetcher:
                     fh.write(body)
                 os.replace(tmp, f)
                 text = body.decode("utf-8", errors="replace")
+            elif code in GONE:
+                # Remember a real 404 or 410, so a re-run (and --offline) sees the same row.
+                with open(f + ".gone", "w", encoding="utf-8") as fh:
+                    fh.write("%d\n" % code)
         with self.lock:
             self.texts[lk] = text
             self.statuses[lk] = 200 if text is not None else code
@@ -282,7 +339,7 @@ def write_manifest(rows: list, out: str):
             fh.write("\t".join(str(v) for v in r) + "\n")
 
 
-def main(argv=None) -> int:
+def main(argv=None, fetcher_factory=Fetcher) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("maps", nargs="+")
     ap.add_argument("--out", required=True)
@@ -295,8 +352,18 @@ def main(argv=None) -> int:
     for m in args.maps:
         with open(m, encoding="utf-8") as fh:
             seeds.extend(parse_map(fh.read()))
-    fetcher = Fetcher(args.cache, args.offline)
+    fetcher = fetcher_factory(args.cache, args.offline)
     rows = crawl(seeds, fetcher, fetcher.status, fetcher.prefetch)
+
+    # Only a real 404 or 410 from the server is a legitimate non-200 row. Any
+    # other code (0 for a transport failure or an offline cache miss, 403, 429,
+    # 5xx) means a page's subtree is missing, so the run fails and writes nothing.
+    failed = [r for r in rows if r.http != 200 and r.http not in GONE]
+    for r in failed:
+        print("fetch failed: %s -> %s" % (r.path, r.http or "no response"), file=sys.stderr)
+    if failed:
+        print("manifest not written: %d fetch failure(s)" % len(failed), file=sys.stderr)
+        return 2
     write_manifest(rows, args.out)
 
     seed_keys = {s.path.lower() for s in seeds}
