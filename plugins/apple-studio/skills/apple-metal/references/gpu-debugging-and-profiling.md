@@ -662,8 +662,9 @@ xcrun xctrace export --input run.trace --xpath '/trace-toc/run[@number="1"]/data
 ```
 
 All four ran. The recording exited 0 when the target quit by itself. The probe's
-`MTL4CommandQueue` commits appeared as three rows of
-`metal-application-command-buffer-submissions` (runtime-checked). Three more
+`MTL4CommandQueue` commits appeared as rows of
+`metal-application-command-buffer-submissions` (runtime-checked: a one-frame
+host gave one row). Three more
 results (runtime-checked):
 
 - **Keep Metal System Trace recordings short.** A small offscreen probe rendered

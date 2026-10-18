@@ -337,10 +337,10 @@ thread's loop body in `objc2::rc::autoreleasepool`.
 **Feature flags.** objc2-metal has one cargo feature per Metal header, plus
 `bitflags`, `block2`, `dispatch2`, and `objc2-core-foundation`. The default
 enables all of them. For an application that is fine. A library should set
-`default-features = false` and list only the headers it uses. Runtime-checked,
-debug builds from a cold target directory: the host below took 83 s with all
-three crates at their defaults, and 15 s with `objc2-foundation` dropped and
-objc2-metal trimmed to this list:
+`default-features = false` and list only the headers it uses. Dropping
+`objc2-foundation` and trimming objc2-metal to this list made a cold debug
+build of the host below much faster; that timing was observed once and is not
+logged, so measure your own:
 
 ```toml
 objc2-metal = { version = "=0.3.2", default-features = false, features = [
