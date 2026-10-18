@@ -115,7 +115,11 @@ def extract_blocks(text):
     escapes classification; classify_opener() decides which ones are acceptable.
     """
     blocks = []
-    lines = text.splitlines()
+    # Split on "\n" only. str.splitlines() also breaks on \x0b, \x0c, \x1c-\x1e, \x85,
+    # U+2028 and U+2029, so ```swift followed by one of them would look like a clean
+    # swift opener here while the Swift gate (which matches the literal "```swift\n")
+    # finds no block. Both gates must see the same openers.
+    lines = text.split("\n")
     i = 0
     while i < len(lines):
         m = FENCE_OPEN.match(lines[i])
@@ -269,7 +273,8 @@ RESOLVE_FAILURE = re.compile(
     r"failed to load source|failed to parse manifest|Unable to update|could not find `[^`]+` in registry|"
     r"network|Could not resolve host|spurious")
 COMPILE_FAILURE = re.compile(r"could not compile|error\[E\d+\]|error: aborting")
-USE_START = re.compile(r"^\s*(pub(\([^)]*\))?\s+)?use\b")
+# Column 0 only: an indented `use` belongs to a function or module body and must stay there.
+USE_START = re.compile(r"^(pub(\([^)]*\))?\s+)?use\b")
 
 
 def split_toml_items(value):
@@ -373,9 +378,11 @@ class RustGate(Gate):
         shutil.rmtree(self.dir, ignore_errors=True)
 
     def accumulate(self, prior, code, mode):
-        # with-prior compiled the block with its repeated `use` lines removed;
-        # adding the raw block would put the duplicates into every later framing.
-        return (drop_repeated_uses(prior, code) if mode == "with-prior" else code) + "\n"
+        # Whatever framing passed, drop the `use` lines the context already has.
+        # References repeat their imports block after block, and two standalone
+        # blocks that each pass as written would otherwise leave the same `use`
+        # in the context twice, failing every later block with E0252.
+        return drop_repeated_uses(prior, code) + "\n"
 
     def preflight(self, value):
         rc, out = self.cargo_check("")

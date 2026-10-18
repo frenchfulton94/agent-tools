@@ -43,6 +43,8 @@ expect 2 bare-fence.md "unlabelled fence: label it text, or a gated language"
 expect 2 fence-info.md "fence not in the exact form"       # ```metal title="..."
 expect 2 fence-tilde.md "fence not in the exact form"      # ~~~text
 expect 0 rust-prior.md                          # a with-prior pass must not leave a duplicate `use` in the context
+expect 0 rust-dup-use.md                        # nor may two as-written passes that each write the same `use`
+expect 2 swift-formfeed.md "swift fence the Swift gate cannot parse"   # ```swift + form feed: splitlines() would hide it from both gates
 
 # Fix round 1. Two runs that share one `> typecheck-rust:` directive must not share a
 # source file: an invented symbol has to fail every time, whatever the other run does.
@@ -57,5 +59,5 @@ for round in 1 2 3 4 5 6; do
     echo "ok   rust-race round $round -> invented 1, correct 0"
   fi
 done
-rm -f "$EMPTY_OUT.x" "$EMPTY_OUT.y"
+rm -f "$EMPTY_OUT" "$EMPTY_OUT.x" "$EMPTY_OUT.y"
 exit $fail

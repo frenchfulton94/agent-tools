@@ -27,6 +27,8 @@ ok   bare-fence.md -> 2
 ok   fence-info.md -> 2
 ok   fence-tilde.md -> 2
 ok   rust-prior.md -> 0
+ok   rust-dup-use.md -> 0
+ok   swift-formfeed.md -> 2
 ok   rust-race round 1 -> invented 1, correct 0
 ok   rust-race round 2 -> invented 1, correct 0
 ok   rust-race round 3 -> invented 1, correct 0
