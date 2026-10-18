@@ -62,4 +62,4 @@ away:
 
 - A phase writes its record to
   `authoring/apple-studio/records/<date>-phaseN-<slug>/`.
-- Tags are namespaced: `apple-studio-v0.9.0`, never a bare version.
+- Tags are namespaced: `apple-studio-v0.10.0`, never a bare version.
