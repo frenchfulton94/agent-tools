@@ -42,11 +42,13 @@ than 15%, for these reasons:
    autolinks (ruling P12), because the spec defines a depth1 seed as "the
    page itself and the pages it links". Accelerate's collection pages link
    their articles only through autolinks. So Accelerate grew from 1 row to
-   **265 rows (183,448 words)**, and that accounts for 264 of the 285 added
-   rows. The other 21 added rows come from depth1 seeds.
+   **265 rows (183,448 words)**. Against this crawler's first run (891 rows,
+   before the `doc://` change), that accounts for 264 of the 285 added rows,
+   and the other 21 come from depth1 seeds.
 2. **Case-variant duplicates.** The survey counted `/documentation/Xcode/x`
    and `/documentation/xcode/x` as two pages, and the manifest folds them
-   into one: Metal 173 rows against the survey's 203, Xcode 110 against 128.
+   into one. In the first run, Metal had 173 rows against the survey's 203,
+   and Xcode 110 against 128. The final manifest has 174 and 117.
    This offsets part of item 1.
 3. **Finding 8 additions.** The survey did not count them. They add about
    21,000 words.
