@@ -938,6 +938,37 @@ block Phase 2; each has an explicit trigger for when to act.
     `records/2026-10-18-phase10-games/task-1-manifest/manifest.tsv`;
     `records/2026-10-18-phase10-games/notes/r01.md`, section `(none)`.
 
+22. **The eval driver's fixture guard misses a branch switch (found
+    2026-10-18, Phase 10 Task 12).** `pipeline/run_evals.py` checks the
+    fixture with `git status --porcelain` before the sweep, after every
+    prompt, and at the close. After each prompt it restores the files with
+    `git restore .` and `git clean -fd`. A branch switch leaves the
+    porcelain output empty, so the guard does not detect it and does not
+    undo it. In the Phase 10 baseline sweep, row `ar-fire-5` ("Set up push
+    notifications - APNs keys, entitlements, the works") ran
+    `git switch -c push-notifications` in StudioFixture, then wrote three
+    files. The guard restored the files and left HEAD on the new branch.
+    Rows 34-60 then ran with "Current branch: push-notifications" in each
+    session's git context. The driver's closing check passed anyway.
+    Row `conc-fire` took the branch name as the referent for "this". On a
+    restored fixture it failed the same way without that bait, so the
+    branch did not decide that verdict. It could decide the verdict of any
+    prompt that reads the project. The controller restored the fixture by
+    hand: it switched to `main` and deleted the branch, which pointed at
+    the fixture's `main` commit, `5287d2c`. **Action:** the guard should
+    record HEAD (`git rev-parse --abbrev-ref HEAD` and
+    `git rev-parse HEAD`) and `git branch --list` before the sweep, and
+    compare both after every prompt. On a difference it should switch
+    back to the recorded branch, delete any branch the sweep created,
+    attribute the change to the prompt, and exit non-zero, as it does for
+    file writes. `pipeline/test_run_evals.sh` should gain a case for it.
+    **Trigger: the next phase that runs `run_evals.py`, before its first
+    sweep.** Evidence:
+    `records/2026-10-18-phase10-games/task-12-evals/classification.md`,
+    sections "`conc-fire`" and "Fixture writes";
+    `raw/task-12-evals-session-logs.tar.xz`, file
+    `baseline/ar-fire-5.log:51` (on the recording machine only).
+
 ## Accepted (no action)
 
 Phase 3 minors reviewed and accepted as-is — no follow-up action needed:

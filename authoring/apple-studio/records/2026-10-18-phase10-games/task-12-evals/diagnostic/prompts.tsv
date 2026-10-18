@@ -1,0 +1,5 @@
+# Diagnostic probe, NOT part of the scored sweep. conc-fire failed twice (contaminated, then clean main),
+# both times hunting for the type "this" names and answering blind. This probe asks the same
+# question in how-to form with no deictic referent and no added skill vocabulary.
+# If it fires, conc-fire is a prompt defect (missing referent); if not, a routing miss.
+diag-conc	swift-concurrency	FIRE	How do I decide whether to use an actor or a @MainActor class?

@@ -1,0 +1,65 @@
+# Phase 10 Task 12 trigger-eval sweep. Built from plugins/apple-studio/skills/*/evals/triggers.md,
+# rows copied verbatim. Fields: id <TAB> skill <TAB> FIRE|NOFIRE <TAB> prompt
+# New skills (full sets): apple-metal, apple-games. app-release full set: its description changed in Task 10.
+# Every other prior skill: one FIRE + one NOFIRE regression row (provenance in classification.md).
+# Fixture decision (Deliverable 6): how-to phrasing, StudioFixture not seeded.
+metal-fire-1	apple-metal	FIRE	How do I set up three frames in flight with Metal 4 command allocators?
+metal-fire-2	apple-metal	FIRE	How do I fix textures that render pink after I moved to residency sets?
+metal-fire-3	apple-metal	FIRE	How do I stop the first pipeline compile for an effect from hitching a frame?
+metal-fire-4	apple-metal	FIRE	How do I choose load and store actions so my G-buffer stays in tile memory?
+metal-fire-5	apple-metal	FIRE	How do I add MetalFX temporal upscaling to my Metal renderer?
+metal-fire-6	apple-metal	FIRE	How do I find which render pass costs the most GPU time from the terminal?
+metal-fire-7	apple-metal	FIRE	How do I drive a Metal 4 command queue from my Rust engine with objc2-metal?
+metal-fire-8	apple-metal	FIRE	How do I choose between MSL 4.0 and 4.1 when the game still supports macOS 26?
+metal-not-1	apple-metal	NOFIRE	How do I add a ripple with colorEffect to a SwiftUI image?
+metal-not-2	apple-metal	NOFIRE	How do I find why scrolling my settings list stutters?
+metal-not-3	apple-metal	NOFIRE	How do I add particle effects to a SpriteKit scene?
+metal-not-4	apple-metal	NOFIRE	How do I check a Godot .gdshader for errors before I run the game?
+metal-not-5	apple-metal	NOFIRE	How does a Cook-Torrance BRDF trade energy between diffuse and specular?
+metal-not-6	apple-metal	NOFIRE	How do I read the thumbsticks of a game controller?
+games-fire-1	apple-games	FIRE	How do I keep my game's physics at the same speed on 60 Hz and 120 Hz displays?
+games-fire-2	apple-games	FIRE	How do I set up a render thread for CAMetalDisplayLink in my Mac game?
+games-fire-3	apple-games	FIRE	How do I read a game controller's thumbsticks once per simulation step?
+games-fire-4	apple-games	FIRE	How do I add on-screen touch controls to my Metal game on iPhone?
+games-fire-5	apple-games	FIRE	How do I play positional sound effects that walls muffle with PHASE?
+games-fire-6	apple-games	FIRE	How do I make my Mac game turn on Game Mode?
+games-fire-7	apple-games	FIRE	How do I sync game saves between a player's iPhone and Mac?
+games-fire-8	apple-games	FIRE	How do I download level packs after install with Background Assets?
+games-not-1	apple-games	NOFIRE	How do I find which render pass takes the most GPU time in my frame?
+games-not-2	apple-games	NOFIRE	How do I find out why my app takes three seconds to launch?
+games-not-3	apple-games	NOFIRE	How do I add particle effects to a SpriteKit scene?
+games-not-4	apple-games	NOFIRE	How do I read a gamepad button press in a Godot GDScript _input handler?
+games-not-5	apple-games	NOFIRE	How do I lay out a settings screen that adapts from iPhone to iPad?
+games-not-6	apple-games	NOFIRE	How do I notarize my Mac app for distribution outside the App Store?
+ar-fire-1	app-release	FIRE	Set up TestFlight so external testers can try the beta
+ar-fire-2	app-release	FIRE	xcodebuild says 'No signing certificate iOS Distribution found'
+ar-fire-3	app-release	FIRE	What do I need in place before submitting to the App Store?
+ar-fire-4	app-release	FIRE	My app was rejected under guideline 2.1 - what now?
+ar-fire-5	app-release	FIRE	Set up push notifications - APNs keys, entitlements, the works
+ar-fire-6	app-release	FIRE	Automate our release builds with Xcode Cloud
+ar-fire-7	app-release	FIRE	How should I manage version and build numbers across releases?
+ar-fire-8	app-release	FIRE	What screenshot sizes does the App Store need for iPhone Duo?
+ar-nofire-1	app-release	NOFIRE	Build and run the app on the simulator
+ar-nofire-2	app-release	NOFIRE	Show a local notification when the timer ends
+ar-nofire-3	app-release	NOFIRE	Design the onboarding screens
+ar-nofire-4	app-release	NOFIRE	Should I use SwiftData or Core Data?
+anim-fire	apple-animations	FIRE	Add a ripple distortion to this view when tapped - shader effect?
+anim-not	apple-animations	NOFIRE	Why does my ScrollView stutter when I scroll fast?
+design-fire	apple-design	FIRE	Does this screen feel native?
+design-not	apple-design	NOFIRE	Fix this Sendable warning
+fw-fire	apple-frameworks	FIRE	Should I use WeatherKit or a third-party weather API?
+fw-not	apple-frameworks	NOFIRE	Where should my models live?
+ai-fire	apple-intelligence	FIRE	Summarize a note with the on-device model and stream the result into the view
+ai-not	apple-intelligence	NOFIRE	Should this feature use on-device AI or just a rule?
+macos-fire	apple-macos	FIRE	Add a Settings window with Cmd-comma to my Mac app
+macos-not	apple-macos	NOFIRE	Does this Mac window layout feel native?
+perf-fire	apple-performance	FIRE	Scrolling this list stutters on a real device but feels fine in the Simulator
+perf-not	apple-performance	NOFIRE	Make this card flip with a spring animation
+arch-fire	swift-architecture	FIRE	Where should this view's state live?
+arch-not	swift-architecture	NOFIRE	Does Apple have a framework for weather?
+conc-fire	swift-concurrency	FIRE	Should this be an actor or a @MainActor class?
+conc-not	swift-concurrency	NOFIRE	What does the HIG say about loading spinners?
+test-fire	swift-testing	FIRE	Write tests for this view model
+test-not	swift-testing	NOFIRE	Fix this data race
+xcode-fire	xcode-loop	FIRE	Run the test suite for this project and show me the failures
+xcode-not	xcode-loop	NOFIRE	Write a test for the parser
