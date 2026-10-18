@@ -17,10 +17,6 @@ echo done
 plain
 ```
 
-```
-no language counts as text
-```
-
 ```swift
 let x = 1
 ```

@@ -22,4 +22,15 @@ ok   rust-invented.md -> 1
 ok   rust-unresolvable.md -> 2
 ok   ungated-fence.md -> 2
 ok   ungated-config-ok.md -> 0
+ok   swift-case.md -> 2
+ok   bare-fence.md -> 2
+ok   fence-info.md -> 2
+ok   fence-tilde.md -> 2
+ok   rust-prior.md -> 0
+ok   rust-race round 1 -> invented 1, correct 0
+ok   rust-race round 2 -> invented 1, correct 0
+ok   rust-race round 3 -> invented 1, correct 0
+ok   rust-race round 4 -> invented 1, correct 0
+ok   rust-race round 5 -> invented 1, correct 0
+ok   rust-race round 6 -> invented 1, correct 0
 test_typecheck_native.sh exit 0

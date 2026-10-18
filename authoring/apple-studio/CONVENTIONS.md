@@ -141,7 +141,11 @@ further move, reading the SDK's own shipped interface, is named after them:
   (`ungated fence language: objc`).
   Only `text`, `bash`, `sh`, `console`, `tsv`, and the config fences `xml`, `json`,
   `toml`, `plist`, `yaml`, `cmake`, and `makefile` need no gate. A fence with no
-  language counts as text. `pipeline/test_typecheck_native.sh` and
+  language exits 2 (`unlabelled fence`). Every fence in a reference must open with
+  exactly three backticks and a lowercase language, with nothing after it.
+  `typecheck_snippets.py` finds its blocks by the literal text "```swift", so a
+  `Swift`, `~~~swift`, or `swift title=...` fence would reach no compiler. The
+  native gate exits 2 on each of them. `pipeline/test_typecheck_native.sh` and
   `pipeline/test_typecheck_snippets.sh` self-test the gates, including an invented
   symbol that must fail. (Added 2026-10-18, Phase 10.)
 - **`pipeline/run_evals.py`** — runs the trigger-eval sweep against the fixture

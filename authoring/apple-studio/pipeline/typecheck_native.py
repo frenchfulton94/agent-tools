@@ -47,8 +47,16 @@ A file with blocks in one of these languages and no matching directive exits 2.
 Any other fence language exits 2 (`ungated fence language: objc`), except text,
 bash, sh, console, tsv, and the config and data fences xml, json, toml, plist,
 yaml, cmake, makefile (Phase 10 ruling P3: they are configuration, not code in a
-gated language). A fence with no language counts as text. ```swift blocks are
-skipped here; typecheck_snippets.py compiles them.
+gated language). ```swift blocks are skipped here; typecheck_snippets.py
+compiles them.
+
+Fence strictness (Phase 10 fix round 1). typecheck_snippets.py finds its blocks
+with the literal text "```swift\n", so a ```Swift, ~~~swift, or "```swift title"
+fence reaches no compiler. Every fence in a file must therefore be exactly
+"```<lowercase language>": three backticks, no tildes, nothing after the
+language. Anything else exits 2, naming the opener. A swift-like opener the
+Swift gate cannot parse says `swift fence the Swift gate cannot parse`. A bare
+fence exits 2 (`unlabelled fence`): label it text, or a gated language.
 
 Strategy per snippet, first success wins:
   metal  1. the snippet after `#include <metal_stdlib>` and `using namespace metal;`
@@ -71,6 +79,7 @@ import hashlib
 import os
 import pathlib
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -82,9 +91,6 @@ UNGATED_TEXT = {"text", "bash", "sh", "console", "tsv"}
 UNGATED_CONFIG = {"xml", "json", "toml", "plist", "yaml", "cmake", "makefile"}
 SKIPPED = {"swift"}
 
-FENCE_OPEN = re.compile(r"^(?P<indent>[ \t]*)(?P<ticks>`{3,}|~{3,})[ \t]*(?P<lang>[^\s`]*)")
-
-
 class SetupError(Exception):
     """The gate cannot give an honest answer. Exit 2."""
 
@@ -93,8 +99,21 @@ class DirectiveError(SetupError):
     pass
 
 
+FENCE_OPEN = re.compile(r"^(?P<indent>[ \t]*)(?P<ticks>`{3,}|~{3,})")
+# The only opener a gated or ungated block may use. typecheck_snippets.py finds
+# its blocks with the literal text "```swift\n", so an opener it would not match
+# must never reach a reader as a block that "passed".
+EXACT_OPENER = re.compile(r"```([a-z0-9_+-]+)")
+SWIFT_LIKE = re.compile(r"[`~]{3,}\s*swift(?![a-z0-9_+-])", re.I)
+
+
 def extract_blocks(text):
-    """Return [(lang, code, line_number)] for every fenced block, in order."""
+    """Return [(opener, code, line_number)] for every fenced block, in order.
+
+    `opener` is the fence line without its indent, exactly as written. Fences made
+    of backticks or tildes, of any length, are recognised so that no code block
+    escapes classification; classify_opener() decides which ones are acceptable.
+    """
     blocks = []
     lines = text.splitlines()
     i = 0
@@ -103,7 +122,8 @@ def extract_blocks(text):
         if not m:
             i += 1
             continue
-        indent, ticks, lang = m.group("indent"), m.group("ticks"), m.group("lang").lower()
+        indent, ticks = m.group("indent"), m.group("ticks")
+        opener = lines[i][len(indent):]
         start = i + 1
         body = []
         i += 1
@@ -114,9 +134,23 @@ def extract_blocks(text):
             line = lines[i]
             body.append(line[len(indent):] if line.startswith(indent) else line.lstrip())
             i += 1
-        blocks.append((lang, "\n".join(body) + "\n", start))
+        blocks.append((opener, "\n".join(body) + "\n", start))
         i += 1
     return blocks
+
+
+def classify_opener(opener, line):
+    """Return the fence language for an acceptable opener, or raise SetupError."""
+    if opener == "```":
+        raise SetupError(f"unlabelled fence: label it text, or a gated language (line {line})")
+    m = EXACT_OPENER.fullmatch(opener)
+    if m:
+        return m.group(1)
+    if SWIFT_LIKE.match(opener):
+        raise SetupError(f"swift fence the Swift gate cannot parse: {opener} (line {line}); "
+                         "write exactly ```swift, in lowercase, with nothing after it")
+    raise SetupError(f"fence not in the exact form ```<lowercase language> (line {line}): {opener}; "
+                     "no tildes, no uppercase, nothing after the language")
 
 
 def directive(text, kind):
@@ -135,6 +169,15 @@ def run_cmd(cmd, cwd=None, env=None, timeout=240):
     return r.returncode, (r.stderr or "") + (r.stdout or "")
 
 
+class Gate:
+    def close(self):
+        pass
+
+    def accumulate(self, prior, code, mode):
+        """The text a passing block adds to the context for later blocks."""
+        return code + "\n"
+
+
 def with_prior_and_probe(prelude, prior, code, wrap):
     """The three framings shared by all three languages."""
     return [
@@ -149,7 +192,7 @@ def with_prior_and_probe(prelude, prior, code, wrap):
 MSL_PRELUDE = "#include <metal_stdlib>\nusing namespace metal;\n"
 
 
-class MetalGate:
+class MetalGate(Gate):
     name = "metal"
 
     def __init__(self, value, cache):
@@ -183,7 +226,7 @@ class MetalGate:
 
 # ---------------------------------------------------------------- cpp
 
-class CppGate:
+class CppGate(Gate):
     name = "cpp"
 
     def __init__(self, value, cache):
@@ -285,7 +328,7 @@ def drop_repeated_uses(prior, code):
     return "\n".join(kept + [rest]) if kept else rest
 
 
-class RustGate:
+class RustGate(Gate):
     name = "rust"
 
     def __init__(self, value, cache):
@@ -295,16 +338,51 @@ class RustGate:
         self.items = split_toml_items(value)
         key = hashlib.sha256(value.encode()).hexdigest()
         base = pathlib.Path(cache) / "rust-gate"
-        self.dir = base / key
-        # One target directory for every scratch crate, so objc2-metal compiles once.
+        self.keydir = base / key
+        self.keydir.mkdir(parents=True, exist_ok=True)
+        # Every invocation gets its OWN crate directory. Two runs that share a
+        # directive (parallel writers do) must not share a src/lib.rs: cargo takes
+        # its build lock after the source is written, so one run's snippet would be
+        # compiled as the other's, and an invented symbol could pass. The shared
+        # target directory keeps builds cached; the lock file is seeded from the
+        # last run so a warm run does not re-resolve.
+        self.dir = pathlib.Path(tempfile.mkdtemp(prefix="run-", dir=self.keydir))
         self.env = dict(os.environ, CARGO_TARGET_DIR=str(base / "target"), CARGO_TERM_COLOR="never")
-        (self.dir / "src").mkdir(parents=True, exist_ok=True)
+        # The crate name is unique per run too. Cargo hashes a workspace member by its
+        # path RELATIVE to the workspace root, so two runs with the same crate name
+        # share fingerprints in the shared target directory: the later run sees an
+        # up-to-date stamp from the other run's build and reports success without
+        # compiling its own source. Measured: an invented symbol passed 3 rounds of 4.
+        self.crate = "probe_" + re.sub(r"[^a-z0-9]", "_", self.dir.name.lower())
+        (self.dir / "src").mkdir()
+        seed = self.keydir / "Cargo.lock"
+        if seed.is_file():
+            (self.dir / "Cargo.lock").write_text(seed.read_text())
         manifest = (
-            '[package]\nname = "snippet_probe"\nversion = "0.0.0"\nedition = "2024"\n\n'
+            f'[package]\nname = "{self.crate}"\nversion = "0.0.0"\nedition = "2024"\n\n'
             "[workspace]\n\n[dependencies]\n" + "\n".join(self.items) + "\n"
         )
         (self.dir / "Cargo.toml").write_text(manifest)
+        try:
+            self.preflight(value)
+        except BaseException:
+            self.close()
+            raise
+
+    def close(self):
+        shutil.rmtree(self.dir, ignore_errors=True)
+
+    def accumulate(self, prior, code, mode):
+        # with-prior compiled the block with its repeated `use` lines removed;
+        # adding the raw block would put the duplicates into every later framing.
+        return (drop_repeated_uses(prior, code) if mode == "with-prior" else code) + "\n"
+
+    def preflight(self, value):
         rc, out = self.cargo_check("")
+        if rc == 0 and (self.dir / "Cargo.lock").is_file():
+            tmp = self.keydir / f"Cargo.lock.{os.getpid()}"
+            tmp.write_text((self.dir / "Cargo.lock").read_text())
+            os.replace(tmp, self.keydir / "Cargo.lock")
         if rc != 0 and RESOLVE_FAILURE.search(out) and not COMPILE_FAILURE.search(out):
             lines = [l for l in out.splitlines() if l.strip()][:3]
             raise SetupError("rust dependency resolution failed for "
@@ -358,40 +436,52 @@ def check_block(gate, code, prior):
 def check_file(path, cache):
     """Return (ok_count, total, error_or_None). Prints the report for the file."""
     text = pathlib.Path(path).read_text()
-    blocks = extract_blocks(text)
     # Refuse before compiling anything: an unchecked fence is the thing this gate exists to stop.
-    for lang, _, line in blocks:
-        if lang in GATED or lang in SKIPPED or lang in UNGATED_TEXT or lang in UNGATED_CONFIG or lang == "":
-            continue
-        raise SetupError(f"ungated fence language: {lang} (line {line}); add a compile gate for it, "
-                         "or use a text, bash, sh, console, or tsv fence")
+    blocks = []
+    for opener, code, line in extract_blocks(text):
+        lang = classify_opener(opener, line)
+        if not (lang in GATED or lang in SKIPPED or lang in UNGATED_TEXT or lang in UNGATED_CONFIG):
+            raise SetupError(f"ungated fence language: {lang} (line {line}); add a compile gate for it, "
+                             "or use a text, bash, sh, console, or tsv fence")
+        blocks.append((lang, code, line))
     by_lang = {lang: [b for b in blocks if b[0] == lang] for lang in GATED}
     gates = {}
+    opened = []
     for lang in GATED:
         if not by_lang[lang]:
             continue
-        value = directive(text, {"metal": "metal", "cpp": "cpp", "rust": "rust"}[lang])
-        if value is None:
-            raise SetupError(f"{len(by_lang[lang])} ```{lang} block(s) but no '> typecheck-{lang}:' directive")
-        gates[lang] = GATES[lang](value, cache)
-    n = sum(len(v) for v in by_lang.values())
-    label = "; ".join(g.label() for g in gates.values()) or "(no gated blocks)"
-    print(f"\n{'=' * 78}\nFILE: {path}   ({n} gated blocks)   target: {label}")
-    ok = 0
-    for lang, gate in gates.items():
-        prior = ""
-        for _, code, line in by_lang[lang]:
-            passed, mode, diag = check_block(gate, code, prior)
-            if passed and mode in ("as-written", "with-prior"):
-                prior += code + "\n"
-            first = next((l for l in code.strip().splitlines() if l.strip()), "")[:72]
-            if passed:
-                ok += 1
-                print(f"  [PASS:{lang}:{mode:13s}] line {line}  {first}")
-            else:
-                print(f"  [FAIL:{lang}] line {line}  {first}")
-                for l in diag.splitlines():
-                    print("      " + l)
+        try:
+            value = directive(text, lang)
+            if value is None:
+                raise SetupError(f"{len(by_lang[lang])} ```{lang} block(s) but no '> typecheck-{lang}:' directive")
+            gates[lang] = GATES[lang](value, cache)
+        except SetupError:
+            for g in gates.values():
+                g.close()
+            raise
+        opened.append(gates[lang])
+    try:
+        n = sum(len(v) for v in by_lang.values())
+        label = "; ".join(g.label() for g in gates.values()) or "(no gated blocks)"
+        print(f"\n{'=' * 78}\nFILE: {path}   ({n} gated blocks)   target: {label}")
+        ok = 0
+        for lang, gate in gates.items():
+            prior = ""
+            for _, code, line in by_lang[lang]:
+                passed, mode, diag = check_block(gate, code, prior)
+                if passed and mode in ("as-written", "with-prior"):
+                    prior += gate.accumulate(prior, code, mode)
+                first = next((l for l in code.strip().splitlines() if l.strip()), "")[:72]
+                if passed:
+                    ok += 1
+                    print(f"  [PASS:{lang}:{mode:13s}] line {line}  {first}")
+                else:
+                    print(f"  [FAIL:{lang}] line {line}  {first}")
+                    for l in diag.splitlines():
+                        print("      " + l)
+    finally:
+        for g in opened:
+            g.close()
     return ok, n
 
 
