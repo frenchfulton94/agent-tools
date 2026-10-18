@@ -96,7 +96,7 @@ AudioToolbox where it is still the right layer	IsUISound; Vibrate only on some d
 Core Haptics: where haptics can play	HIG and page platform lists conflict	g01.md:105,115,121; g08.md:52; g09.md:68; preparing-your-app page line 25; finding 13
 Core Haptics: where haptics can play	CHHapticEngine availability; init fails NotSupported without internal haptics	CHHapticEngine.h:134,226-227,240-241
 Core Haptics: where haptics can play	GCDeviceHaptics and GCController.haptics macos 11, ios 14, tvos 14	GCDeviceHaptics.h:13-14; GCController.h:256; gcdevicehaptics and gccontroller/haptics pages
-Core Haptics: where haptics can play	Mac mini: supportsHaptics false; CHHapticEngine() throws -4809 notSupported	runs.txt section 3
+Core Haptics: where haptics can play	MacBook Pro (Mac16,8, Force Touch trackpad): supportsHaptics false; CHHapticEngine() throws -4809 notSupported; trackpad feedback is NSHapticFeedbackManager	runs.txt section 3 and machine model block
 Core Haptics: where haptics can play	Engine supportsHaptics describes device, not controller; use supportedLocalities	gcdevicehaptics page line 40
 Core Haptics: where haptics can play	Default and All localities guaranteed; per-locality engines	GCDeviceHapticsLocality.h:22-29; GCDeviceHaptics.h createEngineWithLocality comment; createengine(withlocality:) page
 Core Haptics: where haptics can play	Header comment names nonexistent hapticEngines property	CHHapticEngine.h:228-229,242-243; grep of GameController headers (no match)

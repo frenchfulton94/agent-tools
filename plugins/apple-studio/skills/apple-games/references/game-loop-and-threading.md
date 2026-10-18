@@ -40,8 +40,8 @@ Ship on `CAMetalDisplayLink` (macOS 14, iOS 17) on a dedicated render thread.
 It hands you the drawable together with the deadline, and it runs off the main
 thread, so frame work does not compete with event delivery. Its setup,
 `preferredFrameLatency`, the weak delegate, and the present rules are in
-`display-and-upscaling.md`. Everything below about frame-rate ranges applies to
-both display link types.
+`apple-metal/references/display-and-upscaling.md`. Everything below about
+frame-rate ranges applies to both display link types.
 
 The facts that decide it:
 
@@ -155,7 +155,7 @@ buys:
 - **Layer.** An opaque `CAMetalLayer` with RGB content, full screen, on Apple
   silicon is the condition for direct-to-display, where the display hardware
   scales the drawable at almost no cost. The drawable need not match the panel.
-  Verify it in the Metal HUD (`display-and-upscaling.md`).
+  Verify it in the Metal HUD (`apple-metal/references/display-and-upscaling.md`).
 - **Resize.** `windowDidResize(_:)` fires on every resize, including the one
   `toggleFullScreen(_:)` causes. Set `drawableSize` there (snippet in "Full
   screen, the Dock, and the cursor").
@@ -298,7 +298,7 @@ Which timestamp to feed it:
   `targetTimestamp - CACurrentMediaTime()`.
 - **`CAMetalDisplayLink`: `targetPresentationTimestamp`** for animation deltas,
   as its page advises. Its `targetTimestamp` is the deadline for `present()`,
-  not a display time (`display-and-upscaling.md`).
+  not a display time (`apple-metal/references/display-and-upscaling.md`).
 - **A late callback costs the next one.** If a `CADisplayLink` callback runs past
   `targetTimestamp`, the next interval gets no callback. The accumulator absorbs
   the gap as two intervals; cap the steps per frame so a long stall slows the
@@ -346,7 +346,7 @@ struct FixedStepClock {
 ```
 
 The order inside one callback, and how it meets the GPU frame in
-`command-model.md`:
+`apple-metal/references/command-model.md`:
 
 1. **Input.** Drain controller input queues into the sim. For a fixed step,
    drain per step, not per frame (`input.md`: `inputStateQueueDepth`,
@@ -380,8 +380,9 @@ protocol GameSimulation {
     func snapshot(alpha: Double) -> RenderSnapshot
 }
 
-/// The GPU half: command-model.md's FrameLoop encode and submit, or the
-/// CAMetalDisplayLink delegate in display-and-upscaling.md. It owns the
+/// The GPU half: the FrameLoop encode and submit in
+/// apple-metal/references/command-model.md, or the CAMetalDisplayLink delegate
+/// in apple-metal/references/display-and-upscaling.md. It owns the
 /// frames-in-flight wait.
 protocol FrameSubmitter: AnyObject {
     func submit(_ snapshot: RenderSnapshot) throws
@@ -544,8 +545,8 @@ The rules behind it:
 ```swift
 import Foundation
 
-/// Configure a render thread (such as display-and-upscaling.md's
-/// RenderLoopThread) before starting it.
+/// Configure a render thread (such as the RenderLoopThread in
+/// apple-metal/references/display-and-upscaling.md) before starting it.
 func startRenderThread(_ thread: Thread) {
     thread.name = "Render"
     thread.qualityOfService = .userInteractive   // a new Thread otherwise runs at .default
@@ -590,7 +591,7 @@ lower than the signaling thread's. Thread Performance Checker flags mismatches.
 What that means for each Metal path:
 
 - **Metal 4**, this skill's default, bounds frames in flight with an
-  `MTLSharedEvent` wait, not a semaphore (`command-model.md`).
+  `MTLSharedEvent` wait, not a semaphore (`apple-metal/references/command-model.md`).
 - **Metal 3** signals a `DispatchSemaphore` from `addCompletedHandler(_:)`. The
   handler's page and `MTLCommandBuffer.h` say only that the driver calls it after
   the GPU finishes. Neither names a thread or a QoS. On this M4 Pro, 10 of 10
@@ -853,7 +854,7 @@ final class CursorCapture {
   background article then calls `waitUntilScheduled()` on each queue's last
   command buffer. That is a Metal 3 call: `MTL4CommandBuffer` has none. Under
   Metal 4, stop committing and watch commit feedback for
-  `MTL4CommandQueueError.Code.notPermitted` (`command-model.md`).
+  `MTL4CommandQueueError.Code.notPermitted` (`apple-metal/references/command-model.md`).
 - **Release what you can rebuild** when backgrounded: render targets, streamed
   textures, scene caches. A small suspended footprint is less likely to be
   jetsammed.

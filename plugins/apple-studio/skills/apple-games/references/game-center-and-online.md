@@ -8,8 +8,8 @@ Scope: the online layer of a game. That is sign-in, the Game Center surfaces
 (access point, achievements, leaderboards, challenges, activities), GameKit
 matchmaking for real-time and turn-based play, saves that follow a player
 between devices, and custom netcode on the Network framework. Presentation
-rules for Game Center UI (placement, artwork, terminology) are in
-`game-design.md`. Frame pacing and threads are in `game-loop-and-threading.md`.
+rules for Game Center UI (placement, terminology) are in `game-design.md`.
+Artwork sizes are on the HIG Game Center page, https://developer.apple.com/design/human-interface-guidelines/game-center.md. Frame pacing and threads are in `game-loop-and-threading.md`.
 Signing and notarization are in `app-release`.
 
 ## Contents
@@ -230,9 +230,10 @@ func finishRun(score: Int) async throws {
   are a one-way change. After you adopt sets, every new leaderboard must go
   in a set (up to 500 leaderboards in 100 sets, against 100 without sets).
   Choose the ID scheme before the first sync.
-- **The pre-26 types are gone.** Do not use `GKScore` (use `GKLeaderboard`
+- **The older types are deprecated, but still in the SDK.** Do not use
+  `GKScore` (deprecated in iOS 14 and macOS 11; use `GKLeaderboard`
   submissions), `GKLeaderboardViewController`, or
-  `GKAchievementViewController`. The old `GKChallenge` family and
+  `GKAchievementViewController` (both deprecated in iOS 7 and macOS 10.10). The old `GKChallenge` family and
   `GKChallengeListener` are deprecated at 26.
 
 ## Challenges and activities (OS 26)
@@ -284,8 +285,6 @@ func hostParty(definitionID: String, typedCode: String) async throws -> GKGameAc
           definition.supportsPartyCode else { return nil }
     let code = typedCode.uppercased()
     guard GKGameActivity.isValidPartyCode(code) else { return nil }
-    let boards = try await definition.leaderboards
-    _ = boards
     return try GKGameActivity.start(definition: definition, partyCode: code)
 }
 ```
@@ -545,10 +544,19 @@ func sendOverDTLS(_ payload: Data, to endpoint: NWEndpoint) async throws {
     } else {
         let connection = NWConnection(to: endpoint, using: lanParameters())
         connection.start(queue: .global(qos: .userInitiated))
-        connection.send(content: payload, completion: .contentProcessed { _ in })
+        defer { connection.cancel() }   // an uncancelled connection leaks its DTLS session
+        try await withCheckedThrowingContinuation { (sent: CheckedContinuation<Void, any Error>) in
+            connection.send(content: payload, completion: .contentProcessed { error in
+                if let error { sent.resume(throwing: error) } else { sent.resume() }
+            })
+        }
     }
 }
 ```
+
+Both branches open, use, and close one connection per call, which costs one
+DTLS handshake each time. For game traffic, keep one connection per peer for
+the whole session, and close it when the peer leaves.
 
 **C API knobs worth knowing** (all predate the floor unless noted):
 `nw_connection_get_maximum_datagram_size` (size packets from it, not from a
@@ -661,8 +669,8 @@ for an iPhone over USB. Find the Wi-Fi interface with `networksetup
 - `app-release/references/direct-distribution.md`: Developer ID signing, the
   embedded provisioning profile, notarization.
 - `app-release`: App Store submission and TestFlight for Game Center builds.
-- `game-design.md`: access point placement, achievement and leaderboard
-  artwork, Game Center terminology.
+- `game-design.md`: access point placement, Game Center terminology.
+- https://developer.apple.com/design/human-interface-guidelines/game-center.md: achievement, leaderboard, challenge, and activity artwork sizes.
 - `game-loop-and-threading.md`: where the network thread sits beside the
   simulation and render threads.
 - `assets.md`: Uniform Type Identifiers for save files.

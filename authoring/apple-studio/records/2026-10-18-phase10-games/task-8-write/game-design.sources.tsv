@@ -45,7 +45,6 @@ Text size and legibility	SwiftUI .dynamicTypeSize(_:) does not change .body/.tit
 Text size and legibility	scaledFont(for:compatibleWith:) scales to Dynamic Type; already-scaled base font raises an exception	uikit/uifontmetrics/scaledfont(for:compatiblewith:).md
 Text size and legibility	maximumPointSize caps the scaled font	uikit/uifontmetrics/scaledfont(for:maximumpointsize:compatiblewith:).md
 Text size and legibility	Rebuild on UIContentSizeCategory.didChangeNotification	uikit/uicontentsizecategory/didchangenotification.md
-Text size and legibility	Unity plug-ins for Dynamic Type; otherwise own text-size control	g02.md:10; typography.md Using custom fonts
 Menus, buttons, and layout	Menus use platform default input	g01.md:58; menus.md In-game menus; designing-for-games.md
 Menus, buttons, and layout	Resize menu targets per screen rather than scaling down	g01.md:58; menus.md In-game menus
 Menus, buttons, and layout	Aspect ratios 16:10, 19.5:9, 4:3; relative constraints; device-specific layout last	g01.md:10; designing-for-games.md

@@ -300,7 +300,8 @@ xcrun TextureConverter --compression_format=ASTC4x4 --compression_quality=Produc
 ```
 
 Choose the container with care. `MTKTextureLoader` treats KTX and KTX2 differently
-(runtime-checked, with files from the command above):
+(runtime-checked, with files that the command above made at `--compression_quality=Normal`
+instead of `Production`):
 
 | File | `newTexture(URL:options:)` returned |
 |---|---|

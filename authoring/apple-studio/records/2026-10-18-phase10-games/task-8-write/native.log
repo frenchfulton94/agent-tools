@@ -10,7 +10,7 @@ FILE: plugins/apple-studio/skills/apple-games/references/audio-and-haptics.md   
 
 ==============================================================================
 FILE: plugins/apple-studio/skills/apple-games/references/game-center-and-online.md   (1 gated blocks)   target: metal-cpp 26.4, -std=c++20
-  [PASS:cpp:as-written   ] line 563  #include <Network/Network.h>
+  [PASS:cpp:as-written   ] line 571  #include <Network/Network.h>
 
 ==============================================================================
 FILE: plugins/apple-studio/skills/apple-games/references/game-design.md   (0 gated blocks)   target: (no gated blocks)

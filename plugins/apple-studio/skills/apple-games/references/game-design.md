@@ -36,7 +36,7 @@ direction, Apple Arcade, or App Store product-page marketing.
 | GameKit authentication, achievements, leaderboards, activities, GameSave | `game-center-and-online.md` |
 | Background Assets and the initial download size | `assets.md` |
 | Text on a drawable after upscaling, drawable size | `apple-metal/references/display-and-upscaling.md` |
-| General type scaling, contrast, settings windows | `apple-design/references/hig-foundations.md`, `hig-patterns.md`, `accessibility.md` |
+| General type scaling, contrast, settings windows | `apple-design/references/hig-foundations.md`, `apple-design/references/hig-patterns.md`, `apple-design/references/accessibility.md` |
 
 Two 2026 HIG changes affect anything written from older material:
 
@@ -274,10 +274,8 @@ func dynamicPointSize(for role: GameTextRole, traits: UITraitCollection) -> CGFl
 }
 ```
 
-Unity games can get Dynamic Type through Apple's Unity plug-ins; where they do
-not fit, the game still owes the player a text-size control. Structural
-fixes for large text (stacking, fewer columns, truncation rules) are in
-`apple-design/references/hig-foundations.md`.
+Structural fixes for large text (stacking, fewer columns, truncation rules)
+are in `apple-design/references/hig-foundations.md`.
 
 ## Menus, buttons, and layout
 
@@ -549,7 +547,7 @@ current code visible in game, and manual code entry. Challenges should take 1 to
 5 minutes and score the most recent attempt, not a personal best, so that an
 invited newcomer is not beaten by construction. Artwork sizes for
 achievements, leaderboards, challenges, and activities are on the HIG Game
-Center page (and in `assets.md`).
+Center page, https://developer.apple.com/design/human-interface-guidelines/game-center.md.
 
 ## Apple In-App Purchase in a game
 
@@ -582,7 +580,7 @@ contain:
   if the game has no input but a controller there.
 - On visionOS and tvOS the access point opens a dashboard, and on visionOS
   its placement depends on whether the game is windowed, volumetric, or
-  immersive (`game-center-and-online.md`).
+  immersive (https://developer.apple.com/documentation/gamekit/adding-an-access-point-to-your-game.md).
 
 ## Where else to look
 
@@ -594,7 +592,8 @@ contain:
   switch.
 - `game-center-and-online.md`: GameKit APIs, GameSave, Developer ID
   capability limits.
-- `assets.md`: Background Assets, initial download size, Game Center artwork.
+- `assets.md`: Background Assets, initial download size.
+- https://developer.apple.com/design/human-interface-guidelines/game-center.md: Game Center artwork sizes.
 - `apple-design`: general layout, typography, color, onboarding, settings
   windows, accessibility review.
 - `apple-macos`: AppKit windows and the menu bar.

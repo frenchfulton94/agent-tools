@@ -96,6 +96,7 @@ Rules that always apply:
   user the exact menu path. Background Assets packaging does have one:
   `xcrun ba-package` and `xcrun ba-serve`.
 - **Measured claims come from one machine.** The references label each one
-  as runtime-checked. The machine was an M4 Pro with macOS 27.0.1 installed,
-  and it has no haptic actuator. Measure again on a new OS or device before
-  you depend on such a claim.
+  as runtime-checked. The machine was an M4 Pro MacBook Pro with macOS
+  27.0.1 installed. Core Haptics reports no haptics support on it, despite its
+  Force Touch trackpad. Measure again on a new OS or device before you depend
+  on such a claim.

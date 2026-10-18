@@ -9,6 +9,7 @@ mkdir -p "$out"
 
 echo "== machine"
 sysctl -n machdep.cpu.brand_string hw.model
+system_profiler SPHardwareDataType | grep -E 'Model Name|Model Identifier|Chip'
 sw_vers -productVersion
 xcodebuild -version | head -1
 clang --version | head -1

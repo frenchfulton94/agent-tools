@@ -1,7 +1,7 @@
 # runs.txt: runtime checks for plugins/apple-studio/skills/apple-games/references/audio-and-haptics.md
 # Command (from any directory): sh authoring/apple-studio/records/2026-10-18-phase10-games/task-8-write/runtime/audio-and-haptics/run.sh <scratch-dir>
 # Binaries go to <scratch-dir>; nothing stays running; no simulator; no fixture.
-# Run: 2026-10-18T17:42Z. Machine: Apple M4 Pro Mac mini (Mac16,8), macOS 27.0.1, Xcode 27.1, Apple clang 21.0.0.
+# Run: 2026-10-18T17:42Z. Machine: Apple M4 Pro MacBook Pro (Mac16,8, Force Touch trackpad), macOS 27.0.1, Xcode 27.1, Apple clang 21.0.0.
 # kernel_check.cpp and spectrum_check.cpp hold the reference's cpp blocks verbatim (extracted from the file).
 #
 # What the reference states from this log:
@@ -12,7 +12,7 @@
 #  2e   relaxed std::atomic load and std::memset pass; vDSP_vsmul warns.
 #  2f   a vDSP call wrapped under a diagnostic pragma: zero warnings.
 #  2g   the reference's GainKernel block: zero warnings under -Wfunction-effects.
-#  3    Mac mini: supportsHaptics=false; CHHapticEngine() throws CHHapticError -4809 (.notSupported).
+#  3    MacBook Pro (Force Touch trackpad): supportsHaptics=false; CHHapticEngine() throws CHHapticError -4809 (.notSupported).
 
 == machine
 Apple M4 Pro
@@ -61,6 +61,19 @@ exit=0
 mag[0]=0.2500 (expect 0.25)  mag[5]=0.5000 (expect 0.5)  mag[6]=0.0000
 exit=0
 == 3. Core Haptics on this Mac
+supportsHaptics=false supportsAudio=false
+CHHapticEngine() threw CHHapticError code=-4809 (CHHapticErrorCode(rawValue: -4809))
+CHHapticErrorCode.notSupported rawValue=-4809
+exit=0
+
+== machine model (added in Task 8 fix round 1, 2026-10-18T19:10Z; the first run's
+   machine line said "Mac mini", which was wrong)
+$ system_profiler SPHardwareDataType | grep -E 'Model Name|Model Identifier|Chip'
+      Model Name: MacBook Pro
+      Model Identifier: Mac16,8
+      Chip: Apple M4 Pro
+== 3, re-run on the same machine at the same time
+$ xcrun swiftc -O haptics_caps.swift -o <scratch>/haptics_caps && <scratch>/haptics_caps
 supportsHaptics=false supportsAudio=false
 CHHapticEngine() threw CHHapticError code=-4809 (CHHapticErrorCode(rawValue: -4809))
 CHHapticErrorCode.notSupported rawValue=-4809

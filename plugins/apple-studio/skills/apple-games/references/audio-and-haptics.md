@@ -27,9 +27,9 @@ it hands controller rumble to this file. The frame loop, QoS, and
 `game-center-and-online.md`. Bundling and streaming audio assets is in
 `assets.md`.
 
-"Runtime-checked" below means run on this machine: Apple M4 Pro Mac mini
-(`Mac16,8`), macOS 27.0.1, Xcode 27.1, Apple clang 21. The scripts and their
-output are in the Phase 10 record,
+"Runtime-checked" below means run on this machine: an Apple M4 Pro MacBook
+Pro (`Mac16,8`) with a Force Touch trackpad. It ran macOS 27.0.1, Xcode 27.1,
+and Apple clang 21. The scripts and their output are in the Phase 10 record,
 `task-8-write/runtime/audio-and-haptics/`.
 
 ## Choosing the audio layer
@@ -701,11 +701,12 @@ The sources disagree, and the SDK settles it.
 
 What that means per device:
 
-- **Mac:** no actuator Core Haptics can drive on its own. Runtime-checked on
-  a Mac mini: `capabilitiesForHardware().supportsHaptics` is `false` and
-  `CHHapticEngine()` throws `CHHapticError` code -4809, `.notSupported`. Not
-  checked on a laptop with a Force Touch trackpad. A Mac game's haptics are a
-  connected controller (`GCDeviceHaptics`) and, for UI only, the trackpad.
+- **Mac:** Core Haptics reports no haptics support on this MacBook Pro,
+  despite its Force Touch trackpad: `capabilitiesForHardware().supportsHaptics`
+  is `false` and `CHHapticEngine()` throws `CHHapticError` code -4809,
+  `.notSupported` (runtime-checked). Trackpad feedback goes through
+  `NSHapticFeedbackManager`. A Mac game's haptics are a connected controller
+  (`GCDeviceHaptics`) and, for UI only, the trackpad.
 - **iPhone:** the built-in Taptic Engine through Core Haptics, plus
   controllers. The HIG's controller list leaves out iPhone; the header has
   `ios(14.0)`, so controller haptics work there too.
@@ -718,8 +719,8 @@ The `GCDeviceHaptics` page says the `supportsHaptics` of an engine from
 `createEngine(withLocality:)` describes the device, not the controller. Gate
 controller rumble on `controller.haptics` being non-nil and its
 `supportedLocalities`. A game that gates everything on `supportsHaptics`
-turns controller rumble off wherever the device itself has no actuator: the
-Mac mini above, and iPad per the preparing page.
+turns controller rumble off wherever the device itself reports no haptics: the
+MacBook Pro above, and iPad per the preparing page.
 
 ```swift
 import CoreHaptics
