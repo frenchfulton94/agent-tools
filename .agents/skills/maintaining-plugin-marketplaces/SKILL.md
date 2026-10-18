@@ -36,6 +36,8 @@ bun test                                        # the pinned contract
 claude plugin validate .                        # authoritative, when the CLI is installed
 ```
 
+The sweep's path is relative to this skill's directory; pass the marketplace root as its argument. When the repository defines an `audit` script in `package.json`, run that instead.
+
 The sweep's own job is small and specific: run the vendored `validate_*.ts` validators over every skill, plugin, agent, and hook file (nothing else does), then check plugin-level READMEs, the README's skills column, the marketplace-level schema, and — with `--since <ref>` — plugin directories that changed without a version bump.
 
 Read `references/health.md` when a finding needs interpreting, or when code execution is unavailable and the checks have to be applied by hand.

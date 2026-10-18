@@ -7,7 +7,7 @@
     "url": "https://github.com/frenchfulton94/agent-tools"
   },
   "metadata": {
-    "description": "Claude Code plugins for this catalog — agent tooling, the TypeScript and SvelteKit stacks, interface craft and motion, containers, OWASP-grounded security review, and OpenSpec workflow setup.",
+    "description": "Claude Code plugins for this catalog — agent tooling, the TypeScript and SvelteKit stacks, interface craft and motion, native Apple apps, Godot games, containers and self-hosted infrastructure (Docker, Unraid, Dokploy), OWASP-grounded security review, OpenSpec workflow setup, the Zed editor, PARA file organization, and Windows apps on a Mac with CrossOver.",
     "version": "0.1.0"
   },
   "plugins": [
