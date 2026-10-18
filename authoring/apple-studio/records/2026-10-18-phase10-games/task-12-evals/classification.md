@@ -28,7 +28,7 @@ in Task 9, and its description did not. It therefore gets the standard two rows.
 |---|---|
 | Every new-skill row passes | **Met.** apple-metal 14/14, apple-games 14/14 |
 | No prior-skill row regresses from its last recorded verdict | **Not met: `conc-fire`** regressed from PASS to FAIL. It failed again on a restored fixture and is classified as a prompt defect, below. Every other prior row matches or betters its last verdict |
-| Known-open rows are reported and do not gate | `test-fire` failed, as it last did. `ad-nofire-1` (deferred item 13) was not sampled |
+| Known-open rows are reported and do not gate | `test-fire` failed, as it last did. `conc-fire` is known-open by controller ruling P43 (deferred item 23). `ad-nofire-1` (deferred item 13) was not sampled |
 
 Per-skill counts: apple-metal 14/14, apple-games 14/14, app-release 12/12,
 apple-animations 2/2, apple-design 2/2, apple-frameworks 2/2, apple-intelligence 2/2,
@@ -56,7 +56,7 @@ and `games-not-6` (notarization) reached app-release under its new Task 10 descr
 
 ## Failures
 
-### `conc-fire` — prompt defect (missing referent). A regression from its last verdict; gates
+### `conc-fire` — prompt defect (missing referent). A regression from its last verdict; known-open by ruling P43
 
 The baseline failure had a contaminated fixture, as described next. A re-run on a restored
 fixture failed again, and a how-to control fired. Both are described after the baseline
@@ -112,7 +112,8 @@ evidence.
 
 **Classification: prompt defect (missing referent), not a routing miss.**
 
-- Only the referent changed between the two prompts, and the verdict changed with it.
+- Mainly the referent changed between the two prompts (see the framing caveat below), and
+  the verdict changed with it.
 - This is the mechanism Phase 7 recorded for `anim-fire-8` and `test-fire`: "a missing
   referent shifts the session into answering blind from priors rather than into loading the
   skill".
@@ -133,7 +134,10 @@ is **not met** for this row. It was left unfixed on purpose:
 - A reword belongs in `swift-concurrency/evals/triggers.md`, which this task does not edit.
   The obvious reword is the diagnostic prompt.
 
-The controller decides whether to accept the row as a prompt defect or to schedule the reword.
+**Controller ruling P43:** the row is recorded as a known-open prompt defect and does not
+gate. Phase 10 touched nothing in swift-concurrency, and the how-to control routes. The
+reword is deferred item 23. Each probe ran once, so this rests on one failing run and one
+passing control.
 
 ### `test-fire` — known-open (prompt defect). Does not gate
 
