@@ -95,6 +95,9 @@ buffer. A discrete GPU may have tolerated it. Run Shader Validation before blami
 ```swift
 /// One compute pass: upload parameters with a copy, then run a kernel that reads them.
 /// The barrier is required: copies and dispatches in one Metal 4 pass overlap.
+/// The kernel tiles a fixed threadgroup size, so the pipeline must pin that size on its
+/// descriptor (see `makeFilterPipeline` below). A size pinned only by the MSL attribute reads
+/// back as zero, and a computed fallback would then dispatch the wrong shape without any error.
 func encodeUploadThenFilter(commandBuffer: any MTL4CommandBuffer,
                             pipeline: any MTLComputePipelineState,
                             table: any MTL4ArgumentTable,
@@ -111,12 +114,10 @@ func encodeUploadThenFilter(commandBuffer: any MTL4CommandBuffer,
     table.setAddress(params.gpuAddress, index: 0)
     pass.setComputePipelineState(pipeline)
     pass.setArgumentTable(table)
-    // requiredThreadsPerThreadgroup reads zero unless the pipeline descriptor pinned a size.
-    let pinned = pipeline.requiredThreadsPerThreadgroup
-    let width = pipeline.threadExecutionWidth
-    let group = pinned.width > 0
-        ? pinned
-        : MTLSize(width: width, height: pipeline.maxTotalThreadsPerThreadgroup / width, depth: 1)
+    // Only a descriptor pin reads back here. Stop rather than guess a shape.
+    let group = pipeline.requiredThreadsPerThreadgroup
+    precondition(group.width > 0,
+                 "Pin requiredThreadsPerThreadgroup on the pipeline descriptor for this kernel")
     pass.dispatchThreads(threadsPerGrid: MTLSize(width: destination.width,
                                                  height: destination.height, depth: 1),
                          threadsPerThreadgroup: group)
@@ -159,7 +160,11 @@ the SDK wins. `MTLComputePipelineState.requiredThreadsPerThreadgroup` reads back
 that the pipeline descriptor pinned. With no descriptor pin it reads zero in every dimension,
 even when the MSL attribute pins the size; the attribute then shows only as a smaller
 `maxTotalThreadsPerThreadgroup` (measured: 16 × 16 pinned by attribute read `0 0 0` and 256).
-Size a dispatch from that property only after checking that it is nonzero.
+So a kernel pinned only by the MSL attribute must also pin the pipeline descriptor, as
+`makeFilterPipeline` below does, or its caller must pass the known size in. A shape computed from
+`threadExecutionWidth` and `maxTotalThreadsPerThreadgroup` is only for kernels that pin nothing.
+For an attribute-only 16 × 16 kernel it gives 32 × 8, the kernel runs at 32 × 8, and neither API
+nor Shader Validation reports the mismatch (measured).
 
 `[[max_total_threads_per_threadgroup(n)]]`, `MTL4ComputePipelineDescriptor.maxTotalThreadsPerThreadgroup`,
 and `MTLCompileOptions.maxTotalThreadsPerThreadgroup` cap the size instead. An attribute value
@@ -190,7 +195,8 @@ func makeFilterPipeline(device: any MTLDevice, library: any MTLLibrary) throws
                                                  compilerTaskOptions: nil)
 }
 
-/// A shape for kernels that do not pin their size.
+/// Only for kernels that pin nothing, in the MSL attribute or on the descriptor.
+/// For a kernel pinned only by the attribute this returns the wrong shape, silently.
 func widestGroup(for pipeline: any MTLComputePipelineState) -> MTLSize {
     let w = pipeline.threadExecutionWidth
     return MTLSize(width: w, height: pipeline.maxTotalThreadsPerThreadgroup / w, depth: 1)

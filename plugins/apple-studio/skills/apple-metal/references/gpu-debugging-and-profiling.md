@@ -422,10 +422,11 @@ texture's label and the encoder's label ("Forward pass"), and gave the allocatio
 The process then exited 0 (runtime-checked). Add `MTL_SHADER_VALIDATION_ABORT_ON_FAULT=1`
 when a test should fail on the first fault.
 
-- Output goes to the unified log by default: `log stream --process <name>` (the article
-  writes `-process`; `man log` spells it `--process`).
-  `MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1` copies it to stderr, which is what an agent
-  or CI run can read.
+- **Set `MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1` to read the reports.** Without it they
+  go only to the unified log. There, `log stream --process <name>` shows each report under
+  `com.apple.Metal` / `GPUDebug` with its text replaced by `<private>`, so the log tells you
+  that a fault happened but not which (runtime-checked). The article writes `-process`;
+  `man log` spells it `--process`.
 - `MTL_SHADER_VALIDATION_FAIL_MODE`: `zerofill` (the default: bad reads return 0, bad
   writes are dropped) or `allow` (cheaper, but the command buffer may fail).
 - **The man page and the article disagree on defaults.** The article lists

@@ -12,3 +12,38 @@ exit: 0
   pinned descriptorPin true required 16 16 1 execWidth 32 maxTotal 256
   free_size descriptorPin true required 16 16 1 execWidth 32 maxTotal 1024
 
+## Round-1 fallback sizing on an attribute-only 16x16 kernel (reviewer probe), both validation layers
+$ swiftc -O review5b/rtpt-mtl4.swift -o fixrun/work/rtpt-mtl4 && MTL_DEBUG_LAYER=1 MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1 ./fixrun/work/rtpt-mtl4
+exit: 0
+  group 32 8 1
+  written 4096 tpt 32 8
+  rtpt-mtl4: Metal API Validation Enabled
+  rtpt-mtl4: Metal GPU Validation Enabled
+
+## Final snippet, extracted verbatim from the reference: build
+$ python3 build.py
+exit: 0
+  build exit 0
+
+## Final snippet, pipeline from makeFilterPipeline (descriptor pin), both validation layers
+$ MTL_DEBUG_LAYER=1 MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1 ./dispatch pinned filterTile.metal
+exit: 0
+  pinned requiredThreadsPerThreadgroup 16 16 1 maxTotal 256
+  pinned destination equals source: true
+  dispatch: Metal API Validation Enabled
+  dispatch: Metal GPU Validation Enabled
+
+## Final snippet, same kernel with no descriptor pin (attribute only), optimized build
+$ MTL_DEBUG_LAYER=1 MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1 ./dispatch attr-only filterTile.metal; echo exit $? = SIGTRAP from the precondition
+exit: 0
+  attr-only requiredThreadsPerThreadgroup 0 0 0 maxTotal 256
+  exit 133 = SIGTRAP from the precondition
+  dispatch: Metal API Validation Enabled
+  dispatch: Metal GPU Validation Enabled
+  bash: line 1: 43834 Trace/BPT trap: 5       MTL_DEBUG_LAYER=1 MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1 ./dispatch attr-only filterTile.metal
+
+## Final snippet, same case, debug build (shows the precondition message)
+$ swiftc -Onone main.swift snippet.swift -o dispatch-debug && ./dispatch-debug attr-only filterTile.metal 2>&1 | grep -m1 'Precondition failed'
+exit: 0
+  main/snippet.swift:26: Precondition failed: Pin requiredThreadsPerThreadgroup on the pipeline descriptor for this kernel
+

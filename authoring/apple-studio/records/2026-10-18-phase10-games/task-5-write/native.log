@@ -11,10 +11,10 @@ FILE: plugins/apple-studio/skills/apple-metal/references/command-model.md   (1 g
 
 ==============================================================================
 FILE: plugins/apple-studio/skills/apple-metal/references/compute-and-gpu-driven.md   (4 gated blocks)   target: -std=metal4.0
-  [PASS:metal:as-written   ] line 200  [[kernel, required_threads_per_threadgroup(16, 16, 1)]]
-  [PASS:metal:as-written   ] line 367  struct CullArgs {
-  [PASS:metal:as-written   ] line 491  struct Meshlet {
-  [PASS:metal:as-written   ] line 667  kernel void shadowRays(raytracing::primitive_acceleration_structure scen
+  [PASS:metal:as-written   ] line 206  [[kernel, required_threads_per_threadgroup(16, 16, 1)]]
+  [PASS:metal:as-written   ] line 373  struct CullArgs {
+  [PASS:metal:as-written   ] line 497  struct Meshlet {
+  [PASS:metal:as-written   ] line 673  kernel void shadowRays(raytracing::primitive_acceleration_structure scen
 
 ==============================================================================
 FILE: plugins/apple-studio/skills/apple-metal/references/cpp-and-rust.md   (6 gated blocks)   target: metal-cpp 26.4, -std=c++20; cargo check, objc2 = "=0.6.5", objc2-foundation = "=0.3.2", objc2-metal = "=0.3.2"
@@ -31,7 +31,7 @@ FILE: plugins/apple-studio/skills/apple-metal/references/display-and-upscaling.m
 
 ==============================================================================
 FILE: plugins/apple-studio/skills/apple-metal/references/gpu-debugging-and-profiling.md   (1 gated blocks)   target: -std=metal4.0
-  [PASS:metal:as-written   ] line 471  #include <metal_logging>
+  [PASS:metal:as-written   ] line 472  #include <metal_logging>
 
 ==============================================================================
 FILE: plugins/apple-studio/skills/apple-metal/references/pipelines-and-render-passes.md   (2 gated blocks)   target: -std=metal4.0
