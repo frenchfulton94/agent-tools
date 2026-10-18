@@ -1,7 +1,7 @@
 # agent-tools
 
 Claude Code plugins for this catalog — agent tooling, the
-TypeScript and SvelteKit stacks, interface craft and motion, native Apple apps, Godot games,
+TypeScript and SvelteKit stacks, Rust, interface craft and motion, native Apple apps, Godot games,
 containers and self-hosted infrastructure (Docker, Unraid, Dokploy), OWASP-grounded security
 review, OpenSpec workflow setup, the Zed editor, PARA file organization, and Windows apps on a
 Mac with CrossOver.
@@ -32,6 +32,7 @@ plugins travel with the repo instead of living on one workstation.
 | [para](plugins/para) | `maintaining-para-systems` `organizing-files-with-para` | Organizing a directory into PARA — Projects, Areas, Resources, Archives — with an approve-before-move plan. Ships `/para:organize`, an undo trail, and a guard hook against deletion and unplanned moves |
 | [godot](plugins/godot) | `gdscript` `godot-project-architecture` `godot-scene-files` `godot-testing-and-debugging` | Game development with Godot 4 — GDScript with static typing, the style guide, the warning system, project/scene architecture, and a verify loop built on the engine's own headless tooling. Ships a read-only MCP server over the project and engine, and a guard hook against uid-breaking file moves |
 | [crossover](plugins/crossover) | `using-crossover-mac` | Running Windows applications and games on a Mac with CodeWeavers CrossOver — bottles, the command line, Advanced Settings per version, debug logs, locale and input. Ships a `crossover-log-triage` agent and a guard hook against irreversible bottle deletion |
+| [rust](plugins/rust) | `building-rust-clis` `designing-rust-apis` `documenting-rust` `fixing-rust-compile-errors` `linting-and-formatting-rust` `testing-rust` `using-atomics-and-locks` `using-cargo` `writing-rust` | Rust on the 2024 edition from the official docs, the API Guidelines, the Clippy book, and *Rust Atomics and Locks* — the language and std through 1.99, API design, Cargo, compiler errors, lint policy and formatting, atomics and memory ordering, testing, rustdoc, CLIs. Ships `rust-build-triage` and `rust-api-reviewer` agents, a Stop gate that blocks ending on a failing `cargo check`, and a guard hook that asks before `cargo publish`, `yank`, and `owner` changes |
 
 Each plugin's own README covers its components, its limits, and how to run it locally.
 

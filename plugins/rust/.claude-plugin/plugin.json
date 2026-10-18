@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "rust",
+  "displayName": "Rust",
+  "version": "0.1.0",
+  "description": "Rust development on the 2024 edition, built from the official Rust documentation, the Rust API Guidelines, and the Clippy book — the language and the standard library, with the edition-2024 changes and APIs stabilised through Rust 1.99; Cargo manifests, features, workspaces, profiles, build scripts, configuration, cross-compilation, and publishing; designing public APIs against the API Guidelines checklist; Clippy lint policy, clippy.toml, and rustfmt; reading compiler errors and lints; atomics, memory ordering, and building locks and other synchronization primitives, from Mara Bos's Rust Atomics and Locks; testing; rustdoc and doctests; and command-line applications on current crates. Ships a build-triage agent that returns only root-cause diagnostics, an API-review agent that checks a crate's public surface against the guidelines, a Stop gate that keeps a session from ending while cargo check fails after Rust edits, and a guard that asks before cargo publish, yank, and owner changes.",
+  "author": {
+    "name": "Agent Tools",
+    "email": "michael@frenchfultonjr.dev"
+  },
+  "license": "MIT",
+  "keywords": [
+    "rust",
+    "cargo",
+    "rustc",
+    "rustdoc",
+    "crates-io",
+    "cli"
+  ]
+}
