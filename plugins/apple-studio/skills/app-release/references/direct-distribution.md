@@ -202,8 +202,9 @@ explains how App Store Connect classifies an app as Apple silicon only.
 Treat the classification as unverified, and control what you can: the
 architectures in the binary.
 
-**Measured with Xcode 27.1**, building a Release configuration for a generic
-macOS destination:
+**Measured with Xcode 27.1**, building a minimal SwiftPM executable package
+through `xcodebuild`, in Release, for a generic macOS destination. An Xcode
+app target was not tested:
 
 | `MACOSX_DEPLOYMENT_TARGET` | `ARCHS` | Slices built |
 |---|---|---|
@@ -284,27 +285,37 @@ syspolicy_check notary-submission "MyGame.app"
 
 ## The release sequence
 
-These are the commands for one app, in order. R6, the Phase 10 runtime
-check, runs them verbatim. Set the four variables first. The `IDENTITY`
-value comes from step 2, and `SUBMISSION_ID` comes from the `id:` line that
-step 6 prints.
+These are the commands for one app, in order. Steps 1 and 2 are one-time
+setup. Step 1 prompts for a password, and step 2 prints the identity name
+that step 3 needs, so run them by hand first. Steps 3 to 8 are one block
+that R6, the Phase 10 runtime check, runs verbatim after you set the
+variables at its top.
 
 **R6 pending: not yet runtime-checked.** Each spelling matches its `--help`
-text or man page on this machine. The expected results are from Apple's
-pages and from those help texts.
+text or man page on this machine. The expected results come from Apple's
+pages and from those help texts, except where a comment says otherwise.
+
+One-time setup:
+
+```bash
+# 1. Once per machine: store notary credentials in the keychain.
+#    Without --password, notarytool asks for the app-specific password.
+xcrun notarytool store-credentials "<profile name>" --apple-id "<Apple ID>" --team-id "<Team ID>"
+
+# 2. Find the Developer ID Application identity. Copy its full name, or its
+#    SHA-1 hash, into IDENTITY below. The name ends with the Team ID.
+security find-identity -v -p codesigning
+```
+
+The release block:
 
 ```bash
 APP="MyGame.app"
 ZIP="MyGame.zip"
-PROFILE="<keychain profile name>"
-IDENTITY="Developer ID Application: <Team Name> (<Team ID>)"
-
-# 1. Once per machine: store notary credentials in the keychain.
-#    Without --password, notarytool asks for the app-specific password.
-xcrun notarytool store-credentials "$PROFILE" --apple-id "<Apple ID>" --team-id "<Team ID>"
-
-# 2. Find the Developer ID Application identity and its Team ID.
-security find-identity -v -p codesigning
+PROFILE="<profile name from step 1>"
+IDENTITY="<identity from step 2>"
+SUBMIT_JSON="notary-submit.json"
+LOG="notary-log.json"
 
 # 3. Sign with the hardened runtime and a secure timestamp, then verify.
 codesign --force --sign "$IDENTITY" --options runtime --timestamp "$APP"
@@ -316,22 +327,30 @@ spctl --assess -vv --type execute "$APP"
 # 5. The notary service takes a zip, a DMG, or a pkg. It rejects a bare .app.
 ditto -c -k --keepParent "$APP" "$ZIP"
 
-# 6. Submit and wait, then fetch the log, also when the status is Accepted.
-xcrun notarytool submit "$ZIP" --keychain-profile "$PROFILE" --wait
-xcrun notarytool log "$SUBMISSION_ID" --keychain-profile "$PROFILE" notary-log.json
+# 6. Submit and wait, keep the JSON result, then fetch the log, also when
+#    the status is Accepted. The help documents -f json, but not the keys in
+#    the result: the "id" and "status" keys are unverified until R6.
+#    plutil exits 1 if the key is missing.
+xcrun notarytool submit "$ZIP" --keychain-profile "$PROFILE" --wait -f json > "$SUBMIT_JSON"
+plutil -extract status raw -o - "$SUBMIT_JSON"
+SUBMISSION_ID="$(plutil -extract id raw -o - "$SUBMIT_JSON")"
+xcrun notarytool log "$SUBMISSION_ID" --keychain-profile "$PROFILE" "$LOG"
 
 # 7. Staple the ticket to the app (a zip cannot be stapled), then check it.
 xcrun stapler staple "$APP"
 xcrun stapler validate "$APP"
 
-# 8. Expect "accepted" with source "Notarized Developer ID".
+# 8. Expected (task brief, not an Apple page; R6 pending): "accepted",
+#    with source "Notarized Developer ID".
 spctl --assess -vv --type execute "$APP"
 ```
 
 After step 7, zip the stapled app again if you ship a zip: the zip from step
 5 holds the app without its ticket. For an app with entitlements, add
 `--entitlements <file>` to step 3. For an app with nested code, sign it inside
-out first, as the previous section shows.
+out first, as the previous section shows. `plutil` reads a JSON file and
+prints a string value with `raw`. That was checked here on a sample file,
+not on real `notarytool` output.
 
 ## notarytool details
 

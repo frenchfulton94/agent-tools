@@ -38,5 +38,5 @@ probe t26-arm 26.0 "ARCHS=arm64"
 echo
 echo "## ARCHS_STANDARD and the x86_64 deployment range in Xcode's macOS architecture spec"
 spec="/Applications/Xcode.app/Contents/SharedFrameworks/SwiftBuild.framework/Versions/A/PlugIns/SWBBuildService.bundle/Contents/PlugIns/SWBApplePlatformPlugin.bundle/Contents/Frameworks/SWBApplePlatform.framework/Versions/A/Resources/macOSArchitectures.xcspec"
-echo "\$ grep -n -e RealArchitectures -e DeploymentTargetRange -e 'Identifier = \"x86_64\"' SWBApplePlatform.framework/Resources/macOSArchitectures.xcspec"
-grep -n -e 'RealArchitectures' -e 'DeploymentTargetRange' -e 'Identifier = "x86_64"' "$spec"
+echo "\$ grep -n -e RealArchitectures -e ArchitectureSetting -e DeploymentTargetRange -e 'Identifier = \"x86_64\"' SWBApplePlatform.framework/Resources/macOSArchitectures.xcspec"
+grep -n -e 'RealArchitectures' -e 'ArchitectureSetting' -e 'DeploymentTargetRange' -e 'Identifier = "x86_64"' "$spec"

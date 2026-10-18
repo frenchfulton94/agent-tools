@@ -23,7 +23,7 @@ show() {   # show <title> <grep -E pattern> <command...>
 show "notarytool version" '.' xcrun notarytool --version
 show "notarytool subcommands" '^  (store-credentials|submit|info|wait|history|log) ' xcrun notarytool --help
 show "notarytool store-credentials" 'USAGE|<profile-name>|--apple-id|--team-id|--password|--key |--key-id|--issuer|Required for Team|Do not provide|--validate|--keychain <' xcrun notarytool store-credentials --help
-show "notarytool submit" 'USAGE|keychain-profile|--wait|--timeout|continue processing|output-format|--webhook|s3-acceleration|--force' xcrun notarytool submit --help
+show "notarytool submit" 'USAGE|keychain-profile|--wait|--timeout|continue processing|output-format|are incompatible|single update|Choices|"json"|--webhook|s3-acceleration|--force' xcrun notarytool submit --help
 show "notarytool log" 'USAGE|pretty printed|output-format|<output-path>|default: stdout' xcrun notarytool log --help
 show "notarytool history" 'USAGE|OVERVIEW' xcrun notarytool history --help
 show "stapler usage" 'Usage|Supported file formats|bundles, and signed' xcrun stapler

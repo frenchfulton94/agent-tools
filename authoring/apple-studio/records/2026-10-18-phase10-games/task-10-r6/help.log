@@ -1,5 +1,5 @@
 Machine: Apple M4 Pro, macOS 27.0.1 26A434, Xcode 27.1 (Build version 27A9275)
-Date: 2026-10-18 16:07 EDT
+Date: 2026-10-18 16:16 EDT
 Active developer directory: /Applications/Xcode.app/Contents/Developer
 
 ## notarytool version
@@ -31,10 +31,13 @@ $ xcrun notarytool store-credentials --help 2>&1 | grep -n -E 'USAGE|<profile-na
 31:  --keychain <keychain>   Pass the path to a keychain file to use for reading
 
 ## notarytool submit
-$ xcrun notarytool submit --help 2>&1 | grep -n -E 'USAGE|keychain-profile|--wait|--timeout|continue processing|output-format|--webhook|s3-acceleration|--force'
+$ xcrun notarytool submit --help 2>&1 | grep -n -E 'USAGE|keychain-profile|--wait|--timeout|continue processing|output-format|are incompatible|single update|Choices|"json"|--webhook|s3-acceleration|--force'
 3:USAGE: notarytool submit [<options>] <file-path>
 23:  -p, --keychain-profile <keychain-profile>
 30:  -f, --output-format <output-format>
+32:                          are incompatible with '--progress'; a single update
+33:                          will be output at the end of the operation. Choices:
+34:                          ["normal", "json", "plist"] (default: normal)
 39:  --webhook <webhook>     Designate a public webhook URL to receive HTTP
 41:  --wait/--no-wait        Wait until processing is complete. Optionally set a
 42:                          '--timeout' if waiting. (default: false)
