@@ -1,6 +1,7 @@
 #!/bin/bash
-# Self-test for typecheck_snippets.py's iOS directive. Needs an installed
-# iPhoneOS SDK >= 27.0; compiles for real, so allow ~1 minute.
+# Self-test for typecheck_snippets.py's target directive (ios, macos, and
+# multi-target). Needs an installed iPhoneOS SDK >= 27.0 and a macOS SDK >= 27.0;
+# compiles for real, so allow a few minutes.
 set -u
 HERE="$(cd "$(dirname "$0")" && pwd)"
 F="$HERE/fixtures/typecheck"
@@ -14,7 +15,13 @@ expect() { # expect <exit-code> <fixture> [grep-pattern]
 expect 0 ios-only.md                        # iOS-only API passes under the directive
 expect 1 macos-default.md "unavailable in macOS"   # same code, no directive: macOS, fails
 expect 1 invented.md "cannot find"          # invented symbol still fails under iOS
-expect 2 bad-directive.md "expected 'ios <major>.<minor>'"
+expect 2 bad-directive.md "expected '<macos|ios>"
 expect 2 too-new.md "older than the directive"
 expect 0 uikit.md                           # UIKit hint imports UIKit
+# Phase 10: the macOS target and the multi-target directive.
+expect 0 macos-floor-ok.md                              # MTL4CommandQueue under macos 26.0
+expect 1 macos-floor-too-old.md "only available in macOS 26"   # same code, macos 15.0
+expect 2 macos-too-new.md "older than the directive"    # macos 99.0 > the installed SDK
+expect 0 multi-target.md                                # an NSView and a UIView snippet, macos 26.0, ios 26.0
+expect 1 multi-target-invented.md "cannot find"
 exit $fail

@@ -8,6 +8,11 @@ later phases can't drift from earlier ones. Amend deliberately, never silently.
 - SwiftUI-first, Swift 6 strict concurrency, async/await, SPM, Swift Testing.
 - UIKit, Combine, XCTest, and other legacy material appears only under a heading that
   marks it as such: `## Maintaining older code: <topic>`.
+- Metal guidance is Swift first. C++ (metal-cpp) and Rust (objc2-metal) appear only
+  where they differ from Swift. Snippets in MSL, C++, and Rust are allowed, and each
+  one is compile-gated (see Pipeline tooling). Metal 4 is the default voice; Metal 3
+  appears only under `## Maintaining older code: Metal 3`. (Amended 2026-10-18,
+  Phase 10.)
 - Current Apple docs win over book material on any conflict:
   - https://docs.swift.org/swift-book/
   - https://developer.apple.com/documentation/
@@ -26,6 +31,10 @@ This plugin covers **native correctness**: architecture, concurrency, testing, H
 conformance, accessibility, release engineering. Custom visual design and branding are
 out of scope — other tooling owns "does it look distinctively ours"; this plugin owns
 "is it correctly Apple".
+
+Rendering and engine code are native correctness, so they are in scope: Metal
+pipelines, shaders, frame pacing, game input, and the game loop. Art direction is
+out of scope. (Amended 2026-10-18, Phase 10.)
 
 ## Skills
 
@@ -71,27 +80,70 @@ out of scope — other tooling owns "does it look distinctively ours"; this plug
 
 ## Pipeline tooling
 
-`pipeline/` holds the scripts distillation depends on. Three are worth knowing
-about before starting any live-docs work, and a fourth move — reading the SDK's
-own shipped interface — is named alongside them:
+`pipeline/` holds the scripts distillation depends on. They are listed below, and a
+further move, reading the SDK's own shipped interface, is named after them:
 
-- **`pipeline/docc.py`** — fetches and renders an Apple DocC JSON page.
-  developer.apple.com serves a JavaScript shell, so fetching a human doc URL
-  returns navigation and no content; the content is the DocC JSON behind it.
-  `--children` walks topicSections, `--tutorial` handles the tutorials prefix
-  (tutorials are not under `/documentation/`).
+- **Reading a doc page: append `.md` to its documentation URL.** Apple returns
+  `text/markdown` for `https://developer.apple.com/documentation/<path>.md`. The
+  body holds a JSON metadata comment (`documentType`, `role`, availability), the
+  prose, and the topic links as Markdown links. A bare documentation URL returns a
+  JavaScript shell, with navigation and no content. The pipeline once said the DocC
+  JSON was the only route. That is wrong, and the `.md` route is now the first one
+  to try. (Corrected 2026-10-18, Phase 10.)
+- **`WebFetch` is not a read.** Its tool description says it answers a prompt
+  "using a small fast model". What it returns is a summary written by another
+  model. Under the Phase 10 reading rule, a page seen only through `WebFetch`
+  counts as unread. Read the raw text: save the `.md` body, then load all of it
+  with the Read tool.
+- **`pipeline/docc.py`** — fetches and renders an Apple DocC JSON page. It is the
+  fallback for the `.md` route, and the tool for `--children`, which walks
+  topicSections and prints the exact child URLs. `--tutorial` handles the tutorials
+  prefix (tutorials are not under `/documentation/`).
+- **`pipeline/crawl_corpus.py`** — regenerates the bounded Phase 10 corpus from the
+  seed maps in `pipeline/maps/`. It fetches each page as `.md`, keeps the raw text
+  in `pipeline/tmp/corpus/`, and writes one manifest row per page. It exits 2 when a
+  fetch fails for any reason except a real 404 or 410.
 - **`pipeline/typecheck_snippets.py`** — compiles every ```swift block in a
   reference. **A 200 on a doc page is not evidence a symbol exists.** Phase 6
   found the live docs simultaneously behind the shipped OS and ahead of the
   shipped SDK, and found two non-compiling samples in Apple's own
   documentation. Compilation, not fetch success, is the ship gate for any
   API-specific claim.
-  A reference whose APIs are iOS-only declares `> typecheck: ios <major>.<minor>`
-  in its header block; the script then compiles that file against the iPhoneOS
-  SDK. Without the directive a file compiles for macOS, which is correct for
-  cross-platform SwiftUI and wrong for UIKit or iOS-only SwiftUI. A malformed
-  directive, or one newer than the installed SDK, exits 2 rather than falling
-  back. (Amended 2026-09-30, Phase 9.)
+  A reference declares its compile target in its header block with
+  `> typecheck: <macos|ios> <major>.<minor>`, or several targets separated by
+  commas, such as `> typecheck: macos 26.0, ios 26.0`. The version is the
+  deployment target. An API newer than it fails with an availability error,
+  instead of passing because the SDK is newer. A snippet must compile on at least
+  one listed target, and its PASS line names that target. Without the directive a
+  file compiles for the macOS SDK default. That default is correct for
+  cross-platform SwiftUI and wrong for UIKit or iOS-only SwiftUI. A malformed directive, or one
+  newer than the installed SDK, exits 2 rather than falling back. The Metal 4 floor
+  is macOS 26.0 / iOS 26.0, read from `MTL4CommandQueue`'s availability metadata on
+  2026-10-18; Metal references declare it. (Amended 2026-09-30, Phase 9, and
+  2026-10-18, Phase 10.)
+- **`pipeline/typecheck_native.py`** — compiles every ```metal, ```cpp, and
+  ```rust block in a reference. It does not compile ```swift blocks.
+  Each language has its own header directive, placed after `> typecheck:`:
+  - `> typecheck-metal: metal<M>.<m>` compiles with `xcrun metal -std=metal<M>.<m>`.
+    It needs the Metal Toolchain, which Xcode 27 ships as a separate download
+    (about 839 MB): run `xcodebuild -downloadComponent MetalToolchain` once on
+    any machine that reruns the pipeline.
+  - `> typecheck-cpp: metal-cpp <version>` compiles with `clang++ -std=c++20
+    -fsyntax-only` against the metal-cpp headers in `pipeline/tmp/`. Run
+    `pipeline/fetch_metal_cpp.sh <version>` first. It downloads the archive, checks
+    its pinned sha256, and unpacks it.
+  - `> typecheck-rust: <TOML dependency items>` writes the items into a scratch
+    crate. It then checks that crate with cargo. The first run needs the network.
+
+  The gate exits 2, not 1, when it cannot give an honest answer. The causes are a
+  missing directive, a metal-cpp version that is not in the cache, a dependency
+  that does not resolve, and a fence in any other language
+  (`ungated fence language: objc`).
+  Only `text`, `bash`, `sh`, `console`, `tsv`, and the config fences `xml`, `json`,
+  `toml`, `plist`, `yaml`, `cmake`, and `makefile` need no gate. A fence with no
+  language counts as text. `pipeline/test_typecheck_native.sh` and
+  `pipeline/test_typecheck_snippets.sh` self-test the gates, including an invented
+  symbol that must fail. (Added 2026-10-18, Phase 10.)
 - **`pipeline/run_evals.py`** — runs the trigger-eval sweep against the fixture
   app. **`--allowedTools` does not stop an eval session from writing to the
   fixture.** Phase 6 left nine source files and a build directory in
