@@ -7,41 +7,41 @@ FILE: plugins/apple-studio/skills/apple-metal/references/apple-gpu-tbdr.md   (3 
 
 ==============================================================================
 FILE: plugins/apple-studio/skills/apple-metal/references/command-model.md   (1 gated blocks)   target: -std=metal4.0
-  [PASS:metal:as-written   ] line 135  #include <metal_stdlib>
+  [PASS:metal:as-written   ] line 138  #include <metal_stdlib>
 
 ==============================================================================
 FILE: plugins/apple-studio/skills/apple-metal/references/compute-and-gpu-driven.md   (4 gated blocks)   target: -std=metal4.0
-  [PASS:metal:as-written   ] line 189  [[kernel, required_threads_per_threadgroup(16, 16, 1)]]
-  [PASS:metal:as-written   ] line 361  struct CullArgs {
-  [PASS:metal:as-written   ] line 489  struct Meshlet {
-  [PASS:metal:as-written   ] line 665  kernel void shadowRays(raytracing::primitive_acceleration_structure scen
+  [PASS:metal:as-written   ] line 200  [[kernel, required_threads_per_threadgroup(16, 16, 1)]]
+  [PASS:metal:as-written   ] line 367  struct CullArgs {
+  [PASS:metal:as-written   ] line 491  struct Meshlet {
+  [PASS:metal:as-written   ] line 667  kernel void shadowRays(raytracing::primitive_acceleration_structure scen
 
 ==============================================================================
 FILE: plugins/apple-studio/skills/apple-metal/references/cpp-and-rust.md   (6 gated blocks)   target: metal-cpp 26.4, -std=c++20; cargo check, objc2 = "=0.6.5", objc2-foundation = "=0.3.2", objc2-metal = "=0.3.2"
-  [PASS:cpp:as-written   ] line 172  // main.cpp: the one translation unit that defines the private implement
-  [PASS:cpp:as-written   ] line 627  // Call before the frame's beginCommandBuffer; after the frame-done wait
-  [PASS:cpp:as-written   ] line 736  void encodeFrameMetal3(MTL::CommandQueue* queue, MTL::RenderPassDescript
-  [PASS:rust:as-written   ] line 385  use core::ptr::NonNull;
-  [PASS:rust:as-written   ] line 654  use objc2::rc::Retained;
-  [PASS:rust:as-written   ] line 748  use objc2::rc::autoreleasepool;
+  [PASS:cpp:as-written   ] line 177  // main.cpp: the one translation unit that defines the private implement
+  [PASS:cpp:as-written   ] line 632  // Call before the frame's beginCommandBuffer; after the frame-done wait
+  [PASS:cpp:as-written   ] line 742  void encodeFrameMetal3(MTL::CommandQueue* queue, MTL::RenderPassDescript
+  [PASS:rust:as-written   ] line 390  use core::ptr::NonNull;
+  [PASS:rust:as-written   ] line 659  use objc2::rc::Retained;
+  [PASS:rust:as-written   ] line 754  use objc2::rc::autoreleasepool;
 
 ==============================================================================
 FILE: plugins/apple-studio/skills/apple-metal/references/display-and-upscaling.md   (1 gated blocks)   target: -std=metal4.0
-  [PASS:metal:as-written   ] line 470  #include <metal_stdlib>
+  [PASS:metal:as-written   ] line 496  #include <metal_stdlib>
 
 ==============================================================================
 FILE: plugins/apple-studio/skills/apple-metal/references/gpu-debugging-and-profiling.md   (1 gated blocks)   target: -std=metal4.0
-  [PASS:metal:as-written   ] line 469  #include <metal_logging>
+  [PASS:metal:as-written   ] line 471  #include <metal_logging>
 
 ==============================================================================
 FILE: plugins/apple-studio/skills/apple-metal/references/pipelines-and-render-passes.md   (2 gated blocks)   target: -std=metal4.0
   [PASS:metal:as-written   ] line 197  constant bool has_normal_map [[function_constant(0)]];
-  [PASS:metal:as-written   ] line 656  struct DecalOut {
+  [PASS:metal:as-written   ] line 654  struct DecalOut {
 
 ==============================================================================
 FILE: plugins/apple-studio/skills/apple-metal/references/resources-and-memory.md   (2 gated blocks)   target: -std=metal4.0
   [PASS:metal:as-written   ] line 159  #include <metal_stdlib>
-  [PASS:metal:as-written   ] line 494  #include <metal_stdlib>
+  [PASS:metal:as-written   ] line 481  #include <metal_stdlib>
 
 ==============================================================================
 FILE: plugins/apple-studio/skills/apple-metal/references/shading-language.md   (7 gated blocks)   target: -std=metal4.1
@@ -49,8 +49,8 @@ FILE: plugins/apple-studio/skills/apple-metal/references/shading-language.md   (
   [PASS:metal:as-written   ] line 197  #if __METAL_VERSION__ >= 410
   [PASS:metal:as-written   ] line 211  inline void add_count(int* counter, int amount) {
   [PASS:metal:as-written   ] line 261  struct Light {
-  [PASS:metal:as-written   ] line 372  // Only this function body keeps IEEE semantics.
-  [PASS:metal:as-written   ] line 488  kernel void single_pass_sum(device const float* input [[buffer(0)]],
-  [PASS:metal:as-written   ] line 534  constexpr sampler trilinear_repeat(filter::linear, mip_filter::linear,
+  [PASS:metal:as-written   ] line 366  // Only this function body keeps IEEE semantics.
+  [PASS:metal:as-written   ] line 478  kernel void single_pass_sum(device const float* input [[buffer(0)]],
+  [PASS:metal:as-written   ] line 524  constexpr sampler trilinear_repeat(filter::linear, mip_filter::linear,
 
 TOTAL: 27/27 snippets compile clean

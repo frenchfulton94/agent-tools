@@ -42,8 +42,6 @@ Kernel rules that bite on Apple GPUs	Float atomics Apple7; 64-bit atomics Apple9
 Kernel rules that bite on Apple GPUs	device atomic_ulong only min/max explicit; visibility-buffer use	notes/m07.md (pdf:msl-4.1#ch6)
 Kernel rules that bite on Apple GPUs	MSL 4.1 threadgroup atomic_float add/sub; acquire/release Apple7	notes/m07.md (pdf:msl-4.1#ch6); fst.txt line 186
 Kernel rules that bite on Apple GPUs	32 KB threadgroup memory Apple4+, shared with imageblock memory	fst.txt line 264 and footnote 6 (line 450)
-Kernel rules that bite on Apple GPUs	Plain device int increments lose updates (2 vs 15,949)	notes/m08.md (book ch16/ch17)
-Kernel rules that bite on Apple GPUs	CPU 0.00215 s vs GPU 0.00145 s for 15,949-vertex job on M1 MacBook Pro	notes/m08.md (book ch16)
 Indirect arguments	Build work on GPU instead of CPU stall when render needs compute results	notes/m05.md (/documentation/xcode/analyzing-the-performance-of-your-metal-app)
 Indirect arguments	dispatchThreadgroups(indirectBuffer:) reads MTLDispatchThreadgroupsIndirectArguments; GPU address 4-byte aligned; must be resident	symbol: documentation__metal__mtl4computecommandencoder__dispatchthreadgroups(indirectbuffer_threadsperthreadgroup_).md; documentation__metal__mtldispatchthreadgroupsindirectarguments.md
 Indirect arguments	dispatchThreads(indirectBuffer:) reads MTLDispatchThreadsIndirectArguments	SDK header MTL4ComputeCommandEncoder.h dispatchThreadsWithIndirectBuffer
@@ -68,7 +66,7 @@ Indirect command buffers	makeIndirectCommandBuffer(descriptor:maxCommandCount:op
 Indirect command buffers	GPU-encoding frame shape reset -> cull -> optimize -> execute	notes/m01.md (encoding-indirect-command-buffers-on-the-gpu); notes/m08.md (book ch27 barrier note)
 Indirect command buffers	command_buffer only inside argument-buffer struct; MTLArgumentEncoder.setIndirectCommandBuffer documented host route	msl-4.1.txt lines 14571-14580; notes/m01.md; notes/m08.md (book ch27)
 Indirect command buffers	Last draw call wins; reset uninitialized; = aliases; copy_command between matching descriptors; PSOs via argument buffers; no bounds check	msl-4.1.txt lines 14930-14940, 15017-15030, 6.17.3; notes/m07.md
-Indirect command buffers	16- vs 32-bit index mismatch garbage; develop on iPhone/iPad because Mac can lock up	notes/m08.md (book ch27, cheatsheet)
+Indirect command buffers	16- vs 32-bit index mismatch gives garbage geometry	notes/m08.md (book ch27, cheatsheet)
 Object and mesh shaders	Metal 4 render encoder drops tessellation; mesh shaders replace it	notes/m03.md (understanding-the-metal-4-core-api); notes/m08.md (ch19)
 Object and mesh shaders	Mesh shading keeps generation/culling/drawing in one render encoder	notes/m08.md (book ch28)
 Object and mesh shaders	Docs pair apple7 with A15; tables put mesh shading at Apple7 (A14); tables win; Simulator lacks mesh shaders	notes/m01.md (/documentation/Metal/adjusting-the-level-of-detail-using-metal-mesh-shaders); fst.txt line 127
@@ -76,7 +74,6 @@ Object and mesh shaders	Mesh shading incompatible with function pointers/RT in r
 Object and mesh shaders	Mesh threadgroups per grid 1024/1,048,575/4,194,303; payload 16,384 B minus 16 B; debugger 16 B; object grid unlimited	fst.txt lines 406-412, 457-459; notes/m07.md
 Object and mesh shaders	Book's 1024 limit holds only Apple7-8	task-4-read/report.md finding 25; notes/m08.md
 Object and mesh shaders	Mesh indices uchar -> 256 vertices per meshlet	notes/m06.md (pdf:msl-4.1#ch2)
-Object and mesh shaders	Grass 15x15x100 launches >720,000 threads	notes/m08.md (book ch28)
 Object and mesh shaders	Not calling set_threadgroups_per_grid launches no mesh grid; primitive_culled field	notes/m06.md (pdf:msl-4.1#ch2); notes/m08.md
 Object and mesh shaders	MTL4MeshRenderPipelineDescriptor fields; no mutability hints or binary archives	symbol: documentation__metal__mtl4meshrenderpipelinedescriptor.md
 Object and mesh shaders	payloadMemoryLength 0 derives from type; pointer type reserves one element	symbol: documentation__metal__mtl4meshrenderpipelinedescriptor__payloadmemorylength.md
@@ -104,8 +101,7 @@ MPS and MPSGraph	Book: MPS bloom encoders among longest timeline items	notes/m08
 MPS and MPSGraph	MPSSupportsMTLDevice; device-bound; own encoder; not thread-safe; copy per thread	notes/m04.md (/documentation/MetalPerformanceShaders/the-mpskernel-class)
 MPS and MPSGraph	In-place not guaranteed; fallbackCopyAllocator; compressed formats source-only; ObjC sample broken	notes/m04.md (/documentation/MetalPerformanceShaders/image-filters); task-4-read/report.md finding 9
 MPS and MPSGraph	Destinations need shaderRead+shaderWrite; drawable needs framebufferOnly = false	notes/m08.md (book ch29)
-MPS and MPSGraph	2.5 ms round trip; up to 10x overlap; up to 2x with ~512 KB tiles	notes/m04.md (/documentation/MetalPerformanceShaders/tuning-hints)
-MPS and MPSGraph	MPSSVGFDenoiser, MPSTemporalAA, quantized matmul exist; MPSGraphExecutable GPU/CPU/ANE; .mpsgraphpackage	notes/m05.md (/documentation/metalperformanceshaders; /documentation/metalperformanceshadersgraph)
+MPS and MPSGraph	MPSGraph for non-per-frame inference; .mpsgraphpackage skips graph compilation; prefer MPSGraph/Core ML/Metal 4 routes over MPSNNGraph and MPS CNN	notes/m05.md (/documentation/metalperformanceshaders; /documentation/metalperformanceshadersgraph)
 MPS and MPSGraph	Prefer MPSGraph over MPSNNGraph / MPS CNN for new work	notes/m04.md (objects-that-simplify...); notes/m03.md (convolutional-neural-network-kernels)
 Machine-learning passes	ML encoder runs Core ML model on GPU timeline; metal-package-builder; entry main; Xcode 26	notes/m02.md (/documentation/Metal/machine-learning-passes); notes/m03.md (running-a-machine-learning-model-on-the-gpu-timeline)
 Machine-learning passes	makeMachineLearningPipelineState(descriptor:) on MTL4Compiler	symbol: documentation__metal__mtl4compiler.md
@@ -125,3 +121,5 @@ Maintaining older code: Metal 3	Metal 3 ICB spellings resetCommandsInBuffer, opt
 Maintaining older code: Metal 3	MTLAccelerationStructureCommandEncoder.build(accelerationStructure:descriptor:scratchBuffer:scratchBufferOffset:)	symbol: documentation__metal__mtlaccelerationstructurecommandencoder.md
 Maintaining older code: Metal 3	Tessellation Metal 3 model only, Apple3; factor 64 Apple4 vs book's Apple5	fst.txt line 77; notes/m08.md; task-4-read/report.md finding 24
 Maintaining older code: Metal 3	makeComputeCommandEncoder(dispatchType:) + memoryBarrier(scope:)	compile-verified (typecheck_snippets.py); notes/m05.md (porting guide memoryBarrier)
+Sizing dispatches	Measured: MTLComputePipelineState.requiredThreadsPerThreadgroup reads 0 0 0 unless the descriptor pins the size; an attribute-only pin reads 0 0 0 with maxTotalThreadsPerThreadgroup 256	runtime: fix-round probe; record: runtime/compute-and-gpu-driven/runs.txt "requiredThreadsPerThreadgroup read back: attribute pin against descriptor pin"
+Sizing dispatches	contentionRelief, forwardProgressUsage, optimizeForPersistentKernel need macOS 27 / iOS 27	SDK MTL4ComputePipeline.h lines 63-65 API_AVAILABLE(macos(27.0), ios(27.0))

@@ -45,7 +45,7 @@ the docs, the SDK headers, or the man pages on that machine (`gpudebug(1)`,
 | Where inside the shader does the time go? | Shader cost graph, per-line profiling | GUI only |
 | Why does this pixel have this value? | Shader debugger | GUI only |
 | Wrong API usage on the CPU side | API Validation (`MTL_DEBUG_LAYER=1`) | Yes |
-| Out-of-bounds, non-resident, nil, NaN on the GPU side | Shader Validation (`MTL_SHADER_VALIDATION=1`) | Yes |
+| Out-of-bounds, non-resident, nil, NaN on the GPU side | Shader Validation (`MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1`) | Yes |
 | Print a value from inside a shader | Shader logging (`os_log` in MSL) | Yes |
 | GPU time per frame or per pass, in your own HUD or telemetry | `MTL4CommitFeedback`, `MTL4CounterHeap` | Yes |
 | Stutters across many frames, CPU and GPU together | Instruments: Game Performance, Metal System Trace | Record and export yes; analysis GUI only |
@@ -77,13 +77,15 @@ func encodeLabelledFrame(queue: any MTL4CommandQueue,
                          frameIndex: Int) {
     commandBuffer.beginCommandBuffer(allocator: allocator)
     commandBuffer.pushDebugGroup("Frame \(frameIndex)")
-    guard let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: pass) else { return }
-    encoder.label = "Forward pass"
-    encoder.pushDebugGroup("Opaque")
-    // Opaque draws go here.
-    encoder.popDebugGroup()
-    encoder.insertDebugSignpost("Transparent begins")
-    encoder.endEncoding()
+    // No early return between begin and end: pop the group and end the buffer on every path.
+    if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: pass) {
+        encoder.label = "Forward pass"
+        encoder.pushDebugGroup("Opaque")
+        // Opaque draws go here.
+        encoder.popDebugGroup()
+        encoder.insertDebugSignpost("Transparent begins")
+        encoder.endEncoding()
+    }
     commandBuffer.popDebugGroup()
     commandBuffer.endCommandBuffer()
     queue.commit([commandBuffer])
@@ -647,13 +649,13 @@ All four ran. The recording exited 0 when the target quit by itself. The probe's
 `MTL4CommandQueue` commits appeared as three rows of
 `metal-application-command-buffer-submissions` (runtime-checked). For the template
 picker, call trees, and `xctrace`'s exit code 54 on timed captures, see
-`profiling-workflow.md`.
+`apple-performance/references/profiling-workflow.md`.
 
 Reading the Game Performance timeline: a display interval far longer than its
 neighbours is a stutter. If the GPU track is busy across it, the GPU is the cause. If the
 GPU track has gaps while the render thread shows little blocked time, the CPU is. A
 render thread preempted under load needs a higher priority. Apple recommends 45 for
-rendering threads (`apple-games/references/game-loop-and-threading.md` owns that).
+rendering threads. Render-thread setup is part of the game loop and outside this skill.
 
 ## Reading the Metal debugger's views (GUI only)
 
@@ -691,14 +693,7 @@ below has a command-line form.
 - **Dependencies viewer**: solid edges carry data, dashed edges only synchronize (a
   clear-on-load pass still waits). Unused resources show up as wasted work.
 
-Apple's bottleneck-to-fix pairs, in short: ALU (approximations, `half`, lookup textures);
-texture sampling (mipmaps, bilinear over trilinear, smaller formats, gather for
-single-channel reads); texture write (smaller formats, fewer MSAA samples, fewer tiny
-triangles); buffer read and write (tighter packing, `packed_half3` positions, no dynamic
-indexing into thread-local arrays); tile memory (16-byte-aligned threadgroup allocations,
-fewer threadgroup atomics); interpolation (fewer varyings); last-level cache (smaller
-working sets, compressed read-only textures). **Doc error:** the bottleneck article says
-to opt in to `-ffast-math`, but `MTL_FAST_MATH` already defaults to on. The real choice
+**Doc error:** Apple's GPU bottleneck article says to opt in to `-ffast-math`, but `MTL_FAST_MATH` already defaults to on. The real choice
 is the math mode (`MTL_MATH_MODE`); see `shading-language.md`.
 
 ## Symptom first
@@ -712,8 +707,6 @@ beside one in `RGBA8Unorm_sRGB` was found that way.
 |---|---|---|
 | Pink, black, or missing textures once argument buffers are in | Resource not in a residency set | Shader Validation |
 | Fuchsia or checkerboard areas with load/store validation on | A pass relies on `dontCare` contents | API Validation load/store flags |
-| Speckled self-shadowing | Shadow acne; add depth bias | `gpudebug` `info` on the draw |
-| Sky flickers to the clear color | Depth test needs less-or-equal | `gpudebug` `info` (encoder state) |
 | Noise from a GPU-built indirect command buffer | 16-bit versus 32-bit index mismatch | Bound Resources |
 | Mesh inside out | Winding or handedness disagrees with the cull mode | `gpudebug` `info` (cull mode, winding) |
 | Jittery dynamic data | CPU rewrote a buffer the GPU still reads | `command-model.md` frames in flight |

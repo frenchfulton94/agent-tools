@@ -85,8 +85,8 @@ ICB, every buffer its commands reference, the scratch buffer of an acceleration-
 and the acceleration structures themselves. The SDK makes `MTLComputePipelineState` and
 `MTLRenderPipelineState` conform to `MTLAllocation`, and the SDK header for `executeCommands`
 requires you to add any pipeline state an ICB references to a residency set. A Metal 4 command buffer does
-not retain what it references, and API Validation's unretained-resource check does not cover
-`MTL4CommandBuffer`, so free nothing until the GPU signals completion.
+not retain what it references, so free nothing until the GPU signals completion. API Validation
+does not catch a violation (`command-model.md`).
 
 **An out-of-bounds device or threadgroup access can fault an Apple GPU** and end the command
 buffer. A discrete GPU may have tolerated it. Run Shader Validation before blaming the driver
@@ -111,9 +111,15 @@ func encodeUploadThenFilter(commandBuffer: any MTL4CommandBuffer,
     table.setAddress(params.gpuAddress, index: 0)
     pass.setComputePipelineState(pipeline)
     pass.setArgumentTable(table)
+    // requiredThreadsPerThreadgroup reads zero unless the pipeline descriptor pinned a size.
+    let pinned = pipeline.requiredThreadsPerThreadgroup
+    let width = pipeline.threadExecutionWidth
+    let group = pinned.width > 0
+        ? pinned
+        : MTLSize(width: width, height: pipeline.maxTotalThreadsPerThreadgroup / width, depth: 1)
     pass.dispatchThreads(threadsPerGrid: MTLSize(width: destination.width,
                                                  height: destination.height, depth: 1),
-                         threadsPerThreadgroup: pipeline.requiredThreadsPerThreadgroup)
+                         threadsPerThreadgroup: group)
     pass.endEncoding()
 }
 ```
@@ -149,7 +155,11 @@ pin it, and they must agree or pipeline creation fails:
 Once it is set, every dispatch's `threadsPerThreadgroup` must equal it. The descriptor property
 is optional except for pipelines that use cooperative tensors, where it is required. The MSL 4.1
 spec places `requiredThreadsPerThreadgroup` on `MTLDevice`; the SDK has no such property, and
-the SDK wins. The compiled value reads back from `MTLComputePipelineState.requiredThreadsPerThreadgroup`.
+the SDK wins. `MTLComputePipelineState.requiredThreadsPerThreadgroup` reads back only a size
+that the pipeline descriptor pinned. With no descriptor pin it reads zero in every dimension,
+even when the MSL attribute pins the size; the attribute then shows only as a smaller
+`maxTotalThreadsPerThreadgroup` (measured: 16 × 16 pinned by attribute read `0 0 0` and 256).
+Size a dispatch from that property only after checking that it is nonzero.
 
 `[[max_total_threads_per_threadgroup(n)]]`, `MTL4ComputePipelineDescriptor.maxTotalThreadsPerThreadgroup`,
 and `MTLCompileOptions.maxTotalThreadsPerThreadgroup` cap the size instead. An attribute value
@@ -160,8 +170,9 @@ it. `threadGroupSizeIsMultipleOfThreadExecutionWidth` is a promise you make so t
 drop edge handling. Set it only if every dispatch keeps it.
 
 `MTL4ComputePipelineDescriptor` also exposes `contentionRelief`, `forwardProgressUsage`, and
-`optimizeForPersistentKernel`. Their pages carry no semantics yet, so leave them at their
-defaults rather than guess.
+`optimizeForPersistentKernel`. All three need macOS 27 or iOS 27 (SDK availability), so any
+code that sets them needs `#available(macOS 27.0, iOS 27.0, *)` at a 26 deployment target.
+Their pages carry no semantics yet, so leave them at their defaults rather than guess.
 
 ```swift
 /// Compile a compute pipeline whose kernel assumes 16 x 16 groups.
@@ -218,11 +229,6 @@ void filterTile(texture2d<half, access::read>  src [[texture(0)]],
   adds threadgroup `atomic_float` add and subtract, and acquire and release ordering (Apple7).
 - **Threadgroup memory is 32 KB on Apple4 and later**, shared with imageblock memory when a
   compute pass reserves tile memory.
-- **A plain `device int` that many threads increment loses updates.** The book's vertex counter
-  read 2 instead of 15,949, and a different wrong number each run. Use `atomic_int` with
-  `atomic_fetch_add_explicit`.
-- **Small jobs may not pay for the dispatch.** The book's 15,949-vertex z-flip took 0.00215 s on
-  the CPU against 0.00145 s on the GPU of an M1 MacBook Pro. Time both before moving tiny loops.
 
 ## Indirect arguments: let the GPU size the next command
 
@@ -402,9 +408,6 @@ MSL rules for that kernel (spec §6.17):
 - Cast indices to the submesh's real index type. The book traced a garbage-geometry bug to a
   16-bit buffer read as 32-bit.
 
-The book also advises developing GPU encoding against an iPhone or iPad, because a mismatch can
-lock up the Mac you develop on.
-
 ## Object and mesh shaders
 
 Mesh shading replaces both tessellation and most compute-then-draw geometry pipelines. Metal 4
@@ -427,8 +430,7 @@ tracing, and Metal IR linking there works only through `MTLLinkedFunctions.priva
   or `[[threads_per_grid]]`, and by another 16 B while the Metal debugger shows that mesh's
   geometry.
 
-Mesh indices are `uchar`, so one meshlet addresses at most 256 vertices. Budget threads early:
-the book's grass, at 15 × 15 tiles × 100 blades, already launches over 720,000 threads.
+Mesh indices are `uchar`, so one meshlet addresses at most 256 vertices.
 
 **Culling lives in the object stage.** An object threadgroup that never calls
 `mesh_grid_properties::set_threadgroups_per_grid` launches no mesh grid at all. That is the
@@ -729,18 +731,9 @@ MPS rules that cost people time:
 - A kernel that touches the drawable needs `MTKView.framebufferOnly = false`.
 - Apple's Objective-C image-filter sample does not compile as written. Do not copy it.
 
-Apple's MPS tuning numbers apply to any Metal frame loop:
-
-- an empty command buffer can take up to 2.5 ms to round-trip through `waitUntilCompleted()`;
-- overlapping CPU encoding with GPU execution can raise throughput up to 10×;
-- chained multipass filters can run up to 2× faster in tiles of about 512 KB.
-
-What else exists: `MPSSVGFDenoiser` (a ray-tracing denoiser), `MPSTemporalAA`, matrix kernels
-including quantized matmul, and MPSGraph. MPSGraph compiles a tensor graph to an
-`MPSGraphExecutable` that can target the GPU, the CPU, or the Neural Engine, and that you can
-serialize to a `.mpsgraphpackage` so launch skips graph compilation. Use MPSGraph for inference
-that is not per-frame shading. The older `MPSNNGraph` and MPS CNN layers still ship; prefer
-MPSGraph, Core ML, or the Metal 4 routes below for new work.
+Use MPSGraph for inference that is not per-frame shading. Serialize its executable to a
+`.mpsgraphpackage` so that launch skips graph compilation. For new work, prefer MPSGraph,
+Core ML, or the Metal 4 routes below over the older `MPSNNGraph` and MPS CNN layers.
 
 ## Machine-learning passes: what exists and when
 

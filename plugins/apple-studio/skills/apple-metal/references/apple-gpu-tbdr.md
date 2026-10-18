@@ -276,8 +276,8 @@ fragment LightOut point_light_fragment(LightVaryings in [[stage_in]],
 
 - **The drawable is held for the whole pass.** The single-pass renderer must acquire the
   drawable before the G-buffer stage, because lighting writes into it in the same pass. A
-  two-pass renderer can acquire it later. Budget for that in frame pacing; see
-  `display-and-upscaling.md`.
+  two-pass renderer can acquire it later. This pattern is the exception to the
+  drawable rules in `display-and-upscaling.md` ("Drawables: acquire late, hold briefly").
 - **On an MSAA target, a `[[color(n)]]` input can make the fragment function run once per
   sample** rather than once per pixel. So can `[[sample_id]]` and the `sample_*`
   interpolation qualifiers. Programmable blending on a 4x target can quietly multiply
@@ -550,47 +550,41 @@ GPU. The full barrier, fence, and event ladder is in `command-model.md`.
 
 ## Porting code written for discrete GPUs
 
-Fix correctness first (items 1 to 8), then restructure for tile memory. Keep API Validation
+Fix correctness first (items 1 to 7), then restructure for tile memory. Keep API Validation
 and Shader Validation on throughout.
 
 1. **Load and store actions.** Audit every attachment with the two
    `MTL_DEBUG_LAYER_VALIDATE_*_ACTIONS` variables. Engines that only ever ran on Intel or
    AMD Macs often carry these bugs.
-2. **Position invariance.** Multipass techniques (a depth prepass, then a pass that tests
-   against it) need bit-identical positions from different vertex shaders. The Apple GPU
-   compiler fuses and reorders floating-point work aggressively, so z-fighting appears that
-   other GPUs never showed. Mark `[[position, invariant]]` in every vertex shader involved
-   and compile with `preserveInvariance` (offline, the `preserve-invariance` flag; in
-   Metal 4, the `MTLCompileOptions` you hand to `MTL4LibraryDescriptor.options`).
-3. **Reading what you write.** One texture bound to several arguments when any of them
+2. **Reading what you write.** One texture bound to several arguments when any of them
    writes it is illegal; use one `access::read_write` binding. Sampling a depth texture that
    the same pass writes gives different results on different GPUs; split the pass or, on the
    TBDR path, keep depth in a color attachment as above.
-4. **Depth-stencil format.** `depth24Unorm_stencil8` has never existed on Apple silicon.
+3. **Depth-stencil format.** `depth24Unorm_stencil8` has never existed on Apple silicon.
    The porting guide still says to test `isDepth24Stencil8PixelFormatSupported`; the SDK
    marks that property deprecated with the note "Never supported on Apple Silicon". Use
    `depth32Float_stencil8`.
-5. **Out-of-bounds access.** An Apple GPU may treat an out-of-bounds device or threadgroup
+4. **Out-of-bounds access.** An Apple GPU may treat an out-of-bounds device or threadgroup
    access as a hardware fault and end the command buffer. A discrete GPU often tolerated it.
    Shader Validation finds these.
-6. **Missing synchronization.** Apple GPUs exploit concurrent dispatch and untracked
+5. **Missing synchronization.** Apple GPUs exploit concurrent dispatch and untracked
    resources aggressively, so code that "worked" on Intel or AMD corrupts memory here.
    Metal 4 also needs explicit barriers wherever Metal 3 inferred an order; see
    `command-model.md`.
-7. **SIMD width.** Do not hard-code it; read `threadExecutionWidth` or
+6. **SIMD width.** Do not hard-code it; read `threadExecutionWidth` or
    `[[threads_per_simdgroup]]` (`compute-and-gpu-driven.md`).
-8. **Feature checks by family, not by name.** Never branch on `MTLDevice.name` or a
+7. **Feature checks by family, not by name.** Never branch on `MTLDevice.name` or a
    hard-coded per-GPU value. The porting guide says to test the Mac 2 family for the
    baseline, and an Apple family for tile features. The SDK now deprecates
    `MTLGPUFamily.mac2` (macOS and iOS 27), naming `.apple7` as its replacement. On Apple
    silicon, gate on Apple families, `.metal4`, and per-feature properties.
-9. **Restructure for tile memory:** merge passes, make transients memoryless (the Metal
+8. **Restructure for tile memory:** merge passes, make transients memoryless (the Metal
    debugger's memory insights list textures that could be memoryless, with the bytes
    saved), move compute that sits between two render passes into tile shaders when it
    reads only its own tile, and recheck the G-buffer against the per-pixel budget.
-10. **Re-plan GPU timing.** Apple GPUs sample counters at stage boundaries, while
-    immediate-mode GPUs sample between draws and dispatches, so per-draw timing code needs
-    rework. See `gpu-debugging-and-profiling.md`.
+9. **Re-plan GPU timing.** Apple GPUs sample counters at stage boundaries, while
+   immediate-mode GPUs sample between draws and dispatches, so per-draw timing code needs
+   rework. See `gpu-debugging-and-profiling.md`.
 
 ## Maintaining older code: Metal 3
 

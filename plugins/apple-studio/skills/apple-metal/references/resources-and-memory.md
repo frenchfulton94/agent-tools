@@ -39,8 +39,8 @@ viewer and the Game Memory template are `gpu-debugging-and-profiling.md`.
    needs a barrier, fence, or event (`command-model.md`).
 2. **Command buffers don't retain.** An `MTL4CommandBuffer` holds no reference to the
    resources it uses. Freeing a staging buffer before the GPU has read it is a
-   use-after-free on the GPU timeline. API Validation's unretained-resource check covers only the
-   Metal 3 `MTLCommandBuffer`, so nothing warns you. See "Lifetime" below.
+   use-after-free on the GPU timeline, and API Validation does not catch it
+   (`command-model.md`). See "Lifetime" below.
 3. **Residency is explicit and set-based.** Metal 4 encoders have no `useResource` or
    `useHeap`. A resource the GPU touches must sit in a residency set attached to the
    command buffer or the queue. Shader Validation reports a Metal 4 "resource not
@@ -268,27 +268,14 @@ func makeLevelHeap(device: any MTLDevice,
 
 ## Residency sets
 
-In Metal 4 a residency set is the only way to make a resource resident. Behaviors to
-design around:
+In Metal 4 a residency set is the only way to make a resource resident. The rules for
+sets are in `command-model.md`, "Residency": queue sets against command-buffer sets, the
+32-set limit, staged edits, thread safety, and `requestResidency()`. One rule matters
+for memory layout:
 
 - **A heap entry makes the whole heap resident**, and so does adding any one resource
   that came from a heap. Residency granularity is therefore your heap granularity.
-- Adds and removes are **staged until `commit()`** on the set. You may change a set while
-  the GPU runs work that uses it. The methods are **not thread-safe**.
-- Metal makes the **union** of all attached sets resident, so one resource can sit in
-  several sets; removing it from one leaves it resident through the others.
-- Attach long-lived sets to the **queue** (`addResidencySet(_:)`), which applies them to
-  every command buffer at commit; attach per-pass extras to a command buffer
-  (`useResidencySet(_:)`). Each queue and each command buffer takes at most 32 sets
-  (Feature Set Tables, Apple6 and later).
-- `removeResidencySet(_:)` doesn't detach the set from command buffers already
-  committed.
-- By default the CPU-side residency work runs at the first commit that uses the set,
-  which delays that submission. Call `requestResidency()` earlier, at a loading screen or
-  while the previous zone still plays. Metal may postpone part of it when other apps
-  need memory. `endResidency()` tells Metal the memory can go to other allocations.
-- Residency sets **don't support sparse heaps or sparse textures**, and they don't track
-  hazards.
+  Split heaps by lifetime, so that a zone's set holds only that zone's heaps.
 
 ```swift
 import Metal

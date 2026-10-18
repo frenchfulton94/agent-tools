@@ -633,8 +633,6 @@ matters is the array order at commit.
   (`.clear` and `.store`, not resized with the window), and
   `setDepthBias(_:slopeScale:clamp:)` before the draws. The map pass and the
   pass that samples it must be separate passes with a barrier between them.
-- **Skyboxes** write clip position as `.xyww` so depth is exactly 1, and use
-  `.lessEqual`, because `.less` loses to a cleared depth of 1 and flickers.
 - **Depth bounds testing** (`setDepthTestBounds(_:)`) is Apple10 only.
 
 Multipass techniques (a depth prepass followed by an equal-test pass, shadow
@@ -742,10 +740,6 @@ The pipeline drawing into this pass needs `rasterSampleCount = 4`.
 ## Forward or deferred
 
 Switch to deferred when the light count dominates the frame, not the geometry.
-*Metal by Tutorials* measured 200 lights on an iPad mini 6 at 25 FPS forward
-against 60 FPS deferred. On an M1 Max in a small window, forward degraded near
-250 lights while deferred handled 8,000; maximized, forward degraded near 30
-lights and deferred handled more than ten times that.
 
 On Apple GPUs, deferred does not have to mean a fat G-buffer in system memory:
 
@@ -764,8 +758,7 @@ On Apple GPUs, deferred does not have to mean a fat G-buffer in system memory:
 - **The Simulator and Intel Macs cannot read render targets in the fragment
   shader.** If you test in the Simulator, keep a two-pass path (G-buffer stored
   to private textures, then sampled). Apple's Swift deferred sample picks the
-  path with `supportsFamily(.apple1)`; its single-pass snippet shows `.private`
-  where its own text says `.memoryless`, so trust the text.
+  path with `supportsFamily(.apple1)`.
 - **Alternatives.** Forward+ bins lights per tile with tile shaders (Apple4
   and later). A visibility buffer stores `[[primitive_id]]` and
   `[[barycentric_coord]]` and reconstructs attributes later (Apple7 and later).

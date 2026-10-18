@@ -1,0 +1,26 @@
+Machine: Apple M4 Pro
+OS: macOS 27.0.1 26A434
+Toolchain: Xcode 27.1
+Run: 2026-10-18, Task 5 fix round 1 (re-run of the writers' probes)
+$S below is the session scratchpad that held the probe binaries.
+
+## Heap size and alignment, placement sparse, working-set size
+$ ./resprobe/run
+exit: 0
+  name Apple M4 Pro metal4 true apple8 true apple9 true apple10 false
+  supportsPlacementSparse true
+  sparseTileSizeInBytes 16384 for64 65536
+  recommendedMaxWorkingSetSize 40200896512 hasUnifiedMemory true
+  placement sparse texture from device: true tier=2 tail=Optional(6) mips=13 alloc=720896
+  tile size MTLSize(width: 128, height: 128, depth: 1)
+  placement heap true
+  set allocatedSize 16777216 count 1
+  256 mipmapped levels 9
+  buffer length 4 allocatedSize 4
+  heap size/align 256 rgba8 mipped 352768 128
+
+## Physical memory
+$ sysctl -n hw.memsize
+exit: 0
+  51539607552
+

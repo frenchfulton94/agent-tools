@@ -1,0 +1,111 @@
+Machine: Apple M4 Pro
+OS: macOS 27.0.1 26A434
+Toolchain: Xcode 27.1
+Run: 2026-10-18, Task 5 fix round 1 (re-run of the writers' probes)
+$S below is the session scratchpad that held the probe binaries.
+
+## Frame structure: 120 offscreen frames, both validation layers
+$ MTL_DEBUG_LAYER=1 MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1 ./probe/final
+exit: 0
+  pixel [119, 128, 64, 255]
+  final: Metal API Validation Enabled
+  final: Metal GPU Validation Enabled
+
+## Offscreen target in no residency set, no validation
+$ ./probe/noresid
+exit: 0
+  pixel [119, 128, 64, 255] expected shade 119.0
+
+## Offscreen target in no residency set, Shader Validation only
+$ MTL_SHADER_VALIDATION=1 ./probe/noresid
+exit: 0
+  pixel [119, 128, 64, 255] expected shade 119.0
+  noresid: Metal GPU Validation Enabled
+
+## Offscreen target in no residency set, Shader Validation to stderr
+$ MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1 ./probe/noresid
+exit: 0
+  pixel [119, 128, 64, 255] expected shade 119.0
+  noresid: Metal GPU Validation Enabled
+  Invalid Metal usage: Resource residency error - MTLTexture is not resident at the time of commit.   [x120]
+  MTLTexture:(label:"<no label>", gpuResourceID:1)   [x120]
+  Resource is used in color attachment, in encoder with label:<no label>   [x120]
+  MTLTexture allocated here:   [x120]
+  0   noresid                             0x… main + 496   [x120]
+  1   dyld                                0x… start + 6688   [x120]
+
+## Offscreen target in no residency set, API Validation
+$ MTL_DEBUG_LAYER=1 ./probe/noresid
+exit: 0
+  pixel [119, 128, 64, 255] expected shade 119.0
+  noresid: Metal API Validation Enabled
+
+## Uniform buffers in no residency set, no validation
+$ ./probe/nobuf
+exit: 0
+  pixel [119, 128, 64, 255] expected shade 119.0
+
+## Uniform buffers in no residency set, Shader Validation only
+$ MTL_SHADER_VALIDATION=1 ./probe/nobuf
+exit: 0
+  pixel [0, 0, 0, 0] expected shade 119.0
+  nobuf: Metal GPU Validation Enabled
+
+## Uniform buffers in no residency set, Shader Validation to stderr
+$ MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1 ./probe/nobuf 2>&1 | grep -v '^ *[0-9]' | head -40
+exit: 0
+  Invalid Metal usage: Invalid load in 'device' or 'constant' address space at offset 0, executing fragment function: "flatColorFragment"   [x3]
+  MTLBuffer: <no label>, length:16,  gpuAddress: 0x…, resident:No   [x3]
+  pipeline: "(null)", pipeline UID: "AC6AB56CB6E382FAF4EE21C0F2D94475782865FF589A92CD45965A0FF176B80D"   [x3]
+  Error detected in drawPrimitives:vertexStart:vertexCount: in encoder with label "<no label>"   [x3]
+  GPU stack trace:   [x3]
+  	* frame #0: flatColorFragment() - /program_source:15:21   [x3]
+  MTLBuffer allocated here:   [x3]
+
+## Shader Validation only: what the unified log received (log stream --process noresid during the run)
+$ grep -c 'com.apple.Metal:GPUDebug' fixrun/noresid.logstream.txt; grep -m2 'GPUDebug' fixrun/noresid.logstream.txt
+exit: 0
+  120
+  2026-10-18 06:23:59.907 E  noresid[26942:36de89] [com.apple.Metal:GPUDebug] <private>
+  2026-10-18 06:23:59.909 E  noresid[26942:36de89] [com.apple.Metal:GPUDebug] <private>
+
+## MTKView properties from a nonisolated function, Swift 6 mode
+$ swiftc -swift-version 6 -typecheck $S/fixrun/work/mtkview.swift 2>&1 | grep -E '^[^ ].*(warning|error)'
+exit: 0
+  $S/fixrun/work/mtkview.swift:2:49: warning: main actor-isolated property 'currentDrawable' can not be referenced from a nonisolated context
+  $S/fixrun/work/mtkview.swift:2:80: warning: main actor-isolated property 'currentRenderPassDescriptor' can not be referenced from a nonisolated context
+
+## wait(untilSignaledValue:) from async code, Swift 6 mode
+$ swiftc -swift-version 6 -typecheck probe/asyncwait.swift
+exit: 1
+  probe/asyncwait.swift:2:49: error: instance method 'wait' is unavailable from asynchronous contexts; Use 'await valueSignaled(...)' instead.
+  1 | import Metal
+  2 | func f(e: any MTLSharedEvent) async -> Bool { e.wait(untilSignaledValue: 1, timeoutMS: 1) }
+    |                                                 `- error: instance method 'wait' is unavailable from asynchronous contexts; Use 'await valueSignaled(...)' instead.
+  3 | func g(e: any MTLSharedEvent) async { await e.valueSignaled(1) }
+  4 |
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework/Headers/MTLEvent.h:62:1: note: 'wait(untilSignaledValue:timeoutMS:)' declared here
+  60 | // Synchronously wait for the signaledValue to be greater than or equal to 'value', with a timeout
+  61 | // specified in milliseconds.   Returns YES if the value was signaled before the timeout, otherwise NO.
+  62 | - (BOOL)waitUntilSignaledValue:(uint64_t)value timeoutMS:(uint64_t)milliseconds API_AVAILABLE(macos(12.0), ios(15.0)) NS_SWIFT_UNAVAILABLE_FROM_ASYNC("Use 'await valueSignaled(...)' instead.");
+     | `- note: 'wait(untilSignaledValue:timeoutMS:)' declared here
+  63 |
+  64 | @property (readwrite) uint64_t signaledValue; // Read or set signaled value
+
+## wait(untilSignaledValue:) from async code, Swift 5 mode
+$ swiftc -typecheck probe/asyncwait.swift
+exit: 0
+  probe/asyncwait.swift:2:49: warning: instance method 'wait' is unavailable from asynchronous contexts; Use 'await valueSignaled(...)' instead.; this is an error in the Swift 6 language mode
+  1 | import Metal
+  2 | func f(e: any MTLSharedEvent) async -> Bool { e.wait(untilSignaledValue: 1, timeoutMS: 1) }
+    |                                                 `- warning: instance method 'wait' is unavailable from asynchronous contexts; Use 'await valueSignaled(...)' instead.; this is an error in the Swift 6 language mode
+  3 | func g(e: any MTLSharedEvent) async { await e.valueSignaled(1) }
+  4 |
+  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk/System/Library/Frameworks/Metal.framework/Headers/MTLEvent.h:62:1: note: 'wait(untilSignaledValue:timeoutMS:)' declared here
+  60 | // Synchronously wait for the signaledValue to be greater than or equal to 'value', with a timeout
+  61 | // specified in milliseconds.   Returns YES if the value was signaled before the timeout, otherwise NO.
+  62 | - (BOOL)waitUntilSignaledValue:(uint64_t)value timeoutMS:(uint64_t)milliseconds API_AVAILABLE(macos(12.0), ios(15.0)) NS_SWIFT_UNAVAILABLE_FROM_ASYNC("Use 'await valueSignaled(...)' instead.");
+     | `- note: 'wait(untilSignaledValue:timeoutMS:)' declared here
+  63 |
+  64 | @property (readwrite) uint64_t signaledValue; // Read or set signaled value
+

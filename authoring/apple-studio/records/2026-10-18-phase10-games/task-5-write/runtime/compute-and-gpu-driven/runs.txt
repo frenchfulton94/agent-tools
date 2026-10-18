@@ -1,0 +1,14 @@
+Machine: Apple M4 Pro
+OS: macOS 27.0.1 26A434
+Toolchain: Xcode 27.1
+Run: 2026-10-18, Task 5 fix round 1 (re-run of the writers' probes)
+$S below is the session scratchpad that held the probe binaries.
+
+## requiredThreadsPerThreadgroup read back: attribute pin against descriptor pin
+$ swiftc -O fixrun/rtpt.swift -o fixrun/rtpt && ./fixrun/rtpt
+exit: 0
+  free_size descriptorPin false required 0 0 0 execWidth 32 maxTotal 1024
+  pinned descriptorPin false required 0 0 0 execWidth 32 maxTotal 256
+  pinned descriptorPin true required 16 16 1 execWidth 32 maxTotal 256
+  free_size descriptorPin true required 16 16 1 execWidth 32 maxTotal 1024
+

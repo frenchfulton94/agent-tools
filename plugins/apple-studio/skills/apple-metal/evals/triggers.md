@@ -21,4 +21,4 @@ Every row is a how-to question, per the Phase 10 eval-fixture decision
 - "How do I add particle effects to a SpriteKit scene?"                     (SpriteKit — out of scope)
 - "How do I check a Godot .gdshader for errors before I run the game?"      (godot-testing-and-debugging)
 - "How does a Cook-Torrance BRDF trade energy between diffuse and specular?" (general rendering theory — out of scope)
-- "How do I read the thumbsticks of a game controller?"                     (apple-games — input)
+- "How do I read the thumbsticks of a game controller?"                     (controller input — outside this skill)

@@ -21,7 +21,9 @@ Scope: how work gets from the CPU to an Apple GPU under Metal 4. That covers the
 device, the queue, command buffers and their allocators, argument tables,
 residency sets, every synchronization primitive, and frames in flight.
 Building pipelines is `pipelines-and-render-passes.md`. Drawables, `MTKView`,
-`CAMetalLayer`, and pacing are `display-and-upscaling.md`. Heaps, storage modes,
+`CAMetalLayer`, `CAMetalDisplayLink`, and present are `display-and-upscaling.md`.
+Frame pacing policy (fixed or variable step, frame budgets) is outside this
+skill. Heaps, storage modes,
 and memory budgets are `resources-and-memory.md`. What a compute pass contains is
 `compute-and-gpu-driven.md`.
 
@@ -84,7 +86,8 @@ code). The frame is split into encode and submit, and it renders to any
 `MTLTexture`, so the same code drives an offscreen target and a drawable. The first block is setup: a pipeline that fills the target with a
 colour read from a per-frame buffer. A frame that renders the expected colour
 proves that the argument table binding and the buffer rotation work. Run it
-with `MTL_SHADER_VALIDATION=1` to prove residency as well (see "Residency").
+with `MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1` to
+prove residency as well (see "Residency").
 Pipeline compilation choices belong to `pipelines-and-render-passes.md`.
 
 ```swift
@@ -303,7 +306,10 @@ final class FrameLoop {
 An offscreen driver is three calls per frame. Make the target resident once.
 `CAMetalLayer`'s header says that whatever you render into must be resident.
 On this M4 Pro (macOS 27.0.1), an offscreen attachment left out of every set
-still rendered, with validation on and off. That clean run does not make
+still rendered the right pixel. Shader Validation reported the fault: with
+`MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1`, every
+commit printed "Resource residency error - MTLTexture is not resident at the
+time of commit". API Validation reported nothing. A correct image does not make
 skipping residency safe.
 
 ```swift
@@ -454,12 +460,20 @@ set. Without validation, skipping residency often compiles and may even render
 for a while. Then it shows up as pink or missing textures, GPU memory faults, or
 a hang.
 
+Shader Validation reports to the unified log unless
+`MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1` is set. In the log, the reports sit
+under subsystem `com.apple.Metal`, category `GPUDebug`, and `log stream` shows
+their text as `<private>`. Set both variables to read the report.
+
 Runtime check, on this M4 Pro under macOS 27.0.1: the frame structure above
 ran with its uniform buffers left out of the residency set. Without
 validation, it rendered the right colour. With `MTL_SHADER_VALIDATION=1`, the
-target stayed all zeros, and nothing reached the process's stderr. Treat
-"renders fine" as no evidence of correct residency. Treat a frame that goes
-blank only under validation as a residency bug until you rule it out.
+target stayed all zeros and stderr stayed empty. With
+`MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1` added, it printed "Invalid load in
+'device' or 'constant' address space" for the fragment function and named the
+buffer as `resident:No`. Treat "renders fine" as no evidence of correct
+residency. Treat a frame that goes blank only under validation as a residency
+bug until you rule it out.
 
 - **Queue sets** (`addResidencySet(_:)`) apply to every command buffer at
   commit. Put app-lifetime and level-lifetime data there.
@@ -617,10 +631,10 @@ func commitWithFeedback(queue: any MTL4CommandQueue,
 - On Apple silicon there is one GPU, and `MTLCreateSystemDefaultDevice()`
   returns it. Device enumeration, eGPU hot-plug, and display-to-GPU matching
   are Intel-Mac concerns and outside this skill.
-- A Mac with Apple silicon belongs to the Mac2 family and to an Apple family.
-  Choose the baseline from the Mac family. Use the Apple family only to unlock
-  tile-based features. Where a feature has its own device property, query the
-  property. Never infer anything from `device.name`.
+- Gate on Apple families, `.metal4`, and per-feature properties. The SDK
+  deprecates `MTLGPUFamily.mac2` in macOS and iOS 27 and names `.apple7` as
+  its replacement (`MTLDevice.h`). Where a feature has its own device property,
+  query the property. Never infer anything from `device.name`.
 - Family map, from the Feature Set Tables (May 2026): A13 is Apple6 (Metal 3
   model only); A14 and M1 are Apple7; A15, A16, and M2 are Apple8; A17 Pro, A18,
   M3, and M4 are Apple9; A19 and M5 are Apple10. The tables now list Apple
@@ -739,7 +753,7 @@ spellings do not.
 - `pipelines-and-render-passes.md`: compiling pipelines without hitches, render
   pass load and store choices, and attachments.
 - `display-and-upscaling.md`: `MTKView` against `CAMetalLayer` against
-  `CAMetalDisplayLink`, drawable timing, and pacing.
+  `CAMetalDisplayLink`, drawable acquisition, and present.
 - `resources-and-memory.md`: heaps, storage modes, placement and sparse
   resources, and the memory budget behind residency.
 - `compute-and-gpu-driven.md`: what goes in a compute pass, indirect command

@@ -305,12 +305,6 @@ func lightBufferLength(count: Int) -> Int {
 - **Conversions.** `static_cast` never saturates, and float-to-int sends NaN to
   0. `as_type<T>` reinterprets bits and needs equal sizes (`float4` to `float3` is
   legal, both 16 bytes).
-- **Integer traps.** Division by zero and `INT_MIN / -1` give an unspecified
-  value, with no trap. `%` is undefined for a zero divisor or any negative operand.
-  Shift counts use only the low log2(bits) bits, so a 32-bit `x << 33` shifts by 1.
-- **Swizzle writes are read-modify-write of the whole vector.** Two threads
-  writing different components of one shared vector race. Give each thread its
-  own element.
 - **Porting conventions.** Matrices are column-major (`float4x4(a, b, c, d)`
   takes columns), and matrix-product summation order is unspecified, so results
   can differ in the last bit across GPUs. NDC is left-handed with visible z from 0
@@ -390,10 +384,6 @@ float accurate_angle(float x) { return precise::sin(x) + fast::cos(x); }
   undefined. Division holds 2.5 ulp only for |y| between 2^-126 and 2^126.
   Precise forms are correctly rounded for `+ - * /`, `sqrt`, and `fma`.
 - `fmax`/`fmin` return the non-NaN operand; `fmedian3` treats NaN as missing.
-- `[[invariant]]` on a vertex position is ignored unless the library is built
-  with `-fpreserve-invariance`, or `MTLCompileOptions.preserveInvariance = true`
-  at runtime (the spec misnames the class "MTLCompilerOptions"). A depth prepass
-  that reruns the position math in a second pipeline needs it.
 
 ### When to use `half`
 

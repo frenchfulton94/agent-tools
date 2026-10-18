@@ -1,0 +1,100 @@
+Machine: Apple M4 Pro
+OS: macOS 27.0.1 26A434
+Toolchain: Xcode 27.1
+Run: 2026-10-18, Task 5 fix round 1 (re-run of the writers' probes)
+$S below is the session scratchpad that held the probe binaries.
+
+NOTE: The writer's main.swift (cases A to C: no depth format on the pipeline, depth 0.25 written) was overwritten in the shared scratchpad and is not reproduced here. raster-off.swift reproduces case B.
+
+## Flexible pipeline, specialization, serializer configuration
+$ ./pipelines-probe/probe2
+exit: 1
+  default serializer configuration rawValue: 0
+  flexible created
+  specialization descriptor type: MTL4RenderPipelineDescriptor
+  specialized ok <AGXG16XFamilyRenderPipeline: 0x…>
+  re-specialize unexpectedly ok
+  async plain ok
+  serialize error: nilError
+  pipelines script bytes: 2630
+  makeArchive error: Invalid URL exists: false
+  isDir false
+
+## Archives from a precompiled library
+$ ./pipelines-probe/probe3 pipelines-probe/s.metallib
+exit: 0
+  config=0 ext=.metallib fileLib=false: serialize error: nilError; exists=false; -; -
+  config=0 ext=.mtl4archive fileLib=false: serialize error: nilError; exists=false; -; -
+  config=0 ext= fileLib=false: serialize error: nilError; exists=false; -; -
+  config=2 ext=.metallib fileLib=false: serialized; exists=true; hit ok; miss error: Failed with error: Failed to find fragment function fs with key:Key:
+   6833CE31A0A2E0D6164B07308F897F3A2174067746C185FD47610EA2E4332A1F Function hash   [x3]
+   0000000000000000000000000000000000000000000000000000000000000000 air-nt   [x6]
+   866ED365AF87A9297EC8A3F2E7C11FBD96B43C0025838EE464BDBC12427ED1B6 air-nt plugin   [x6]
+   1312567243757A2DD0A3EC7A0937FD547EA9140C5CC9108D750F66479A1616C7 metal framework   [x6]
+    | compiler+lookup on miss: compiled   [x6]
+  config=2 ext=.mtl4archive fileLib=false: serialized; exists=true; hit ok; miss error: Failed with error: Failed to find fragment function fs with key:Key:
+  config=2 ext= fileLib=false: serialized; exists=true; hit ok; miss error: Failed with error: Failed to find fragment function fs with key:Key:
+  config=3 ext=.metallib fileLib=false: serialize error: nilError; exists=false; -; -
+  config=3 ext=.mtl4archive fileLib=false: serialize error: nilError; exists=false; -; -
+  config=3 ext= fileLib=false: serialize error: nilError; exists=false; -; -
+  config=0 ext=.metallib fileLib=true: serialize error: nilError; exists=false; -; -
+  config=0 ext=.mtl4archive fileLib=true: serialize error: nilError; exists=false; -; -
+  config=0 ext= fileLib=true: serialize error: nilError; exists=false; -; -
+  config=2 ext=.metallib fileLib=true: serialized; exists=true; hit ok; miss error: Failed with error: Failed to find fragment function fs with key:Key:
+   EB8D5B84584D376315FA4466A63E0B6E0E6197559301E62729D565C33E790CB7 Function hash   [x3]
+  config=2 ext=.mtl4archive fileLib=true: serialized; exists=true; hit ok; miss error: Failed with error: Failed to find fragment function fs with key:Key:
+  config=2 ext= fileLib=true: serialized; exists=true; hit ok; miss error: Failed with error: Failed to find fragment function fs with key:Key:
+  config=3 ext=.metallib fileLib=true: serialize error: nilError; exists=false; -; -
+  config=3 ext=.mtl4archive fileLib=true: serialize error: nilError; exists=false; -; -
+  config=3 ext= fileLib=true: serialize error: nilError; exists=false; -; -
+
+## Second serializeAsArchiveAndFlush
+$ ./pipelines-probe/probe4 pipelines-probe/s.metallib
+exit: 0
+  config 0: script 1305 bytes; archive error nilError;
+  config 1: script 1305 bytes; archive error nilError;
+  config 2: script 1305 bytes; archive ok; second flush error Error Domain=MTLBinaryArchiveDomain Code=3 "Nothing to serialize" UserInfo={NSLocalizedDescription=Nothing to serialize}
+  config 3: script 1305 bytes; archive error nilError;
+
+## metal-tt archive for a macOS 27.0 target, loaded
+$ xcrun metal-tt -target air64-apple-macos27.0 s.metallib hand.mtlp-json -o $S/fixrun/work/hand.binary.metallib && wc -c < $S/fixrun/work/hand.binary.metallib && ./probe5 s.metallib load $S/fixrun/work/hand.binary.metallib
+exit: 0
+    240896
+  offline archive hit ok
+
+## metal-tt with a macOS 26.0 target on a default-target library
+$ xcrun metal-tt -target air64-apple-macos26.0 s.metallib hand.mtlp-json -o $S/fixrun/work/h26.metallib
+exit: 1
+  applegpu-nt: error: image not loaded: object
+    Reason: image AIR version (2.9) is bigger than the one of the target (2.8)
+  air-tt: applegpu-nt command failed
+  air-tt: air-tt command failed
+
+## metal-tt archive for macOS 26.0, loaded on macOS 27.0.1
+$ ./pipelines-probe/probe5 pipelines-probe/s26.metallib load pipelines-probe/s26.binary.metallib
+exit: -5
+  probe5/probe5.swift:22: Fatal error: 'try!' expression unexpectedly raised an error: Error Domain=MTLArchiveDomain Code=1 "deployment target for architecture applegpu_g16s found in archive 'file://$S/pipelines-probe/s26.binary.metallib' is not compatible with current OS" UserInfo={NSLocalizedDescription=deployment target for architecture applegpu_g16s found in archive 'file://$S/pipelines-probe/s26.binary.metallib' is not compatible with current OS}
+
+## Memoryless MSAA targets left out of the residency set, API Validation
+$ MTL_DEBUG_LAYER=1 ./pipelines-probe/probe6
+exit: 0
+  wait: true
+  resolved pixel: [0, 0, 255, 255]
+  probe6: Metal API Validation Enabled
+
+## Memoryless MSAA targets added to the residency set, API Validation
+$ MTL_DEBUG_LAYER=1 ./pipelines-probe/probe6 residentMemoryless
+exit: -6
+  probe6: Metal API Validation Enabled
+  -[MTLDebugResidencySet validateResource:]:114: failed assertion `residency sets do not support memoryless resources.'
+
+## Rasterization off with a vertex function that returns a position (reviewer probe)
+$ swiftc -O review5/p2.swift -o fixrun/work/p2 && ./fixrun/work/p2
+exit: 0
+  vs raster false ERROR RasterizationEnabled is false but the vertex shader's return type is not void
+  vs raster true OK
+  vsVoid raster false OK
+  fresh mathMode 2 lang 40001
+  heap size 352768 align 128 levels 9
+  ts freq 24000000
+

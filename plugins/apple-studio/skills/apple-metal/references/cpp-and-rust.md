@@ -133,8 +133,8 @@ Three consequences that bite engine code:
   the Metal 4 default, the same as an unretained-references `MTLCommandBuffer`.
   In Swift, ARC keeps your properties alive. In C++, a `release()` on a texture
   that an in-flight frame still samples frees it under the GPU. API Validation
-  will not catch this, because its unretained-resource check covers only
-  `MTLCommandBuffer`. Defer each release until the frame's shared-event value
+  does not catch this for a Metal 4 command buffer (see "API Validation" in
+  `gpu-debugging-and-profiling.md`). Defer each release until the frame's shared-event value
   has passed, as in the frames-in-flight ring in `command-model.md`.
 
 `NS::SharedPtr<T>` is the optional RAII path. Its destructor always calls
@@ -164,8 +164,13 @@ goes into a residency set even though no shader reads it. In Metal 4,
 residency sets are the only residency mechanism, and Shader Validation counts
 any resource that a Metal 4 command touches outside every attached set as not
 resident. Runtime-checked caution: with the set removed, this clear-only frame
-still produced the right pixel, and API and Shader Validation stayed silent.
-A frame that works is not evidence that residency is right. The frame wait is
+still produced the right pixel, and API Validation stayed silent. Shader
+Validation reported the fault. With `MTL_SHADER_VALIDATION=1
+MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1`, it printed "Resource residency
+error - MTLTexture is not resident at the time of commit" and "Resource is used
+in color attachment". Without the second variable, the report goes to the
+unified log, not to stderr. A frame that works is not evidence that residency
+is right. The frame wait is
 a queue-signalled shared event, because `MTL4CommandBuffer` has no completion
 handler and no `waitUntilCompleted()`.
 
@@ -562,7 +567,7 @@ Then set up the scheme (Edit Scheme):
   options, so they apply to whatever the Run action launches.
 - **Profile > Executable:** the same binary, so that **Product > Profile** opens
   Instruments on it. Profile a `--release` build, for the reasons in
-  `apple-performance`'s `profiling-workflow.md`.
+  `apple-performance/references/profiling-workflow.md`.
 
 **Run Script route, for a Rust or C++ static library inside an app.**
 
@@ -690,12 +695,13 @@ gpudebug --oneshot -t frame.gputrace -c "list"
 ```
 
 Validation needs no Xcode either. `MTL_DEBUG_LAYER=1` and
-`MTL_SHADER_VALIDATION=1` work on a plain binary; the hosts log "Metal API
-Validation Enabled" and "Metal GPU Validation Enabled". The full variable list
-is in `gpu-debugging-and-profiling.md`. Remember the gap from the ownership
-section: API Validation does not flag a resource that is freed while an
-`MTL4CommandBuffer` still uses it, and in C++ and Rust that is your bug to
-prevent.
+`MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1` work on a
+plain binary; the hosts log "Metal API Validation Enabled" and "Metal GPU
+Validation Enabled". Without `MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1`, Shader
+Validation's reports go to the unified log, not to stderr. The full variable
+list is in `gpu-debugging-and-profiling.md`. Remember the gap from the
+ownership section: in C++ and Rust, a resource freed while a frame still uses
+it is your bug to prevent.
 
 ## Maintaining older code: Metal 3
 

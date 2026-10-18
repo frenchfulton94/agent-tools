@@ -19,10 +19,12 @@ Contents:
 Scope: *how a rendered frame reaches the glass, and how to render fewer pixels
 than you show*. The frame itself (allocator, command buffer, argument table,
 residency, commit, frames-in-flight wait) is `command-model.md`'s `## Frame
-structure`; this file supplies only the on-screen tail of it. Frame pacing as a
-game-loop concern (ProMotion rates, `CADisableMinimumFrameDurationOnPhone`,
-skipped-frame recovery) belongs to `apple-games/game-loop-and-threading.md`;
-reading the Metal Performance HUD belongs to `gpu-debugging-and-profiling.md`.
+structure`; this file supplies only the on-screen tail of it: drawable
+acquisition, present, and the `CAMetalDisplayLink` mechanics. Frame pacing policy
+(fixed or variable step, frame budgets, ProMotion rates,
+`CADisableMinimumFrameDurationOnPhone`, skipped-frame recovery) is part of the
+game loop and outside this skill. Reading the Metal Performance HUD belongs to
+`gpu-debugging-and-profiling.md`.
 
 ## Choosing the presentation surface
 
@@ -42,8 +44,8 @@ What decides it:
   frame's encoding then competes with UI and input handling on the main thread.
 - **`MTKView` defaults to 60 fps.** `preferredFramesPerSecond` defaults to 60,
   and the view picks a factor of the screen's maximum rate. On a 120 Hz panel
-  you get 60 until you raise it. (On iPhone you also need the Info.plist key in
-  `apple-games/game-loop-and-threading.md`.)
+  you get 60 until you raise it. (On iPhone you also need an Info.plist key,
+  which is part of the game loop and outside this skill.)
 - **`MTKView` draw modes.** The default is timer-driven (`isPaused == false`,
   `enableSetNeedsDisplay == false`), which is the only mode for a game. Setting
   `enableSetNeedsDisplay` with `isPaused` makes it event-driven, for editors.
@@ -71,23 +73,47 @@ What decides it:
 final class Renderer: NSObject, CAMetalDisplayLinkDelegate {
     let queue: any MTL4CommandQueue
     let commandBuffer: any MTL4CommandBuffer
+    let allocator: any MTL4CommandAllocator
+    let frameEvent: any MTLSharedEvent
+    var frameNumber: UInt64 = 0
 
-    init?(device: any MTLDevice) {
+    init?(device: any MTLDevice, layer: CAMetalLayer) {
         guard let queue = device.makeMTL4CommandQueue(),
-              let commandBuffer = device.makeCommandBuffer() else { return nil }
+              let commandBuffer = device.makeCommandBuffer(),
+              let allocator = device.makeCommandAllocator(),
+              let frameEvent = device.makeSharedEvent() else { return nil }
+        layer.device = device
+        queue.addResidencySet(layer.residencySet)   // drawables are not tracked
         self.queue = queue
         self.commandBuffer = commandBuffer
+        self.allocator = allocator
+        self.frameEvent = frameEvent
     }
 
     func metalDisplayLink(_ link: CAMetalDisplayLink,
                           needsUpdate update: CAMetalDisplayLink.Update) {
         let drawable = update.drawable
-        // Core frame from command-model.md's "Frame structure": reset the
-        // allocator, begin, encode the pass into drawable.texture, end.
+        // One allocator means one frame in flight: wait for the last frame before
+        // the reset. command-model.md's "Frame structure" keeps one per frame.
+        guard frameEvent.wait(untilSignaledValue: frameNumber, timeoutMS: 1_000) else { return }
+        allocator.reset()
+        commandBuffer.beginCommandBuffer(allocator: allocator)
+        let pass = MTL4RenderPassDescriptor()
+        pass.colorAttachments[0].texture = drawable.texture
+        pass.colorAttachments[0].loadAction = .clear
+        pass.colorAttachments[0].storeAction = .store
+        if let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: pass) {
+            // Draws go here.
+            encoder.endEncoding()
+        }
+        commandBuffer.endCommandBuffer()
+
         queue.waitForDrawable(drawable)      // before any commit that touches it
         queue.commit([commandBuffer])
         queue.signalDrawable(drawable)       // once, after the last such commit
         drawable.present()                   // never present(at:) with a display link
+        frameNumber += 1
+        queue.signalEvent(frameEvent, value: frameNumber)
     }
 }
 
@@ -622,8 +648,8 @@ fallback has only the spatial and temporal scalers.
 
 - `command-model.md`: the frame the on-screen tail above attaches to; residency
   sets; shared-event throttling.
-- `apple-games/game-loop-and-threading.md`: frame rates, `targetTimestamp`
-  pacing, ProMotion, window resizing on iPad and Mac.
+- The game loop, outside this skill: frame rates, `targetTimestamp` pacing,
+  ProMotion, window resizing on iPad and Mac.
 - `gpu-debugging-and-profiling.md`: Metal HUD (present delay, frame interval,
   MetalFX modes), attachment viewer EDR overlays, dependency viewer.
 - `pipelines-and-render-passes.md`: store actions for the drawable (always

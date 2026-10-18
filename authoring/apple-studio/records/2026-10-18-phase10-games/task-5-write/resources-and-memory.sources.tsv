@@ -34,7 +34,6 @@ CPU and GPU struct layout	Pointer args assumed naturally aligned; misaligned off
 CPU and GPU struct layout	Separate device buffer arguments assumed not to alias	notes/m06.md resources-and-memory and shading-language (pdf:msl-4.1#ch5)
 CPU and GPU struct layout	Constant buffer offset alignment 4 B on Apple GPUs; Simulator 256 B	notes/m07.md resources-and-memory (pdf:fst#all); notes/m01.md resources-and-memory (developing-metal-apps-that-run-in-simulator)
 Lifetime	Engine owns lifetime; release keyed to frame shared-event value	notes/m03.md command-model (understanding-the-metal-4-core-api); notes/m05.md command-model (deferred release)
-Lifetime	removeResidencySet does not detach from committed buffers	notes/m03.md command-model (simplifying-gpu-resource-management-with-residency-sets)
 Heaps	Heap creation slow; allocation cheap mid-frame (no per-resource tracking)	notes/m02.md resources-and-memory (implementing-a-multistage-image-filter-using-heaps-and-fences); notes/m08.md resources-and-memory (book ch25)
 Heaps	Heap resources share storage mode and CPU cache mode; purgeability on heap only	/documentation/Metal/MTLHeap (symbol page)
 Heaps	Default heap type is automatic	/documentation/Metal/MTLHeapDescriptor/type (symbol page)
@@ -44,18 +43,14 @@ Heaps	makeAliasable valid only for automatic heaps; aliased resource can't be un
 Heaps	makeTexture(descriptor:offset:) needs placement heap, matching storage/cache mode; aliases [offset, offset+size)	/documentation/Metal/MTLHeap/makeTexture(descriptor:offset:) (symbol page); /documentation/Metal/MTLHeap/makeBuffer(length:options:offset:) (symbol page)
 Heaps	Doc slip: makeTexture(descriptor:offset:) page says use heapBufferSizeAndAlign for textures	/documentation/Metal/MTLHeap/makeTexture(descriptor:offset:) (symbol page) vs /documentation/Metal/MTLDevice/heapTextureSizeAndAlign(descriptor:)
 Heaps	heapTextureSizeAndAlign returns size and alignment for heap textures	/documentation/Metal/MTLDevice/heapTextureSizeAndAlign(descriptor:) (symbol page); /documentation/Metal/MTLDevice/heapBufferSizeAndAlign(length:options:) (symbol page)
-Heaps	Measured: 256x256 RGBA8 mipmapped = 352,768 B, 128 B align on M4 Pro	runtime probe on M4 Pro, macOS 27.0.1 (scratchpad resprobe/run.swift)
+Heaps	Measured: 256x256 RGBA8 mipmapped = 352,768 B, 128 B align on M4 Pro	runtime probe on M4 Pro, macOS 27.0.1 (scratchpad resprobe/run.swift); record: runtime/resources-and-memory/runs.txt "Heap size and alignment, placement sparse, working-set size"
 Heaps	maxAvailableSize(alignment:) measures fragmentation	/documentation/Metal/MTLHeap/maxAvailableSize(alignment:) (symbol page); notes/m02.md resources-and-memory
-Heaps	Split heaps by lifetime; scratch heap for transients	notes/m02.md resources-and-memory (implementing-a-multistage-image-filter-using-heaps-and-fences)
+Heaps	Split heaps by lifetime; scratch heap for transients	notes/m02.md resources-and-memory (implementing-a-multistage-image-filter-using-heaps-and-fences); record: runtime/resources-and-memory/runs.txt "Heap size and alignment, placement sparse, working-set size"
 Heaps	Merge small buffers; compare length with allocatedSize	notes/m05.md resources-and-memory (xcode/analyzing-memory-usage); /documentation/Metal/MTLResource/allocatedSize (symbol page)
 Heaps	Sparse heap type is for sparse texture tiles	/documentation/Metal/MTLHeapType/sparse (symbol page)
 Residency sets	Adding a heap-allocated resource makes the whole heap resident	/documentation/Metal/MTLResidencySet (symbol page); notes/m03.md command-model
-Residency sets	Changes staged until commit(); may change set while GPU runs; not thread-safe	/documentation/Metal/MTLResidencySet (symbol page); /documentation/Metal/MTLResidencySet/commit() (symbol page); /documentation/Metal/MTLResidencySet/addAllocation(_:) (symbol page)
-Residency sets	Union of all sets resident; removal from one set keeps others	/documentation/Metal/MTLResidencySet (symbol page)
 Residency sets	Queue sets applied at commit; command-buffer useResidencySet; 32 per queue and per buffer	notes/m03.md command-model (simplifying-gpu-resource-management-with-residency-sets); notes/m07.md command-model (pdf:fst#all)
-Residency sets	requestResidency early; may postpone under other apps' pressure	/documentation/Metal/MTLResidencySet/requestResidency() (symbol page); notes/m03.md command-model
 Residency sets	endResidency lets Metal reuse the memory	/documentation/Metal/MTLResidencySet/endResidency() (symbol page)
-Residency sets	Residency sets don't support sparse heaps/textures; don't track hazards	/documentation/Metal/MTLResidencySet (symbol page)
 Residency sets	makeResidencySet(descriptor:) throws; descriptor label and initialCapacity	/documentation/Metal/MTLDevice/makeResidencySet(descriptor:) (symbol page); /documentation/Metal/MTLResidencySetDescriptor (symbol page)
 Texture views and view pools	makeTextureView compatibility groups; pixelFormatView flag may affect performance	/documentation/Metal/MTLTexture/makeTextureView(pixelFormat:) (symbol page); /documentation/Metal/MTLTextureUsage/pixelFormatView (symbol page)
 Texture views and view pools	Model I/O loads USD textures as linear rgba8Unorm; book adds pixelFormatView (Simulator validation); symbol page says sRGB-only view needs none	notes/m08.md resources-and-memory (book ch08); /documentation/Metal/MTLTextureUsage/pixelFormatView (symbol page)
@@ -70,7 +65,7 @@ Texture formats	supportsBCTextureCompression query	/documentation/Metal/MTLDevic
 Texture formats	Every Apple-silicon Mac is Apple7+ (M1 = Apple7)	notes/m07.md command-model (pdf:fst#all family map)
 Texture formats	ASTC cross-device; smallest adequate format; R8Unorm for height	notes/m08.md resources-and-memory (book ch31, ch19)
 Texture formats	Max 2D size 16384 Apple3-9, 32768 Apple10; 16K texture about 1 GB before mips	notes/m07.md resources-and-memory (pdf:fst#all); notes/m03.md resources-and-memory (streaming-large-images-with-metal-sparse-textures)
-Mipmaps	mipmapLevelCount default 1; full chain ~33%; Apple sample ceil(log2) one short; 256 needs 9	notes/m01.md resources-and-memory (creating-a-mipmapped-texture); task-4-read/report.md finding 14; runtime probe (texture2DDescriptor mipmapped 256 -> 9 levels)
+Mipmaps	mipmapLevelCount default 1; full chain ~33%; Apple sample ceil(log2) one short; 256 needs 9	notes/m01.md resources-and-memory (creating-a-mipmapped-texture); task-4-read/report.md finding 14; runtime probe (texture2DDescriptor mipmapped 256 -> 9 levels); record: runtime/resources-and-memory/runs.txt "Heap size and alignment, placement sparse, working-set size"
 Mipmaps	MTKTextureLoader allocateMipmaps vs generateMipmaps	notes/m01.md resources-and-memory (creating-a-mipmapped-texture)
 Mipmaps	constexpr sampler default mip_filter::none reads only mip 0	notes/m06.md shading-language (pdf:msl-4.1#ch2); notes/m01.md resources-and-memory (adding-mipmap-filtering-to-samplers)
 Mipmaps	All levels allocated at creation; load small levels first (~2% from level 3); clamp	notes/m01.md resources-and-memory (dynamically-adjusting-texture-level-of-detail)
@@ -84,7 +79,7 @@ Sparse textures in Metal 4	Barrier against MTLStageResourceState after mapping u
 Sparse textures in Metal 4	Placement sparse gate: Metal 4, Apple8, some Apple7 incl. all Apple7 Macs	notes/m07.md command-model and resources-and-memory (pdf:fst#all); notes/m01.md resources-and-memory
 Sparse textures in Metal 4	supportsPlacementSparse available from OS 26.4	/documentation/Metal/MTLDevice/supportsPlacementSparse (symbol page); SDK MTLDevice.h
 Sparse textures in Metal 4	Placement sparse buffers via makeBuffer(length:options:placementSparsePageSize:)	/documentation/Metal/MTLDevice/makeBuffer(length:options:placementSparsePageSize:) (symbol page)
-Sparse textures in Metal 4	Measured: device.makeTexture with placementSparsePageSize works; tier 2; tail at 6; allocatedSize 720,896 B; residency set accepts placement heap	runtime probe on M4 Pro, macOS 27.0.1 (scratchpad resprobe/run.swift)
+Sparse textures in Metal 4	Measured: device.makeTexture with placementSparsePageSize works; tier 2; tail at 6; allocatedSize 720,896 B; residency set accepts placement heap	runtime probe on M4 Pro, macOS 27.0.1 (scratchpad resprobe/run.swift); record: runtime/resources-and-memory/runs.txt "Heap size and alignment, placement sparse, working-set size"
 Sparse textures in Metal 4	sparseTextureTier / MTLTextureSparseTier exist (tier1, tier2, none)	/documentation/Metal/MTLTexture/sparseTextureTier (symbol page); /documentation/Metal/MTLTextureSparseTier (symbol page)
 Sparse textures in Metal 4	sparseTileSizeInBytes(sparsePageSize:) sizes heap tiles	/documentation/Metal/MTLDevice/sparseTileSizeInBytes (symbol page); SDK MTLDevice.h sparseTileSizeInBytesForSparsePageSize
 Sparse textures in Metal 4	firstMipmapInTail maps whole tail	/documentation/Metal/MTLTexture/firstMipmapInTail (symbol page)
@@ -112,7 +107,7 @@ Budgeting unified memory	iOS terminates past per-device limit; test every model	
 Budgeting unified memory	os_proc_available_memory: bytes before limit; not on macOS; don't cache	/documentation/os/os_proc_available_memory (symbol page)
 Budgeting unified memory	increased-memory-limit entitlement	notes/m02.md apple-games/game-loop-and-threading (improving-your-games-graphics-performance-and-settings)
 Budgeting unified memory	recommendedMaxWorkingSetSize and currentAllocatedSize semantics	/documentation/Metal/MTLDevice/recommendedMaxWorkingSetSize, /currentAllocatedSize (symbol pages)
-Budgeting unified memory	Measured recommendedMaxWorkingSetSize 40200896512 B on 48 GB M4 Pro	runtime probe on M4 Pro, macOS 27.0.1; sysctl hw.memsize
+Budgeting unified memory	Measured recommendedMaxWorkingSetSize 40200896512 B on 48 GB M4 Pro	runtime probe on M4 Pro, macOS 27.0.1; sysctl hw.memsize; record: runtime/resources-and-memory/runs.txt "Heap size and alignment, placement sparse, working-set size"
 Budgeting unified memory	Allocations track omits private resources; VM: IOAccelerator / IOSurface; compressed memory counted uncompressed	notes/m05.md resources-and-memory (xcode/analyzing-the-memory-usage-of-your-metal-app)
 Budgeting unified memory	High GPU bandwidth can starve CPU memory access on unified memory	notes/m04.md gpu-debugging-and-profiling (Measuring-the-GPUs-use-of-memory-bandwidth)
 Budgeting unified memory	Texture budget numbers; shrink metallic/roughness/AO first	notes/m08.md resources-and-memory (book ch30)
