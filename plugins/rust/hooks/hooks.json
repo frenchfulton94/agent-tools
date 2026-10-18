@@ -1,0 +1,43 @@
+{
+  "description": "Asks before cargo publish (unless --dry-run), cargo yank, and cargo owner --add/--remove, which change a registry other people build from; and keeps a session from ending while cargo check fails after Rust edits",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "perl",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/cargo-registry-guard.pl"],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "perl",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/rust-check-gate.pl", "track"],
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "perl",
+            "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/rust-check-gate.pl", "stop"],
+            "timeout": 300
+          }
+        ]
+      }
+    ]
+  }
+}

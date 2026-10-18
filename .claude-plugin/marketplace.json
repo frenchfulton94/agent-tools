@@ -7,7 +7,7 @@
     "url": "https://github.com/frenchfulton94/agent-tools"
   },
   "metadata": {
-    "description": "Claude Code plugins for this catalog — agent tooling, the TypeScript and SvelteKit stacks, interface craft and motion, native Apple apps, Godot games, containers and self-hosted infrastructure (Docker, Unraid, Dokploy), OWASP-grounded security review, OpenSpec workflow setup, the Zed editor, PARA file organization, and Windows apps on a Mac with CrossOver.",
+    "description": "Claude Code plugins for this catalog — agent tooling, the TypeScript and SvelteKit stacks, Rust, interface craft and motion, native Apple apps, Godot games, containers and self-hosted infrastructure (Docker, Unraid, Dokploy), OWASP-grounded security review, OpenSpec workflow setup, the Zed editor, PARA file organization, and Windows apps on a Mac with CrossOver.",
     "version": "0.1.0"
   },
   "plugins": [
@@ -94,6 +94,12 @@
       "source": "./plugins/crossover",
       "category": "productivity",
       "description": "Running Windows applications and games on a Mac with CodeWeavers CrossOver — bottles, installing listed and unlisted applications, the command-line tools, registry and Wine Configuration changes, Advanced Settings per CrossOver version (23.7–24, 25, 26), debug logs, locale and keyboard fixes, and controllers, anti-cheat, and mods — built from the CodeWeavers Mac knowledge base. Ships a log-triage agent for .cxlog files and a guard against irreversible bottle deletion."
+    },
+    {
+      "name": "rust",
+      "source": "./plugins/rust",
+      "category": "development",
+      "description": "Rust development on the 2024 edition, built from the official Rust documentation, the Rust API Guidelines, and the Clippy book — the language and the standard library, with the edition-2024 changes and APIs stabilised through Rust 1.99; Cargo manifests, features, workspaces, profiles, build scripts, configuration, cross-compilation, and publishing; designing public APIs against the API Guidelines checklist; Clippy lint policy, clippy.toml, and rustfmt; reading compiler errors and lints; atomics, memory ordering, and building locks and other synchronization primitives, from Mara Bos's Rust Atomics and Locks; testing; rustdoc and doctests; and command-line applications on current crates. Ships a build-triage agent that returns only root-cause diagnostics, an API-review agent that checks a crate's public surface against the guidelines, a Stop gate that keeps a session from ending while cargo check fails after Rust edits, and a guard that asks before cargo publish, yank, and owner changes."
     }
   ]
 }
