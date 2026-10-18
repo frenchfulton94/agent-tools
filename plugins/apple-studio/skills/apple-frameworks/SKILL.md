@@ -14,3 +14,7 @@ description: Map of Apple's first-party frameworks - what exists, what each is f
    developer.apple.com pages (live-docs-first rule, CONVENTIONS.md).
    The catalog answers "what exists"; primers answer "should I";
    live docs answer "how".
+4. Implementing with Metal goes to the `apple-metal` skill, and implementing
+   with the game frameworks (Game Controller, GameKit, PHASE, Core Haptics,
+   Background Assets) goes to the `apple-games` skill. This catalog keeps the
+   adoption judgment.

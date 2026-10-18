@@ -19,3 +19,6 @@ Rules:
 - Screenshots: boot → bootstatus → install → launch → `simctl io booted screenshot` (iPhone Duo: pass `--display`; see references/headless-commands.md § 9).
 - Builds, tests and runs; it does not explain *why* something is slow — profiling,
   hangs, memory growth and launch time are the `apple-performance` skill.
+- An external build system (cargo, CMake, make) hosted in Xcode, and attaching
+  Xcode's GPU tools and Instruments to the binary it builds, are the
+  `apple-metal` skill, its `cpp-and-rust.md`.
