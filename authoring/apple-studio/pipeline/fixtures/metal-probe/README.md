@@ -22,6 +22,7 @@ Xcode, and rustup's cargo. CMake is not used. Nothing here is installed.
 | `check_verbatim.py` | Checks that the pasted blocks still match the references |
 | `run.sh` | Runs one claim and prints its log |
 | `heaviest_under_interval.py` | Names the heaviest symbol inside a signpost interval, from an `xctrace` export (R4) |
+| `bundle.sh` | Wraps the release `MetalProbe` in `build/MetalProbe.app` for the notarization run (R6). It signs nothing |
 
 ## Pasted blocks
 
@@ -110,3 +111,18 @@ as well.
 
 The one step that no script can run is attaching Xcode's GPU debugger to a
 binary that Xcode did not build. The Task 6 report gives the manual steps.
+
+## The app bundle (R6)
+
+```bash
+./bundle.sh                                          # swift build -c release, then build/MetalProbe.app
+build/MetalProbe.app/Contents/MacOS/MetalProbe render --frames 1
+```
+
+`bundle.sh` writes an `Info.plist` with the bundle identifier
+`dev.frenchfultonjr.apple-studio.metal-probe` and a 26.0 minimum system
+version. The bundle keeps only the linker's ad hoc signature. The Developer ID
+signature, notarization, and stapling are the steps in
+`plugins/apple-studio/skills/app-release/references/direct-distribution.md`,
+run by hand. The evidence is in
+`authoring/apple-studio/records/2026-10-18-phase10-games/task-10-r6/`.

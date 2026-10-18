@@ -1,0 +1,100 @@
+section	claim	source
+What was checked on this machine	Spellings checked against --help and man pages on macOS 27.0.1, Xcode 27.1, notarytool 1.1.3 (42)	task-10-r6/help.log (whole file; header lines 1-3, notarytool version line 7)
+What was checked on this machine	No Developer ID Application or Installer identity on this machine	task-10-r6/help.log "Developer ID identity check" section; r01.md:86; task-7 report item 46
+Developer ID identities	Application signs apps, bundles, Mach-O, CLI tools, disk images; Installer signs pkgs	r01.md:61 (resolving-common-notarization-issues); $TMP/r06-extra/certificates-overview.txt:62-68; create-developer-id-certificates.txt:19-20
+Developer ID identities	Keychain name holds team name and Team ID; pages write Developer ID Application: <Team ID>	certificates-overview.txt:107; r01.md:86; task-7 report item 43
+Developer ID identities	Sign with the SHA-1 hash when two identities share a name	r01.md:86 (creating-distribution-signed-code-for-the-mac)
+Developer ID identities	Required role to create: Account Holder; cloud-managed Developer ID access role for admins	$TMP/r06-extra/create-developer-id-certificates.txt:13-14; certificates-overview.txt:13; resolves task-7 report item 45 (r01.md:57)
+Developer ID identities	Up to five Application and five Installer certificates	create-developer-id-certificates.txt:12
+Developer ID identities	Notarization page says the Account Holder must sign	$TMP/corpus/documentation__security__notarizing-macos-software-before-distribution.md:75
+Developer ID identities	Create in Xcode Settings > Accounts > Manage Certificates or in Certificates, Identifiers & Profiles	r01.md:108 (sharing-your-teams-signing-certificates); create-developer-id-certificates.txt:16-18
+Developer ID identities	.p12 export, password over a different channel	r01.md:108; signing-and-provisioning.md "The paid team distribution path" item 3
+Developer ID identities	-p codesigning hides installer identities; use security find-identity -v	r01.md:98 (packaging-mac-software-for-distribution); not observable here (no installer identity), help.log security section
+Developer ID identities	Cert expiry: app valid when built keeps running; new builds need a new cert	create-developer-id-certificates.txt:30; certificates-overview.txt:126
+Developer ID identities	Developer ID profile checked at every launch; expired profile stops launch; post-2017-02-22 profiles valid 18 years	create-developer-id-certificates.txt:29,31
+Developer ID identities	Installer pkg: overview says trusted-timestamp pkg still installs; Developer ID page says re-sign	certificates-overview.txt:128 against create-developer-id-certificates.txt:32 (contradiction stated)
+Developer ID identities	Revoked: no install, no launch; membership lapse keeps shipped builds running	create-developer-id-certificates.txt:33,35; certificates-overview.txt:126,128
+The hardened runtime	Required for notarization; ENABLE_HARDENED_RUNTIME; codesign --options runtime	r01.md:44,46; corpus build-settings-reference.md:1349; help.log codesign(1) lines for runtime (man 668-672)
+The hardened runtime	Exception entitlements, default false, write only true keys	r01.md:44,48; corpus hardened-runtime.md:28-49
+The hardened runtime	Build setting names RUNTIME_EXCEPTION_*	corpus build-settings-reference.md:3951-3981; m04.md:132
+The hardened runtime	allow-jit: MAP_JIT only; unsigned-executable-memory warned; disable-library-validation for other-team plug-ins	r01.md:45; allow-jit and allow-unsigned-executable-memory pages
+The hardened runtime	JIT without allow-jit can silently fall back to its interpreter	r01.md:45 (hardened-runtime page)
+The hardened runtime	Apple silicon W^X for all apps; jit-write-allowlist with pthread_jit_write_with_callback_np	g06.md:56; corpus porting-just-in-time-compilers-to-apple-silicon.md:63-77
+The hardened runtime	audio-input + NSMicrophoneUsageDescription; camera; apple-events	r01.md:49,76; corpus hardened-runtime.md:53-65
+The hardened runtime	Entitlements on main executables only; plug-in host claims plug-ins' entitlements	r01.md:47,55,82
+The hardened runtime	Entitlements file: XML, ASCII, no BOM, no comments, LF; plutil -lint / -convert xml1; binary plist error	r01.md:67,83; corpus resolving-common-notarization-issues.md:177; help.log plutil section
+The hardened runtime	CODE_SIGN_INJECT_BASE_ENTITLEMENTS injects get-task-allow; archive/export strip it	r01.md:65; corpus build-settings-reference.md:973
+The hardened runtime	Start from dev claims; aps-environment development->production; delete get-task-allow	r01.md:83
+The hardened runtime	--entitlements - --xml is the current spelling; pages show :-	help.log codesign(1) lines 274-283; r01.md:67; task-7 report item 43
+Capabilities outside the Mac App Store	Game Center, IAP, Sign in with Apple, and eight others not available to Developer ID	$TMP/r01-extra/supported-capabilities-macos.html table (parsed: Developer ID cell empty for those rows); task-7 report item 22
+Capabilities outside the Mac App Store	iCloud x3, Push, App groups, Keychain sharing, etc. available to Developer ID	same table (Developer ID cell checked)
+Capabilities outside the Mac App Store	Profile optional on macOS except TestFlight; needed only for restricted entitlements; unrestricted list	r01.md:70 (TN3125)
+Capabilities outside the Mac App Store	Developer ID profile: ProvisionsAllDevices; Contents/embedded.provisionprofile	r01.md:71 (TN3125)
+Capabilities outside the Mac App Store	Archived bundle carries a development profile; replace; each appex has its own; copying breaks seal	r01.md:85 (creating-distribution-signed-code-for-the-mac)
+Capabilities outside the Mac App Store	Standalone executable cannot hold a profile; wrap in app-shaped bundle	r01.md:73,109 (TN3125; signing-a-daemon-with-a-restricted-entitlement)
+Capabilities outside the Mac App Store	MAS and Developer ID builds do not share TCC grants by default; codesign -r	r01.md:84; help.log codesign(1) -r line 228
+Capabilities outside the Mac App Store	tccutil reset All <bundle-id>	r01.md:106 (resetting-access-to-protected-resources-in-macos)
+Building for Apple silicon only	Games overview: target the Apple silicon-only apps section, M1 or later	corpus technologyoverviews__games-technologies.md:186-187; g09.md:128
+Building for Apple silicon only	/macos/submit/ redirects to /app-store/submitting/, which does not describe the section	$TMP/r06-extra/macos-submit.html (curl effective URL https://developer.apple.com/app-store/submitting/); submitting.txt (whole page, no Apple silicon-only section)
+Building for Apple silicon only	Slices built per deployment target and ARCHS (four rows) and the x86_64 deprecation warning	task-10-r6/archs-probe/runs.txt (run.sh)
+Building for Apple silicon only	ARCHS_STANDARD is arm64, x86_64 in Xcode 27.1's macOS spec	task-10-r6/archs-probe/runs.txt last section (macOSArchitectures.xcspec:22)
+Building for Apple silicon only	Porting page: add x86_64 to ARCHS for Intel at macOS 27	corpus porting-just-in-time-compilers-to-apple-silicon.md:18-20; g06.md:55; m05.md:120; resolves task-7 report item 45
+Building for Apple silicon only	Xcode 27 does not run on Intel; Rosetta general-purpose through macOS 27	m05.md:120; porting-JIT page:24; m01.md:191
+Signing by hand	Three routes to distribution-signed code	r01.md:79
+Signing by hand	External Build System / Aggregate gives Generic Xcode Archive; SKIP_INSTALL	r01.md:69,80
+Signing by hand	Direct Distribution preset; Custom Developer ID; Copy App unsigned	corpus distributing-your-app-for-beta-testing-and-releases.md:85,106; r01.md:89
+Signing by hand	ditto keeps symlinks	r01.md:81
+Signing by hand	Sign inside out; file distinguishes executables	r01.md:82
+Signing by hand	--deep deprecated for signing as of macOS 13.0; fine for verify	help.log codesign(1) --deep block (man 83); r01.md:88
+Signing by hand	macOS 15 codesign drops library entitlements unless --force-library-entitlements	help.log codesign(1) block (man 182-186)
+Signing by hand	Entitlements or profiles on a framework produce an invalid signature	corpus using-the-latest-code-signature-format.md:79; creating-distribution-signed-code-for-the-mac.md:151
+Signing by hand	-f replaces a signature; -i for non-bundled code; never under sudo	help.log codesign(1) lines 177-179, 201; r01.md:87
+Signing by hand	--timestamp: default Apple server, fails offline; without it a system default may timestamp only some	help.log codesign(1) lines 418-430
+Signing by hand	Xcode timestamps only on archive/export; timestamp.apple.com only; Timestamp= vs Signed Time	r01.md:64
+Signing by hand	Pre-flight: codesign -vvv --deep --strict; syspolicy_check notary-submission	r01.md:60,63; help.log syspolicy_check sections
+The release sequence	store-credentials prompts for the password when --password is omitted	help.log notarytool store-credentials lines 19-21
+The release sequence	find-identity -v -p codesigning	help.log security(1) section
+The release sequence	codesign --force --sign --options runtime --timestamp; --verify --strict --verbose=2	help.log codesign(1); bundle.log "Verify the ad hoc signature" (same verify form, exit 0)
+The release sequence	spctl on signed-not-notarized app: rejected, exit 3 (R6 pending for Developer ID)	help.log spctl(8) exit-code lines 172-175; bundle.log "Gatekeeper on the ad hoc bundle" (ad hoc, rejected, exit 3)
+The release sequence	Notary service rejects a bare .app; ditto -c -k --keepParent	r01.md:31; packaging.log "Zip for upload"
+The release sequence	submit --keychain-profile --wait; log <id> [path] with auth	help.log notarytool submit and log sections; notarytool log --help lists -p (line 28 of its help)
+The release sequence	stapler staple / validate; zip cannot be stapled	help.log stapler usage; r01.md:40
+The release sequence	Final spctl accepted with source Notarized Developer ID	task-10 brief R6 step 8 (expected); R6 pending
+notarytool details	altool stopped 2023-11-01; Xcode 13 and earlier refused	r01.md:34,52
+notarytool details	Three auth forms; --issuer for Team keys only	help.log notarytool store-credentials and submit sections; r01.md:35
+notarytool details	--validate default; --keychain; --sync not with --keychain	help.log notarytool store-credentials section; r01.md:36
+notarytool details	--wait default false; --timeout local only; info/wait/history	help.log notarytool submit lines 41-45 and subcommands section
+notarytool details	log is pretty-printed JSON; -f does not change it; fields	help.log notarytool log lines 3,10-11; r01.md:37-38
+notarytool details	CLT ships notarytool, stapler, codesign_allocate, not xcodebuild	r01.md:78,94
+notarytool details	DEVELOPER_DIR per command	r01.md:78
+notarytool details	5 min / 98% in 15 / 75 per day; non-exec files out of Contents/MacOS	corpus customizing-the-notarization-workflow.md:212,224; r01.md:42
+notarytool details	S3 hosts; --no-s3-acceleration; CloudKit 443	r01.md:41; help.log notarytool submit line 48
+notarytool details	Old releases: submit as shipped, staple; relaxed acceptance	r01.md:58
+Choosing a container	Zip/DMG/pkg trade-offs; MAS takes pkg	r01.md:96,98
+Choosing a container	Sign inside out, notarize outermost, staple what is downloaded; ticket per nested item	r01.md:32,97
+Choosing a container	stapler writes into the file	r01.md:68
+Choosing a container	DMG signed with Application identity and -i	r01.md:100; corpus packaging-mac-software-for-distribution.md:114
+Choosing a container	hdiutil create deprecated on macOS 27, still writes UDZO; warning names diskutil image create from	packaging.log "DMG with hdiutil (UDZO)", "Image format, hdiutil DMG"; help.log hdiutil create line 1 and hdiutil(1) deprecation notice
+Choosing a container	Page spells -srcFolder; help spells -srcfolder	corpus packaging-mac-software-for-distribution.md:105; help.log hdiutil create line 50; task-7 report item 43
+Choosing a container	diskutil image create from defaults to ULFO; --format UDZO gives UDZO; hdiutil verify passes on both	packaging.log "DMG with diskutil (UDZO)", "Image format, default", both verify sections; help.log diskutil section
+Choosing a container	productbuild --component, pkgbuild --root/--analyze, --synthesize, --distribution, productsign	help.log pkgbuild, productbuild, productsign sections; packaging.log "Component pkg, unsigned"
+Choosing a container	pkgbuild timestamps by default with a Developer ID identity	help.log pkgbuild(1) line 308
+Choosing a container	pkgutil --check-signature good output strings	r01.md:60
+Choosing a container	Large-data pattern: notarize pkg of executables, DMG unnotarized	r01.md:43
+What Gatekeeper checks	Ticket stapled or online; first-launch dialog; notarization is not App Review	r01.md:40,51
+What Gatekeeper checks	spctl --type execute/install/open; exit 0/3; --raw	help.log spctl(8) section
+What Gatekeeper checks	spctl no longer edits rules as of macOS 15.0	help.log spctl(8) lines 78-79
+What Gatekeeper checks	syspolicy_check distribution runs Gatekeeper, XProtect, profile checks; --json	help.log syspolicy_check distribution section
+What Gatekeeper checks	codesign --check-notarization forces an online ticket check	help.log codesign(1) line 64
+What Gatekeeper checks	Ad hoc bundle with hardened runtime: rejected, exit 3	bundle.log "Gatekeeper on the ad hoc bundle"
+What Gatekeeper checks	Test matrix and translocation	r01.md:102
+Notary log messages and their fixes	The seven messages and causes	corpus resolving-common-notarization-issues.md:28,55,75,111,124,134,177; r01.md:59
+Notary log messages and their fixes	macOS 10.15.4 AMFI abort on malformed entitlements	r01.md:67; resolving page:183
+After release: crash reports and symbols	No Organizer reports for Developer ID	r01.md:92; p01.md:101
+After release: crash reports and symbols	Keep archives; mdfind / dwarfdump --uuid; UUID format	r01.md:95
+After release: crash reports and symbols	No macOS symbol download; same OS version	r01.md:77
+A release smoke test in code	Snippet compiles at macOS 26.0	task-10-r6/typecheck.log
+A release smoke test in code	kSecCodeInfoEntitlementsDict is a generic key, absent when no entitlements	SDK Security.framework SecCode.h:400-403,497
+A release smoke test in code	true with get-task-allow, false without, using default flags	task-10-r6/selfcheck/runs.txt (selfcheck/run.sh extracts the block verbatim)
+Classic pitfalls	Standalone binary gets a ticket but cannot be stapled	r01.md:40
+Where else to look	Notary API for Xcode-free pipelines	r01.md:39

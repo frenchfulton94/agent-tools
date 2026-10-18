@@ -1,6 +1,6 @@
 ---
 name: app-release
-description: Shipping iOS/macOS apps - code signing and provisioning, certificates and App Store Connect API keys, TestFlight beta distribution, App Store submission and rejection avoidance, App Store screenshots and metadata for every device size, privacy manifests and export compliance, version and build numbering, push notification (APNs) setup and delivery debugging, and CI release automation with Xcode Cloud. Use when archiving or distributing a build, fixing signing or provisioning errors, setting up TestFlight, preparing screenshots or metadata for App Store Connect, preparing for or responding to App Review, configuring push infrastructure, or automating releases. Not for in-app feature work, UI, or local-notification API usage.
+description: Shipping iOS/macOS apps - code signing and provisioning, certificates and App Store Connect API keys, Developer ID signing and notarization for distribution outside the App Store, TestFlight beta distribution, App Store submission and rejection avoidance, App Store screenshots and metadata for every device size, privacy manifests and export compliance, version and build numbering, push notification (APNs) setup and delivery debugging, and CI release automation with Xcode Cloud. Use when archiving or distributing a build, notarizing or packaging a Mac app as a DMG, zip, or pkg, fixing signing or provisioning errors, setting up TestFlight, preparing screenshots or metadata for App Store Connect, preparing for or responding to App Review, configuring push infrastructure, or automating releases. Not for in-app feature work, UI, or local-notification API usage.
 ---
 
 # App release (shipping and operating)
@@ -11,6 +11,7 @@ usernotifications primer; UI belongs to apple-design.
 
 Read the reference for the decision at hand:
 - Certificates, profiles, entitlements, signing errors → `references/signing-and-provisioning.md`
+- Developer ID, hardened runtime, notarytool and stapler, DMG/zip/pkg, Gatekeeper, capabilities outside the Mac App Store, Apple silicon-only builds → `references/direct-distribution.md`
 - Submitting, App Review, rejections, privacy manifests → `references/app-store-submission.md`
 - TestFlight, beta strategy, version/build numbers → `references/testflight-and-versioning.md`
 - APNs keys, environments, delivery debugging → `references/push-notifications.md`

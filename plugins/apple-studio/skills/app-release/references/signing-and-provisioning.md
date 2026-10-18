@@ -61,7 +61,7 @@ Two separate files/settings both claim to represent "the app's entitlements," an
 
 Inspect what actually got embedded in a *built* app, not just what's in the project, with:
 
-```
+```bash
 codesign --display --entitlements - --xml /path/to/MyApp.app
 ```
 
@@ -81,7 +81,7 @@ Diagnose these by asking which of the four bound pieces (cert, App ID/entitlemen
 ### CI / headless keychain failures
 
 - **`User interaction is not allowed`** — `codesign`/`security` tried to unlock a keychain or prompt for keychain-item access and there's no interactive session (SSH/CI runner). This is the signature CI-specific failure. Fix: create a dedicated CI keychain, unlock it non-interactively, and set its default/search-list explicitly:
-  ```
+  ```bash
   security create-keychain -p "$KEYCHAIN_PW" build.keychain
   security unlock-keychain -p "$KEYCHAIN_PW" build.keychain
   security set-keychain-settings -lut 21600 build.keychain
@@ -112,4 +112,4 @@ Four build settings govern all of the above once manual signing is on, and are t
 
 ## Code signature format currency
 
-iOS/iPadOS/tvOS 15+ and watchOS 8+ require the newer DER-encoded entitlements format in the code signature; apps signed with the older format simply fail to launch on these OS versions, with no App Store-side warning if you sideload/Ad-Hoc distribute an old-format build (Using the latest code signature format, https://developer.apple.com/documentation/xcode/using-the-latest-code-signature-format.md). Building with a current Xcode on macOS 11+ produces this format by default — this is only a live concern for Ad Hoc/Enterprise binaries built on old toolchains, since App Store/TestFlight builds get re-signed by Apple with the current format regardless of what was uploaded. Diagnose a "won't launch after install, no crash log" report by checking `codesign -dv` for `CodeDirectory v=20500` or higher and confirming DER entitlements are present (a nonzero `-7` hash entry) before assuming the bug is anywhere in app code.
+iOS/iPadOS/tvOS 15+ and watchOS 8+ require the newer DER-encoded entitlements format in the code signature; apps signed with the older format simply fail to launch on these OS versions, with no App Store-side warning if you sideload/Ad-Hoc distribute an old-format build (Using the latest code signature format, https://developer.apple.com/documentation/xcode/using-the-latest-code-signature-format.md). Building with a current Xcode on macOS 11+ produces this format by default — this is only a live concern for Ad Hoc/Enterprise binaries built on old toolchains, since App Store/TestFlight builds get re-signed by Apple with the current format regardless of what was uploaded. Diagnose a "won't launch after install, no crash log" report by checking the `CodeDirectory v=` value in `codesign -dv` output — any value below `20400` needs a re-sign (the page's sample output shows `v=20500`, which is an example, not the threshold) — and confirming DER entitlements are present (a nonzero `-7` hash entry) before assuming the bug is anywhere in app code.
