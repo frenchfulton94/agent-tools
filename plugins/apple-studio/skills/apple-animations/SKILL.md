@@ -16,6 +16,7 @@ Read the reference for the decision at hand:
 - Transitions, matchedGeometryEffect, zoom navigation transitions → `references/transitions-and-matched-geometry.md`
 - scrollTransition, visualEffect, shader effect modifiers → `references/scroll-and-visual-effects.md`
 - Gesture-driven motion — drags, sheets, carousels, flick-to-dismiss → `references/fluid-interfaces.md`
+- Shaders for an engine's Metal render or compute pipeline → the apple-metal skill; the SwiftUI shader modifiers stay here
 
 Rules that always apply:
 - Animate state, not side effects: drive every animation from a state

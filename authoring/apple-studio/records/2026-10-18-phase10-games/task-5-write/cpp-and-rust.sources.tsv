@@ -1,0 +1,89 @@
+section	claim	source
+Choosing a binding	metal-cpp is header-only, maps every ObjC class to C++, inlines calls with no measured overhead, no wrapper allocations, no shim	pipeline/tmp/metal-cpp/26.4/README.md (About, Highlights)
+Choosing a binding	objc2-metal 0.3.2 has 81 MTL4* items incl. MTL4CommandQueue, MTL4CommandAllocator, MTLResidencySet; metal crate 0.33 README deprecation points to objc2	docs/specs/2026-10-18-phase10-games-design.md Finding 6; ~/.cargo/registry/src/*/objc2-metal-0.3.2/src/generated/
+Choosing a binding	SWIFT_OBJC_INTEROP_MODE lets Swift interoperate with C++	notes/m04.md cpp-and-rust (build-settings-reference); corpus build-settings-reference.md line 4270
+Choosing a binding	explicitly built modules unsupported with Swift C++ interop	notes/m05.md cpp-and-rust; corpus building-your-project-with-explicit-module-dependencies.md line 43
+Choosing a binding	metal-cpp version tracks SDK; 26.4 adds 26.4 APIs; 26 added Metal 4 and Apple10	metal-cpp 26.4 README Changelog
+Names across the three bindings	Swift spellings (makeMTL4CommandQueue, makeCommandBuffer, beginCommandBuffer(allocator:), makeRenderCommandEncoder(descriptor:), commit(_:options:), signalEvent/waitForEvent/waitForDrawable, wait(untilSignaledValue:timeoutMS:), makeCaptureScope(device:), begin/end, colorAttachments[0], MTLClearColor init)	symbol pages MTL4CommandQueue, MTL4CommandBuffer, MTLSharedEvent wait, MTLCaptureManager; compiled with swiftc -typecheck -target arm64-apple-macos26.0 (scratch names.swift)
+Names across the three bindings	metal-cpp spellings incl. wait(event,value)=waitForEvent:value:, wait(drawable)=waitForDrawable:, newCaptureScope overloads, beginScope/endScope	metal-cpp 26.4 Metal/MTL4CommandQueue.hpp lines 215-283; Metal/MTLCaptureManager.hpp; Metal/MTLCaptureScope.hpp
+Names across the three bindings	objc2-metal spellings: commit_count, signalEvent_value, waitForEvent_value, waitUntilSignaledValue_timeoutMS, beginCommandBufferWithAllocator, renderCommandEncoderWithDescriptor, newCaptureScopeWithDevice; error: becomes Result	objc2-metal-0.3.2/src/generated/MTL4CommandQueue.rs, MTL4CommandBuffer.rs, MTLEvent.rs, MTLCaptureManager.rs, MTLDevice.rs (newResidencySetWithDescriptor_error)
+Names across the three bindings	MTLClearColorMake not bound in Rust; struct literal	objc2-metal-0.3.2/src/generated/MTLRenderPass.rs line 37
+metal-cpp: setup and ownership	define NS_/MTL_PRIVATE_IMPLEMENTATION in one cpp; CA_PRIVATE_IMPLEMENTATION for QuartzCore	metal-cpp README "Adding metal-cpp to a Project"
+metal-cpp: setup and ownership	MTLFX_PRIVATE_IMPLEMENTATION checked by MetalFX headers, not in README	metal-cpp 26.4 MetalFX/MTLFXPrivate.hpp line 36
+metal-cpp: setup and ownership	METALCPP_SYMBOL_VISIBILITY_HIDDEN; SingleHeader/MakeSingleHeader.py	metal-cpp README
+metal-cpp: setup and ownership	metal-cpp requires C++17	metal-cpp README Highlights
+metal-cpp: setup and ownership	Xcode Compiler Default for CLANG_CXX_LANGUAGE_STANDARD documented as GNU++98	corpus build-settings-reference.md line 504; notes/m04.md cpp-and-rust
+metal-cpp: setup and ownership	plain clang++ defaults to __cplusplus 201402L; Metal.hpp fails with is_convertible_v error; c++17 compiles	runtime: Apple clang 21.0.0 on this machine (echo __cplusplus | clang++ -E; syntax check of Metal.hpp with and without -std=c++17)
+metal-cpp: setup and ownership	ownership rule: alloc/new/copy/mutableCopy/Create owned, else autoreleased; retain to extend	metal-cpp README Memory Allocation Policy
+metal-cpp: setup and ownership	per-call ownership table (new* owned; texture2DDescriptor, renderCommandEncoder, NS::String::string, fileURLWithPath autoreleased; object(0), sharedCaptureManager borrowed)	metal-cpp README naming rule applied to Metal/MTLDevice.hpp, MTL4CommandBuffer.hpp, MTLTexture.hpp line 178, MTLCaptureManager.hpp
+metal-cpp: setup and ownership	autoreleased object with no pool leaks; pool in main and every thread; OBJC_DEBUG_MISSING_POOLS; leaks --autoreleasePools	metal-cpp README "Use and debug AutoreleasePools"
+metal-cpp: setup and ownership	messaging nullptr is a NOP incl. retain/release	metal-cpp README nullptr
+metal-cpp: setup and ownership	MTL4CommandBuffer does not create strong references to resources	corpus understanding-the-metal-4-core-api.md lines 96-100; notes/m03.md command-model
+metal-cpp: setup and ownership	API Validation unretained-resource check covers MTLCommandBuffer only, not MTL4CommandBuffer	corpus validating-your-apps-metal-api-usage.md line 86; notes/m04.md command-model; task-4 report finding 18
+metal-cpp: setup and ownership	NS::SharedPtr destructor releases; TransferPtr no retain; RetainPtr retains	metal-cpp README NS::SharedPtr
+metal-cpp: setup and ownership	supports*() return false if selector missing; ErrorDomain constants weak-linked nullptr	metal-cpp README Highlights
+metal-cpp: setup and ownership	MTLSTR macro; MakeConstantString deprecated	metal-cpp 26.4 Foundation/NSString.hpp lines 110-113; README changelog
+metal-cpp: setup and ownership	Enhanced Security sets ENABLE_CPLUSPLUS_BOUNDS_SAFE_BUFFERS=YES; errors on raw-pointer indexing/arithmetic and two-arg std::span	corpus enabling-enhanced-security-for-your-app.md lines 162-190; build-settings-reference.md line 1301; notes/m05.md cpp-and-rust
+The minimal metal-cpp host	shared storage is default for textures on Apple silicon	symbol page MTLStorageMode.shared
+The minimal metal-cpp host	residency sets are the only residency mechanism in Metal 4	notes/m01.md command-model (simplifying-gpu-resource-management-with-residency-sets); symbol page MTLResidencySet
+The minimal metal-cpp host	Shader Validation: resource touched by Metal 4 command outside attached sets counts as not resident	notes/m04.md command-model (validating-your-apps-metal-shader-usage)
+The minimal metal-cpp host	without the residency set the clear-only frame still produced the pixel; API and Shader Validation silent	runtime: scratch nores.cpp with MTL_DEBUG_LAYER=1 MTL_SHADER_VALIDATION=1, M4 Pro macOS 27.0.1
+The minimal metal-cpp host	MTL4CommandBuffer has no completion handler / waitUntilCompleted; wait on queue-signalled shared event	notes/m01.md command-model; task-4 report finding 27; symbol pages MTL4CommandBuffer, MTL4CommandQueue
+The minimal metal-cpp host	allocator reset then begin; endCommandBuffer before commit	symbol pages MTL4CommandAllocator/reset(), MTL4CommandBuffer/endCommandBuffer()
+The minimal metal-cpp host	host prints pixel 255 0 0 255, also under MTL_DEBUG_LAYER=1 with validation log line	runtime: clang++ -std=c++20 build of the file's block, M4 Pro macOS 27.0.1
+The minimal metal-cpp host	MTLCreateSystemDefaultDevice needs CoreGraphics link for command-line tools on macOS	symbol page MTLCreateSystemDefaultDevice(); objc2-metal-0.3.2/src/lib.rs NOTE
+The minimal metal-cpp host	build without -framework CoreGraphics still got a device	runtime: scratch host-nocg build
+objc2-metal: types, unsafety, feature flags	Retained releases on drop; ProtocolObject<dyn P>; ProtocolObject::from_ref upcast	objc2-0.6.5/src/rc/mod.rs docs; src/runtime/protocol_object.rs lines 26-120
+objc2-metal: types, unsafety, feature flags	endEncoding declared on MTL4CommandEncoder trait	objc2-metal-0.3.2/src/generated/MTL4CommandEncoder.rs line 224
+objc2-metal: types, unsafety, feature flags	crate treats GPU memory safety as CPU; shader loading safe, calling unsafe; offsets/lengths often unsafe; resources need sync	objc2-metal-0.3.2/src/lib.rs Safety considerations
+objc2-metal: types, unsafety, feature flags	commit_count, addResidencySets_count, useResidencySets_count unsafe (pointer, count not bounds-checked)	objc2-metal-0.3.2/src/generated/MTL4CommandQueue.rs lines 410-420; MTL4CommandBuffer.rs line 250; MTLResidencySet.rs line 130
+objc2-metal: types, unsafety, feature flags	objectAtIndexedSubscript unsafe (index not bounds-checked)	objc2-metal-0.3.2/src/generated/MTLRenderPass.rs line 565
+objc2-metal: types, unsafety, feature flags	getBytes and replaceRegion unsafe; MTLBuffer::contents safe returning NonNull	objc2-metal-0.3.2/src/generated/MTLTexture.rs lines 816-850; MTLBuffer.rs line 32
+objc2-metal: types, unsafety, feature flags	texture2DDescriptor factory, sharedCaptureManager, setCaptureObject unsafe; set_capture_scope / set_capture_device safe helpers; no MTL4 queue helper	objc2-metal-0.3.2/src/generated/MTLTexture.rs line 243; MTLCaptureManager.rs lines 105,172; src/capture.rs
+objc2-metal: types, unsafety, feature flags	MTLRegionMake2D, MTLSizeMake, MTLOriginMake, MTLClearColorMake are TODO	objc2-metal-0.3.2/src/generated/MTLTypes.rs lines 35-91; MTLRenderPass.rs line 37
+objc2-metal: types, unsafety, feature flags	MTLDevice, MTL4CommandQueue, MTLEvent Send+Sync; MTL4CommandBuffer, MTL4CommandAllocator, MTLResidencySet not	objc2-metal-0.3.2/src/generated/MTLDevice.rs line 664; MTL4CommandQueue.rs line 382; MTLEvent.rs line 14; MTL4CommandBuffer.rs line 76; MTL4CommandAllocator.rs line 71; MTLResidencySet.rs line 88
+objc2-metal: types, unsafety, feature flags	residency set methods not thread-safe	symbol page MTLResidencySet
+objc2-metal: types, unsafety, feature flags	resources used in MTL4CommandBuffer must be kept alive	objc2-metal-0.3.2/src/lib.rs Memory management and lifetimes
+objc2-metal: types, unsafety, feature flags	one cargo feature per header; defaults on; libraries should disable defaults	objc2-0.6.5/src/topics/about_generated/cargo_features.md; objc2-metal-0.3.2/Cargo.toml [features] default
+objc2-metal: types, unsafety, feature flags	cold debug build 83 s default vs 15 s trimmed feature list; trimmed list builds and runs	runtime: scratch rusthost and rusttrim crates, cargo build --offline, M4 Pro
+objc2-metal: types, unsafety, feature flags	bindings generated from a fixed Xcode SDK; newer APIs missing	objc2-0.6.5/src/lib.rs Supported operating systems
+The minimal objc2-metal host	host prints pixel [255, 0, 0, 255]; same with MTL_DEBUG_LAYER=1; no missing-pool warning with OBJC_DEBUG_MISSING_POOLS=YES	runtime: cargo build of the file's block, M4 Pro macOS 27.0.1
+The minimal objc2-metal host	beginCommandBuffer voids prior useResidencySet calls	symbol page MTL4CommandBuffer/beginCommandBuffer(allocator:); objc2-metal generated MTL4CommandBuffer.rs doc comment
+Compiling shaders outside Xcode	Metal Toolchain is a separate Xcode 27 download (xcodebuild -downloadComponent MetalToolchain)	CONVENTIONS.md Pipeline tooling; spec Finding 4
+Compiling shaders outside Xcode	external builds give -std explicitly	notes/m06.md cpp-and-rust (pdf:msl-4.1#ch1)
+Compiling shaders outside Xcode	one -std across the build because of the 4.0/4.1 ABI break	notes/m03.md cpp-and-rust (writing-reusable-gpu-functions-with-generic-pointers)
+Compiling shaders outside Xcode	metal -c then metal -o .metallib; metal-ar -q archives	corpus building-a-shader-library-by-precompiling-source-files.md; runtime: xcrun metal -std=metal4.0 on this machine
+Compiling shaders outside Xcode	.ir vs .air naming inconsistency	task-4 report finding 8; notes/m01.md
+Hosting the build in Xcode	Debug > Debug Executable flow for an already-built app with GPU Frame Capture	corpus capturing-a-metal-workload-in-xcode.md lines 52-64; notes/m04.md gpu-debugging
+Hosting the build in Xcode	External Build System template under Other; legacy target; Build Tool default /usr/bin/make; argument string $(ACTION)	installed Xcode 27.1: Developer/Library/Xcode/Templates/Project Templates/Other/External Build System.xctemplate/TemplateInfo.plist
+Hosting the build in Xcode	ACTION and CONFIGURATION build settings	corpus build-settings-reference.md lines 22, 1015
+Hosting the build in Xcode	External Build Tool / Aggregate targets cannot have Compile Sources or Link Binary phases	corpus customizing-the-build-phases-of-a-target.md lines 52-63; notes/m05.md cpp-and-rust
+Hosting the build in Xcode	xcode-cargo.sh builds, cleans, fails with message on unknown action and missing cargo; cargo here is /opt/homebrew/opt/rustup/bin/cargo	runtime: shell runs of the script in scratch crates
+Hosting the build in Xcode	scheme Run/Profile Executable: for other products specify the app to launch; Run Options GPU Frame Capture; Run-only Metal diagnostics	corpus customizing-the-build-schemes-for-a-project.md lines 81-132; notes/m05.md gpu-debugging
+Hosting the build in Xcode	GPU Frame Capture Automatically depends on the target linking Metal (Metal option inference)	corpus capturing-a-metal-workload-in-xcode.md lines 22-37 (inference marked; R5 checks)
+Hosting the build in Xcode	Run Script: undeclared I/O runs every build; .xcfilelist; error: line format; nonzero exit fails	corpus running-custom-scripts-during-a-build.md; notes/m05.md cpp-and-rust
+Hosting the build in Xcode	ENABLE_USER_SCRIPT_SANDBOXING disallows undeclared I/O	corpus build-settings-reference.md line 1502; notes/m04.md cpp-and-rust
+Hosting the build in Xcode	Swift auto-links Apple frameworks; C/C++/ObjC only with CLANG_MODULES_AUTOLINK; add own libraries explicitly	corpus customizing-the-build-phases-of-a-target.md lines 124-129
+Hosting the build in Xcode	implicit dependencies cannot see script-produced files	corpus configuring-a-new-target-in-your-project.md lines 98-104
+Hosting the build in Xcode	ENABLE_DEBUG_DYLIB moves app code to NAME.debug.dylib behind a stub; per-target NO; linker-section crates inference	corpus understanding-build-product-layout-changes.md lines 27-46; build-settings-reference.md line 1313; notes/m05.md
+Hosting the build in Xcode	Copy Files signs products; LD_RUNPATH_SEARCH_PATHS for @rpath	corpus customizing-the-build-phases-of-a-target.md lines 81-87; build-settings-reference.md line 3150
+Hosting the build in Xcode	Hydra sample: build_usd.py --generator Xcode, cmake -S -B, open project, pick scheme; no -G in cmake line (not runtime-checked)	corpus creating-a-3d-application-with-hydra-rendering.md lines 20-55; notes/m01.md cpp-and-rust
+Capturing outside Xcode	MetalCaptureEnabled plist key or MTL_CAPTURE_ENABLED=1 on macOS 14+; small CPU cost	corpus capturing-a-metal-workload-programmatically.md lines 21-29; notes/m05.md gpu-debugging
+Capturing outside Xcode	supportsDestination(.gpuTraceDocument) false without MTL_CAPTURE_ENABLED	runtime: scratch capture.cpp and Rust host, M4 Pro macOS 27.0.1
+Capturing outside Xcode	captureObject documented kinds: device, MTLCommandQueue, MTLCaptureScope	symbol page MTLCaptureDescriptor/captureObject
+Capturing outside Xcode	SDK has newCaptureScopeWithMTL4CommandQueue / makeCaptureScope(commandQueue: MTL4CommandQueue)	SDK MTLCaptureManager.h line 85; symbol page makeCaptureScope(commandQueue:)-9wie3
+Capturing outside Xcode	MTL4-queue scope as captureObject crashes startCapture with -[MTLCaptureScope traceStream] unrecognized selector (Swift and C++); device scope works; MTL4 queue as captureObject also wrote a trace	runtime: scratch capture.cpp modes 0-3 and swiftcap/main.swift with MTL_CAPTURE_ENABLED=1, macOS 27.0.1, Xcode 27.1
+Capturing outside Xcode	docs: only command buffers created after start and committed before stop are captured	corpus capturing-a-metal-workload-programmatically.md line 57; SDK MTLCaptureManager.h line 94
+Capturing outside Xcode	reused MTL4CommandBuffer created before capture start was captured (gpudebug: 1 command buffer, 1 encoder)	runtime: capture.cpp mode 1 + gpudebug --oneshot -t ... -c list
+Capturing outside Xcode	endScope on a device scope ended the capture (isCapturing false)	runtime: capture.cpp mode 1 log
+Capturing outside Xcode	outputURL required for gpuTraceDocument; use .gputrace extension	symbol page MTLCaptureDescriptor/outputURL; capturing-a-metal-workload-programmatically.md line 65
+Capturing outside Xcode	startCaptureWithDescriptor:error: is the non-deprecated start; startCaptureWithDevice/Queue/Scope deprecated	SDK MTLCaptureManager.h lines 95-102; objc2-metal generated MTLCaptureManager.rs deprecated attrs
+Capturing outside Xcode	both helpers wrote traces with MTL_CAPTURE_ENABLED=1 and nothing without	runtime: scratch helper.cpp (file's block verbatim) and Rust start_trace in rusthost
+Capturing outside Xcode	MTL_DEBUG_LAYER=1 and MTL_SHADER_VALIDATION=1 log enable lines on plain binaries	runtime: C++ and Rust hosts
+Maintaining older code: Metal 3	Metal 4 model starts at Apple7 (A14, M1); A13 = Apple6 Metal 3 only	notes/m07.md command-model (pdf:fst#all)
+Maintaining older code: Metal 3	MTL4 types exist from OS 26.0	symbol pages MTL4CommandQueue, MTL4CommandBuffer availability
+Maintaining older code: Metal 3	gate with supportsFamily Metal4 (C++ GPUFamilyMetal4 = 5002, Rust MTLGPUFamily::Metal4)	notes/m01.md command-model; metal-cpp MTLDevice.hpp line 193; objc2-metal generated MTLDevice.rs line 260
+Maintaining older code: Metal 3	older-OS runtime behaviour of binding calls (inference, not runtime-checked)	metal-cpp README Highlights (supports* selector check); inference
+Maintaining older code: Metal 3	Metal 3 queue commandBuffer autoreleased and retains resources; commit on buffer; addCompletedHandler std::function overload / unsafe block in Rust	metal-cpp MTLCommandQueue.hpp line 43, MTLCommandBuffer.hpp lines 137-138; objc2-metal generated MTLCommandQueue.rs line 34-38, MTLCommandBuffer.rs line 489
+Maintaining older code: Metal 3	type map MTL4 vs MTL (compute encoder absorbs blit; argument tables; residency sets replace useResource)	corpus understanding-the-metal-4-core-api.md; notes/m03.md command-model
+Maintaining older code: Metal 3	Apple's C++ deferred-lighting sample uses Metal 3 encoder API via metal-cpp and AAPLSTR	notes/m02.md cpp-and-rust

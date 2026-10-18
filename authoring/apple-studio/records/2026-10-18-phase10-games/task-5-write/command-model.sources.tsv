@@ -1,0 +1,89 @@
+section	claim	source
+Intro	Metal 4 needs Apple7+ (A14, M1 and later) and OS 26	notes/m07.md (pdf:fst#all family map); MTLDevice.h MTLGPUFamilyMetal4 API_AVAILABLE(macos(26.0), ios(26.0)); MTL4CommandQueue.md availability 26.0
+What a Metal 4 frame holds	Queue from device.makeMTL4CommandQueue(); command buffer and allocator from the device, not the queue	understanding-the-metal-4-core-api.md; mtldevice__makemtl4commandqueue().md; mtldevice__makecommandbuffer().md; mtldevice__makecommandallocator().md; notes/m03.md
+What a Metal 4 frame holds	Command buffer reusable right after commit; allocator keeps the commands and may be reset only after the GPU finishes	drawing-a-triangle-with-metal-4.md ("Prepare a command buffer", Important note); mtl4commandallocator__reset().md; notes/m01.md, m03.md
+What a Metal 4 frame holds	MTL4CommandBuffer does not retain resources (like makeCommandBufferWithUnretainedReferences)	understanding-the-metal-4-core-api.md; notes/m03.md
+What a Metal 4 frame holds	API Validation unretained-resource check covers only MTLCommandBuffer	notes/m05.md (/documentation/xcode/validating-your-apps-metal-api-usage)
+What a Metal 4 frame holds	Metal 4 encoders have no per-resource binds, useResource or useHeap; bindings in argument tables, residency in sets	understanding-the-metal-4-core-api.md; mtl4rendercommandencoder.md; notes/m01.md, m03.md, m08.md
+What a Metal 4 frame holds	hazardTrackingMode has no effect on MTL4CommandQueue work; all resources untracked	resource-synchronization.md (Important note); understanding-the-metal-4-core-api.md (Barriers)
+What a Metal 4 frame holds	MTL4ComputeCommandEncoder replaces blit, compute and acceleration-structure encoders; stages blit/dispatch/accelerationStructure	understanding-the-metal-4-core-api.md; mtlstages.md
+What a Metal 4 frame holds	One command buffer can hold passes of the three encoder kinds; commit to any queue of the same device; no commit() on the buffer	drawing-a-triangle-with-metal-4.md; understanding-the-metal-4-core-api.md; mtl4commandbuffer.md (no commit member)
+Frame structure	Frame sequence: wait on shared event for frame N-3, reset allocator, begin, render pass, argument table, end, commit, signalEvent with frame number	drawing-a-triangle-with-metal-4.md; notes/m01.md; runtime: scratchpad probe rendered 120 frames offscreen, pixel [119,128,64,255] as expected, clean under MTL_DEBUG_LAYER=1 MTL_SHADER_VALIDATION=1 (M4 Pro, macOS 27.0.1)
+Frame structure	MTL4Compiler pipeline: makeCompiler(descriptor:), MTL4LibraryFunctionDescriptor, MTL4RenderPipelineDescriptor, sync makeRenderPipelineState(descriptor:) throws	mtldevice__makecompiler(descriptor_).md; mtl4compiler.md; mtl4compiler__makerenderpipelinestate(...)-84kox.md; mtl4renderpipelinedescriptor.md; mtl4libraryfunctiondescriptor.md; mtldevice__makelibrary(source_options_).md
+Frame structure	residencySet.commit() applies staged adds; queue.addResidencySet applies to every commit on the queue	mtlresidencyset.md; mtlresidencyset__commit().md; mtl4commandqueue__addresidencyset(__).md; MTL4CommandQueue.h addResidencySet comment
+Frame structure	Committing a command buffer that was not ended is an error	mtl4commandbuffer__endcommandbuffer().md; MTL4CommandBuffer.h endCommandBuffer comment
+Frame structure	Metal snapshots the argument table at each draw/dispatch/execute, so one table serves all frames in flight	mtl4rendercommandencoder__setargumenttable(__stages_).md
+Frame structure	CAMetalLayer header: rendered-into resources must be resident; layer set auto-updated, must not be modified, invalidated on device change	CAMetalLayer.h residencySet comment (MacOSX SDK 27); cametallayer__residencyset.md; drawing-a-triangle-with-metal-4.md (adds layer set to queue)
+Frame structure	Runtime: offscreen attachment left out of every residency set still rendered with and without validation	runtime: scratchpad noresid variant (M4 Pro, macOS 27.0.1)
+Frame structure	On-screen order: waitForDrawable, commit, signalDrawable, present, signalEvent	drawing-a-triangle-with-metal-4.md; mtl4commandqueue__waitfordrawable(__).md; mtl4commandqueue__signaldrawable(__).md; notes/m01.md, m07.md
+Frame structure	Sample's wait uses 10 ms timeout, logs, and proceeds to reset the allocator	drawing-a-triangle-with-metal-4.md (waitOnSharedEvent:forEarlierFrame: and frame code)
+Frame structure	Sample's first wait (frame kMaxFramesInFlight waits for 0) is a no-op because signaledValue starts at 0	drawing-a-triangle-with-metal-4.md (frameNumber, signaledValue = 0, >= test)
+Frame structure	wait(untilSignaledValue:) satisfied by any value >= target; smaller signals ignored	MTLEvent.h waitUntilSignaledValue comment; mtlsharedevent__signaledvalue.md; mtlevent.md
+Frame structure	signalEvent fires after all prior GPU work on the queue completes	mtl4commandqueue__signalevent(__value_).md; MTL4CommandQueue.h
+Frame structure	beginCommandBuffer(allocator:) clears prior useResidencySet calls	mtl4commandbuffer__begincommandbuffer(allocator_).md; MTL4CommandBuffer.h
+Frame structure	Swift commit(_:options:) takes an array; ObjC commit:count: takes a C array; order significant	mtl4commandqueue__commit(__options_).md; mtl4commandqueue__commit_count_.md; Metal.swiftinterface MTL4CommandQueue extension
+Frame structure	wait(untilSignaledValue:timeoutMS:) is NS_SWIFT_UNAVAILABLE_FROM_ASYNC: error in Swift 6, warning in Swift 5; use await valueSignaled(_:)	MTLEvent.h; mtlsharedevent__valuesignaled(__).md; Metal.swiftinterface valueSignaled body; compile test in scratchpad (swiftc -swift-version 6 error, default mode warning)
+Frame structure	No more frame copies than drawables; maximumDrawableCount accepts only 2 or 3, default 3	synchronizing-cpu-and-gpu-work.md (Note on drawables); notes/m03.md
+Frame structure	Submit early, present late; waitForDrawable only before the on-screen commit; held drawable is scarce	notes/m08.md (book ch31-best-practices)
+Frame structure	signalDrawable fails if called twice or after present	mtl4commandqueue__signaldrawable(__).md
+Frame structure	MTKView.residencySet holds view-created textures, macOS/iOS 26.4+; currentMTL4RenderPassDescriptor excluded from Simulator	MTKView.h (residencySet API_AVAILABLE(macos(26.4), ios(26.4)); currentMTL4RenderPassDescriptor under #if !TARGET_OS_SIMULATOR); mtkview__currentmtl4renderpassdescriptor.md; notes/m07.md (MTKView.residencySet)
+Frame structure	MTKView properties are main-actor isolated (drawFrame marked @MainActor)	compile test in scratchpad, swiftc -swift-version 6 warnings on currentDrawable / currentRenderPassDescriptor
+Frame structure	Early return before taking a frame slot avoids the semaphore-leak stall	notes/m08.md (book ch30-profiling gotcha); notes/m08.md (ch03 skipped frame normal)
+Command buffers, allocators, and threads	Allocator serves one command buffer at a time; multiple threads need multiple allocators	mtl4commandbuffer__begincommandbuffer(allocator_).md; understanding-the-metal-4-core-api.md
+Command buffers, allocators, and threads	Group commit of worker buffers replaces MTLParallelRenderCommandEncoder for any work	understanding-the-metal-4-core-api.md; notes/m03.md
+Command buffers, allocators, and threads	Suspending/resuming rules: first only suspends, last only resumes, middle both; no compute/blit/AS/ML intermix; no suspending after resuming in one buffer	mtl4renderencoderoptions.md; mtl4commandqueue__commit_count_.md
+Command buffers, allocators, and threads	endCommandBuffer frees the allocator for another command buffer	mtl4commandbuffer__endcommandbuffer().md; understanding-the-metal-4-core-api.md
+Command buffers, allocators, and threads	Commit from any thread; work sent at commit	understanding-the-metal-4-core-api.md
+Command buffers, allocators, and threads	MTL4CommitOptions is not thread-safe	mtl4commitoptions.md; MTL4CommandQueue.h
+Command buffers, allocators, and threads	allocatedSize() reports bytes in the allocator's internal heaps	mtl4commandallocator__allocatedsize().md; MTL4CommandAllocator.h
+Argument tables	Max bind counts 31 buffers, 128 textures, 16 samplers	MTL4ArgumentTable.h; mtl4argumenttabledescriptor__maxbufferbindcount.md; mtl4argumenttabledescriptor__maxtexturebindcount.md
+Argument tables	Limits match Feature Set Tables per-stage limits (Apple6+ for 128 textures); inline constexpr samplers count against 16	notes/m07.md (pdf:fst#all)
+Argument tables	A table uses memory per declared slot; size to need	drawing-a-triangle-with-metal-4.md (Tip); understanding-the-metal-4-core-api.md
+Argument tables	initializeBindings defaults to false; true initializes bindings to nil	mtl4argumenttabledescriptor__initializebindings.md; MTL4ArgumentTable.h
+Argument tables	No setBytes on MTL4ArgumentTable; per-frame constants in a buffer bound by gpuAddress	mtl4argumenttable.md (member list); notes/m08.md (book ch04 differs); task-4-read/report.md finding 28
+Argument tables	Textures and samplers bind by MTLResourceID (gpuResourceID); setResource puts a resource ID in a buffer slot	mtl4argumenttable__settexture(__index_).md; mtl4argumenttable__setsamplerstate(__index_).md; mtl4argumenttable__setresource(__bufferindex_).md; notes/m02.md (sampler gpuResourceID)
+Argument tables	Separate tables per kind of work	understanding-the-metal-4-core-api.md (Tip)
+Argument tables	Render setArgumentTable(_:stages:) takes MTLRenderStages; compute takes setArgumentTable(_:)	mtl4rendercommandencoder__setargumenttable(__stages_).md; MTL4ComputeCommandEncoder.h setArgumentTable:
+Argument tables	Shared binding-index header between Swift and MSL carries over as table slots	notes/m08.md (book ch04/ch06 agrees)
+Residency	Every touched resource must be in a set on the command buffer or queue; Shader Validation "resource not resident"	notes/m05.md (validating-your-apps-metal-shader-usage); notes/m03.md
+Residency	Skipping residency can compile and render, then pink/missing textures, faults, hangs	notes/m08.md (book ch25-27)
+Residency	Runtime: uniform buffers left out of residency rendered correctly without validation; target stayed all zeros under MTL_SHADER_VALIDATION=1 with nothing on stderr	runtime: scratchpad nobuf variant (M4 Pro, macOS 27.0.1)
+Residency	Queue sets apply at each commit; command-buffer sets cleared at next begin	mtl4commandqueue.md; simplifying-gpu-resource-management-with-residency-sets.md; mtl4commandbuffer__begincommandbuffer(allocator_).md
+Residency	Max 32 sets per queue and per command buffer; residency sets from Apple6	MTL4CommandQueue.h addResidencySet; mtl4commandbuffer__useresidencyset(__).md; notes/m07.md (pdf:fst#all)
+Residency	Add/remove staged until commit; duplicates ignored; residency is union of sets	mtlresidencyset.md; simplifying-gpu-resource-management-with-residency-sets.md
+Residency	A heap resource makes the whole heap resident	mtlresidencyset.md; simplifying-gpu-resource-management-with-residency-sets.md
+Residency	Set methods not thread-safe; no sparse heaps or sparse textures	mtlresidencyset.md (Important)
+Residency	Removing a set from a queue does not detach it from committed command buffers	simplifying-gpu-resource-management-with-residency-sets.md
+Residency	Default residency work at first commit; requestResidency earlier; may postpone under pressure; endResidency releases memory; per-zone streaming pattern	simplifying-gpu-resource-management-with-residency-sets.md; mtlresidencyset__requestresidency().md; mtlresidencyset__endresidency().md; notes/m03.md
+Synchronization	Scope ladder intrapass < fence < queue barriers < event < shared event; choose smallest	resource-synchronization.md
+Synchronization	Producer barriers only on Metal 4 encoders; consumer barriers also on Metal 3 encoders	synchronizing-passes-with-producer-barriers.md; synchronizing-passes-with-consumer-barriers.md
+Synchronization	Conflicts through bindings, argument buffers, attachments; implicit load/store; concurrent reads safe; built-in orderings	resource-synchronization.md
+Synchronization	MTL4 compute pass runs dispatches concurrently; Metal 3 compute serial unless .concurrent	resource-synchronization.md; notes/m03.md
+Synchronization	Name only the consuming stage; over-broad masks cost GPU time	notes/m01.md (combining-blit-and-compute-operations-in-a-single-pass)
+Synchronization	Intrapass barrier cannot wait on fragment or tile on TBDR; split passes and use queue barrier or fence	synchronizing-stages-within-a-pass.md
+Synchronization	Fence: encode close to conflict; producer submitted first; reuse wait-then-update; update-then-wait in one pass can deadlock	synchronizing-passes-with-a-fence.md; mtl4commandencoder__updatefence(__afterencoderstages_).md; mtl4commandencoder__waitforfence(__beforeencoderstages_).md; mtlfence.md
+Synchronization	32,768 fences max	notes/m07.md (pdf:fst#all)
+Synchronization	Metal 4 fence same queue only; MTLFence page contradicts; SDK header requires same queue	synchronizing-passes-with-a-fence.md (Note); mtlfence.md; MTL4CommandEncoder.h waitForFence comment
+Synchronization	Events monotonic UInt64 from 0; smaller signal ignored; one event per producer	mtlevent.md; about-synchronization-events.md
+Synchronization	MTLSharedEvent costs more than MTLEvent; use only for CPU or cross-device	about-synchronization-events.md; mtlsharedevent.md (Tip)
+Synchronization	Metal 4 queue wait timeout unblocks queue; Metal 3 timeout ends buffer with timeout error	mtlevent.md (Important)
+Synchronization	Visibility .device flushes to device coherence point; .resourceAlias for aliased virtual addresses; .device is default	mtl4visibilityoptions.md; barrier symbol pages (default [ .device ])
+Synchronization	Intrapass barrier symbol page parameter descriptions swapped; discussion and SDK correct	mtl4commandencoder__barrier(afterencoderstages_beforeencoderstages_visibilityoptions_).md; MTL4CommandEncoder.h barrierAfterEncoderStages comment
+Synchronization	Consumer barrier blocks beforeStages of this and later passes until afterQueueStages of earlier passes finish	mtl4commandencoder__barrier(afterqueuestages_beforestages_visibilityoptions_).md; synchronizing-passes-with-consumer-barriers.md
+Errors and GPU time	MTL4CommandBuffer has no status, error, completed handler, waitUntilCompleted	mtl4commandbuffer.md (member list); task-4-read/report.md finding 27
+Errors and GPU time	MTL4CommitOptions.addFeedbackHandler; MTL4CommitFeedback error, gpuStartTime, gpuEndTime; handler @Sendable	mtl4commitoptions.md; mtl4commitoptions__addfeedbackhandler(__).md; mtl4commitfeedback.md; mtl4commitfeedbackhandler.md; mtl4commitfeedback__error.md
+Errors and GPU time	feedbackQueue must be serial; nil uses an internal queue; set via makeMTL4CommandQueue(descriptor:)	mtl4commandqueuedescriptor__feedbackqueue.md; mtldevice__makemtl4commandqueue(descriptor_).md
+Errors and GPU time	Error codes timeout, notPermitted, outOfMemory, accessRevoked, internal; deviceRemoved deprecated in SDK (cannot occur on Apple Silicon), docs list it undeprecated	mtl4commandqueueerror-swift.struct.md; mtl4commandqueueerror-swift.struct__code.md; MTL4CommandQueue.h (API_DEPRECATED on MTL4CommandQueueErrorDeviceRemoved)
+Errors and GPU time	Out-of-bounds access can fault Apple GPU and end the command buffer; Shader Validation finds it	notes/m05.md (porting-your-metal-code-to-apple-silicon)
+Device and family facts	One GPU on Apple silicon via MTLCreateSystemDefaultDevice; multi-GPU is Intel-era	notes/m01.md, m02.md
+Device and family facts	Apple silicon Mac is Mac2 plus an Apple family; baseline from Mac family; query properties; never infer from name	notes/m05.md (porting-your-metal-code-to-apple-silicon)
+Device and family facts	Family map A13=Apple6 ... A19/M5=Apple10; tables list Apple families only	notes/m07.md (pdf:fst#all); mtlgpufamily.md (doc comments)
+Device and family facts	Metal-4-only rows in tables (Apple7+), counter heaps 32 per process	notes/m07.md (pdf:fst#all)
+Maintaining older code: Metal 3	Metal 3 path for GPUs below Apple7 and OS before 26.0	notes/m07.md; MTLDevice.h MTLGPUFamilyMetal4 availability; notes/m08.md (book scope)
+Maintaining older code: Metal 3	MPS image kernels and MPSMatrixMultiplication need a Metal 3 command buffer; events bridge queue kinds	task-4-read/report.md finding 19; understanding-the-metal-4-core-api.md (events work with any mix)
+Maintaining older code: Metal 3	Gate with #available plus supportsFamily(.metal4); sample ships two renderers	drawing-a-triangle-with-metal-4.md; mtldevice__supportsfamily(__).md; notes/m01.md, m05.md
+Maintaining older code: Metal 3	Queue kind decides type family; MTL4 types separate, others shared	understanding-the-metal-4-core-api.md; notes/m03.md
+Maintaining older code: Metal 3	Residency sets available from macOS 15 / iOS 18	MTLResidencySet.h; mtlresidencyset.md availability
+Maintaining older code: Metal 3	Metal 3 frame: makeCommandBuffer per frame retains resources; semaphore + addCompletedHandler; present before commit	mtlcommandqueue__makecommandbuffer().md; mtlcommandbuffer__addcompletedhandler(__).md; mtlcommandbuffer__present(__).md; synchronizing-cpu-and-gpu-work.md; notes/m03.md, m08.md
+Maintaining older code: Metal 3	Concept map rows (events move to queue, present sequence, bytes to buffers, useResource to sets, hazards, concurrency, blit merge, parallel encoder, fence scope, timeout, store-action options and tessellation removed)	understanding-the-metal-4-core-api.md; mtlevent.md; mtlcommandbuffer__encodesignalevent(__value_).md; synchronizing-passes-with-a-fence.md; notes/m01.md, m03.md, m07.md, m08.md
+Maintaining older code: Metal 3	Book teaches Metal 3 spellings throughout (per-frame command buffers, setVertexBytes under 4 KB, useResource)	notes/m08.md (book SKILL.md scope, ch04, ch25); notes/m07.md (ch01)
