@@ -23,8 +23,8 @@ structure`; this file supplies only the on-screen tail of it: drawable
 acquisition, present, and the `CAMetalDisplayLink` mechanics. Frame pacing policy
 (fixed or variable step, frame budgets, ProMotion rates,
 `CADisableMinimumFrameDurationOnPhone`, skipped-frame recovery) is part of the
-game loop and outside this skill. Reading the Metal Performance HUD belongs to
-`gpu-debugging-and-profiling.md`.
+game loop, in `apple-games/references/game-loop-and-threading.md`. Reading the
+Metal Performance HUD belongs to `gpu-debugging-and-profiling.md`.
 
 ## Choosing the presentation surface
 
@@ -45,7 +45,7 @@ What decides it:
 - **`MTKView` defaults to 60 fps.** `preferredFramesPerSecond` defaults to 60,
   and the view picks a factor of the screen's maximum rate. On a 120 Hz panel
   you get 60 until you raise it. (On iPhone you also need an Info.plist key,
-  which is part of the game loop and outside this skill.)
+  which is part of the game loop: `apple-games/references/game-loop-and-threading.md`.)
 - **`MTKView` draw modes.** The default is timer-driven (`isPaused == false`,
   `enableSetNeedsDisplay == false`), which is the only mode for a game. Setting
   `enableSetNeedsDisplay` with `isPaused` makes it event-driven, for editors.
@@ -125,6 +125,8 @@ final class RenderLoopThread: Thread {
         self.layer = layer
         self.renderer = renderer
         super.init()
+        name = "Render"
+        qualityOfService = .userInteractive // a new Thread otherwise runs at .default
     }
 
     override func main() {
@@ -648,8 +650,9 @@ fallback has only the spatial and temporal scalers.
 
 - `command-model.md`: the frame the on-screen tail above attaches to; residency
   sets; shared-event throttling.
-- The game loop, outside this skill: frame rates, `targetTimestamp` pacing,
-  ProMotion, window resizing on iPad and Mac.
+- `apple-games/references/game-loop-and-threading.md`: the game loop, frame
+  rates, `targetTimestamp` pacing, ProMotion, render-thread QoS, window
+  resizing on iPad and Mac.
 - `gpu-debugging-and-profiling.md`: Metal HUD (present delay, frame interval,
   MetalFX modes), attachment viewer EDR overlays, dependency viewer.
 - `pipelines-and-render-passes.md`: store actions for the drawable (always

@@ -1,6 +1,6 @@
 ---
 name: apple-metal
-description: Writing and debugging a game or engine renderer on Metal for Apple silicon - the Metal 4 command model (command allocators, argument tables, residency sets, barriers), pipeline compilation without hitches, render and compute passes, TBDR tile memory, MSL versions and precision, heaps and memory budgets, indirect command buffers, mesh shaders and ray tracing, drawables and CAMetalDisplayLink, HDR, MetalFX upscaling and frame interpolation, GPU capture, the Metal debugger, gpudebug, API and Shader Validation, Metal System Trace, and Metal from C++ through metal-cpp or from Rust through objc2-metal. Use when GPU frame time is too high, a frame renders wrong, a Metal resource or shader faults, a pipeline compile hitches, or when writing, porting, or reviewing Metal host or shader code. Not for SwiftUI shader modifiers (apple-animations) or CPU-side and app-level slowness (apple-performance). Frame pacing, input, audio, and Game Center are outside this skill.
+description: Writing and debugging a game or engine renderer on Metal for Apple silicon - the Metal 4 command model (command allocators, argument tables, residency sets, barriers), pipeline compilation without hitches, render and compute passes, TBDR tile memory, MSL versions and precision, heaps and memory budgets, indirect command buffers, mesh shaders and ray tracing, drawables and CAMetalDisplayLink, HDR, MetalFX upscaling and frame interpolation, GPU capture, the Metal debugger, gpudebug, API and Shader Validation, Metal System Trace, and Metal from C++ through metal-cpp or from Rust through objc2-metal. Use when GPU frame time is too high, a frame renders wrong, a Metal resource or shader faults, a pipeline compile hitches, or when writing, porting, or reviewing Metal host or shader code. Not for SwiftUI shader modifiers (apple-animations), CPU-side and app-level slowness (apple-performance), or frame pacing, input, audio, and Game Center (apple-games).
 ---
 
 # Metal (rendering and GPU work)
@@ -47,10 +47,10 @@ Name the symptom before you pick the skill:
   Performance timeline, a long display interval with a busy GPU track is GPU
   work and stays here. A long interval with GPU gaps and little blocked render
   thread time is CPU work and goes there.
-- **Frame pacing policy is outside this skill,** with input, audio, and Game
-  Center. Fixed or variable step and frame budgets belong to the game loop.
-  Drawable acquisition, present, and the `CAMetalDisplayLink` mechanics stay
-  here.
+- **Frame pacing policy goes to apple-games,** with input, audio, and Game
+  Center. Fixed or variable step, frame budgets, and render-thread QoS belong
+  to its game loop. Drawable acquisition, present, and the
+  `CAMetalDisplayLink` mechanics stay here.
 - **SwiftUI shader modifiers go to apple-animations.** `colorEffect`,
   `layerEffect`, and `distortionEffect` are SwiftUI. A shader in an engine's
   render or compute pipeline is here.

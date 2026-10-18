@@ -22,8 +22,8 @@ device, the queue, command buffers and their allocators, argument tables,
 residency sets, every synchronization primitive, and frames in flight.
 Building pipelines is `pipelines-and-render-passes.md`. Drawables, `MTKView`,
 `CAMetalLayer`, `CAMetalDisplayLink`, and present are `display-and-upscaling.md`.
-Frame pacing policy (fixed or variable step, frame budgets) is outside this
-skill. Heaps, storage modes,
+Frame pacing policy (fixed or variable step, frame budgets) is
+`apple-games/references/game-loop-and-threading.md`. Heaps, storage modes,
 and memory budgets are `resources-and-memory.md`. What a compute pass contains is
 `compute-and-gpu-driven.md`.
 

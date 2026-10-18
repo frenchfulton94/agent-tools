@@ -688,7 +688,8 @@ Reading the Game Performance timeline: a display interval far longer than its
 neighbours is a stutter. If the GPU track is busy across it, the GPU is the cause. If the
 GPU track has gaps while the render thread shows little blocked time, the CPU is. A
 render thread preempted under load needs a higher priority. Apple recommends 45 for
-rendering threads. Render-thread setup is part of the game loop and outside this skill.
+rendering threads. Render-thread setup, and the choice between priority 45 and QoS, is
+part of the game loop: `apple-games/references/game-loop-and-threading.md`.
 
 ## Reading the Metal debugger's views (GUI only)
 

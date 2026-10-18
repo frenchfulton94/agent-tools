@@ -1,0 +1,67 @@
+# runs.txt: runtime checks for plugins/apple-studio/skills/apple-games/references/audio-and-haptics.md
+# Command (from any directory): sh authoring/apple-studio/records/2026-10-18-phase10-games/task-8-write/runtime/audio-and-haptics/run.sh <scratch-dir>
+# Binaries go to <scratch-dir>; nothing stays running; no simulator; no fixture.
+# Run: 2026-10-18T17:42Z. Machine: Apple M4 Pro Mac mini (Mac16,8), macOS 27.0.1, Xcode 27.1, Apple clang 21.0.0.
+# kernel_check.cpp and spectrum_check.cpp hold the reference's cpp blocks verbatim (extracted from the file).
+#
+# What the reference states from this log:
+#  1    vDSP real FFT: unit cosine at bin k -> |X[k]| = n; DC -> 2 x sum; unscaled round trip -> x 2n (n = 512, 1024; DFT n = 480).
+#       vDSP_DFT_zrop_CreateSetup accepts 480, 768, 1536, 1920; returns NULL for 1000.
+#  1b   the reference's spectrum() returns amplitude 0.25 (DC) and 0.5 (bin 5) for 0.25 + 0.5 cos.
+#  2-2d CA_REALTIME_API violations: no diagnostic under default flags; six warnings under -Wfunction-effects.
+#  2e   relaxed std::atomic load and std::memset pass; vDSP_vsmul warns.
+#  2f   a vDSP call wrapped under a diagnostic pragma: zero warnings.
+#  2g   the reference's GainKernel block: zero warnings under -Wfunction-effects.
+#  3    Mac mini: supportsHaptics=false; CHHapticEngine() throws CHHapticError -4809 (.notSupported).
+
+== machine
+Apple M4 Pro
+Mac16,8
+27.0.1
+Xcode 27.1
+Apple clang version 21.0.0 (clang-2100.3.34.2)
+== 1. vDSP real FFT scaling and DFT lengths
+n=1024 forward: |bin 5|=1024.000 (n/2=512, n=1024)  DC realp[0]=512.000 (0.25*n=256.0)  imagp[0](Nyquist)=0.000
+n=1024 round trip (no scaling): y[0]/x[0]=2048.0000 y[1]/x[1]=2048.0000  (2n=2048)
+n=512 forward: |bin 5|=512.000 (n/2=256, n=512)  DC realp[0]=256.000 (0.25*n=128.0)  imagp[0](Nyquist)=0.000
+n=512 round trip (no scaling): y[0]/x[0]=1024.0000 y[1]/x[1]=1024.0000  (2n=1024)
+DFT n=480 forward: |bin 5|=480.000 (n=480)  DC realp[0]=240.000
+DFT n=480 round trip (no scaling): y[0]/x[0]=959.9999  (2n=960)
+vDSP_DFT_zrop_CreateSetup(8) -> setup
+vDSP_DFT_zrop_CreateSetup(16) -> setup
+vDSP_DFT_zrop_CreateSetup(480) -> setup
+vDSP_DFT_zrop_CreateSetup(512) -> setup
+vDSP_DFT_zrop_CreateSetup(768) -> setup
+vDSP_DFT_zrop_CreateSetup(1000) -> NULL
+vDSP_DFT_zrop_CreateSetup(1024) -> setup
+vDSP_DFT_zrop_CreateSetup(1536) -> setup
+vDSP_DFT_zrop_CreateSetup(1920) -> setup
+vDSP_DFT_zrop_CreateSetup(2048) -> setup
+exit=0
+== 2. CA_REALTIME_API diagnostics, default warnings
+exit=0
+== 2b. same, -Wno-function-effects
+exit=0
+== 2c. same, -Wfunction-effects (warning lines only)
+realtime_effects.cpp:19:15: warning: function with 'nonblocking' attribute must not call non-'nonblocking' function 'malloc' [-Wfunction-effects]
+realtime_effects.cpp:20:33: warning: function with 'nonblocking' attribute must not call non-'nonblocking' destructor 'std::lock_guard<std::mutex>::~lock_guard' [-Wfunction-effects]
+realtime_effects.cpp:20:33: warning: function with 'nonblocking' attribute must not call non-'nonblocking' constructor 'std::lock_guard<std::mutex>::lock_guard' [-Wfunction-effects]
+realtime_effects.cpp:21:24: warning: function with 'nonblocking' attribute must not call non-'nonblocking' destructor 'std::vector<float>::~vector' [-Wfunction-effects]
+realtime_effects.cpp:21:24: warning: function with 'nonblocking' attribute must not call non-'nonblocking' constructor 'std::vector<float>::vector' [-Wfunction-effects]
+realtime_effects.cpp:23:5: warning: function with 'nonblocking' attribute must not call non-'nonblocking' function 'free' [-Wfunction-effects]
+== 2d. same, -Werror=function-effects
+6 errors generated.
+== 2e. atomic, memset, vDSP inside CA_REALTIME_API, -Wfunction-effects
+realtime_calls.cpp:22:5: warning: function with 'nonblocking' attribute must not call non-'nonblocking' function 'vDSP_vsmul' [-Wfunction-effects]
+== 2f. vDSP call wrapped under a diagnostic pragma, -Wfunction-effects
+exit=0
+== 2g. the reference's GainKernel block, -Wfunction-effects
+exit=0
+== 1b. the reference's spectrum() block on 0.25 + 0.5*cos(bin 5)
+mag[0]=0.2500 (expect 0.25)  mag[5]=0.5000 (expect 0.5)  mag[6]=0.0000
+exit=0
+== 3. Core Haptics on this Mac
+supportsHaptics=false supportsAudio=false
+CHHapticEngine() threw CHHapticError code=-4809 (CHHapticErrorCode(rawValue: -4809))
+CHHapticErrorCode.notSupported rawValue=-4809
+exit=0

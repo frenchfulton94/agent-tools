@@ -42,6 +42,7 @@ to use Xcode tools" in Xcode → Settings → Intelligence, then:
 | `apple-frameworks` | Skill | What Apple ships and what each framework costs — privacy, entitlements, availability, pitfalls — with primers for the sixteen most apps use |
 | `apple-intelligence` | Skill | On-device generative AI — Foundation Models sessions, guided generation, tool calling, guardrails and refusals, App Intents |
 | `apple-metal` | Skill | Game and engine rendering on Metal 4 for Apple silicon — the command model, pipelines and render passes, tile memory, MSL, resources and residency, GPU-driven work, presentation and MetalFX, GPU capture and validation, metal-cpp and objc2-metal |
+| `apple-games` | Skill | The game around a Metal renderer on Mac, iPhone, and iPad — the loop and frame pacing, threads and QoS, Game Mode, Game Controller and Touch Controller input, audio and haptics, Game Center and online play, saves, asset delivery, the HIG for games |
 | `apple-performance` | Skill | Why an app is slow and how to measure it — Instruments templates, `xctrace`, signposts, hangs against hitches, launch time, MetricKit |
 | `app-release` | Skill | Signing and provisioning, TestFlight, App Store submission, privacy manifests, version and build numbering, push notifications, Xcode Cloud |
 | `xcode-loop` | Skill | Build, test, run, and screenshot from the command line or Xcode's MCP bridge |

@@ -1,0 +1,24 @@
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/assets.md   (0 gated blocks)   target: (no gated blocks)
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/audio-and-haptics.md   (3 gated blocks)   target: metal-cpp 26.4, -std=c++20
+  [PASS:cpp:as-written   ] line 504  #include <Accelerate/Accelerate.h>
+  [PASS:cpp:as-written   ] line 575  #include <AudioToolbox/AudioToolbox.h>
+  [PASS:cpp:as-written   ] line 634  #include <Accelerate/Accelerate.h>
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/game-center-and-online.md   (1 gated blocks)   target: metal-cpp 26.4, -std=c++20
+  [PASS:cpp:as-written   ] line 563  #include <Network/Network.h>
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/game-design.md   (0 gated blocks)   target: (no gated blocks)
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/game-loop-and-threading.md   (0 gated blocks)   target: (no gated blocks)
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/input.md   (0 gated blocks)   target: (no gated blocks)
+
+TOTAL: 4/4 snippets compile clean

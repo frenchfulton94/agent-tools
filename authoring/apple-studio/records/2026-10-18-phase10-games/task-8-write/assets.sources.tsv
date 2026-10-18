@@ -1,0 +1,82 @@
+section	claim	source
+Compression	LZMESH and LZRAVEN are buffer-API only, macOS/iOS 27	SDK usr/include/compression.h:131-132; /documentation/compression/compression_lzmesh.md; /documentation/compression/compression_lzraven.md; g03.md:36
+Compression	compression_stream_init rejects LZMESH, LZRAVEN, LZBITMAP, LZ4_RAW; accepts the other five	runtime/assets/runs.txt section 1
+Compression	LZBITMAP and LZ4_RAW are buffer-only	/documentation/compression/compression_lzbitmap.md; /documentation/compression/compression_lz4_raw.md; compression.h:111,130
+Compression	LZMESH replaces LZFSE and zlib; LZRAVEN replaces LZMA	compression_lzmesh.md; compression_lzraven.md; compression.h:46-54
+Compression	zlib output is raw DEFLATE RFC 1951 at level 5	compression.h:101-109; g09.md:115
+Compression	LZ4_RAW only for non-Apple LZ4 decoders	compression_lz4_raw.md
+Compression	LZBITMAP favors decode speed, ratio between LZ4 and LZMESH	compression_lzbitmap.md; /documentation/compression/compression_algorithm.md
+Compression	OS 27 gate is a comment, not an availability attribute; swiftc and clang compile ungated at 26.0 without warning	compression.h:131-132; runs.txt section 1b
+Compression	Swift Algorithm enum lacks lzmesh/lzraven	SDK usr/lib/swift/Compression.swiftmodule arm64e-apple-macos.swiftinterface:13-19
+Compression	NSData.CompressionAlgorithm has LZFSE, LZ4, LZMA, zlib only	SDK Foundation NSData.h:422-444
+Compression	MTLIOCompressionMethod has zlib, LZFSE, LZ4, LZMA, LZBitmap	SDK Metal MTLDevice.h:114-119
+Compression	ArchiveCompression adds .lzraven (OS 27), no LZMESH	SDK AppleArchive.swiftmodule arm64e-apple-macos.swiftinterface:302-311; AppleArchive/AADefs.h:33-40
+Compression	Stream sample and filters article still recommend LZFSE	/documentation/accelerate/compressing-and-decompressing-files-with-stream-compression.md; /documentation/accelerate/compressing-and-decompressing-data-with-input-and-output-filters.md; g03.md:37
+Compression	compression_algorithm overview calls LZRAVEN an order of magnitude slower; header says LZMA; LZRAVEN page says 3x faster decode than LZMA	compression_algorithm.md; compression.h:39-42; compression_lzraven.md
+Compression	Measured ratio and throughput table; derived 2.6-2.7x, 2-2.6x, within 10%	runs.txt section 1 part 4
+Pak files	Buffer API suits <8 MB uncompressed or <1 MB compressed	/documentation/compression.md; g09.md:116
+Pak files	Codec does not record decoded size; store it	/documentation/accelerate/compressing-and-decompressing-data-with-buffer-compression.md; g03.md:38
+Pak files	A 26 device cannot decode LZMESH (choose by deployment target)	compression_lzmesh.md note (OS 27 or later); compression.h:132
+Pak files	encode_buffer returns 0 when output does not fit or on error; 16 incompressible bytes return 0 for all codecs	/documentation/compression/compression_encode_buffer(_:_:_:_:_:_:).md; compression.h:190-193; runs.txt section 1 part 3
+Pak files	decode_buffer returns dst_size when destination too small (article says 0 - wrong)	/documentation/compression/compression_decode_buffer(_:_:_:_:_:_:).md; compression.h:252-258; buffer-compression article line 162
+Pak files	Truncation behaviour differs: 6 codecs return dst_size, LZMA/Brotli/LZRAVEN return 0	runs.txt section 1 part 2
+Pak files	MTLIOCommandQueue decompresses into GPU resources; hand-off	apple-metal/references/resources-and-memory.md ## Streaming from disk
+Streams and archives	Filters: page size trades progress frequency vs steps; either class compresses or decompresses	input-and-output-filters article; g03.md:39
+Streams and archives	writeDirectoryContents / extractStream / process for directories	/documentation/accelerate/compressing-file-system-directories.md; /documentation/accelerate/decompressing-and-extracting-an-archived-directory.md; g03.md:46
+Streams and archives	decompressionStream takes no algorithm; one reader opened lzfse and lzraven archives	/documentation/accelerate/decompressing-and-parsing-an-archived-string.md; runs.txt section 4
+Streams and archives	AppleArchive sample String(cString:) over-reads unterminated buffer	decompressing-and-parsing-an-archived-string.md (final step); g03.md:45; task-7 report finding 29
+Streams and archives	Buffer-compression sample String(cString:) over uninitialized 8 MB buffer	buffer-compression article lines 141-159
+Streams and archives	Length-based read snippet round-trips data with embedded NUL	runs.txt section 4 (archive_check.swift read())
+Streams and archives	Samples write Downloads, need file-access entitlement; container needs none	decompressing-and-parsing-an-archived-string.md; g03.md:48
+Model I/O	Supported import extensions list	/documentation/modelio/mdlasset/canimportfileextension(_:).md
+Model I/O	No import for gltf/glb/fbx/dae; usdz not exportable on macOS 27	runs.txt section 5
+Model I/O	3D model processing on main thread is a named watchdog cause (iOS)	/documentation/xcode/addressing-watchdog-terminations.md:33-36; p01.md:72
+Model I/O	Converters are partial and copy no names; names must be set	/documentation/metalkit/mtkmodeliovertexdescriptorfrommetalwitherror.md; MTKModel.h:258-270; m08.md:144
+Model I/O	WithError converters throw in Swift overlay	SDK MetalKit.swiftmodule arm64e-apple-macos.swiftinterface:16,19; runs.txt section 7
+Model I/O	MTKMesh raises exception without MTKMeshBufferAllocator	MTKModel.h:196 (initWithMesh discussion)
+Model I/O	preserveTopology false converts to triangles; bufferAllocator for Metal	/documentation/modelio/mdlasset/init(url:vertexdescriptor:bufferallocator:preservetopology:error:)-510xi.md
+Model I/O	newMeshes(asset:device:) returns tuple with metalKitMeshes	/documentation/metalkit/mtkmesh/newmeshes(asset:device:).md
+Model I/O	Submeshes share buffers at offsets; Metal 4 draw takes GPU address	MTKModel.h:94-104; MTL4RenderCommandEncoder.h:336-345; m07.md:143; m08.md:145
+Model I/O	USD textures load linear; fix in apple-metal	apple-metal/references/resources-and-memory.md ## Texture views and view pools
+Model I/O	Bake-time generators (normals, tangents, light probes, MDLSkyCubeTexture)	g09.md:118; g04.md:16; m08.md:148; /documentation/modelio/mdlasset.md
+Texture bakes	TextureConverter formats, inputs, outputs, options	runs.txt section 3 (xcrun TextureConverter --help, 5.0.220200)
+Texture bakes	Build rule: one task per file, rebuild on newer source, outputs in DERIVED_FILE_DIR	/documentation/xcode/creating-build-rules-for-custom-file-types.md; m05.md:106
+Texture bakes	KTX loads compressed with mips; KTX2 decoded to BGRA8 1 mip; SRGB option; origin error	runs.txt section 3
+Texture bakes	origin cannot be used with block-compressed formats	MTKTextureLoader.h:105
+Texture bakes	Unpremultiply before geometric transforms	/documentation/accelerate/applying-geometric-transforms-to-images.md; g02.md:61; g03.md:59
+Texture bakes	Default Lanczos-3, HQ flag = Lanczos-5; geometry not in place	applying-geometric-transforms-to-images.md
+Texture bakes	HQ flag does not remove ringing; custom linear filter via two shears	/documentation/accelerate/reducing-artifacts-with-custom-resampling-filters.md; g04.md:15
+Texture bakes	Linear data gives best scaling/convolution results	/documentation/accelerate/adjusting-the-brightness-and-contrast-of-an-image.md:223; g02.md:56
+Texture bakes	DitherOrderedReproducible uses same blue-noise offset	/documentation/accelerate/improving-the-quality-of-quantized-images-with-dithering.md; g04.md:11
+Texture bakes	Row padding 10 px -> 16 bytes, uninitialized	/documentation/accelerate/finding-the-sharpest-image-in-a-sequence-of-captured-images.md:155-170; g03.md:58
+Texture bakes	Gray conversion uses Rec. 601 weights	/documentation/accelerate/converting-bitmap-data-between-core-graphics-images-and-vimage-buffers.md:76-84; g03.md:53
+Texture bakes	OS 27 RGB8/RGB16/RGB32 formats limited to texture buffers without shaderWrite (resolves g03:56 reader claim)	SDK Metal MTLPixelFormat.h:48-83,120-208; Swift spelling .typeTextureBuffer typechecked (runs.txt scratch names.swift)
+Texture bakes	vImageConvert_RGB888toRGBA8888 takes constant or planar alpha	/documentation/accelerate/functions-that-add-an-alpha-channel-to-three-channel-buffers.md
+UTIs	Exported vs imported, reserved prefixes, public.data/com.apple.package, public.content for AirDrop, exported wins	/documentation/uniformtypeidentifiers/defining-file-and-data-types-for-your-app.md; g09.md:112
+UTIs	No UTType constant for glTF/KTX/KTX2/ASTC/DDS	SDK UTCoreTypes.h:724-769,1143 (grep: no gltf/ktx/astc); g09.md:113
+UTIs	On macOS 27 CoreTypes imports org.khronos.gltf/glb; Preview exports ktx/ktx2/astc/dds	runs.txt section 2 (UTType + lsregister dump)
+UTIs	exportedAs undeclared: isDeclared true, extension nil	runs.txt section 2
+UTIs	exportedAs/importedAs semantics	/documentation/uniformtypeidentifiers/uttype-swift.struct/init(exportedas:conformingto:).md; .../init(importedas:conformingto:).md
+UTIs	filenameExtension init may return dynamic type	/documentation/uniformtypeidentifiers/uttype-swift.struct/init(filenameextension:conformingto:).md
+UTIs	Save as versioned package for iCloud; handoff	g09.md:111; game-center-and-online.md ## Saves across devices
+Background Assets	Managed Swift API is OS 26, watchOS unavailable; framework page says iOS 16/macOS 13 (SDK wins)	SDK BackgroundAssets.swiftmodule arm64e-apple-macos.swiftinterface:71-73,256-258,301-303; /documentation/backgroundassets.md availability; g07.md:50
+Background Assets	ODR unavailable on macOS and deprecated in iOS/tvOS 27 "Use Background Assets instead"	SDK Foundation NSBundle.h:721,776 (macOS and iPhoneOS 27.1 SDKs)
+Background Assets	GameKit article still recommends ODR; bundle caps 2 GB/4 GB iOS/tvOS only, nothing for Mac	/documentation/gamekit/improving-the-player-experience-for-games-with-large-downloads.md; g08.md:166,172; task-7 finding 31
+Background Assets	Apple-hosted up to 200 GB, App Store/TestFlight only, three plist keys only	/documentation/backgroundassets/downloading-apple-hosted-asset-packs.md; creating-managed-asset-packs.md; g07.md:44,46
+Background Assets	Managed self-hosted: system schedules, updates, compresses	/documentation/backgroundassets.md overview; g07.md:41
+Background Assets	ba-package download-manifest for self-hosted	runs.txt section 6
+Background Assets	Unmanaged: App Sandbox on both targets on macOS; allowances compressed, max install sizes uncompressed	/documentation/backgroundassets/configuring-an-unmanaged-background-assets-project.md; g07.md:43
+Background Assets	ba-package template/evaluate/package/convert, ba-serve, url-override	creating-managed-asset-packs.md; testing-asset-packs-locally.md; runs.txt section 6
+Background Assets	Download policies and installationEventTypes; tutorial example	creating-managed-asset-packs.md; g07.md:44
+Background Assets	HTTPS for all downloads; certificate steps; override from Xcode builds	/documentation/backgroundassets/testing-asset-packs-locally.md:20,119-140
+Background Assets	ensureLocalAvailability returns fast; call even for essential	downloading-apple-hosted-asset-packs.md:60-62
+Background Assets	assetPack(withID:) deprecated 27 -> manifest; one-arg ensureLocalAvailability deprecated 26.4; manifest get async throws; manifest.assetPack returns optional	BackgroundAssets.swiftinterface:97-100,118-121,143-157,326-327; task-7 finding 30
+Background Assets	Article switch lacks leading dots; Swift 6 needs @unknown default	downloading-apple-hosted-asset-packs.md:73-79; runs.txt section 7
+Background Assets	Snippets compile at macOS 26.0 and iOS 26.0, Swift 6	runs.txt section 7; typecheck_snippets.py 6/6
+Background Assets	contents(at:) memory-mapped default; descriptor must be closed; merged namespace; Progress.cancel	downloading-apple-hosted-asset-packs.md:112-145; BackgroundAssets.swiftinterface:126-129
+Background Assets	Packs never removed automatically; remove(assetPackWithID:)	downloading-apple-hosted-asset-packs.md:147-153
+Background Assets	26.4 status(relativeTo:), assetPackIsAvailableLocally; checkForUpdates returns IDs	BackgroundAssets.swiftinterface:110-115,123,148-152
+Background Assets	OS 27 batch ensureLocalAvailability, LocalAvailabilityError, language key, resolvedLanguage + reconcile, asLocalizedFor	/documentation/backgroundassets/reducing-download-and-storage-demands-with-localized-asset-packs.md; BackgroundAssets.swiftinterface:84-121,127-134
+Background Assets	Use only for app's own assets, no tracking or ads	/documentation/backgroundassets.md
+File locations	Caches/tmp excluded from backup and purgeable; isExcludedFromBackup advisory, re-set after save; bundle-ID directory under Library	/documentation/foundation/optimizing-your-app-s-data-for-icloud-backup.md; p01.md:77
+File locations	Unmanaged downloads: extract to Caches subfolder, not Documents, delete download; re-enqueue failed essential with copyAsNonEssential	gamekit large-downloads article; g08.md:171

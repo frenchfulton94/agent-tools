@@ -14,6 +14,7 @@ Read the reference for the decision at hand:
 - Windows, menus, commands, shortcuts, toolbars, focus → `references/mac-windows-menus-commands.md`
 - SwiftUI falls short on Mac, AppKit escape hatches → `references/appkit-interop.md`
 - Sandbox, entitlements, scoped bookmarks, file access → `references/mac-sandbox-and-files.md`
+- Hosting a Metal view for a game, Game Mode, game full screen and cursor → `apple-games` skill
 
 Rules that always apply:
 - A Mac app is judged by its menus, shortcuts, and windows - wire the

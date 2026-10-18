@@ -19,6 +19,7 @@ Read the reference for the decision at hand:
 - Whether and how to animate → `references/animation-taste.md`
 - Mac structure and mechanics (windows, scenes, menu bar) → `apple-macos` skill
 - Animation implementation (springs, keyframes, transitions API, shader effects) → `apple-animations` skill
+- Game-specific HIG (game controls, text on a game screen, pause, Game Center presentation) → `apple-games` skill, its `game-design.md`
 
 Rules that always apply:
 - System-provided first: text styles (never fixed point sizes), semantic

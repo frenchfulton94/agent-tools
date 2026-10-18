@@ -1,0 +1,58 @@
+Runtime check for game-center-and-online.md: GameKit party-code format.
+
+Machine: Apple M4 Pro (Mac16,8), macOS ProductVersion 27.0.1 (BuildVersion 26A434)
+Toolchain: Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1), MacOSX SDK 27.0
+Date: 2026-10-18
+Game Center sign-in: none (both members called are class-level; no auth needed)
+
+Commands (from the worktree root; binary written to the session scratchpad):
+
+  swiftc -target arm64-apple-macos26.0 \
+    authoring/apple-studio/records/2026-10-18-phase10-games/task-8-write/runtime/game-center-and-online/partycode.swift \
+    -o $SCRATCH/partycode
+  perl -e 'alarm 20; exec @ARGV' $SCRATCH/partycode
+
+The process exits by itself (exit 0); the alarm only guards against a hang.
+Nothing is left running. No simulator. StudioFixture untouched.
+
+Output (verbatim):
+
+alphabet count: 20
+alphabet: 23456789CFGHJMPQRVWX
+2MP4-9CMF true
+2345-CFGH true
+1234-5678 true
+AB-CD false
+ABCDEFG-HIJKLMN false
+abcd-efgh false
+ABCD-EFG false
+O0I1-ABCD false
+ABCDEF-GHJKLM false
+cfgh-jmpq false
+CF-GH true
+CFGHJM-PQRVWX true
+CFGHJMP-QRVWXCF false
+CFGH-JMP false
+12-34 true
+0123-4567 true
+CFGHJMPQ false
+
+What the reference states from this run:
+- validPartyCodeAlphabet has 20 characters, 23456789CFGHJMPQRVWX.
+- isValidPartyCode accepts 2..6 characters per half, both halves equal length,
+  joined by one dash (CF-GH and CFGHJM-PQRVWX true; CFGHJMP-QRVWXCF, CFGH-JMP,
+  CFGHJMPQ false).
+- Pure-digit codes may use 0 and 1 (0123-4567 true).
+- isValidPartyCode rejects lowercase (cfgh-jmpq false), although
+  start(definition:partyCode:) documents that it uppercases the code. Uppercase
+  typed input before validating it.
+
+Compile-time check (not runtime), cited by the reference's GKTurnTimeoutDefault note:
+  Concatenate the file's ```swift blocks after `import AppKit / GameKit / GameSave /
+  Network / Foundation`, then
+  swiftc -typecheck -swift-version 6 -target arm64-apple-macos26.0 all.swift
+  With `turnTimeout: GKTurnTimeoutDefault` the compiler reports:
+    error: reference to var 'GKTurnTimeoutDefault' is not concurrency-safe because it
+    involves shared mutable state
+  With the spelled-out interval (as shipped), the blocks typecheck with no errors or
+  warnings in Swift 6 mode.

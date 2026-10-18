@@ -1,0 +1,93 @@
+section	claim	source
+Choosing the input path	GCController.input is macOS 14 / iOS 17	GCController.h:194 (macos(14.0), ios(17.0)); gccontroller/input page availability; g08.md:36
+Choosing the input path	GCKeyboard and GCMouse are macOS 11 / iOS 14	GCKeyboard.h:39; GCMouse.h:71; gckeyboard and gcmouse pages
+Choosing the input path	GCKeyboardInput is for polling; use AppKit/UIKit for text	GCKeyboardInput.h class comment
+Choosing the input path	GCMouseInput gives deltas only; cursor position from UIHoverGestureRecognizer / NSEvent.mouseLocation	GCMouseInput.h class comment; gcmouseinput page Overview
+Choosing the input path	Trackpad pinch/rotate via NSMagnification/NSRotationGestureRecognizer	appkit/gestures page; g06.md:7
+Choosing the input path	Touch Controller is iOS/iPadOS 26 only	TCTouchController.h:37 (ios(26.0), API_UNAVAILABLE(macCatalyst, visionos)); no framework in MacOSX27.0 SDK; g09.md:105
+Choosing the input path	GCVirtualController iOS 15, no macOS header	iPhoneOS27.1 GCVirtualController.h:19,69; MacOSX SDK lacks GCVirtualController.h (ls); g08.md:20
+Choosing the input path	Racing wheels macOS 13 only	g08.md:47 (header API_AVAILABLE(macos(13.0), macCatalyst(16.0)) API_UNAVAILABLE(ios, tvos)); racing-wheel-device-support page
+Choosing the input path	Game Controllers capability writes GCSupportsControllerUserInteraction and GCSupportedGameControllers	gamecontroller page Overview; g09.md:101
+Choosing the input path	INFOPLIST_KEY_GCSupportsControllerUserInteraction build setting	m04.md:105
+Choosing the input path	Support the platform default input; controller optional	HIG game-controls, Physical controllers; g01.md:83
+Discovering controllers	controllers() returns empty array when none	discovering-game-controllers page line 125
+Discovering controllers	Initial check not synchronous, can be empty while connected	discovering-and-tracking-spatial-game-controllers-and-styli page lines 68-71; g08.md:28
+Discovering controllers	Mac shows a system approval prompt on connect; iOS USB connects automatically	discovering-game-controllers page lines 53-56; g08.md:27
+Discovering controllers	Typed DidConnectMessage etc. are macOS 26 / iOS 26 MainActorMessage, observed with addObserver(of:for:using:)	gccontroller/didconnectmessage page; GameController arm64e-apple-macos.swiftinterface lines 603-662; Foundation swiftinterface addObserver(of:for:using:) MainActor overload
+Discovering controllers	Filter Touch Controller by productCategory, prefer isAttachedToDevice, else connection order	discovering-game-controllers page lines 139-168; g08.md:29
+Discovering controllers	playerIndex lights matching LED; indexUnset releases	discovering-game-controllers page lines 180-187; g08.md:30
+Discovering controllers	shouldMonitorBackgroundEvents defaults false on macOS 11.3+, ignored on iOS	gccontroller/shouldmonitorbackgroundevents page; GCController.h:162-169
+Discovering controllers	Runtime: built at 26.0 floor, reads false on macOS 27.0.1	task-8-write/runtime/input/runs.txt
+Reading controller input	Snapshot classes deprecated; capture() replaces them	deprecated-symbols page; g08.md:25
+Reading controller input	Element subscripts return optionals; page one-liner does not compile	GameController arm64e-apple-macos.swiftinterface subscripts lines 62,102,367,595,750 (-> T?); gcphysicalinputelementcollection-swift.struct page; handling-input-events page line 79 vs 127,161; g08.md:37; task-7 report item 19
+Reading controller input	handlerQueue defaults to main queue; set input.queue before callbacks	gcdevice/handlerqueue page; gcdevicephysicalinput/queue page; GCDevicePhysicalInput.h:30-39; g08.md:38
+Reading controller input	Single reads atomic; capture() for consistent multi-element reads; snapshots cheap if not held	handling-input-events page line 82; g08.md:39
+Reading controller input	inputStateQueueDepth default 1 (no buffering); 20 more than enough	gcdevicephysicalinput/inputstatequeuedepth page; GCDevicePhysicalInput.h:106-117; g08.md:40
+Reading controller input	Racing wheel hundreds of inputs per second; per-frame poll misses events	handling-input-events page line 98
+Reading controller input	inputStateAvailableHandler fires once until drained	handling-input-events page line 109; g08.md:40
+Reading controller input	Overflow: changedElements nil, change(for:) .unknownChange	handling-input-events page line 151; GCDevicePhysicalInputStateDiff.h:14-22; g08.md:41
+Reading controller input	lastEventTimestamp no fixed epoch, comparable across devices	gcdevicephysicalinputstate/lasteventtimestamp page; GCDevicePhysicalInputState.h:36-44
+Reading controller input	pressedDidChangeHandler / elementValueDidChangeHandler once per changed element	handling-input-events page lines 157-172; g08.md:42
+Reading controller input	GCLinearInput.physicalExtents is macOS 26.2 / iOS 26.2	GCLinearInput.h:83
+Keyboard and mouse on the Mac	Keyboards coalesce into one object; connect notification once	GCKeyboard.h:26,37; gckeyboard/coalesced page
+Keyboard and mouse on the Mac	keyChangedHandler fires once per changed key	gckeyboardinput/keychangedhandler page
+Keyboard and mouse on the Mac	GCKeyCode are low-level key codes	GCKeyCodes.h:13-21; gckeycode page
+Keyboard and mouse on the Mac	GCMouse deltas not affected by mouse sensitivity settings	GCMouseInput.h GCMouseMoved comment
+Keyboard and mouse on the Mac	Mouse profile buttons and scroll	gcmouseinput page Topics
+Keyboard and mouse on the Mac	HIG keyboard bindings: single keys, near WASD, Command for Control, let players customize	HIG game-controls Keyboards section; g01.md:86
+AppKit events where Game Controller does not reach	Responder chain; NSApplication/NSWindow/NSView inherit NSResponder	appkit/mouse-keyboard-and-trackpad page; g06.md:8
+AppKit events where Game Controller does not reach	NSWindow can consume key events meant for GC; empty keyDown fix	managing-your-game-window-for-metal-in-macos page lines 237-252; m02.md:156
+AppKit events where Game Controller does not reach	Default keyDown passes to next responder	appkit/nsresponder/keydown(with:) page
+AppKit events where Game Controller does not reach	NSTextInputClient for custom text; NSTextInput deprecated since 10.6	NSInputManager.h:18; g06.md:6
+AppKit events where Game Controller does not reach	NSTextInsertionIndicator macOS 14; displayMode automatic/hidden; move frame	adopting-the-system-text-cursor-in-custom-text-views page; NSTextInsertionIndicator.h:17; g06.md:5
+AppKit events where Game Controller does not reach	Gesture recognizers continuous vs discrete	appkit/gestures page; g06.md:7
+AppKit events where Game Controller does not reach	NSPressureConfiguration for Force Touch	appkit/mouse-keyboard-and-trackpad page; g06.md:8
+AppKit events where Game Controller does not reach	Local monitor: nil drops event; not called for nested tracking loops; removeMonitor	appkit/nsevent/addlocalmonitorforevents(matching:handler:) page
+AppKit events where Game Controller does not reach	Click to pixel: convertToBacking then flip y on macOS; contentScaleFactor no flip on iOS	reading-pixel-data-from-a-drawable-texture page lines 56-93; m02.md:157
+AppKit events where Game Controller does not reach	Apple sample converts locationInWindow directly (correct only when the view fills the window)	reading-pixel-data-from-a-drawable-texture page line 63 (writer's reading of the sample)
+Mouse-look and pointer lock	CGAssociateMouseAndMouseCursorPosition disconnects; constant location with deltas	coregraphics/cgassociatemouseandmousecursorposition(_:) page; CGRemoteOperation.h:236-246; g01.md:98
+Mouse-look and pointer lock	CGWarpMouseCursorPosition moves cursor without event; used by games to avoid edge pinning	coregraphics/cgwarpmousecursorposition(_:) page; CGRemoteOperation.h:219-223
+Mouse-look and pointer lock	NSCursor hide/unhide balanced; overrides setHiddenUntilMouseMoves	appkit/nscursor/hide() page
+Mouse-look and pointer lock	prefersPointerLocked iOS 14 request; conditions; setNeedsUpdate; isLocked and didChangeNotification	uikit/uiviewcontroller/preferspointerlocked page; uikit/uipointerlockstate/islocked page; UIViewController.h:695-706; UIPointerLockState.h:14-38; g01.md:98
+Mouse-look and pointer lock	preferredScreenEdgesDeferringSystemGestures iOS 11 not tvOS; setNeedsUpdate; allow system gestures where possible	uikit/uiviewcontroller/preferredscreenedgesdeferringsystemgestures page; UIViewController.h:667-676; g01.md:88
+Mouse-look and pointer lock	UIApplicationSupportsIndirectInputEvents defaults YES from iOS 17; indirectPointer touches; location(ofTouch:in:) raises	bundleresources/information-property-list/uiapplicationsupportsindirectinputevents page; m04.md:105
+Touch controls on iPhone and iPad	macOS SDK has no GCVirtualController.h and no Touch Controller framework	ls of MacOSX27.0 SDK GameController headers and Frameworks; g08.md:20; g09.md:105
+Touch controls on iPhone and iPad	Touch Controller controls list and GCController surface	touchcontroller page; tctouchcontroller page; g09.md:105
+Touch controls on iPhone and iPad	GCVirtualController hidden, setValue, setPosition are iOS 17	iPhoneOS27.1 GCVirtualController.h:33,101,106; g08.md:23
+Touch controls on iPhone and iPad	Touch Controller for Metal games, GCVirtualController otherwise	discovering-game-controllers page lines 150-154
+Touch controls on iPhone and iPad	isSupported check; unsupported device is a fatal error	tctouchcontroller/issupported page; TCTouchController.h isSupported comment
+Touch controls on iPhone and iPad	Descriptor fields; init(mtkView:)	tctouchcontrollerdescriptor page; TCTouchControllerDescriptor.h
+Touch controls on iPhone and iPad	Keep size and drawableSize in sync; add controls; automaticallyLayoutControls(for:); connect creates GCController	TCTouchController.h; tctouchcontroller page; g09.md:106
+Touch controls on iPhone and iPad	handleTouch* return true when a control handled the touch	tctouchcontroller/handletouchbegan(at:index:) page; TCTouchController.h
+Touch controls on iPhone and iPad	render(using:) takes Metal 3 MTLRenderCommandEncoder; no MTL4 variant in iOS 27.1 SDK	tctouchcontroller/render(using:) page; TCTouchController.h:186 (grep finds no MTL4 in TouchController headers); g09.md:143; task-7 report item 40
+Touch controls on iPhone and iPad	Metal 4 renderer keeps a Metal 3 queue beside MTL4 queue; events order the two	apple-metal/references/command-model.md "Maintaining older code: Metal 3"; MTL4CommandQueue.h:266-275; MTLCommandBuffer.h:409,416
+Touch controls on iPhone and iPad	Overlay textures must be in the Metal 4 residency set	apple-metal/references/command-model.md Residency; apple-metal/references/resources-and-memory.md
+Touch controls on iPhone and iPad	GCVirtualController lifecycle: viewDidLoad, connect when controllers empty, disconnect when other controller, compare against .controller (async connections)	adding-virtual-controls-to-games-that-support-game-controllers-in-ios page lines 31-102; g08.md:21
+Touch controls on iPhone and iPad	hidden keeps elements; setValue/setPosition from own recognizers; GCEventViewController root	adding-virtual-controls page lines 22,131-228; g08.md:23-24
+Touch controls on iPhone and iPad	Article code blocks are Objective-C under a swift label	adding-virtual-controls page lines 38-305
+Touch controls on iPhone and iPad	HIG touch layout (left movement, right camera, 44x44 pt)	HIG game-controls Touch controls; g01.md:80
+Controller haptics	haptics nil when none; createEngine(withLocality:) returns CHHapticEngine?	GCController.h:250-256; gcdevicehaptics/createengine(withlocality:) page
+Controller haptics	Localities list; default and all guaranteed; default usually handles	gchapticslocality page; GCDeviceHapticsLocality.h:24-33; GCDeviceHaptics.h:28-55
+Controller haptics	supportsHaptics on the vended engine describes the device, not the controller; use supportedLocalities	gcdevicehaptics page Important note
+Controller haptics	Controller haptics on Mac rest on GCDeviceHaptics.h macos(11.0); sample page lists iOS only	GCDeviceHaptics.h:20; corehaptics/playing-haptics-on-game-controllers page availability; brief "Notes the Task 7 review corrected" (g09.md:100)
+Remapping and the Home button	System-level remap in Settings/System Settings	gamecontroller page Overview; GCController.h:76-95; g09.md:102
+Remapping and the Home button	Mapped input reflects the remap (A/B swap example)	GCPhysicalInputSource.h:21-49
+Remapping and the Home button	localizedName/sfSymbolsName reflect remapping; do not cache	GCPhysicalInputElement.h:25-38; gccontrollerelement/sfsymbolsname page; gcphysicalinputelement/localizedname page
+Remapping and the Home button	GCControllerUserCustomizationsDidChangeNotification macOS 13 / iOS 16, main thread, controller as object	gccontrollerusercustomizationsdidchangenotification page
+Remapping and the Home button	Show glyphs of the controller in use	HIG game-controls Support multiple connected controllers; g01.md:84
+Remapping and the Home button	unmappedInput (Swift: unmapped) for own remap UI; Apple discourages own remapping	GCControllerInput.h unmappedInput comment; gccontrollerliveinput page (var unmapped); runtime/input/defaults.swift compiles controller.input.unmapped
+Remapping and the Home button	GCPhysicalInputSource elementAliases/elementLocalizedName/sfSymbolsName	gcphysicalinputsource page; GCPhysicalInputSource.h:52-66
+Remapping and the Home button	unmappedSfSymbolsName/unmappedLocalizedName for own remap UI	GCControllerElement.h:84-96; gccontrollerelement/unmappedsfsymbolsname page
+Remapping and the Home button	hasRemappedElements, mappedElementAlias, mappedPhysicalInputNames	gcphysicalinputprofile/hasremappedelements page; mappedelementalias page; mappedphysicalinputnames page; g09.md:102
+Remapping and the Home button	System gesture recognizers run first; .disabled requests raw input; may be ignored	GCControllerElement.h:20-48; gccontrollerelement/preferredsystemgesturestate page
+Remapping and the Home button	.alwaysReceive deprecated in 27 in favor of .disabled	GCControllerElement.h:44-48 (API_DEPRECATED_WITH_REPLACEMENT ... 27.0)
+Remapping and the Home button	Home settings manager Swift spelling: class, MainActor init(), get-throws tuple properties, settingsUpdates, openControllerHomeButtonSettings(for:) throws	GameController arm64e-apple-macos.swiftinterface lines 211-233; gccontrollerhomebuttonsettingsmanager-258mu page and its controllerhomebuttoninappaction, settingsupdates, opencontrollerhomebuttonsettings(for:) pages
+Remapping and the Home button	macOS/iOS/visionOS 27, not tvOS; only while a controller is connected	GCControllerHomeButtonSettingsManager.h:112-116; manager page Overview
+Remapping and the Home button	.defer means system honors app's request made via preferredSystemGestureState = disabled on Home	GCControllerHomeButtonSettingsManager.h:49-60; gccontrollerhomebuttonsettinginappaction page
+Remapping and the Home button	.disabled cases macOS only	GCControllerHomeButtonSettingsManager.h:32,63
+Mac only: synthetic HID devices and racing wheels	macOS 14 synthetic HID device per controller, Xbox 360 wired shape, off by default, Increase controller compatibility, not returned by IOHIDManagerCopyDevices when off	understanding-game-controller-backward-compatibility page lines 20-28; g08.md:48
+Mac only: synthetic HID devices and racing wheels	Only supported test is GCSyntheticDevice property; match false to exclude	understanding-game-controller-backward-compatibility page lines 32-53; GCSyntheticDeviceKeys.h:26-57
+Mac only: synthetic HID devices and racing wheels	Engine using both sees each pad twice when emulation on	understanding-game-controller-backward-compatibility page line 24 (synthetic device alongside the real HID device); g09.md:104
+Mac only: synthetic HID devices and racing wheels	Racing wheel discovery, acquireDevice/relinquishDevice, queue depth, usb entitlement	racing-wheel-device-support page; g08.md:47
+Mac only: synthetic HID devices and racing wheels	ENABLE_RESOURCE_ACCESS_USB / BLUETOOTH build settings and usage description	m04.md:106
+Mac only: synthetic HID devices and racing wheels	kIOHIDManagerOptionNone has no Swift name (zero value of CF_OPTIONS)	IOHIDManager.h:90-91; typecheck_snippets.py failure "cannot find 'kIOHIDManagerOptionNone' in scope" on the first draft
