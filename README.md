@@ -1,8 +1,10 @@
 # agent-tools
 
 Claude Code plugins for this catalog — agent tooling, the
-TypeScript and SvelteKit stacks, interface craft and motion, containers, OWASP-grounded security
-review, and OpenSpec workflow setup.
+TypeScript and SvelteKit stacks, interface craft and motion, native Apple apps, Godot games,
+containers and self-hosted infrastructure (Docker, Unraid, Dokploy), OWASP-grounded security
+review, OpenSpec workflow setup, the Zed editor, PARA file organization, and Windows apps on a
+Mac with CrossOver.
 
 ## Install
 
@@ -28,7 +30,8 @@ plugins travel with the repo instead of living on one workstation.
 | [zed](plugins/zed) | `configuring-zed` | Configuring the Zed editor |
 | [apple-studio](plugins/apple-studio) | `app-release` `apple-animations` `apple-design` `apple-frameworks` `apple-intelligence` `apple-macos` `apple-performance` `swift-architecture` `swift-concurrency` `swift-testing` `xcode-loop` | Native Apple app development — architecture, strict concurrency, testing, HIG conformance, motion, macOS, frameworks, on-device AI, performance, release. Ships a PostToolUse edit tracker and a Stop build gate |
 | [para](plugins/para) | `maintaining-para-systems` `organizing-files-with-para` | Organizing a directory into PARA — Projects, Areas, Resources, Archives — with an approve-before-move plan. Ships `/para:organize`, an undo trail, and a guard hook against deletion and unplanned moves |
-| [godot](plugins/godot) | `gdscript` `godot-project-architecture` `godot-scene-files` `godot-testing-and-debugging` | Game development with Godot 4 — GDScript with static typing, the style guide, the warning system, project/scene architecture, and a verify loop built on the engine's own headless tooling |
+| [godot](plugins/godot) | `gdscript` `godot-project-architecture` `godot-scene-files` `godot-testing-and-debugging` | Game development with Godot 4 — GDScript with static typing, the style guide, the warning system, project/scene architecture, and a verify loop built on the engine's own headless tooling. Ships a read-only MCP server over the project and engine, and a guard hook against uid-breaking file moves |
+| [crossover](plugins/crossover) | `using-crossover-mac` | Running Windows applications and games on a Mac with CodeWeavers CrossOver — bottles, the command line, Advanced Settings per version, debug logs, locale and input. Ships a `crossover-log-triage` agent and a guard hook against irreversible bottle deletion |
 
 Each plugin's own README covers its components, its limits, and how to run it locally.
 

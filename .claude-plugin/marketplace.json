@@ -7,7 +7,7 @@
     "url": "https://github.com/frenchfulton94/agent-tools"
   },
   "metadata": {
-    "description": "Claude Code plugins for this catalog — agent tooling, the TypeScript and SvelteKit stacks, interface craft and motion, containers, OWASP-grounded security review, and OpenSpec workflow setup.",
+    "description": "Claude Code plugins for this catalog — agent tooling, the TypeScript and SvelteKit stacks, interface craft and motion, native Apple apps, Godot games, containers and self-hosted infrastructure (Docker, Unraid, Dokploy), OWASP-grounded security review, OpenSpec workflow setup, the Zed editor, PARA file organization, and Windows apps on a Mac with CrossOver.",
     "version": "0.1.0"
   },
   "plugins": [
@@ -88,6 +88,12 @@
       "source": "./plugins/godot",
       "category": "development",
       "description": "Game development with Godot 4 — project and scene architecture, the .tscn and .tres file formats and their uid:// identity rules, GDScript with static typing, and a verify loop built on the engine's own headless tooling. Ships a read-only MCP server that parses a project, checks scripts and shaders, runs scenes, captures screenshots, and serves the class reference generated from the user's own engine binary, plus a guard against the file moves that break uid:// references unrepairably."
+    },
+    {
+      "name": "crossover",
+      "source": "./plugins/crossover",
+      "category": "productivity",
+      "description": "Running Windows applications and games on a Mac with CodeWeavers CrossOver — bottles, installing listed and unlisted applications, the command-line tools, registry and Wine Configuration changes, Advanced Settings per CrossOver version (23.7–24, 25, 26), debug logs, locale and keyboard fixes, and controllers, anti-cheat, and mods — built from the CodeWeavers Mac knowledge base. Ships a log-triage agent for .cxlog files and a guard against irreversible bottle deletion."
     }
   ]
 }
