@@ -1,0 +1,71 @@
+path	words	read_in_full	fed
+/documentation/CoreHaptics/preparing-your-app-to-play-haptics	863	yes	audio-and-haptics.md
+/documentation/CoreHaptics/representing-haptic-patterns-in-ahap-files	1604	yes	audio-and-haptics.md
+/documentation/CoreHaptics/updating-continuous-and-transient-haptic-parameters-in-real-time	1221	yes	audio-and-haptics.md
+/documentation/Dispatch/2963138-wall-time-constants	35	yes	nothing: one-constant index (DISPATCH_WALLTIME_NOW), no decision content
+/documentation/Dispatch/deprecated-symbols	58	yes	game-loop-and-threading.md
+/documentation/Dispatch/dispatch-barrier	243	yes	game-loop-and-threading.md
+/documentation/Dispatch/dispatch-constants	241	yes	nothing: macro and constant index with no descriptions
+/documentation/Dispatch/dispatch-data	327	yes	nothing: dispatch_data API index, general knowledge
+/documentation/Dispatch/dispatch-data-types	82	yes	nothing: typedef index
+/documentation/Dispatch/dispatch-functions	33	yes	game-loop-and-threading.md
+/documentation/Dispatch/dispatch-group	311	yes	game-loop-and-threading.md
+/documentation/Dispatch/dispatch-i-o	390	yes	nothing: DispatchIO index; asset streaming belongs to the Metal IO command queue, page gives no judgment
+/documentation/Dispatch/dispatch-objects	292	yes	nothing: base-object API index, general knowledge
+/documentation/Dispatch/dispatch-queue	1357	yes	game-loop-and-threading.md
+/documentation/Dispatch/dispatch-semaphore	162	yes	game-loop-and-threading.md
+/documentation/Dispatch/dispatch-source	388	yes	game-loop-and-threading.md
+/documentation/Dispatch/dispatch-work-item	276	yes	game-loop-and-threading.md
+/documentation/Dispatch/workloop	575	yes	game-loop-and-threading.md
+/documentation/GameController/adding-virtual-controls-to-games-that-support-game-controllers-in-ios	1384	yes	input.md
+/documentation/GameController/deprecated-symbols	106	yes	input.md
+/documentation/GameController/directional-gamepad-input-names	89	yes	input.md
+/documentation/GameController/discovering-and-tracking-spatial-game-controllers-and-styli	798	yes	input.md
+/documentation/GameController/discovering-game-controllers	1594	yes	input.md;game-loop-and-threading.md
+/documentation/GameController/dualshock-controller-input-names	159	yes	input.md
+/documentation/GameController/extended-gamepad-input-names	477	yes	input.md
+/documentation/GameController/handling-input-events	1306	yes	input.md;game-loop-and-threading.md
+/documentation/GameController/input	392	yes	input.md
+/documentation/GameController/letting-players-use-their-second-generation-siri-remote-as-a-game-controller	295	yes	input.md
+/documentation/GameController/micro-gamepad-input-names	86	yes	input.md
+/documentation/GameController/racing-wheel-device-support	468	yes	input.md
+/documentation/GameController/supporting-game-controllers	89	yes	nothing: sample-code stub, only WWDC session links (10081, 10614, 604)
+/documentation/GameController/understanding-game-controller-backward-compatibility	650	yes	input.md
+/documentation/GameController/xbox-controller-input-names	164	yes	input.md
+/documentation/GameKit/adding-an-access-point-to-your-game	1043	yes	game-center-and-online.md;game-design.md
+/documentation/GameKit/adding-recurring-leaderboards-to-your-game	57	yes	nothing: sample-code stub, only a WWDC21 10067 link
+/documentation/GameKit/adding-voice-chat-to-multiplayer-games	938	yes	game-center-and-online.md;audio-and-haptics.md
+/documentation/GameKit/assigning-players-to-teams-using-rules	893	yes	game-center-and-online.md
+/documentation/GameKit/authenticating-a-player	892	yes	game-center-and-online.md
+/documentation/GameKit/choosing-a-leaderboard-for-your-challenges	1143	yes	game-center-and-online.md;game-design.md
+/documentation/GameKit/connecting-players-with-their-friends-in-your-game	800	yes	game-center-and-online.md
+/documentation/GameKit/creating-activities-for-your-game	1505	yes	game-center-and-online.md
+/documentation/GameKit/creating-engaging-challenges-from-leaderboards	1317	yes	game-center-and-online.md;game-design.md
+/documentation/GameKit/creating-matchmaking-rules-for-backward-compatibility	1016	yes	game-center-and-online.md
+/documentation/GameKit/creating-real-time-games	1859	yes	game-center-and-online.md
+/documentation/GameKit/creating-recurring-leaderboards	864	yes	game-center-and-online.md
+/documentation/GameKit/creating-turn-based-games	1906	yes	game-center-and-online.md
+/documentation/GameKit/deprecated-symbols	778	yes	game-center-and-online.md
+/documentation/GameKit/displaying-the-game-center-dashboard	786	yes	game-center-and-online.md
+/documentation/GameKit/encourage-progress-and-competition-with-leaderboards	1560	yes	game-center-and-online.md
+/documentation/GameKit/exchanging-data-between-players-in-real-time-games	716	yes	game-center-and-online.md
+/documentation/GameKit/exchanging-data-between-players-in-turn-based-games	836	yes	game-center-and-online.md
+/documentation/GameKit/finding-multiple-players-for-a-game	1389	yes	game-center-and-online.md
+/documentation/GameKit/finding-players-for-custom-server-based-games	1575	yes	game-center-and-online.md
+/documentation/GameKit/finding-players-using-matchmaking-rules	1404	yes	game-center-and-online.md
+/documentation/GameKit/finding-players-with-similar-skill-levels	1189	yes	game-center-and-online.md
+/documentation/GameKit/improving-the-player-experience-for-games-with-large-downloads	1290	yes	assets.md;game-design.md
+/documentation/GameKit/initializing-and-configuring-game-center	1125	yes	game-center-and-online.md
+/documentation/GameKit/letting-players-join-matches-using-party-codes	492	yes	game-center-and-online.md
+/documentation/GameKit/matchmaking-rules	862	yes	game-center-and-online.md
+/documentation/GameKit/protecting-the-player-s-privacy-using-scoped-identifiers	583	yes	game-center-and-online.md
+/documentation/GameKit/rewarding-players-with-achievements	1159	yes	game-center-and-online.md;game-design.md
+/documentation/GameKit/saving-the-player-s-game-data-to-an-icloud-account	641	yes	game-center-and-online.md
+/documentation/GameKit/sending-messages-to-players-in-turn-based-games	705	yes	game-center-and-online.md
+/documentation/GameKit/starting-turn-based-matches-and-passing-turns-between-players	2219	yes	game-center-and-online.md
+/documentation/GameKit/testing-matchmaking-rules	592	yes	game-center-and-online.md
+/documentation/GameKit/testing-rule-sets-with-player-traffic-using-metrics	580	yes	game-center-and-online.md
+/documentation/GameKit/troubleshooting-matchmaking-rules-using-metrics	666	yes	game-center-and-online.md
+/documentation/ModelIO/model-i-o-constants	304	yes	assets.md
+/documentation/ModelIO/model-i-o-data-types	62	yes	nothing: two-type index (MDLAxisAlignedBoundingBox, MDLVoxelIndex), no judgment
+/documentation/ModelIO/model-i-o-enumerations	264	yes	assets.md

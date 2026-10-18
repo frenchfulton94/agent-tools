@@ -1,0 +1,67 @@
+path	words	read_in_full	fed
+/documentation/kernel/1387446-sysctlbyname	0	no-unfetchable:404:deferred-20	nothing: curl .md returned 404 on 2026-10-18 (bare URL 200 is the JS shell)
+/documentation/kernel/1462446-mach_absolute_time	0	no-unfetchable:404:deferred-20	nothing: curl .md returned 404 on 2026-10-18 (bare URL 200 is the JS shell)
+/documentation/ModelIO/model-i-o-structures	45	yes	nothing: one-symbol index (MDLVoxelIndexExtent), no game judgment
+/documentation/Network/building-a-custom-peer-to-peer-protocol	178	yes	game-center-and-online.md
+/documentation/Network/c-language-symbols	402	yes	game-center-and-online.md
+/documentation/Network/choosing-a-network-debugging-tool	374	yes	game-center-and-online.md
+/documentation/Network/creating-an-identity-for-local-network-tls	1361	yes	game-center-and-online.md
+/documentation/Network/debugging-http-server-side-errors	732	yes	game-center-and-online.md
+/documentation/Network/debugging-https-problems-with-cfnetwork-diagnostic-logging	613	yes	game-center-and-online.md
+/documentation/Network/framer-protocol-options	806	yes	game-center-and-online.md
+/documentation/Network/implementing-netcat-with-network-framework	2646	yes	game-center-and-online.md
+/documentation/Network/indicating-the-source-of-network-activity	1156	yes	game-center-and-online.md
+/documentation/Network/inspecting-app-activity-data	1184	yes	game-center-and-online.md
+/documentation/Network/ip-options	279	yes	game-center-and-online.md
+/documentation/Network/network-constants	222	yes	game-center-and-online.md
+/documentation/Network/network-data-types	1039	yes	game-center-and-online.md
+/documentation/Network/network-enumerations	31	yes	game-center-and-online.md
+/documentation/Network/network-functions	5109	yes	game-center-and-online.md
+/documentation/Network/network-macros	91	yes	nothing: C macro index; only NW_CONNECTION_DEFAULT_MESSAGE_CONTEXT/FINAL already noted from nwcat
+/documentation/Network/privacy-management	123	yes	nothing: index of attribution pages and nw_parameters_set_attribution, already noted from the attribution articles
+/documentation/Network/quic-options	744	yes	game-center-and-online.md
+/documentation/Network/recording-a-packet-trace	1286	yes	game-center-and-online.md
+/documentation/Network/recording-a-wi-fi-packet-trace	465	yes	game-center-and-online.md
+/documentation/Network/security-options	144	yes	game-center-and-online.md
+/documentation/Network/submitting-a-packet-trace-to-apple	604	yes	game-center-and-online.md
+/documentation/Network/taking-advantage-of-third-party-network-debugging-tools	247	yes	game-center-and-online.md
+/documentation/Network/tcp-options	294	yes	game-center-and-online.md
+/documentation/Network/testing-and-debugging-l4s-in-your-app	2037	yes	game-center-and-online.md
+/documentation/Network/tls-options	100	yes	game-center-and-online.md
+/documentation/Network/troubleshooting-packet-traces	766	yes	game-center-and-online.md
+/documentation/Network/udp-options	101	yes	game-center-and-online.md
+/documentation/Network/websocket-options	517	yes	game-center-and-online.md
+/documentation/PHASE/personalizing-spatial-audio-in-your-app	563	yes	audio-and-haptics.md
+/documentation/PHASE/phase-errors	115	yes	audio-and-haptics.md
+/documentation/PHASE/playback-parameterization	505	yes	audio-and-haptics.md
+/documentation/PHASE/playing-sound-from-a-location-in-a-3d-scene	2011	yes	audio-and-haptics.md
+/documentation/PHASE/sound-event-nodes	262	yes	audio-and-haptics.md
+/documentation/PHASE/spatial-mixing	282	yes	audio-and-haptics.md
+/documentation/RealityKit/scene-content-audio	541	yes	audio-and-haptics.md
+/documentation/TechnologyOverviews/games-technologies	1500	yes	game-loop-and-threading.md;audio-and-haptics.md;input.md;game-center-and-online.md;assets.md;game-design.md;apple-metal/compute-and-gpu-driven.md;app-release/direct-distribution.md
+/documentation/TechnologyOverviews/shared-data	1272	yes	game-center-and-online.md;assets.md;game-loop-and-threading.md
+/documentation/UIKit/positioning-content-relative-to-the-safe-area	512	yes	game-loop-and-threading.md
+/documentation/UniformTypeIdentifiers/defining-file-and-data-types-for-your-app	832	yes	assets.md
+/documentation/UniformTypeIdentifiers/system-declared-uniform-type-identifiers	3762	yes	assets.md
+/documentation/UniformTypeIdentifiers/uniformtypeidentifiers-constants	40	yes	audio-and-haptics.md
+/documentation/Xcode	814	yes	nothing: Xcode landing/index page; lists tool areas (Device Hub, Instruments, Metal debugger) with no game-specific judgment
+/documentation/Xcode/configuring-icloud-services	1293	yes	game-center-and-online.md;app-release/direct-distribution.md
+/documentation/Xcode/creating-an-xcode-project-for-an-app	1160	yes	nothing: generic new-project walkthrough; only mentions that a game template exists under Multiplatform/iOS/macOS, with no details
+/documentation/Xcode/diagnosing-memory-thread-and-crash-issues-early	1769	yes	game-loop-and-threading.md;apple-metal/cpp-and-rust.md
+/documentation/accelerate	472	yes	assets.md;game-loop-and-threading.md
+/documentation/appkit	723	yes	nothing: AppKit landing index; game-relevant topic groups (Mouse, Keyboard, and Trackpad; Menus, Cursors; Windows, Panels, and Screens) are links only, covered by their own pages
+/documentation/audiotoolbox	729	yes	audio-and-haptics.md
+/documentation/avfaudio	397	yes	audio-and-haptics.md
+/documentation/compression	555	yes	assets.md
+/documentation/corehaptics	587	yes	audio-and-haptics.md;input.md
+/documentation/dispatch	904	yes	game-loop-and-threading.md;apple-metal/cpp-and-rust.md
+/documentation/gamecontroller	1049	yes	input.md
+/documentation/gamekit	1342	yes	game-center-and-online.md;assets.md
+/documentation/gamesave	192	yes	game-center-and-online.md
+/documentation/modelio	1532	yes	assets.md
+/documentation/network	1646	yes	game-center-and-online.md
+/documentation/os/workgroups	552	yes	game-loop-and-threading.md;audio-and-haptics.md
+/documentation/phase	1135	yes	audio-and-haptics.md;game-loop-and-threading.md
+/documentation/touchcontroller	292	yes	input.md;apple-metal/command-model.md
+/documentation/uniformtypeidentifiers	275	yes	assets.md
+/documentation/visionOS	1878	yes	game-loop-and-threading.md;game-center-and-online.md;game-design.md

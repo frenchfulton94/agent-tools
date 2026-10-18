@@ -901,6 +901,43 @@ block Phase 2; each has an explicit trigger for when to act.
     Then fetch it, read it in full, and replace the ledger row. Evidence:
     `records/2026-10-18-phase10-games/task-1-manifest/manifest.tsv`.
 
+20. **Two unfetchable `apple-games` pages: legacy kernel symbol pages
+    (found 2026-10-18, Phase 10 Task 7).** The manifest rows
+    `/documentation/kernel/1387446-sysctlbyname` and
+    `/documentation/kernel/1462446-mach_absolute_time` return HTTP 404 for
+    their `.md` files. The bare URLs return 200, but only the JavaScript
+    shell. Both are numeric-ID symbol links from
+    `/documentation/Apple-Silicon/addressing-architectural-differences-in-your-macos-code`.
+    That page is slice g06's row, and a reader read it in full. Its notes
+    (`notes/g06.md`) carry the game-relevant use of both symbols: probing
+    CPU features with `sysctlbyname("hw.optional.<feature>")`, and scaling
+    `mach_absolute_time()` ticks by `mach_timebase_info`. Little content is
+    lost. They are function pages, and other sources cover each one. The
+    SDK ships `usr/share/man/man3/sysctlbyname.3`. `mach_absolute_time`
+    has no man page, but `/documentation/driverkit/mach_absolute_time`
+    returns 200, and the SDK header `mach/mach_time.h` declares it. The two
+    ledger rows in `records/2026-10-18-phase10-games/ledger/g09.tsv` record
+    the 404s and point here. **Trigger: a writer states a claim that only
+    one of these symbol pages would support.** Then read the man page, the
+    DriverKit page, or the header in its place, and cite that. Evidence:
+    `records/2026-10-18-phase10-games/task-1-manifest/manifest.tsv`.
+
+21. **One unfetchable `app-release` page: the man-page reading article
+    (found 2026-10-18, Phase 10 Task 7).** The manifest row
+    `/documentation/os/reading-unix-manual-pages` returns HTTP 404 for its
+    `.md` file and for its DocC JSON. It is linked from
+    `/documentation/Security/notarizing-macos-software-before-distribution`.
+    The article only explains how to read man pages. Reader r01 read the
+    local man pages it points toward in its place: `codesign`, `spctl`,
+    `hdiutil`, `pkgbuild`, `productbuild`, and `pkgutil`, plus each tool's
+    help or usage text. No release-relevant content is lost. The ledger
+    row in `records/2026-10-18-phase10-games/ledger/r01.tsv` records the
+    404 and points here. **Trigger: Apple publishes the article again at
+    that path.** Then fetch it, read it in full, and replace the ledger
+    row. Evidence:
+    `records/2026-10-18-phase10-games/task-1-manifest/manifest.tsv`;
+    `records/2026-10-18-phase10-games/notes/r01.md`, section `(none)`.
+
 ## Accepted (no action)
 
 Phase 3 minors reviewed and accepted as-is — no follow-up action needed:

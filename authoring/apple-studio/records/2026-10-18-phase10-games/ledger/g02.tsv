@@ -1,0 +1,69 @@
+path	words	read_in_full	fed
+/design/human-interface-guidelines/typography	6694	yes	game-design.md
+/documentation/AVFAudio/Adding-synthesized-speech-to-calls	1097	yes	nothing: AAC accessibility microphone injection into phone/FaceTime calls (iOS 18.2+), no game use
+/documentation/AVFAudio/audio-engine	651	yes	audio-and-haptics.md
+/documentation/AVFAudio/audio-settings	141	yes	nothing: index of AVAudioRecorder/AVAudioPlayer settings-key groups, no judgment
+/documentation/AVFAudio/audio-units	231	yes	audio-and-haptics.md
+/documentation/AVFAudio/building-a-signal-generator	800	yes	audio-and-haptics.md
+/documentation/AVFAudio/building-an-audio-sequencer-to-arrange-and-play-clips	1836	yes	audio-and-haptics.md
+/documentation/AVFAudio/capturing-stereo-audio-from-built-in-microphones	746	yes	audio-and-haptics.md
+/documentation/AVFAudio/creating-a-custom-speech-synthesizer	749	yes	nothing: system-wide TTS voice provider AU extension for VoiceOver, not a game audio path
+/documentation/AVFAudio/creating-an-audio-unit-extension	1081	yes	audio-and-haptics.md
+/documentation/AVFAudio/creating-custom-audio-effects	1973	yes	audio-and-haptics.md
+/documentation/AVFAudio/encoder-bit-rate-strategy-values	96	yes	nothing: settings-key index for AVAudioRecorder/AVAudioFile encoding, no game judgment
+/documentation/AVFAudio/encoder-settings	86	yes	nothing: settings-key index for AVAudioRecorder/AVAudioFile encoding, no game judgment
+/documentation/AVFAudio/format-settings	82	yes	nothing: settings-key index for AVAudioRecorder/AVAudioFile encoding, no game judgment
+/documentation/AVFAudio/linear-pcm-format-settings	51	yes	nothing: settings-key index for AVAudioRecorder/AVAudioFile encoding, no game judgment
+/documentation/AVFAudio/macros	62	yes	nothing: header guard and feature-test macro list
+/documentation/AVFAudio/sample-rate-conversion-settings	69	yes	nothing: settings-key index for sample-rate converter quality
+/documentation/AVFAudio/using-voice-processing	71	yes	audio-and-haptics.md
+/documentation/AVFAudio/handling-audio-interruptions	1027	yes	audio-and-haptics.md
+/documentation/AVFAudio/performing-offline-audio-processing	901	yes	audio-and-haptics.md
+/documentation/AVFAudio/playing-custom-audio-with-your-own-player	1862	yes	audio-and-haptics.md
+/documentation/AVFAudio/responding-to-audio-route-changes	591	yes	audio-and-haptics.md
+/documentation/AVFAudio/routing-audio-to-specific-devices-in-multidevice-sessions	1424	yes	audio-and-haptics.md
+/documentation/AVFAudio/speech-synthesis	256	yes	audio-and-haptics.md
+/documentation/Accelerate/1399056-vimage-buffer-type-codes	453	yes	nothing: vImage buffer channel type-code constant list
+/documentation/Accelerate/1498271-core-video-image-format-errors	122	yes	nothing: vImage CV image format error-code list
+/documentation/Accelerate/1509228-rotation-constants	127	yes	nothing: vImage 90-degree rotation constant list
+/documentation/Accelerate/1515413-png-filter-types	153	yes	nothing: vImage PNG pre-compression filter constants, no game judgment
+/documentation/Accelerate/1533233-dithering-methods	148	yes	assets.md
+/documentation/Accelerate/1578972-error-codes	361	yes	nothing: vImage error-code constant list
+/documentation/Accelerate/1578976-processing-flags	371	yes	assets.md
+/documentation/Accelerate/1584480-gamma-function-types	184	yes	nothing: vImage gamma constant list (sRGB/BT.709); color-space handling belongs to Metal pixel formats
+/documentation/Accelerate/16-bit-signed-integer-vectors	167	yes	nothing: simd_short* type index, no layout or judgment stated
+/documentation/Accelerate/16-bit-unsigned-integer-vectors	167	yes	nothing: simd_ushort* type index, no layout or judgment stated
+/documentation/Accelerate/1d-correlation-and-convolution	421	yes	nothing: vDSP 1D convolve/correlate function index, general DSP knowledge
+/documentation/Accelerate/2d-convolution	596	yes	nothing: vDSP 2D convolution index (not in-place); GPU or vImage is the game path
+/documentation/Accelerate/32-bit-signed-integer-vectors	146	yes	nothing: simd_int* type index
+/documentation/Accelerate/32-bit-unsigned-integer-vectors	146	yes	nothing: simd_uint* type index
+/documentation/Accelerate/64-bit-signed-integer-vectors	125	yes	nothing: simd_long* type index
+/documentation/Accelerate/64-bit-unsigned-integer-vectors	125	yes	nothing: simd_ulong* type index
+/documentation/Accelerate/8-bit-signed-integer-vectors	188	yes	nothing: simd_char* type index
+/documentation/Accelerate/8-bit-unsigned-integer-vectors	188	yes	nothing: simd_uchar* type index
+/documentation/Accelerate/UsingTheFortran90Wrappers	603	yes	nothing: Fortran 90 BLAS/LAPACK wrapper modules (new in OS 27 SDK), no game use
+/documentation/Accelerate/absolute-and-negation-functions	634	yes	nothing: vDSP abs/negate function index
+/documentation/Accelerate/adding-a-bokeh-effect-to-images	590	yes	assets.md
+/documentation/Accelerate/adjusting-saturation-and-applying-tone-mapping	1786	yes	assets.md
+/documentation/Accelerate/adjusting-the-brightness-and-contrast-of-an-image	1235	yes	assets.md
+/documentation/Accelerate/adjusting-the-hue-of-an-image	977	yes	nothing: CPU L*a*b* hue rotation via vImageConverter; runtime hue shift is a shader, no game judgment
+/documentation/Accelerate/alpha-compositing	1277	yes	assets.md
+/documentation/Accelerate/applying-a-flood-fill-to-an-image	120	yes	nothing: vImage flood-fill function index
+/documentation/Accelerate/applying-affine-transformations-to-images	491	yes	nothing: vImageAffineWarp function index, no judgment
+/documentation/Accelerate/applying-biquadratic-filters-to-a-music-loop	730	yes	audio-and-haptics.md
+/documentation/Accelerate/applying-filters	186	yes	nothing: BNNS filter apply function index (CPU neural nets)
+/documentation/Accelerate/applying-color-transforms-to-images-with-a-multidimensional-lookup-table	1229	yes	assets.md
+/documentation/Accelerate/applying-flood-fills-to-an-image	598	yes	nothing: vImage flood fill of line art (in-place only, needs lossless input), no game judgment
+/documentation/Accelerate/applying-geometric-transforms-to-images	1985	yes	assets.md
+/documentation/Accelerate/applying-projective-transformations-to-images	201	yes	nothing: vImage perspective-warp function index
+/documentation/Accelerate/applying-tone-curve-adjustments-to-images	821	yes	nothing: CPU polynomial tone curves for a photo editor UI, no game judgment
+/documentation/Accelerate/applying-transformations-to-selected-colors-in-an-image	551	yes	nothing: CPU selective desaturation via 3D LUT; LUT baking already noted from the MD lookup-table page
+/documentation/Accelerate/applying-vimage-operations-to-regions-of-interest	936	yes	nothing: vImage ROI via offset sub-buffers for CPU blur/desaturate, no game judgment
+/documentation/Accelerate/applying-vimage-operations-to-video-sample-buffers	677	yes	nothing: CPU camera-frame conversion via vImageConverter; a game would texture camera frames on the GPU instead
+/documentation/Accelerate/arithmetic-operations	2791	yes	audio-and-haptics.md
+/documentation/Accelerate/autospectrum-computation	76	yes	nothing: vDSP_zaspec index entry
+/documentation/Accelerate/availability-flags	93	yes	nothing: vImage compile-time availability macros
+/documentation/Accelerate/biquadratic-iir-filters	43	yes	audio-and-haptics.md
+/documentation/Accelerate/blockwise-matrix-operations	368	yes	nothing: Sparse BLAS block-matrix API index
+/documentation/Accelerate/blurring-an-image	1628	yes	nothing: CPU vImage convolution/box/tent blur sample; runtime blur is a GPU pass, no game judgment
+/documentation/Accelerate/blas-library	4458	yes	nothing: Accelerate BLAS/LAPACK reference (LAPACK 3.12 via ACCELERATE_NEW_LAPACK from OS 26), no game-relevant judgment

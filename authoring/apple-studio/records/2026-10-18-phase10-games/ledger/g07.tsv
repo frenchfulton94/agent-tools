@@ -1,0 +1,207 @@
+path	words	read_in_full	fed
+/documentation/AudioToolbox/1494111-instance-codec-properties	226	yes	nothing: AudioCodec instance property-ID list; codec plumbing a game never touches
+/documentation/AudioToolbox/1494116-program-target-levels	36	yes	nothing: loudness target-level constant list, no game judgment
+/documentation/AudioToolbox/1494121-global-codec-properties	89	yes	nothing: three read-only codec name property IDs
+/documentation/AudioToolbox/1494122-output-status-constants	49	yes	nothing: AudioCodecProduceOutputPackets status constants only
+/documentation/AudioToolbox/1494127-audio-codec-delays	27	yes	nothing: single codec delay-mode constant
+/documentation/AudioToolbox/1494130-audio-codec-quality-constants	50	yes	nothing: codec quality enum list only
+/documentation/AudioToolbox/1494142-deprecated-constants-used-with-k	35	yes	nothing: deprecated settings-hint constants
+/documentation/AudioToolbox/1494144-bit-rate-control-mode-constants	65	yes	nothing: AAC bit-rate control mode constants; encoder-only
+/documentation/AudioToolbox/1494154-audio-codec-priming-method-const	39	yes	nothing: codec priming method constants only
+/documentation/AudioToolbox/1509425-audio-unit-parameter-listener	28	yes	nothing: single AU parameter-listener wildcard constant
+/documentation/AudioToolbox/1513526-clock-errors	59	yes	nothing: CAClock error constants only
+/documentation/AudioToolbox/1515446-music-extended-control-event-typ	29	yes	nothing: single MusicSequence extended-control event constant
+/documentation/AudioToolbox/1515456-music-track-properties	205	yes	nothing: MusicTrack property IDs (loop, mute, solo); MIDI sequencing a game rarely needs
+/documentation/AudioToolbox/1515472-music-player-errors	57	yes	nothing: MusicPlayer error codes
+/documentation/AudioToolbox/1515479-music-event-types	115	yes	nothing: MusicEventType constant list
+/documentation/AudioToolbox/1533930-music-device-generic-properties	34	yes	nothing: music-device bank/instrument property IDs
+/documentation/AudioToolbox/1533931-music-device-properties	30	yes	nothing: two music-device instrument-name property IDs
+/documentation/AudioToolbox/1533941-music-effect-and-instrument-unit	39	yes	nothing: AU parameter MIDI-mapping property IDs
+/documentation/AudioToolbox/1533959-ausampler-properties	29	yes	nothing: two AUSampler load property IDs; covered better by music-player and AVAudioUnitSampler
+/documentation/AudioToolbox/1533960-anonymous	37	yes	nothing: legacy speaker configuration constants
+/documentation/AudioToolbox/1533963-music-device-unit-properties	37	yes	nothing: music device scheduling/name property IDs
+/documentation/AudioToolbox/1533969-audio-unit-generic-properties	46	yes	nothing: generic AU property IDs list
+/documentation/AudioToolbox/1533972-converter_audio_unit_properties	35	yes	nothing: single AUConverter SRC complexity property
+/documentation/AudioToolbox/1533978-music-device-sample-frame-mask	32	yes	nothing: music-device sample-frame mask constants
+/documentation/AudioToolbox/1533986-reserved_audio_unit_clump_identi	44	yes	nothing: reserved clump ID constant
+/documentation/AudioToolbox/1533994-audio-unit-src-algorithms	31	yes	nothing: two SRC algorithm constants
+/documentation/AudioToolbox/1534010-audio-unit-offline-preflight-fla	35	yes	nothing: offline preflight flag constants
+/documentation/AudioToolbox/1534019-anonymous	28	yes	nothing: AUSampler bank/preset property IDs
+/documentation/AudioToolbox/1534022-aunbandeq-property-ids	33	yes	nothing: N-band EQ property IDs
+/documentation/AudioToolbox/1534024-audio-unit-scheduled-sound-playe	36	yes	nothing: scheduled sound player property IDs; AVAudioPlayerNode covers scheduling for games
+/documentation/AudioToolbox/1534035-audio-unit-parameter-flags	37	yes	nothing: AU parameter flag constants
+/documentation/AudioToolbox/1534041-mixer_audio_unit_properties	93	yes	nothing: matrix mixer / metering property IDs
+/documentation/AudioToolbox/1534054-offline_audio_unit_properties	55	yes	nothing: offline AU property IDs; non-realtime path
+/documentation/AudioToolbox/1534055-audio-unit-full-name-parameter	29	yes	nothing: single parameter-name constant
+/documentation/AudioToolbox/1534061-audeferredrenderer-properties	32	yes	nothing: AUDeferredRenderer property IDs
+/documentation/AudioToolbox/1534063-3d_mixer_audio_unit_properties	52	yes	nothing: legacy 3D mixer property IDs; superseded by the spatial mixer / AVAudioEnvironmentNode
+/documentation/AudioToolbox/1534074-anonymous	25	yes	nothing: single voice-processing quality property ID
+/documentation/AudioToolbox/1534079-audio-unit-file-player-propertie	41	yes	nothing: AUAudioFilePlayer scheduling property IDs; AVAudioPlayerNode is the game path
+/documentation/AudioToolbox/1534082-other-plug-in-formats	36	yes	nothing: legacy plug-in format constants
+/documentation/AudioToolbox/1534085-apple-voice-processing-audio-uni	47	yes	nothing: single voice-processing error constant
+/documentation/AudioToolbox/1534086-ausampler-property-ids	33	yes	nothing: AUSampler default-bank constants
+/documentation/AudioToolbox/1534089-music-device-properties	33	yes	nothing: panner mode / group bus property IDs
+/documentation/AudioToolbox/1534092-frequency_response_constants	51	yes	nothing: frequency-response bin-count constant
+/documentation/AudioToolbox/1534109-aunetreceive-properties	29	yes	nothing: AUNetReceive hostname/password property IDs
+/documentation/AudioToolbox/1534112-audio-unit-attenuation-propertie	28	yes	nothing: single distance-attenuation property ID (legacy)
+/documentation/AudioToolbox/1534116-i_o_audio_unit_properties	226	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1534149-audio-unit-migration-properties	31	yes	nothing: AU migration property IDs, plug-in hosting only
+/documentation/AudioToolbox/1534150-spatial-mixer-property-ids	61	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1534153-dls-music-device-properties	37	yes	nothing: DLS music device sound-bank property IDs
+/documentation/AudioToolbox/1534166-audio-unit-parameter-flags	28	yes	nothing: single parameter HasName flag
+/documentation/AudioToolbox/1534173-audio_unit_sample_rate_converter	63	yes	nothing: SRC complexity constants (linear/normal/mastering), no game decision beyond defaults
+/documentation/AudioToolbox/1534177-renderquality	43	yes	nothing: render-quality enum
+/documentation/AudioToolbox/1534190-aumidisynth-properties	26	yes	nothing: AUMIDISynth preload property
+/documentation/AudioToolbox/1534202-instrument-types	38	yes	nothing: sampler instrument-type constants
+/documentation/AudioToolbox/1534207-aunetsend-properties	41	yes	nothing: AUNetSend property IDs; obsolete network audio unit
+/documentation/AudioToolbox/1534212-aunetsendpresetformat-properties	80	yes	nothing: AUNetSend preset formats
+/documentation/AudioToolbox/1534214-audio_unit_scopes	122	yes	nothing: AU scope constants
+/documentation/AudioToolbox/1534225-anonymous	25	yes	nothing: speaker-configuration property ID
+/documentation/AudioToolbox/1537630-audio-graph-errors	190	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1537633-kaunodeinteraction-connection	81	yes	nothing: AUGraph node-interaction constants
+/documentation/AudioToolbox/1547255-caf-file-header	30	yes	nothing: CAF header constants
+/documentation/AudioToolbox/1547262-caf-file-smpte-time-types	65	yes	nothing: CAF SMPTE time-type constants
+/documentation/AudioToolbox/1547266-caf-file-chunk-types	82	yes	nothing: CAF chunk-type IDs; format internals
+/documentation/AudioToolbox/1547272-caf-file-marker-types	94	yes	nothing: CAF marker-type constants
+/documentation/AudioToolbox/1552626-audio-queue-parameters	253	yes	nothing: AudioQueue playback parameters (volume, rate 0.5-2.0, pitch +-2400 cents); queue is not the game playback path; cached page truncates mid-Pan
+/documentation/AudioToolbox/1552627-anonymous	344	yes	nothing: AudioQueue error codes
+/documentation/AudioToolbox/1552629-audio-queue-property-ids	379	yes	nothing: AudioQueue property IDs (metering, decode buffer size); streaming-queue detail no game needs over AVAudioEngine
+/documentation/AudioToolbox/1552630-audio-queue-time-pitch-algorithm	35	yes	nothing: AudioQueue time-pitch algorithm constants
+/documentation/AudioToolbox/1559923-sample-rate-conversion-complexit	100	yes	nothing: converter SRC complexity constants (linear/normal/mastering/minimum-phase)
+/documentation/AudioToolbox/1559924-sample-rate-conversion-quality-i	90	yes	nothing: converter SRC quality constants
+/documentation/AudioToolbox/1559925-audio-converter-properties-macos	31	yes	nothing: macOS dithering property IDs
+/documentation/AudioToolbox/1559927-converter-priming-constants	75	yes	nothing: converter priming constants; offline-conversion detail
+/documentation/AudioToolbox/1559928-audio-converter-properties	818	yes	nothing: AudioConverter property list; offline transcoding, a game decodes via AVAudioFile
+/documentation/AudioToolbox/1559930-audio-converter-errors	114	yes	nothing: AudioConverter error codes (hardware-in-use on interruption is the only notable, iOS codec detail)
+/documentation/AudioToolbox/1559931-audio-converter-dithering-algori	31	yes	nothing: dither algorithm constants
+/documentation/AudioToolbox/1576492-audio-file-marker-types	47	yes	nothing: single file marker type
+/documentation/AudioToolbox/1576494-audio-file-loop-direction-consta	68	yes	nothing: loop direction constants for file metadata
+/documentation/AudioToolbox/1576495-audio-file-global-info-propertie	423	yes	nothing: AudioFile global-info property IDs (readable types, UTIs, extensions)
+/documentation/AudioToolbox/1576497-audio-file-types	199	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1576499-audio-file-properties	963	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1576500-audio-file-errors	268	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1577851-audio-format-error-codes	70	yes	nothing: AudioFormat error codes
+/documentation/AudioToolbox/1577853-audio-format-property-identifier	855	yes	nothing: AudioFormat property IDs (format info, channel layouts, panning matrix); codec-query plumbing
+/documentation/AudioToolbox/1579363-audio_unit_carbon_view_component	29	yes	nothing: Carbon view component constants, obsolete
+/documentation/AudioToolbox/1579365-audio_unit_carbon_view_events	28	yes	nothing: Carbon view event constants, obsolete
+/documentation/AudioToolbox/1579372-audio_unit_carbon_view_selectors	29	yes	nothing: Carbon view selectors, obsolete
+/documentation/AudioToolbox/1584138-audio-unit-errors	108	yes	nothing: AU error code list
+/documentation/AudioToolbox/1584139-input_output_audio_unit_subtypes	60	yes	nothing: two I/O subtypes; VoiceProcessingIO noted from the voice-I/O page instead
+/documentation/AudioToolbox/1584140-general_audio_unit_function_sele	262	yes	nothing: AU component selector constants, used by the system not by callers
+/documentation/AudioToolbox/1584141-audio-unit-instrument-errors	31	yes	nothing: two instrument error codes
+/documentation/AudioToolbox/1584142-audio_unit_types	265	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1584143-audio_unit_manufacturer_identifi	34	yes	nothing: Apple manufacturer code
+/documentation/AudioToolbox/1584145-converter_audio_unit_subtypes	105	yes	nothing: converter AU subtypes (varispeed, time-pitch, splitter); AVAudioUnitTimePitch/Varispeed wrap these
+/documentation/AudioToolbox/1584146-audio-unit-mixer-subtypes	121	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1584148-audio-unit-output-subtypes	34	yes	nothing: output subtypes (default, HAL, system)
+/documentation/AudioToolbox/1584150-mixer_audio_unit_subtypes	89	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1584151-audio-unit-panner-subtypes	37	yes	nothing: panner subtype constants (HRTF, sound field, spherical head, vector)
+/documentation/AudioToolbox/1584152-audio-unit-pitch-subtypes	65	yes	nothing: single time-pitch subtype
+/documentation/AudioToolbox/1584153-audio-unit-filter-subtypes	78	yes	nothing: filter AU subtype constants
+/documentation/AudioToolbox/1584154-effect_audio_unit_subtypes	198	yes	nothing: effect AU subtype list; AVAudioUnitEQ/Reverb/Delay/Distortion wrap these
+/documentation/AudioToolbox/1584155-audio-unit-player-subtypes	77	yes	nothing: player subtypes; scheduled-sound player schedulable from any thread, but AVAudioPlayerNode is the game path
+/documentation/AudioToolbox/1585807-i_o_audio_unit_function_selector	97	yes	nothing: I/O start/stop selectors
+/documentation/AudioToolbox/1615024-reverb_unit_parameters	50	yes	nothing: Reverb2 parameter IDs
+/documentation/AudioToolbox/1618202-alert-sound-identifiers	114	yes	nothing: system-sound alert identifiers (vibrate, flash screen); Core Haptics is the game path
+/documentation/AudioToolbox/1618357-audio-session-activation-flags	66	yes	nothing: deprecated C audio-session activation flag
+/documentation/AudioToolbox/1618372-audio-session-category-route-ove	153	yes	nothing: deprecated C audio-session route override
+/documentation/AudioToolbox/1618373-audio-session-errors	237	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1618380-audio-route-change-reasons	163	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1618387-audio-session-interruption-types	90	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1618405-audio-session-modes	199	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1618425-audio-session-interruption-state	96	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1618426-anonymous	25	yes	nothing: single deprecated audio-route property ID
+/documentation/AudioToolbox/1618427-audio-session-categories	287	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1618455-audio-session-property-identifie	561	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1618459-deprecated-audio-session-categor	68	yes	nothing: two deprecated C session categories
+/documentation/AudioToolbox/1618724-hardware-codec-policy-keys	349	yes	nothing: AudioQueue hardware-codec policy; queue path, not game playback
+/documentation/AudioToolbox/1618727-audio-queue-hardware-codec-polic	204	yes	nothing: duplicate of the hardware-codec policy constants
+/documentation/AudioToolbox/1618733-audio-queue-property-ids	28	yes	nothing: single AudioQueue channel-assignment property ID
+/documentation/AudioToolbox/1618742-anonymous	25	yes	nothing: single low-latency time-pitch constant for AudioQueue
+/documentation/AudioToolbox/1619479-anonymous	66	yes	nothing: iOS embedded 3D mixer subtype (stereo out), legacy
+/documentation/AudioToolbox/1619485-i-o-audio-unit-subtypes	28	yes	nothing: RemoteIO subtype constant
+/documentation/AudioToolbox/1619490-audio-component-errors	42	yes	nothing: AudioComponent error codes
+/documentation/AudioToolbox/1619493-generator_audio_unit_subtypes	75	yes	nothing: generator subtypes (file player, scheduled player)
+/documentation/AudioToolbox/1619498-music-instrument-audio-unit-subt	72	yes	nothing: instrument subtypes (DLS synth, MIDI synth, sampler); AVAudioUnitSampler wraps the sampler
+/documentation/AudioToolbox/1619501-inter-app-audio-unit-types	37	yes	nothing: Inter-App Audio unit types, a retired iOS feature
+/documentation/AudioToolbox/1619504-anonymous	39	yes	nothing: AUiPodTime subtype, legacy
+/documentation/AudioToolbox/1620448-audio-codec-manufacturer-and-imp	75	yes	nothing: Apple hardware/software codec manufacturer IDs
+/documentation/AudioToolbox/1620452-hardware-codec-capabilities	403	yes	nothing: hardware codec capability query; hardware codecs only via Audio Queue/AVFoundation, not OpenAL or the I/O unit; legacy iOS concern with no game decision today
+/documentation/AudioToolbox/1621038-inter-app-audio-unit-property-ids	35	yes	nothing: Inter-App Audio property IDs, retired feature
+/documentation/AudioToolbox/1621039-inter-app-output-unit-property-ids	41	yes	nothing: Inter-App output unit property IDs, retired feature
+/documentation/AudioToolbox/1621044-anonymous	25	yes	nothing: single voice-I/O ducking property ID
+/documentation/AudioToolbox/1623673-codec-unavailable-errors	65	yes	nothing: ExtAudioFile codec-unavailable write errors
+/documentation/AudioToolbox/1624333-audio-converter-property-id	45	yes	nothing: single converter can-resume property
+/documentation/AudioToolbox/3547050-ausampledelay-parameters	26	yes	nothing: single sample-delay parameter
+/documentation/AudioToolbox/3547074-extended-audio-file-packet-overr	32	yes	nothing: ExtAudioFile packet-table override constants
+/documentation/AudioToolbox/3751765-anonymous	46	yes	audio-and-haptics.md
+/documentation/AudioToolbox/3950917-anonymous	28	yes	audio-and-haptics.md
+/documentation/AudioToolbox/4103713-anonymous	25	yes	audio-and-haptics.md
+/documentation/AudioToolbox/4304947-anonymous	37	yes	nothing: dynamic-range compression profile constants for codecs
+/documentation/AudioToolbox/4354006-anonymous	28	yes	audio-and-haptics.md
+/documentation/AudioToolbox/AudioToolbox-constants	32	yes	nothing: AU configuration-info key constants
+/documentation/AudioToolbox/AudioToolbox-data-types	33	yes	nothing: four AU/file-component typealiases
+/documentation/AudioToolbox/AudioToolbox-enumerations	38	yes	nothing: index of anonymous enum pages, all read separately
+/documentation/AudioToolbox/AudioToolbox-functions	61	yes	nothing: five utility functions (validation, converter options/prepare)
+/documentation/AudioToolbox/AudioToolbox-macros	79	yes	nothing: header-guard and display-type macros; AUGRAPH_DEPRECATED macro confirms AUGraph deprecation, noted under audio-unit-processing-graph-services
+/documentation/AudioToolbox/AudioToolbox-structures	27	yes	nothing: two struct links
+/documentation/AudioToolbox/adding-asynchronous-real-time-threads-to-audio-workgroups	635	yes	audio-and-haptics.md;game-loop-and-threading.md
+/documentation/AudioToolbox/adding-audio-unit-auxiliary-real-time-threads-to-audio-workgroups	260	yes	audio-and-haptics.md
+/documentation/AudioToolbox/adding-parallel-real-time-threads-to-audio-workgroups	332	yes	audio-and-haptics.md
+/documentation/AudioToolbox/alternative-audio-route-change-reason-dictionary-key	73	yes	nothing: deprecated C session route-change key
+/documentation/AudioToolbox/analyzing-audio-performance-with-instruments	1903	yes	apple-performance/profiling-workflow.md;audio-and-haptics.md
+/documentation/AudioToolbox/audio-codec	453	yes	nothing: AudioCodec C API index; codec implementer/low-level transcoding surface
+/documentation/AudioToolbox/audio-components	430	yes	nothing: AudioComponent discovery and registration API; plug-in hosting plumbing, Info.plist AudioComponents layout
+/documentation/AudioToolbox/audio-converter-services	561	yes	nothing: AudioConverter API index; transforms listed (bit depth, rate, int/float, interleave, compressed) but offline transcoding is not a game runtime path
+/documentation/AudioToolbox/audio-file-components	311	yes	nothing: AudioFileComponent API, for implementers of file-format plug-ins
+/documentation/AudioToolbox/audio-file-services	1313	yes	assets.md
+/documentation/AudioToolbox/audio-file-stream-flags	134	yes	nothing: AudioFileStream property/parse/seek flags
+/documentation/AudioToolbox/audio-file-stream-services	865	yes	nothing: AudioFileStream parser for network-streamed audio; games ship local files, packet-table-before-data note covered by audio-file-properties
+/documentation/AudioToolbox/audio-format-services	251	yes	nothing: AudioFormat Services index, format-query plumbing
+/documentation/AudioToolbox/audio-input-routes	110	yes	nothing: deprecated C-session input route strings
+/documentation/AudioToolbox/audio-output-routes	152	yes	nothing: deprecated C-session output route strings
+/documentation/AudioToolbox/audio-queue-services	1687	yes	audio-and-haptics.md
+/documentation/AudioToolbox/audio-route-change-dictionary-keys	62	yes	nothing: deprecated C-session route-change keys
+/documentation/AudioToolbox/audio-route-description-dictionary-keys	64	yes	nothing: deprecated C-session route-description keys
+/documentation/AudioToolbox/audio-route-type-key	61	yes	nothing: deprecated C-session route-type key
+/documentation/AudioToolbox/audio-services	444	yes	audio-and-haptics.md
+/documentation/AudioToolbox/audio-session-support	668	yes	audio-and-haptics.md
+/documentation/AudioToolbox/audio-toolbox-debugging	158	yes	audio-and-haptics.md
+/documentation/AudioToolbox/audio-unit-processing-graph-services	1090	yes	audio-and-haptics.md
+/documentation/AudioToolbox/audio-unit-properties	435	yes	nothing: index of AU property/parameter groups (mixers, EQ, filters, effects, I/O, generators); each group read separately or out of slice
+/documentation/AudioToolbox/audio-unit-v2-c-api	1370	yes	nothing: AUv2 C API index (initialize, render, properties, parameters, listeners, host callbacks); symbol map with no game judgment beyond the render-thread rules noted elsewhere
+/documentation/AudioToolbox/audio-unit-v3-plug-ins	359	yes	nothing: AUv3 class index (AUAudioUnit, buses, parameter tree, AUHeadTrackingBinauralRenderer); hosting/extension API with no game decision
+/documentation/AudioToolbox/audio-unit-voice-i-o	187	yes	audio-and-haptics.md
+/documentation/AudioToolbox/audio_file_creation_flags	118	yes	nothing: file creation flags (erase, don't page-align)
+/documentation/AudioToolbox/audio_file_packet_translation_flags	57	yes	nothing: single packet-translation estimate flag
+/documentation/AudioToolbox/clock-utilities	237	yes	nothing: CAClock tempo/SMPTE clock API, music-sync for DAWs
+/documentation/AudioToolbox/core-audio-file-format	101	yes	nothing: CAF structure type list
+/documentation/AudioToolbox/debugging-out-of-process-audio-units-on-apple-silicon	377	yes	nothing: attaching Xcode to AUHostingServiceXPC for out-of-process AU plug-ins, plug-in developer workflow requiring SIP off
+/documentation/AudioToolbox/deprecated-symbols	842	yes	nothing: deprecated-symbol index (Inter-App Audio deprecated iOS 13 and unavailable for iPad apps on macOS, FSRef file APIs, C audio session); deprecation of the C session is noted from its own pages
+/documentation/AudioToolbox/encoding-and-decoding-audio	1087	yes	assets.md
+/documentation/AudioToolbox/extended-audio-file-services	496	yes	nothing: ExtAudioFile API index (read/seek/write, async write); AVAudioFile covers a game's needs
+/documentation/AudioToolbox/general-audio-unit-properties	650	yes	nothing: generic AU property list (stream format, max frames per slice, latency, tail time); hand-built AU hosting detail only
+/documentation/AudioToolbox/generating-spatial-audio-from-a-multichannel-audio-stream	449	yes	audio-and-haptics.md
+/documentation/AudioToolbox/hosting-audio-unit-extensions-using-the-auv2-api	519	yes	nothing: AUv2 host loading AUv3 extensions (async instantiation, view controller); plug-in host concern, AUv2 in maintenance mode
+/documentation/AudioToolbox/incorporating-audio-effects-and-instruments	1364	yes	audio-and-haptics.md
+/documentation/AudioToolbox/info-string-keys	183	yes	nothing: audio file info-dictionary keys (artist, album, tempo)
+/documentation/AudioToolbox/migrating-your-audio-unit-host-to-the-auv3-api	802	yes	nothing: AUv2-to-AUv3 host migration (AUAudioUnit equivalents, in-process check); plug-in host concern, in-process point captured from incorporating-audio-effects
+/documentation/AudioToolbox/music-player	1615	yes	audio-and-haptics.md
+/documentation/AudioToolbox/rendering-spatial-audio-from-bluetooth-headphones	841	yes	nothing: third-party headphone head-tracking renderer extension (AUHeadTrackingBinauralRenderer), EU-only and dev/Ad Hoc builds only; accessory-vendor concern, not a game
+/documentation/AudioToolbox/spatializing-sound-from-a-uiscene	466	yes	audio-and-haptics.md
+/documentation/AudioToolbox/understanding-audio-workgroups	507	yes	audio-and-haptics.md;game-loop-and-threading.md
+/documentation/AudioToolbox/usb-accessory-audio-destination-dictionary-keys	48	yes	nothing: deprecated C-session USB destination keys
+/documentation/AudioToolbox/usb-accessory-audio-source-dictionary-keys	49	yes	nothing: deprecated C-session USB source keys
+/documentation/AudioToolbox/workgroup-management	359	yes	audio-and-haptics.md
+/documentation/BackgroundAssets	921	yes	assets.md
+/documentation/BackgroundAssets/configuring-an-unmanaged-background-assets-project	927	yes	assets.md
+/documentation/BackgroundAssets/creating-managed-asset-packs	819	yes	assets.md
+/documentation/BackgroundAssets/downloading-apple-hosted-asset-packs	1263	yes	assets.md
+/documentation/BackgroundAssets/downloading-essential-assets-in-the-background	103	yes	nothing: sample-code stub (WWDC23 10108) with only signing setup; no technique text on the page
+/documentation/BackgroundAssets/reducing-download-and-storage-demands-with-localized-asset-packs	1130	yes	assets.md
+/documentation/BackgroundAssets/testing-asset-packs-locally	1310	yes	assets.md
+/documentation/CoreHaptics/delivering-rich-app-experiences-with-haptics	72	yes	nothing: sample stub for WWDC21 10278 (iPhone 8+ requirement only); no technique text
+/documentation/CoreHaptics/playing-a-custom-haptic-pattern-from-a-file	752	yes	audio-and-haptics.md
+/documentation/CoreHaptics/playing-a-single-tap-haptic-pattern	561	yes	audio-and-haptics.md
+/documentation/CoreHaptics/playing-collision-based-haptic-patterns	825	yes	audio-and-haptics.md
+/documentation/CoreHaptics/playing-haptics-on-game-controllers	68	yes	nothing: sample stub for WWDC20 10614 (needs physical device and Bluetooth controller); names no API

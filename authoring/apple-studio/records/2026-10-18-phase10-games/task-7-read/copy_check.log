@@ -1,0 +1,15 @@
+threshold: 12 words
+== g01: 29 source texts, notes g01.md
+== g02: 68 source texts, notes g02.md
+== g03: 91 source texts, notes g03.md
+== g04: 59 source texts, notes g04.md
+== g05: 74 source texts, notes g05.md
+== g06: 169 source texts, notes g06.md
+== g07: 206 source texts, notes g07.md
+== g08: 70 source texts, notes g08.md
+EXCLUDED g08.md:74 (13 words, src documentation__gamekit__assigning-players-to-teams-using-rules.md): length(teams name == red players ) == length(teams name == blue players )
+== g09: 64 source texts, notes g09.md
+== p01: 39 source texts, notes p01.md
+== r01: 36 source texts, notes r01.md
+hits: 0
+excluded (symbol/path/signature): 1
