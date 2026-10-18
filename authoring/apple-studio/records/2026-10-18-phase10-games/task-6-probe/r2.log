@@ -1,7 +1,7 @@
 Machine: Apple M4 Pro
 OS: macOS 27.0.1 26A434
 Toolchain: Xcode 27.1
-Date: 2026-10-18 10:25 EDT
+Date: 2026-10-18 11:22 EDT
 $TMP below is authoring/apple-studio/pipeline/tmp, the gitignored pipeline scratch
 
 ## Capture without MTL_CAPTURE_ENABLED
@@ -9,6 +9,7 @@ $ .build/release/MetalProbe capture --out $TMP/nocap.gputrace
 exit: 1
 MetalProbe: Error Domain=MTLCaptureError Code=1 "Capture layer is not inserted." UserInfo={NSLocalizedDescription=Capture layer is not inserted., NSLocalizedRecoverySuggestion=Enable GPU Frame Capture in your Xcode scheme or run with MTL_CAPTURE_ENABLED=1.}
 supports gpuTraceDocument: false
+MetalProbe: error: Error Domain=MTLCaptureError Code=1 "Capture layer is not inserted." UserInfo={NSLocalizedDescription=Capture layer is not inserted., NSLocalizedRecoverySuggestion=Enable GPU Frame Capture in your Xcode scheme or run with MTL_CAPTURE_ENABLED=1.}
 trace written: no
 
 ## Capture with MTL_CAPTURE_ENABLED=1
@@ -202,19 +203,83 @@ api80          [MTL4CommandQueue signalEvent:value:]                            
 api81          [@sevt1 waitUntilSignaledValue:1 timeoutMS:95000]                                     info
 (82 items)
 gpudebug --terminate "$id"
-Session 286 terminated.
+Session 354 terminated.
+
+## gpudebug: the profiling block as previously written (6c6d834), in a new session
+(a plain profile run, then the same session's profile load, and the one-step path)
+id=$(gpudebug -q -t $TMP/probe.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p')
+gpudebug -q -t $TMP/probe.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p'
+gpudebug -s "$id" -c "profile run"                               # "Profile data collected. (6.5s)"
+Profile data collected. (6.5s)
+gpudebug -s "$id" -c "go /performance" -c "go commands"         # draws ranked by cost
+Name      Summary         Actions
+────────  ──────────────  ────────
+timeline                  go, info
+encoders  sorted by cost        go
+commands  sorted by cost        go
+shaders                         go
+(4 items)
+error: 'commands' has no info. Available actions: go
+gpudebug -s "$id" -c "go /performance" -c "go shaders"          # frag0, vert0, ... with cost share
+Name      Summary         Actions
+────────  ──────────────  ────────
+timeline                  go, info
+encoders  sorted by cost        go
+commands  sorted by cost        go
+shaders                         go
+(4 items)
+error: 'shaders' has no info. Available actions: go
+gpudebug -s "$id" -c "go /performance" -c "go commands" -c "go draw0" -c "go heatmap" -c "go fragment" -c "fetch cost --out $PWD/cost.png"
+Name      Summary         Actions
+────────  ──────────────  ────────
+timeline                  go, info
+encoders  sorted by cost        go
+commands  sorted by cost        go
+shaders                         go
+(4 items)
+error: 'commands' has no info. Available actions: go
+error: 'draw0' not found in commands
+error: 'heatmap' not found in commands
+error: 'fragment' not found in commands
+error: 'cost' not found in commands
+gpudebug -s "$id" -c "go /performance" -c "go commands" -c "list"
+Name      Summary         Actions
+────────  ──────────────  ────────
+timeline                  go, info
+encoders  sorted by cost        go
+commands  sorted by cost        go
+shaders                         go
+(4 items)
+error: 'commands' has no info. Available actions: go
+(empty)
+gpudebug -s "$id" -c "profile load"
+Profile data already loaded.
+gpudebug -s "$id" -c "go /performance" -c "go commands" -c "list"
+Name      Summary         Actions
+────────  ──────────────  ────────
+timeline                  go, info
+encoders  sorted by cost        go
+commands  sorted by cost        go
+shaders                         go
+(4 items)
+error: 'commands' has no info. Available actions: go
+(empty)
+gpudebug -s "$id" -c "go /performance/commands"
+error: 'commands' has no info. Available actions: go
+gpudebug --terminate "$id"
+Session 357 terminated.
 
 ## gpudebug: the profiling block, verbatim, after the Sessions block's first line
 id=$(gpudebug -q -t $TMP/probe.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p')
 gpudebug -q -t $TMP/probe.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p'
-gpudebug -s "$id" -c "profile run --embed"                       # "Profile data collected. (6.6s)"
-Profile data collected. (6.6s)
+gpudebug -s "$id" -c "profile run --embed"                       # prints "Profile data collected."
+Profile data collected. (6.3s)
 gpudebug --terminate "$id"
-Session 289 terminated.
+Session 360 terminated.
 id=$(gpudebug -q -t $TMP/probe.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p')
 gpudebug -q -t $TMP/probe.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p'
-gpudebug -s "$id" -c "profile load"                              # "Profile data loaded. (2.9s)"
-Profile data loaded. (3.2s)
+gpudebug -s "$id" -c "profile load"                              # prints "Profile data loaded."
+Profile data loaded. (266ms)
 gpudebug -s "$id" -c "go /performance" -c "go commands"         # draws ranked by cost
 Name      Summary                     Actions
 ────────  ──────────────────────────  ────────
@@ -225,10 +290,10 @@ shaders   3 shaders, sorted by cost         go
 (4 items)
 Name   Shaders                                 Pipeline                        Cost    Actions
 ─────  ──────────────────────────────────────  ──────────────────────────────  ──────  ────────
-draw0  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  29.06%  go, info
-disp0  "addArrays"                             @cps0 "MTLComputePipelineSt...  27.71%  go, info
-draw1  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  23.33%  go, info
-draw2  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  17.45%  go, info
+draw0  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  28.72%  go, info
+draw1  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  26.76%  go, info
+draw2  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  19.84%  go, info
+disp0  "addArrays"                             @cps0 "MTLComputePipelineSt...  19.32%  go, info
 (4 items)
 gpudebug -s "$id" -c "go /performance" -c "go shaders"          # frag0, vert0, ... with cost share
 Name      Summary                     Actions
@@ -240,9 +305,9 @@ shaders   3 shaders, sorted by cost         go
 (4 items)
 Name   Function           Pipeline                        Cost    Invocations  Actions
 ─────  ─────────────────  ──────────────────────────────  ──────  ──────────  ────────
-frag0  flatColorFragment  @rps0 "MTLRenderPipelineSta...  54.75%  3           go, info
-comp0  addArrays          @cps0 "MTLComputePipelineSt...  27.71%  1           go, info
-vert0  fullscreenVertex   @rps0 "MTLRenderPipelineSta...  15.10%  3           go, info
+frag0  flatColorFragment  @rps0 "MTLRenderPipelineSta...  46.11%  3           go, info
+vert0  fullscreenVertex   @rps0 "MTLRenderPipelineSta...  29.21%  3           go, info
+comp0  addArrays          @cps0 "MTLComputePipelineSt...  19.32%  1           go, info
 (3 items)
 gpudebug -s "$id" -c "go /performance" -c "go commands" -c "go draw0" -c "go heatmap" -c "go fragment" -c "fetch cost --out $PWD/cost.png"
 Name      Summary                     Actions
@@ -254,10 +319,10 @@ shaders   3 shaders, sorted by cost         go
 (4 items)
 Name   Shaders                                 Pipeline                        Cost    Actions
 ─────  ──────────────────────────────────────  ──────────────────────────────  ──────  ────────
-draw0  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  29.06%  go, info
-disp0  "addArrays"                             @cps0 "MTLComputePipelineSt...  27.71%  go, info
-draw1  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  23.33%  go, info
-draw2  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  17.45%  go, info
+draw0  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  28.72%  go, info
+draw1  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  26.76%  go, info
+draw2  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  19.84%  go, info
+disp0  "addArrays"                             @cps0 "MTLComputePipelineSt...  19.32%  go, info
 (4 items)
 Name      Summary  Actions
 ────────  ───────  ───────
@@ -290,18 +355,33 @@ draw_mapping  Draw ID                   info, fetch
 raytracing    Raytracing Latency        info, fetch
 (11 items)
 Fetched:
-  $TMP/r2/cost.png (468 bytes)
+  $TMP/r2/cost.png (442 bytes)
   $TMP/r2/draw0_fragment_cost_top100.json (11.7 KiB)
+gpudebug -s "$id" -c "go /performance/commands"
+Name   Shaders                                 Pipeline                        Cost    Actions
+─────  ──────────────────────────────────────  ──────────────────────────────  ──────  ────────
+draw0  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  28.72%  go, info
+draw1  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  26.76%  go, info
+draw2  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  19.84%  go, info
+disp0  "addArrays"                             @cps0 "MTLComputePipelineSt...  19.32%  go, info
+(4 items)
+gpudebug -s "$id" -c "go /performance/shaders"
+Name   Function           Pipeline                        Cost    Invocations  Actions
+─────  ─────────────────  ──────────────────────────────  ──────  ──────────  ────────
+frag0  flatColorFragment  @rps0 "MTLRenderPipelineSta...  46.11%  3           go, info
+vert0  fullscreenVertex   @rps0 "MTLRenderPipelineSta...  29.21%  3           go, info
+comp0  addArrays          @cps0 "MTLComputePipelineSt...  19.32%  1           go, info
+(3 items)
 gpudebug -s "$id" -c "find add arrays"
   commands/cb3/grp0/ce0  "Add arrays"  1 dispatch
   commands/cb3/grp0/ce0/disp0  "addArrays"  4096x1x1
-  performance/timeline/encoders/ce0  "Add arrays"  67.25µs
+  performance/timeline/encoders/ce0  "Add arrays"  0.00µs
   performance/timeline/encoders/ce0/shaders/comp0  addArrays  @cps0 "MTLComputePipelineState 1"
   performance/timeline/counters/address_generation  Address Generation  2 counters
-  performance/timeline/counters/address_generation/address_generation_limiter  0.00%
-  performance/timeline/counters/address_generation/address_generation_utilization  0.00%
+  performance/timeline/counters/address_generation/address_generation_limiter
+  performance/timeline/counters/address_generation/address_generation_utilization
   performance/timeline/shaders/comp0  addArrays  @cps0 "MTLComputePipelineState 1"
-  performance/encoders/ce0  "Add arrays"  27.71%
+  performance/encoders/ce0  "Add arrays"  19.32%
   performance/encoders/ce0/commands/disp0  "addArrays"  @cps0 "MTLComputePipelineState 1"
   performance/commands/disp0  "addArrays"  @cps0 "MTLComputePipelineState 1"
   performance/shaders/comp0  addArrays  @cps0 "MTLComputePipelineState 1"
@@ -339,12 +419,14 @@ Links:
   :pt  /performance/timeline/encoders/ce0
   :pe  /performance/encoders/ce0
 gpudebug --terminate "$id"
-Session 292 terminated.
+Session 363 terminated.
 
 ## Files the blocks wrote
 cost.png
 draw0_fragment_cost_top100.json
 draw0.png
+pre-fix-gpu-debugging.md
+pre-fix-profile.sh
 profile.sh
 sessions.sh
 
@@ -359,9 +441,53 @@ compute ok 4096
 isCapturing after end: false
 wrote $TMP/probe-compile-in-capture.gputrace
 
+## Browsing that trace: list, find, info, fetch
+$ gpudebug --oneshot -t $TMP/probe-compile-in-capture.gputrace -c go /commands -c list -c find opaque -c go /commands/cb0/grp0/re0/grp0/draw0 -c info -c fetch color0 --out $TMP/r2/compile-in-capture-draw0.png
+exit: 0
+Name  Summary    Label                  Actions
+────  ─────────  ─────────────────────  ───────
+cb0   1 encoder  "MTL4CommandBuffer 1"       go
+cb1   1 encoder  "MTL4CommandBuffer 1"       go
+cb2   1 encoder  "MTL4CommandBuffer 1"       go
+cb3   1 encoder  "MTL4CommandBuffer 2"       go
+(4 items)
+Name  Summary    Label                  Actions
+────  ─────────  ─────────────────────  ───────
+cb0   1 encoder  "MTL4CommandBuffer 1"       go
+cb1   1 encoder  "MTL4CommandBuffer 1"       go
+cb2   1 encoder  "MTL4CommandBuffer 1"       go
+cb3   1 encoder  "MTL4CommandBuffer 2"       go
+(4 items)
+  commands/cb0/grp0/re0/grp0  "Opaque"  1 draw
+  commands/cb1/grp0/re0/grp0  "Opaque"  1 draw
+  commands/cb2/grp0/re0/grp0  "Opaque"  1 draw
+  api_calls/api5  [MTL4RenderCommandEncoder pushDebugGroup:"Opaque"]
+  api_calls/api23  [MTL4RenderCommandEncoder pushDebugGroup:"Opaque"]
+  api_calls/api40  [MTL4RenderCommandEncoder pushDebugGroup:"Opaque"]
+(6 matches)
+Name      Label                       Summary                 Actions
+────────  ──────────────────────────  ──────────────────────  ───────────
+pipeline  "MTLRenderPipelineState 1"  @rps0                          info
+vertex    "fullscreenVertex"                                           go
+fragment  "flatColorFragment"         1 buffer                         go
+color0    "Offscreen target"          @tex0 64x64 RGBA8Unorm  info, fetch
+(4 items)
+
+Links:
+  :a   /api_calls/api9
+-[MTL4RenderCommandEncoder drawPrimitives:vertexStart:vertexCount:]
+  primitiveType:  Triangle
+  vertexStart:    0
+  vertexCount:    3
+
+-- Encoder State --
+Cull mode             None
+Front facing winding  Clockwise
+Fetched $TMP/r2/compile-in-capture-draw0.png (1.32 KiB)
+
 ## profile run on that trace, killed after 120 s
 $ perl -e alarm 120; exec @ARGV gpudebug --oneshot -t $TMP/probe-compile-in-capture.gputrace -c status -c profile run
-run.sh: line 29: 73049 Alarm clock: 14         "$@" > "$OUT" 2>&1
+run.sh: line 37: 89481 Alarm clock: 14         "$@" > "$OUT" 2>&1
 exit: 142
 Trace:     $TMP/probe-compile-in-capture.gputrace
 Device:    Apple M4 Pro

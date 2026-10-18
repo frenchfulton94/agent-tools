@@ -1,7 +1,7 @@
 Machine: Apple M4 Pro
 OS: macOS 27.0.1 26A434
 Toolchain: Xcode 27.1
-Date: 2026-10-18 10:59 EDT
+Date: 2026-10-18 11:20 EDT
 $TMP below is authoring/apple-studio/pipeline/tmp, the gitignored pipeline scratch
 
 ## The project's targets
@@ -15,19 +15,62 @@ exit: 0
 ## xcodebuild clean, CppHost
 $ xcodebuild -project ExternalHosts.xcodeproj -target CppHost clean
 exit: 0
+    export ACTION\=clean
+    export CONFIGURATION\=Release
     /bin/sh build.sh clean
 ** CLEAN SUCCEEDED **
 
 ## xcodebuild clean, RustHost
 $ xcodebuild -project ExternalHosts.xcodeproj -target RustHost clean
 exit: 0
+    export ACTION\=clean
+    export CONFIGURATION\=Release
     /bin/sh xcode-cargo.sh Release clean
 ** CLEAN SUCCEEDED **
 cpp-host after clean: absent, rust-host after clean: absent
 
+## The pre-fix xcode-cargo.sh, from 6c6d834
+2:# Build Tool: /bin/sh   Arguments: xcode-cargo.sh $(ACTION) $(CONFIGURATION)
+9:action="${1:-build}"
+10:config="${2:-Debug}"
+argument string in the copy: buildArgumentsString = "$TMP/r5-pre-fix/xcode-cargo.sh $(ACTION) $(CONFIGURATION)";
+
+## xcodebuild build, RustHost, pre-fix arguments, unquoted
+$ xcodebuild -project $TMP/r5-pre-fix/unquoted/ExternalHosts.xcodeproj -target RustHost build
+exit: 75
+    export ACTION\=
+    export CONFIGURATION\=Release
+    /bin/sh $TMP/r5-pre-fix/xcode-cargo.sh Release
+error: xcode-cargo.sh does not handle the action 'Release'
+error: Internal inconsistency error: never received target ended message for target ID '0' (in target 'RustHost' from project 'ExternalHosts').
+** BUILD INTERRUPTED **
+argument string in the copy: buildArgumentsString = "$TMP/r5-pre-fix/xcode-cargo.sh \"$(ACTION)\" $(CONFIGURATION)";
+
+## xcodebuild build, RustHost, pre-fix arguments, quoted
+$ xcodebuild -project $TMP/r5-pre-fix/quoted/ExternalHosts.xcodeproj -target RustHost build
+exit: 75
+    export ACTION\=
+    export CONFIGURATION\=Release
+    /bin/sh $TMP/r5-pre-fix/xcode-cargo.sh Release
+error: xcode-cargo.sh does not handle the action 'Release'
+error: Internal inconsistency error: never received target ended message for target ID '0' (in target 'RustHost' from project 'ExternalHosts').
+** BUILD INTERRUPTED **
+
+## xcode-cargo.sh from a shell, unknown action
+$ sh rust/xcode-cargo.sh Release install
+exit: 1
+error: xcode-cargo.sh does not handle the action 'install'
+
+## xcode-cargo.sh from a shell, no cargo on PATH
+$ env CARGO= PATH=/usr/bin:/bin sh rust/xcode-cargo.sh Release
+exit: 1
+error: cargo is not on this build's PATH; set CARGO to an absolute path
+
 ## xcodebuild build, CppHost
 $ xcodebuild -project ExternalHosts.xcodeproj -target CppHost build
 exit: 0
+    export ACTION\=
+    export CONFIGURATION\=Release
     /bin/sh build.sh
 built cpp/build/cpp-host
 ** BUILD SUCCEEDED **
@@ -35,8 +78,10 @@ built cpp/build/cpp-host
 ## xcodebuild build, RustHost
 $ xcodebuild -project ExternalHosts.xcodeproj -target RustHost build
 exit: 0
+    export ACTION\=
+    export CONFIGURATION\=Release
     /bin/sh xcode-cargo.sh Release
-    Finished `release` profile [optimized] target(s) in 8.44s
+    Finished `release` profile [optimized] target(s) in 7.81s
 ** BUILD SUCCEEDED **
 
 ## cpp-host, one offscreen frame
@@ -47,8 +92,8 @@ pixel 255 0 0 255
 ## cpp-host, API and Shader Validation, reports to stderr
 $ env MTL_DEBUG_LAYER=1 MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1 cpp/build/cpp-host
 exit: 0
-2026-10-18 10:59:24.726 cpp-host[79980:3964864] Metal API Validation Enabled
-2026-10-18 10:59:24.727 cpp-host[79980:3964864] Metal GPU Validation Enabled
+2026-10-18 11:21:09.279 cpp-host[88728:4020071] Metal API Validation Enabled
+2026-10-18 11:21:09.279 cpp-host[88728:4020071] Metal GPU Validation Enabled
 pixel 255 0 0 255
 
 ## cpp-host --capture without MTL_CAPTURE_ENABLED
@@ -97,7 +142,7 @@ Output file saved as: r5-cpp-host.trace
 $ xcrun xctrace export --input $TMP/r5-cpp-host.trace --toc
 exit: 0
 launched process:
-<process type="launched" return-exit-status="0" name="cpp-host" pid="80007" termination-reason="exit(0)"/>
+<process type="launched" return-exit-status="0" name="cpp-host" pid="88755" termination-reason="exit(0)"/>
 GPU and Metal tables: 48
   schema="device-gpu-info"
   schema="gpu-aps-stream"
@@ -149,7 +194,7 @@ GPU and Metal tables: 48
   schema="metal-wired-sysmem-level-interval"
 metal-application-command-buffer-submissions rows: 1
 processes the table defines:
-  <process id="7" fmt="cpp-host (80007)"
+  <process id="7" fmt="cpp-host (88755)"
 references to cpp-host (process id 7) after its first row: 2
 
 ## rust-host, one offscreen frame
@@ -160,8 +205,8 @@ pixel [255, 0, 0, 255]
 ## rust-host, API and Shader Validation, reports to stderr
 $ env MTL_DEBUG_LAYER=1 MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1 rust/target/release/rust-host
 exit: 0
-2026-10-18 10:59:32.866 rust-host[80095:3966373] Metal API Validation Enabled
-2026-10-18 10:59:32.866 rust-host[80095:3966373] Metal GPU Validation Enabled
+2026-10-18 11:21:17.273 rust-host[88801:4021367] Metal API Validation Enabled
+2026-10-18 11:21:17.273 rust-host[88801:4021367] Metal GPU Validation Enabled
 pixel [255, 0, 0, 255]
 
 ## rust-host --capture without MTL_CAPTURE_ENABLED
@@ -210,7 +255,7 @@ Output file saved as: r5-rust-host.trace
 $ xcrun xctrace export --input $TMP/r5-rust-host.trace --toc
 exit: 0
 launched process:
-<process type="launched" return-exit-status="0" name="rust-host" pid="80122" termination-reason="exit(0)"/>
+<process type="launched" return-exit-status="0" name="rust-host" pid="88835" termination-reason="exit(0)"/>
 GPU and Metal tables: 48
   schema="device-gpu-info"
   schema="gpu-aps-stream"
@@ -262,5 +307,5 @@ GPU and Metal tables: 48
   schema="metal-wired-sysmem-level-interval"
 metal-application-command-buffer-submissions rows: 1
 processes the table defines:
-  <process id="7" fmt="rust-host (80122)"
+  <process id="7" fmt="rust-host (88835)"
 references to rust-host (process id 7) after its first row: 2

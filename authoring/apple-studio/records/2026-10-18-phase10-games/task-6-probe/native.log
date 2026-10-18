@@ -31,7 +31,7 @@ FILE: plugins/apple-studio/skills/apple-metal/references/display-and-upscaling.m
 
 ==============================================================================
 FILE: plugins/apple-studio/skills/apple-metal/references/gpu-debugging-and-profiling.md   (1 gated blocks)   target: -std=metal4.0
-  [PASS:metal:as-written   ] line 486  #include <metal_logging>
+  [PASS:metal:as-written   ] line 487  #include <metal_logging>
 
 ==============================================================================
 FILE: plugins/apple-studio/skills/apple-metal/references/pipelines-and-render-passes.md   (2 gated blocks)   target: -std=metal4.0

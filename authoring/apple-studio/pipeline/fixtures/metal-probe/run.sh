@@ -15,6 +15,14 @@ PROBE="$HERE/.build/release/MetalProbe"
 mkdir -p "$TMP"
 cd "$HERE" || exit 2
 
+# The last commit before Task 6 changed the references. The "as previously
+# written" steps run that version's text, to log the failures behind each fix.
+PRE_FIX=6c6d834
+REFDIR=plugins/apple-studio/skills/apple-metal/references
+pre_fix_reference() {   # pre_fix_reference <file.md> <dest>
+  git -C "$HERE" show "$PRE_FIX:$REFDIR/$1" > "$2"
+}
+
 header() {
   echo "Machine: $(sysctl -n machdep.cpu.brand_string)"
   echo "OS: macOS $(sw_vers -productVersion) $(sw_vers -buildVersion)"
@@ -52,6 +60,13 @@ r1() {
   grep -v '^frame [0-9]* ok$' "$OUT"
   step "The probe's compute workload" "$PROBE" compute --count 1048576
   show
+  # Task 9's workload. /usr/bin/time -p prints the wall time.
+  step "sim, 2,000 normal ticks" /usr/bin/time -p "$PROBE" sim --ticks 2000
+  show
+  step "sim, 200 ticks through plantedSlowStep" /usr/bin/time -p "$PROBE" sim --ticks 200 --slow
+  show
+  step "plantedSlowStep is a symbol in the release binary" nm "$PROBE"
+  grep plantedSlowStep "$OUT"
 }
 
 # Runs a bash block from gpu-debugging-and-profiling.md as written, with only
@@ -77,10 +92,28 @@ r2() {
   documented 'gpudebug -s "$id" -c "status"' > "$TMP/r2/sessions.sh"
   bash -v "$TMP/r2/sessions.sh" 2>&1 | sed "s|$TMP|\$TMP|g"
   echo
+  echo "## gpudebug: the profiling block as previously written ($PRE_FIX), in a new session"
+  echo "(a plain profile run, then the same session's profile load, and the one-step path)"
+  pre_fix_reference gpu-debugging-and-profiling.md "$TMP/r2/pre-fix-gpu-debugging.md"
+  {
+    documented 'gpudebug -s "$id" -c "status"' | head -1
+    python3 "$HERE/check_verbatim.py" --block "$TMP/r2/pre-fix-gpu-debugging.md" \
+      'gpudebug -s "$id" -c "profile run"' | sed "s|Frame.gputrace|$TRACE|g"
+    echo 'gpudebug -s "$id" -c "go /performance" -c "go commands" -c "list"'
+    echo 'gpudebug -s "$id" -c "profile load"'
+    echo 'gpudebug -s "$id" -c "go /performance" -c "go commands" -c "list"'
+    echo 'gpudebug -s "$id" -c "go /performance/commands"'
+    echo 'gpudebug --terminate "$id"'
+  } > "$TMP/r2/pre-fix-profile.sh"
+  bash -v "$TMP/r2/pre-fix-profile.sh" 2>&1 | sed "s|$TMP|\$TMP|g"
+  echo
   echo "## gpudebug: the profiling block, verbatim, after the Sessions block's first line"
   {
     documented 'gpudebug -s "$id" -c "status"' | head -1
     documented 'gpudebug -s "$id" -c "profile run --embed"'
+    # With a profile loaded, the one-step path under /performance.
+    echo 'gpudebug -s "$id" -c "go /performance/commands"'
+    echo 'gpudebug -s "$id" -c "go /performance/shaders"'
     # The reference: "With other grouping, run go /commands/cb0 and follow the
     # listing, or find <label>." The dispatch is in its own command buffer.
     echo 'gpudebug -s "$id" -c "find add arrays"'
@@ -101,6 +134,11 @@ r2() {
   rm -rf "$incapture"
   step "Capture with the compute pipeline compiled inside the capture" \
     env MTL_CAPTURE_ENABLED=1 "$PROBE" capture --out "$incapture" --compile-in-capture
+  show
+  step "Browsing that trace: list, find, info, fetch" gpudebug --oneshot -t "$incapture" \
+    -c "go /commands" -c "list" -c "find opaque" \
+    -c "go /commands/cb0/grp0/re0/grp0/draw0" -c "info" \
+    -c "fetch color0 --out $TMP/r2/compile-in-capture-draw0.png"
   show
   local reports=~/Library/Logs/DiagnosticReports
   local before
@@ -159,10 +197,10 @@ xctrace_toc() {
 
 r3() {
   header
-  # xctrace relays none of the target's output unless --target-stdout is given,
-  # and it never relays stderr. The probe prints its errors to stdout as well.
-  # `record` exits 54 when --time-limit ends the recording, but also when the
-  # target exits non-zero, so the toc's process line is the target's verdict.
+  # xctrace passes none of the target's output through unless --target-stdout
+  # is given; the last steps below check where stdout and stderr go. The exit
+  # steps check what `record`'s exit status means: the toc's launched-process
+  # element, not that status, is the target's verdict.
   local n=1
   for template in 'Metal System Trace' 'Game Performance'; do
     local trace="$TMP/r3-$n.trace"
@@ -175,31 +213,88 @@ r3() {
     grep -v -e '^frame [0-9]* ok$' -e '^$' "$TMP/r3-$n.stdout"
     echo "recording size: $(du -sh "$trace" | cut -f1)"
     xctrace_toc "$trace" MetalProbe "$template"
+    if [ "$STATUS" -ne 0 ]; then
+      xctrace_toc "$trace" MetalProbe "$template, second attempt"
+    fi
     n=$((n + 1))
   done
-  # 100,000 frames take about 5 s here, so the runs above end before the time
-  # limit. This run cannot finish in 1 s, so the limit ends it.
+  # The runs above end when the probe finishes or when the 10 s limit is
+  # reached, whichever comes first. This run cannot finish in 1 s.
   local trace="$TMP/r3-3.trace"
   rm -rf "$trace"
   step "xctrace record, Metal System Trace, ended by --time-limit 1s" xcrun xctrace record \
     --template 'Metal System Trace' --time-limit 1s --output "$trace" \
     --launch -- .build/release/MetalProbe render --frames 10000000
   show
-  echo "(exit 54: here --time-limit ended the recording, and xctrace killed the target)"
   echo "recording size: $(du -sh "$trace" | cut -f1)"
   xctrace_toc "$trace" MetalProbe "Metal System Trace, 1 s"
   for target in /usr/bin/true /usr/bin/false; do
-    rm -rf "$TMP/r3-$(basename "$target").trace"
+    trace="$TMP/r3-$(basename "$target").trace"
+    rm -rf "$trace"
     step "xctrace record exit status for $target, which ends at once" xcrun xctrace record \
-      --template 'Time Profiler' --time-limit 10s --output "$TMP/r3-$(basename "$target").trace" --launch -- "$target"
-    grep -E 'ended|exited|limit' "$OUT"
+      --template 'Time Profiler' --time-limit 10s --output "$trace" --launch -- "$target"
+    show
+    step "xctrace export --toc, $target" xcrun xctrace export --input "$trace" --toc
+    grep -o '<process [^>]*type="launched"[^>]*>' "$OUT"
   done
+  # Where the target's stdout and stderr go, with and without --target-stdout.
+  local probe_cmd='echo TO-STDOUT; echo TO-STDERR >&2'
+  rm -rf "$TMP/r3-streams" && mkdir -p "$TMP/r3-streams"
+  step "xctrace record, a target that writes one line to stdout and one to stderr" xcrun xctrace record \
+    --template 'Time Profiler' --time-limit 10s --output "$TMP/r3-streams/plain.trace" \
+    --launch -- /bin/sh -c "$probe_cmd"
+  echo "xctrace's own stdout and stderr:"
+  show
+  step "the same, with --target-stdout" xcrun xctrace record \
+    --template 'Time Profiler' --time-limit 10s --output "$TMP/r3-streams/redirected.trace" \
+    --target-stdout "$TMP/r3-streams/target.out" --launch -- /bin/sh -c "$probe_cmd"
+  echo "xctrace's own stdout and stderr:"
+  show
+  echo "the --target-stdout file:"
+  cat "$TMP/r3-streams/target.out"
 }
 
 # xcodebuild output is long; keep the command the target ran and the verdict.
 xcodebuild_summary() {
+  grep -E '^    export (ACTION|CONFIGURATION)\\=' "$OUT"
   grep -v '^    export' "$OUT" | grep -E '^    /bin/sh |^built |Finished|^error|warning:|\*\* [A-Z ]+ \*\*' \
     | sed "s|$TMP|\$TMP|g; s|$HERE/||g"
+}
+
+# The RustHost target with the argument string and script as they were before
+# Task 6 ($PRE_FIX), in a throwaway copy of the project under $TMP. The copy
+# runs the old script from $TMP against the fixture's crate. `quoted` puts
+# "$(ACTION)" in double quotes.
+r5_pre_fix() {
+  local old="$TMP/r5-pre-fix"
+  rm -rf "$old" && mkdir -p "$old"
+  pre_fix_reference cpp-and-rust.md "$old/cpp-and-rust.md"
+  python3 "$HERE/check_verbatim.py" --block "$old/cpp-and-rust.md" '#!/bin/sh' > "$old/xcode-cargo.sh"
+  echo
+  echo "## The pre-fix xcode-cargo.sh, from $PRE_FIX"
+  grep -n -E 'Arguments:|action=|config=' "$old/xcode-cargo.sh"
+  for variant in unquoted quoted; do
+    local args='$(ACTION) $(CONFIGURATION)'
+    [ "$variant" = quoted ] && args='\"$(ACTION)\" $(CONFIGURATION)'
+    mkdir -p "$old/$variant/ExternalHosts.xcodeproj"
+    python3 - "$HERE/ExternalHosts.xcodeproj/project.pbxproj" "$old/$variant/ExternalHosts.xcodeproj/project.pbxproj" \
+      "$old/xcode-cargo.sh $args" "$HERE/rust" <<'PY'
+import sys
+src, dst, args, workdir = sys.argv[1:]
+text = open(src).read()
+new = text.replace('buildArgumentsString = "xcode-cargo.sh $(CONFIGURATION) $(ACTION)";',
+                   'buildArgumentsString = "%s";' % args)
+new = new.replace('buildWorkingDirectory = "$(PROJECT_DIR)/rust";',
+                  'buildWorkingDirectory = "%s";' % workdir)
+assert new.count(args) == 1 and workdir in new, "pbxproj did not change as expected"
+open(dst, "w").write(new)
+PY
+    grep 'buildArgumentsString = ".*xcode-cargo' "$old/$variant/ExternalHosts.xcodeproj/project.pbxproj" \
+      | sed "s|$TMP|\$TMP|g; s/^[[:space:]]*/argument string in the copy: /"
+    step "xcodebuild build, RustHost, pre-fix arguments, $variant" \
+      xcodebuild -project "$old/$variant/ExternalHosts.xcodeproj" -target RustHost build
+    xcodebuild_summary
+  done
 }
 
 r5() {
@@ -213,6 +308,12 @@ r5() {
   done
   echo "cpp-host after clean: $([ -e "$cpp" ] && echo present || echo absent)," \
        "rust-host after clean: $([ -e "$rust" ] && echo present || echo absent)"
+  r5_pre_fix
+  # The fixed script's error paths, from a shell, with the new argument order.
+  step "xcode-cargo.sh from a shell, unknown action" sh rust/xcode-cargo.sh Release install
+  show
+  step "xcode-cargo.sh from a shell, no cargo on PATH" env CARGO= PATH=/usr/bin:/bin sh rust/xcode-cargo.sh Release
+  show
   for target in CppHost RustHost; do
     step "xcodebuild build, $target" xcodebuild -project ExternalHosts.xcodeproj -target "$target" build
     xcodebuild_summary

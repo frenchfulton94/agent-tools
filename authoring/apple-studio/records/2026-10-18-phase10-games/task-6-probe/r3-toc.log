@@ -1,7 +1,7 @@
 Machine: Apple M4 Pro
 OS: macOS 27.0.1 26A434
 Toolchain: Xcode 27.1
-Date: 2026-10-18 10:55 EDT
+Date: 2026-10-18 11:15 EDT
 $TMP below is authoring/apple-studio/pipeline/tmp, the gitignored pipeline scratch
 
 ## xctrace record, Metal System Trace, the brief's command plus --target-stdout
@@ -14,11 +14,17 @@ Recording completed. Saving output file...
 Output file saved as: r3-1.trace
 probe stdout: 100000 ok lines, then:
 pixel 159 128 64 255
-recording size: 508M
+recording size: 466M
 
 ## xctrace export --toc, Metal System Trace
 $ xcrun xctrace export --input $TMP/r3-1.trace --toc
-run.sh: line 29: 79349 Bus error: 10           "$@" > "$OUT" 2>&1
+run.sh: line 37: 87290 Bus error: 10           "$@" > "$OUT" 2>&1
+exit: 138
+(exit 138 is SIGBUS: xctrace itself crashed while it loaded the trace)
+
+## xctrace export --toc, Metal System Trace, second attempt
+$ xcrun xctrace export --input $TMP/r3-1.trace --toc
+run.sh: line 37: 87305 Bus error: 10           "$@" > "$OUT" 2>&1
 exit: 138
 (exit 138 is SIGBUS: xctrace itself crashed while it loaded the trace)
 
@@ -27,18 +33,18 @@ $ xcrun xctrace record --template Game Performance --time-limit 10s --output $TM
 exit: 0
 Starting recording with the Game Performance template. Launching process: MetalProbe. Time limit: 10.0 s
 Ctrl-C to stop the recording
-Reached specified time limit, ending recording...
+Target app exited, ending recording...
 Recording completed. Saving output file...
 Output file saved as: r3-2.trace
 probe stdout: 100000 ok lines, then:
 pixel 159 128 64 255
-recording size: 281M
+recording size: 388M
 
 ## xctrace export --toc, Game Performance
 $ xcrun xctrace export --input $TMP/r3-2.trace --toc
 exit: 0
 launched process:
-<process arguments="render --frames 100000" type="launched" return-exit-status="0" name="MetalProbe" pid="79372" termination-reason="exit(0)"/>
+<process arguments="render --frames 100000" type="launched" return-exit-status="0" name="MetalProbe" pid="87319" termination-reason="exit(0)"/>
 GPU and Metal tables: 48
   schema="device-gpu-info"
   schema="gpu-aps-stream"
@@ -88,10 +94,10 @@ GPU and Metal tables: 48
   schema="metal-visual-highlight-chain-driver"
   schema="metal-visual-highlight-chain-gpu"
   schema="metal-wired-sysmem-level-interval"
-metal-application-command-buffer-submissions rows: 10840
+metal-application-command-buffer-submissions rows: 24059
 processes the table defines:
-  <process id="6" fmt="MetalProbe (79372)"
-references to MetalProbe (process id 6) after its first row: 14706
+  <process id="7" fmt="MetalProbe (87319)"
+references to MetalProbe (process id 7) after its first row: 24645
 
 ## xctrace record, Metal System Trace, ended by --time-limit 1s
 $ xcrun xctrace record --template Metal System Trace --time-limit 1s --output $TMP/r3-3.trace --launch -- .build/release/MetalProbe render --frames 10000000
@@ -101,14 +107,13 @@ Ctrl-C to stop the recording
 Reached specified time limit, ending recording...
 Recording completed. Saving output file...
 Output file saved as: r3-3.trace
-(exit 54: here --time-limit ended the recording, and xctrace killed the target)
 recording size:  98M
 
 ## xctrace export --toc, Metal System Trace, 1 s
 $ xcrun xctrace export --input $TMP/r3-3.trace --toc
 exit: 0
 launched process:
-<process arguments="render --frames 10000000" type="launched" return-exit-status="9" name="MetalProbe" pid="79550" termination-reason="SIGKILL"/>
+<process arguments="render --frames 10000000" type="launched" return-exit-status="9" name="MetalProbe" pid="87460" termination-reason="SIGKILL"/>
 GPU and Metal tables: 48
   schema="device-gpu-info"
   schema="gpu-aps-stream"
@@ -158,19 +163,58 @@ GPU and Metal tables: 48
   schema="metal-visual-highlight-chain-driver"
   schema="metal-visual-highlight-chain-gpu"
   schema="metal-wired-sysmem-level-interval"
-metal-application-command-buffer-submissions rows: 14603
+metal-application-command-buffer-submissions rows: 14626
 processes the table defines:
-  <process id="7" fmt="MetalProbe (79550)"
-references to MetalProbe (process id 7) after its first row: 15111
+  <process id="7" fmt="MetalProbe (87460)"
+references to MetalProbe (process id 7) after its first row: 15160
 
 ## xctrace record exit status for /usr/bin/true, which ends at once
 $ xcrun xctrace record --template Time Profiler --time-limit 10s --output $TMP/r3-true.trace --launch -- /usr/bin/true
 exit: 0
 Starting recording with the Time Profiler template. Launching process: true. Time limit: 10.0 s
+Ctrl-C to stop the recording
 Target app exited, ending recording...
+Recording completed. Saving output file...
+Output file saved as: r3-true.trace
+
+## xctrace export --toc, /usr/bin/true
+$ xcrun xctrace export --input $TMP/r3-true.trace --toc
+exit: 0
+<process type="launched" return-exit-status="0" name="true" pid="87534" termination-reason="exit(0)"/>
 
 ## xctrace record exit status for /usr/bin/false, which ends at once
 $ xcrun xctrace record --template Time Profiler --time-limit 10s --output $TMP/r3-false.trace --launch -- /usr/bin/false
 exit: 54
 Starting recording with the Time Profiler template. Launching process: false. Time limit: 10.0 s
+Ctrl-C to stop the recording
 Target app exited, ending recording...
+Recording completed. Saving output file...
+Output file saved as: r3-false.trace
+
+## xctrace export --toc, /usr/bin/false
+$ xcrun xctrace export --input $TMP/r3-false.trace --toc
+exit: 0
+<process type="launched" return-exit-status="1" name="false" pid="87554" termination-reason="exit(1)"/>
+
+## xctrace record, a target that writes one line to stdout and one to stderr
+$ xcrun xctrace record --template Time Profiler --time-limit 10s --output $TMP/r3-streams/plain.trace --launch -- /bin/sh -c echo TO-STDOUT; echo TO-STDERR >&2
+exit: 0
+xctrace's own stdout and stderr:
+Starting recording with the Time Profiler template. Launching process: sh. Time limit: 10.0 s
+Ctrl-C to stop the recording
+Target app exited, ending recording...
+Recording completed. Saving output file...
+Output file saved as: plain.trace
+
+## the same, with --target-stdout
+$ xcrun xctrace record --template Time Profiler --time-limit 10s --output $TMP/r3-streams/redirected.trace --target-stdout $TMP/r3-streams/target.out --launch -- /bin/sh -c echo TO-STDOUT; echo TO-STDERR >&2
+exit: 0
+xctrace's own stdout and stderr:
+Starting recording with the Time Profiler template. Launching process: sh. Time limit: 10.0 s
+Ctrl-C to stop the recording
+Target app exited, ending recording...
+Recording completed. Saving output file...
+Output file saved as: redirected.trace
+the --target-stdout file:
+TO-STDOUT
+TO-STDERR

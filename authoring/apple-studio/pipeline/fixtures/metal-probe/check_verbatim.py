@@ -58,14 +58,18 @@ def blocks(path):
 
 
 def find_block(ref, first):
-    """The one block in `ref` with a line starting `first` among its first three, or None."""
-    candidates = [b for b in blocks(REFS / ref) if any(l.startswith(first) for l in b[:3])]
+    """The one block in `ref` with a line starting `first` among its first three, or None.
+
+    `ref` names a reference file, or is a path to a copy of one (run.sh reads
+    earlier versions of a reference out of git that way)."""
+    path = pathlib.Path(ref) if pathlib.Path(ref).is_file() else REFS / ref
+    candidates = [b for b in blocks(path) if any(l.startswith(first) for l in b[:3])]
     return candidates[0] if len(candidates) == 1 else None
 
 
 def main():
     if sys.argv[1:2] == ["--block"]:
-        # check_verbatim.py --block <reference.md> <text of one of its first lines>
+        # check_verbatim.py --block <reference.md or path> <start of one of its first lines>
         # prints that block, so run.sh can execute documented commands verbatim.
         block = find_block(sys.argv[2], sys.argv[3])
         if block is None:
