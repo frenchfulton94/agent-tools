@@ -1,0 +1,6 @@
+slice_id	dest	path
+m01	apple-metal	/documentation/Metal/a
+m01	apple-metal	/documentation/x
+m01	apple-metal	/documentation/dead
+m02	apple-metal	pdf:fst#all
+g01	apple-games	/documentation/gamekit/g

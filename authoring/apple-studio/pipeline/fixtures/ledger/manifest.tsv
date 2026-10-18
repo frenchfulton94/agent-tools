@@ -1,0 +1,5 @@
+path	seed	bound	depth	documentType	role	words	http	dest
+/documentation/Metal/a	/documentation/metal	recursive	1	article	article	120	200	apple-metal
+/documentation/x	/documentation/metal	recursive	1	article	article	80	200	apple-metal
+/documentation/dead	/documentation/metal	recursive	2			0	404	apple-metal
+/documentation/gamekit/g	/documentation/gamekit	depth1	1	article	article	50	200	apple-games
