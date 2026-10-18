@@ -1,0 +1,21 @@
+# Toolchain survey, 2026-10-18
+Xcode 27.1
+Build version 27A9275
+macOS SDK 27.0, iPhoneOS SDK 27.1
+ProductName:		macOS ProductVersion:		27.0.1 BuildVersion:		26A434 
+chip: Apple M4 Pro; Metal Support: Metal 4
+MTL4 headers in macOS SDK Metal.framework: 31
+xcrun metal --version:
+error: error: cannot execute tool 'metal' due to missing Metal Toolchain; use: xcodebuild -downloadComponent MetalToolchain
+gpudebug: /usr/bin/gpudebug
+xctrace: /Applications/Xcode.app/Contents/Developer/usr/bin/xctrace
+notarytool: /Applications/Xcode.app/Contents/Developer/usr/bin/notarytool
+stapler: /Applications/Xcode.app/Contents/Developer/usr/bin/stapler
+codesign: /usr/bin/codesign
+rustc: rustc 1.97.1 (8bab26f4f 2026-07-14); cargo: cargo 1.97.1 (c980f4866 2026-06-30)
+clang++: Apple clang version 21.0.0 (clang-2100.3.34.2); cmake: not installed
+xctrace game/GPU templates: Audio System Trace CPU Counters Game Memory Game Performance Game Performance Overview Metal System Trace Processor Trace
+MSL spec PDF: Pages: 383, Version 4.1, created  Thu Jun  4 03:17:15 2026 EDT, 97341 words via pdftotext
+objc2-metal 0.3.2 on docs.rs: 81 MTL4* items incl. MTL4CommandQueue, MTL4CommandAllocator, MTLResidencySet
+metal crate 0.33.0 (2025-12-17): README marks it deprecated in favour of objc2 + objc2-metal
+.md endpoints: https://developer.apple.com/documentation/<path>.md returns text/markdown (200) for all 50 seeds and 1,148 of 1,180 first-level children; the 32 misses are this survey's own regex truncating symbol URLs at ')'

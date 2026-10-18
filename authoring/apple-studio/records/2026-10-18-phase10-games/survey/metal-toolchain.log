@@ -1,0 +1,17 @@
+# Metal Toolchain install and gate smoke test, 2026-10-18
+Installed with: xcodebuild -downloadComponent MetalToolchain (user-requested). Result line:
+Done downloading: Metal Toolchain 27A266a.
+Apple metal version 32023.921 (metalfe-32023.921.6)
+Target: air64-apple-darwin27.0.0
+-std=metal3.2: valid kernel compiles
+-std=metal4.0: valid kernel compiles
+-std=metal4.1: valid kernel compiles
+-std=metal4.0, invented identifier: error: use of undeclared identifier 'not_a_real_fn'
+
+# User-supplied sources, 2026-10-18 (sha256)
+9f31df15dd6827545702c5a0845f6e36e1889878cd0e534123bd70211e5c00a8  user-pdfs/Metal-Feature-Set-Tables.pdf
+27e557837b61c2e0ad4ebe39bc39216edd44f1f5077b9ec4d474e37a72f28a8e  user-pdfs/Metal-Feature-Set-Tables.numbers
+41538b30d2f1140a5b2a0c84ce0a9f7b67bf0c707e224cfea0bfe5a44aa26cf5  user-pdfs/Metal-Shading-Language-Specification.pdf
+41538b30d2f1140a5b2a0c84ce0a9f7b67bf0c707e224cfea0bfe5a44aa26cf5  msl.pdf
+The user's MSL PDF and the survey's download of developer.apple.com/metal/Metal-Shading-Language-Specification.pdf are byte-identical.
+Feature Set Tables PDF: 18 pages, footer dated May 21, 2026, 6,587 words via pdftotext.

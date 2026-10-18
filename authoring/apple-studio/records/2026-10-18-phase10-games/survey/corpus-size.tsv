@@ -1,0 +1,29 @@
+# Bounded reading corpus, crawled 2026-10-18 from the 50 seeds
+# Rule: articles, collections, and sample-code pages reachable from each seed, recursively, inside the seed's framework path.
+# Xcode and HIG seeds: depth 1 only (the seed and the pages it links), because those prefixes span the whole Xcode docs and the whole HIG.
+# Symbol pages excluded. Counts include some case-variant duplicates (Xcode/ vs xcode/).
+articles	words	framework
+909	622615	TOTAL
+203	184176	documentation/metal
+128	159588	documentation/xcode
+30	59234	design/human-interface-guidelines
+116	48982	documentation/appkit
+253	44671	documentation/audiotoolbox
+35	36784	documentation/gamekit
+29	23651	documentation/network
+23	15883	documentation/avfaudio
+15	8057	documentation/gamecontroller
+13	7760	documentation/metalperformanceshaders
+12	6149	documentation/os
+8	5966	documentation/corehaptics
+15	4770	documentation/dispatch
+3	4730	documentation/apple-silicon
+3	4634	documentation/uniformtypeidentifiers
+6	3738	documentation/phase
+6	2474	documentation/quartzcore
+4	675	documentation/modelio
+3	375	documentation/metalperformanceshadersgraph
+3	220	documentation/metalkit
+1	98	documentation/metalfx
+
+# Unbounded (whole HIG, whole Xcode docs): 934 articles, 1,089,531 words; 122 sample-code pages; 489 collections

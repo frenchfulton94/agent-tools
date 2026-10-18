@@ -133,6 +133,20 @@ block Phase 2; each has an explicit trigger for when to act.
    **Decision rule applied unchanged, not improvised:** the precondition —
    a shipped real feature — remains unmet, so **no skill is cut this phase,
    regardless of the count.**
+
+   **Phase 10 measurement (2026-10-18).** This re-runs the Phase 6/7/9 scan,
+   scoped to sessions since 2026-09-30 (the prior measurement date). It
+   found 1,056 transcripts and **1** genuine non-fixture invocation of an
+   `apple-studio:*` skill: `apple-studio:xcode-loop`, on 2026-10-01, in the
+   `dependency-tracker` project directory. This is the first such hit in any
+   measurement. All 163 excluded invocations came from a single project
+   directory, `StudioFixture`. The scan classifies by project directory and
+   not by intent. The author did not open the `dependency-tracker`
+   transcript, so the hit is not confirmed as real use. Evidence:
+   `records/2026-10-18-phase10-games/task-0-sweep/killswitch.log`.
+
+   **Decision rule applied unchanged, not improvised:** no skill is cut this
+   phase, regardless of the count. One hit does not change that outcome.
 2. **Stop-gate session-start baseline (only on observed pain).** Add a
    session-start baseline build capture to `stop-gate` to avoid a one-turn
    false block on projects that were already red before the session started.

@@ -1,0 +1,36 @@
+==> plugins/apple-studio/skills/apple-performance/SKILL.md <==
+---
+name: apple-performance
+
+==> plugins/apple-studio/skills/apple-performance/references/profiling-workflow.md <==
+> verified: 2026-09 against https://developer.apple.com/documentation/xcode/improving-your-app-s-performance.md, https://developer.apple.com/tutorials/instruments, https://developer.apple.com/tutorials/instruments/getting-started-with-hang-analysis, https://developer.apple.com/tutorials/instruments/identifying-a-hang, https://developer.apple.com/tutorials/instruments/analyzing-main-thread-activity
+> sources: live Apple docs (no book input — the corpus predates these frameworks)
+
+==> plugins/apple-studio/skills/app-release/SKILL.md <==
+---
+name: app-release
+
+==> plugins/apple-studio/skills/apple-design/SKILL.md <==
+---
+name: apple-design
+
+==> plugins/apple-studio/skills/apple-macos/SKILL.md <==
+---
+name: apple-macos
+
+==> plugins/apple-studio/skills/xcode-loop/SKILL.md <==
+---
+name: xcode-loop
+
+==> plugins/apple-studio/skills/apple-animations/SKILL.md <==
+---
+name: apple-animations
+
+==> plugins/apple-studio/skills/apple-frameworks/SKILL.md <==
+---
+name: apple-frameworks
+
+==> plugins/apple-studio/README.md <==
+# apple-studio
+
+

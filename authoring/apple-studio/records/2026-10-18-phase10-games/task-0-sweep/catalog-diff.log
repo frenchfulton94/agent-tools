@@ -1,0 +1,43 @@
+$ bash authoring/apple-studio/pipeline/generate_catalog.sh
+Wrote .../framework-catalog.md: 400 entries
+
+First result (before any post-processing):
+  1 file changed, 391 insertions(+), 391 deletions(-)
+That diff is noise. generate_catalog.sh emits bare /documentation/ URLs. The
+committed catalog instead carried a trailing ".md" on 390 of its 400 entries (the
+Phase 8 rewrite, 2026-09-13). The generator was never taught that rewrite. With the
+bare URLs, tests/apple-doc-links.test.ts failed ("every page-form Apple documentation
+link in apple-studio ends in .md").
+
+Fix applied to the generated file, not to the generator: re-append ".md" to every
+/documentation/ URL except the nine legacy roots the test pins as exceptions
+(applicationservices, coreservices, installer_js, iokit, kernel, playgroundbluetooth,
+playgroundsupport, tvmljs, webkitjs). The HIG entry is not a /documentation/ URL and
+is left alone. "rewrote 390" matches the 390 the old file carried.
+
+$ git diff --stat   (after the re-append)
+ .../apple-frameworks/references/framework-catalog.md | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+Entry count: 400 before, 400 after. One line is the "> generated:" date
+(2026-09-02 -> 2026-10-18). The other six are reworded abstracts. No framework was
+added or removed.
+
+## added entry lines (6)
++ - **Advanced Commerce API** — Support Apple In-App Purchases through the App Store for exceptionally large catalogs of custom one-time purchases, subscriptions, and subscriptions with optional add-ons. — https://developer.apple.com/documentation/advancedcommerceapi.md
++ - **App Tracking Transparency** — Request authorization to access app-related data that your app can use to track the person or the device. — https://developer.apple.com/documentation/apptrackingtransparency.md
++ - **Apple Ads** — Drive app discovery by creating and managing campaigns with the Apple Ads Campaign Management API. — https://developer.apple.com/documentation/apple_ads.md
++ - **AVKit** — Adopt the system’s video playback interfaces, and integrate your camera app with capture hardware. — https://developer.apple.com/documentation/avkit.md
++ - **StoreKit Test** — Create and automate tests in Xcode for your app’s subscription and Apple In-App Purchase transactions, and SKAdNetwork implementations. — https://developer.apple.com/documentation/storekittest.md
++ - **StoreKit** — Support Apple In-App Purchases and interactions with the App Store. — https://developer.apple.com/documentation/storekit.md
+
+## removed entry lines (6)
+- - **Advanced Commerce API** — Support In-App Purchases through the App Store for exceptionally large catalogs of custom one-time purchases, subscriptions, and subscriptions with optional add-ons. — https://developer.apple.com/documentation/advancedcommerceapi.md
+- - **App Tracking Transparency** — Request user authorization to access app-related data for tracking the user or the device. — https://developer.apple.com/documentation/apptrackingtransparency.md
+- - **Apple Ads** —  — https://developer.apple.com/documentation/apple_ads.md
+- - **AVKit** — Create user interfaces for media playback, complete with transport controls, chapter navigation, picture-in-picture support, and display of subtitles and closed captions. — https://developer.apple.com/documentation/avkit.md
+- - **StoreKit Test** — Create and automate tests in Xcode for your app’s subscription and in-app purchase transactions, and SKAdNetwork implementations. — https://developer.apple.com/documentation/storekittest.md
+- - **StoreKit** — Support In-App Purchases and interactions with the App Store. — https://developer.apple.com/documentation/storekit.md
+
+The Metal, MetalKit, MetalFX, Metal Performance Shaders, Game Controller and GameKit
+rows are unchanged.

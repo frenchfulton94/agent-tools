@@ -1,0 +1,4 @@
+transcripts scanned: 1056
+excluded invocations by project: {'-Users-michaelfrenchfultonjr-Projects-StudioFixture': 163}
+genuine non-fixture invocations since 2026-09-30: 1
+   ('7f3b6f5e-f5c0-421c-a2c7-38f4613845ab', 'apple-studio:xcode-loop', '2026-10-01', '-Users-michaelfrenchfultonjr-Projects-dependency-tracker')
