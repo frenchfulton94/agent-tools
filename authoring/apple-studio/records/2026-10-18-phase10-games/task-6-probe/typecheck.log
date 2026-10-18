@@ -1,0 +1,91 @@
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/apple-gpu-tbdr.md   (7 swift blocks)   target: macos 26.0
+  [PASS:parse-as-library] #1  struct TBDRCapabilities {
+  [PASS:parse-as-library] #2  /// A transient attachment that exists only in tile memory for the lengt
+  [PASS:with-prior      ] #3  /// One render pass: fill the G-buffer, then light it. Only the drawable
+  [PASS:parse-as-library] #4  /// Reserve tile memory for a pipeline's explicit imageblock, and report
+  [PASS:parse-as-library] #5  func makeTilePipeline(compiler: any MTL4Compiler, library: any MTLLibrar
+  [PASS:parse-as-library] #6  /// A blur reads neighbouring pixels, so it cannot live inside the light
+  [PASS:parse-as-library] #7  func usesMetal4Path(_ device: any MTLDevice) -> Bool {
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/command-model.md   (8 swift blocks)   target: macos 26.0
+  [PASS:parse-as-library] #1  import Metal
+  [PASS:parse-as-library] #2  import Metal
+  [PASS:with-prior      ] #3  func renderOffscreen(device: any MTLDevice, target: any MTLTexture, fram
+  [PASS:with-prior      ] #4  import MetalKit
+  [PASS:parse-as-library] #5  func encodeSimulateThenDraw(commandBuffer: any MTL4CommandBuffer,
+  [PASS:parse-as-library] #6  func commitWithFeedback(queue: any MTL4CommandQueue,
+  [PASS:parse-as-library] #7  enum CommandModel {
+  [PASS:parse-as-library] #8  import MetalKit
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/compute-and-gpu-driven.md   (9 swift blocks)   target: macos 26.0
+  [PASS:parse-as-library] #1  /// One compute pass: upload parameters with a copy, then run a kernel t
+  [PASS:parse-as-library] #2  /// Compile a compute pipeline whose kernel assumes 16 x 16 groups.
+  [PASS:parse-as-library] #3  func makeDrawICB(device: any MTLDevice, maxDraws: Int) -> (any MTLIndire
+  [PASS:parse-as-library] #4  func makeMeshletPipeline(compiler: any MTL4Compiler, library: any MTLLib
+  [PASS:parse-as-library] #5  func buildTriangleBLAS(device: any MTLDevice, commandBuffer: any MTL4Com
+  [PASS:parse-as-library] #6  /// MPS on a Metal 3 side queue, fenced against the Metal 4 queue with o
+  [PASS:parse-as-library] #7  /// An ML pass whose output a later render pass samples in its fragment 
+  [PASS:parse-as-library] #8  func usesMetal4ComputePath(_ device: any MTLDevice) -> Bool {
+  [PASS:parse-as-library] #9  /// Metal 3: two dependent dispatches in one concurrent pass.
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/cpp-and-rust.md   (0 swift blocks)   target: macos 26.0
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/display-and-upscaling.md   (6 swift blocks)   target: macos 26.0, ios 26.0
+  [PASS:parse-as-library @ macos 26.0] #1  final class Renderer: NSObject, CAMetalDisplayLinkDelegate {
+  [PASS:parse-as-library @ macos 26.0] #2  @MainActor
+  [PASS:parse-as-library @ macos 26.0] #3  func configureForGameHDR(_ layer: CAMetalLayer) {
+  [PASS:parse-as-library @ macos 26.0] #4  func makeTemporalUpscaler(device: any MTLDevice, compiler: any MTL4Compi
+  [PASS:parse-as-library @ macos 26.0] #5  func presentsWithMetal4(_ device: any MTLDevice) -> Bool {
+  [PASS:parse-as-library @ macos 26.0] #6  func presentMetal3(queue: any MTLCommandQueue, drawable: any CAMetalDraw
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/gpu-debugging-and-profiling.md   (9 swift blocks)   target: macos 26.0
+  [PASS:parse-as-library] #1  func encodeLabelledFrame(queue: any MTL4CommandQueue,
+  [PASS:parse-as-library] #2  enum TraceError: Error { case captureLayerMissing }
+  [PASS:parse-as-library] #3  @MainActor
+  [PASS:parse-as-library] #4  func pipelineOptionsForValidation(enabled: Bool) -> MTL4PipelineOptions 
+  [PASS:parse-as-library] #5  func makeShaderLoggingOptions(device: any MTLDevice) throws -> MTL4Comma
+  [PASS:parse-as-library] #6  func commitTimed(_ commandBuffer: any MTL4CommandBuffer, on queue: any M
+  [PASS:parse-as-library] #7  struct PassTimer {
+  [PASS:parse-as-library] #8  func supportsMetal4(_ device: any MTLDevice) -> Bool {
+  [PASS:parse-as-library] #9  func commitTimedMetal3(_ commandBuffer: any MTLCommandBuffer) {
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/pipelines-and-render-passes.md   (10 swift blocks)   target: macos 26.0
+  [PASS:parse-as-library] #1  import Metal
+  [PASS:parse-as-library] #2  import Metal
+  [PASS:parse-as-library] #3  import Metal
+  [PASS:with-prior      ] #4  import Metal
+  [PASS:parse-as-library] #5  import Metal
+  [PASS:parse-as-library] #6  import Foundation
+  [PASS:parse-as-library] #7  import Foundation
+  [PASS:parse-as-library] #8  import Metal
+  [PASS:parse-as-library] #9  import Metal
+  [PASS:parse-as-library] #10  import Metal
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/resources-and-memory.md   (9 swift blocks)   target: macos 26.0
+  [PASS:parse-as-library] #1  import Metal
+  [PASS:parse-as-library] #2  import Metal
+  [PASS:parse-as-library] #3  import Metal
+  [PASS:parse-as-library] #4  import Metal
+  [PASS:parse-as-library] #5  import Metal
+  [PASS:parse-as-library] #6  import Metal
+  [PASS:parse-as-library] #7  import Metal
+  [PASS:parse-as-library] #8  import Metal
+  [PASS:parse-as-library] #9  import Metal
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/shading-language.md   (4 swift blocks)   target: macos 26.0
+  [PASS:parse-as-library] #1  func shaderCompileOptions() -> MTLCompileOptions {
+  [PASS:parse-as-library] #2  struct Light {
+  [PASS:parse-as-library] #3  struct ShaderFeatureSupport {
+  [PASS:parse-as-library] #4  enum ShaderLibraryError: Error { case missingMetal3Library }
+
+TOTAL: 62/62 snippets typecheck clean

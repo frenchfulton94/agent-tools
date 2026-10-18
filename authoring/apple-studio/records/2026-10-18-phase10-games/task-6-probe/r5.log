@@ -1,0 +1,266 @@
+Machine: Apple M4 Pro
+OS: macOS 27.0.1 26A434
+Toolchain: Xcode 27.1
+Date: 2026-10-18 10:59 EDT
+$TMP below is authoring/apple-studio/pipeline/tmp, the gitignored pipeline scratch
+
+## The project's targets
+$ xcodebuild -project ExternalHosts.xcodeproj -list
+exit: 0
+    Targets:
+        CppHost
+        RustHost
+
+
+## xcodebuild clean, CppHost
+$ xcodebuild -project ExternalHosts.xcodeproj -target CppHost clean
+exit: 0
+    /bin/sh build.sh clean
+** CLEAN SUCCEEDED **
+
+## xcodebuild clean, RustHost
+$ xcodebuild -project ExternalHosts.xcodeproj -target RustHost clean
+exit: 0
+    /bin/sh xcode-cargo.sh Release clean
+** CLEAN SUCCEEDED **
+cpp-host after clean: absent, rust-host after clean: absent
+
+## xcodebuild build, CppHost
+$ xcodebuild -project ExternalHosts.xcodeproj -target CppHost build
+exit: 0
+    /bin/sh build.sh
+built cpp/build/cpp-host
+** BUILD SUCCEEDED **
+
+## xcodebuild build, RustHost
+$ xcodebuild -project ExternalHosts.xcodeproj -target RustHost build
+exit: 0
+    /bin/sh xcode-cargo.sh Release
+    Finished `release` profile [optimized] target(s) in 8.44s
+** BUILD SUCCEEDED **
+
+## cpp-host, one offscreen frame
+$ cpp/build/cpp-host
+exit: 0
+pixel 255 0 0 255
+
+## cpp-host, API and Shader Validation, reports to stderr
+$ env MTL_DEBUG_LAYER=1 MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1 cpp/build/cpp-host
+exit: 0
+2026-10-18 10:59:24.726 cpp-host[79980:3964864] Metal API Validation Enabled
+2026-10-18 10:59:24.727 cpp-host[79980:3964864] Metal GPU Validation Enabled
+pixel 255 0 0 255
+
+## cpp-host --capture without MTL_CAPTURE_ENABLED
+$ cpp/build/cpp-host --capture $TMP/r5-cpp-host-nocap.gputrace
+exit: 0
+capture unavailable
+pixel 255 0 0 255
+trace written: no
+
+## cpp-host --capture with MTL_CAPTURE_ENABLED=1
+$ env MTL_CAPTURE_ENABLED=1 cpp/build/cpp-host --capture $TMP/r5-cpp-host.gputrace
+exit: 0
+capture started
+pixel 255 0 0 255
+trace written: yes
+
+## gpudebug on the cpp-host trace
+$ gpudebug --oneshot -t $TMP/r5-cpp-host.gputrace -c list -c go /commands/cb0 -c list
+exit: 0
+Name         Summary           Actions
+───────────  ────────────────  ───────
+commands     1 command buffer       go
+performance  see 'profile ?'          
+api_calls    8 API calls            go
+resources    3 objects              go
+(4 items)
+Name  Label                         Summary  Actions
+────  ────────────────────────────  ───────  ───────
+re0   "MTL4RenderCommandEncoder 1"                go
+(1 items)
+Name  Label                         Summary  Actions
+────  ────────────────────────────  ───────  ───────
+re0   "MTL4RenderCommandEncoder 1"                go
+(1 items)
+
+## xctrace record, Metal System Trace, cpp-host
+$ xcrun xctrace record --template Metal System Trace --output $TMP/r5-cpp-host.trace --launch -- cpp/build/cpp-host
+exit: 0
+Starting recording with the Metal System Trace template. Launching process: cpp-host. 
+Ctrl-C to stop the recording
+Target app exited, ending recording...
+Recording completed. Saving output file...
+Output file saved as: r5-cpp-host.trace
+
+## xctrace export --toc, cpp-host
+$ xcrun xctrace export --input $TMP/r5-cpp-host.trace --toc
+exit: 0
+launched process:
+<process type="launched" return-exit-status="0" name="cpp-host" pid="80007" termination-reason="exit(0)"/>
+GPU and Metal tables: 48
+  schema="device-gpu-info"
+  schema="gpu-aps-stream"
+  schema="gpu-counter-info"
+  schema="gpu-counter-value"
+  schema="gpu-performance-device-state-intervals"
+  schema="gpu-performance-state-info"
+  schema="gpu-performance-state-intervals"
+  schema="gpu-shader-profiler-interval"
+  schema="gpu-shader-profiler-sample"
+  schema="metal-application-command-buffer-submissions"
+  schema="metal-application-encoders-list"
+  schema="metal-application-event-interval"
+  schema="metal-application-intervals"
+  schema="metal-ar-events"
+  schema="metal-command-buffer-completed"
+  schema="metal-command-buffer-error"
+  schema="metal-command-buffer-frame-assignment"
+  schema="metal-command-buffer-to-accelerator-id"
+  schema="metal-current-allocated-size"
+  schema="metal-driver-event-intervals"
+  schema="metal-driver-event-per-thread-intervals"
+  schema="metal-driver-intervals"
+  schema="metal-gpu-counter-intervals"
+  schema="metal-gpu-counter-profile"
+  schema="metal-gpu-execution-points"
+  schema="metal-gpu-info"
+  schema="metal-gpu-intervals"
+  schema="metal-gpu-state-intervals"
+  schema="metal-gpu-submission-to-command-buffer-id"
+  schema="metal-io-surface-access"
+  schema="metal-kernel-resource-allocations"
+  schema="metal-known-compositor-process"
+  schema="metal-object-dependency-chain-app"
+  schema="metal-object-dependency-chain-display"
+  schema="metal-object-dependency-chain-driver"
+  schema="metal-object-dependency-chain-gpu"
+  schema="metal-object-label"
+  schema="metal-residency-set-interval"
+  schema="metal-residency-set-resource-event"
+  schema="metal-residency-set-usage-event"
+  schema="metal-resource-allocations"
+  schema="metal-shader-profiler-intervals"
+  schema="metal-shader-profiler-shader-list"
+  schema="metal-visual-highlight-chain-app"
+  schema="metal-visual-highlight-chain-display"
+  schema="metal-visual-highlight-chain-driver"
+  schema="metal-visual-highlight-chain-gpu"
+  schema="metal-wired-sysmem-level-interval"
+metal-application-command-buffer-submissions rows: 1
+processes the table defines:
+  <process id="7" fmt="cpp-host (80007)"
+references to cpp-host (process id 7) after its first row: 2
+
+## rust-host, one offscreen frame
+$ rust/target/release/rust-host
+exit: 0
+pixel [255, 0, 0, 255]
+
+## rust-host, API and Shader Validation, reports to stderr
+$ env MTL_DEBUG_LAYER=1 MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1 rust/target/release/rust-host
+exit: 0
+2026-10-18 10:59:32.866 rust-host[80095:3966373] Metal API Validation Enabled
+2026-10-18 10:59:32.866 rust-host[80095:3966373] Metal GPU Validation Enabled
+pixel [255, 0, 0, 255]
+
+## rust-host --capture without MTL_CAPTURE_ENABLED
+$ rust/target/release/rust-host --capture $TMP/r5-rust-host-nocap.gputrace
+exit: 0
+capture unavailable
+pixel [255, 0, 0, 255]
+trace written: no
+
+## rust-host --capture with MTL_CAPTURE_ENABLED=1
+$ env MTL_CAPTURE_ENABLED=1 rust/target/release/rust-host --capture $TMP/r5-rust-host.gputrace
+exit: 0
+capture started
+pixel [255, 0, 0, 255]
+trace written: yes
+
+## gpudebug on the rust-host trace
+$ gpudebug --oneshot -t $TMP/r5-rust-host.gputrace -c list -c go /commands/cb0 -c list
+exit: 0
+Name         Summary           Actions
+───────────  ────────────────  ───────
+commands     1 command buffer       go
+performance  see 'profile ?'          
+api_calls    8 API calls            go
+resources    3 objects              go
+(4 items)
+Name  Label                         Summary  Actions
+────  ────────────────────────────  ───────  ───────
+re0   "MTL4RenderCommandEncoder 1"                go
+(1 items)
+Name  Label                         Summary  Actions
+────  ────────────────────────────  ───────  ───────
+re0   "MTL4RenderCommandEncoder 1"                go
+(1 items)
+
+## xctrace record, Metal System Trace, rust-host
+$ xcrun xctrace record --template Metal System Trace --output $TMP/r5-rust-host.trace --launch -- rust/target/release/rust-host
+exit: 0
+Starting recording with the Metal System Trace template. Launching process: rust-host. 
+Ctrl-C to stop the recording
+Target app exited, ending recording...
+Recording completed. Saving output file...
+Output file saved as: r5-rust-host.trace
+
+## xctrace export --toc, rust-host
+$ xcrun xctrace export --input $TMP/r5-rust-host.trace --toc
+exit: 0
+launched process:
+<process type="launched" return-exit-status="0" name="rust-host" pid="80122" termination-reason="exit(0)"/>
+GPU and Metal tables: 48
+  schema="device-gpu-info"
+  schema="gpu-aps-stream"
+  schema="gpu-counter-info"
+  schema="gpu-counter-value"
+  schema="gpu-performance-device-state-intervals"
+  schema="gpu-performance-state-info"
+  schema="gpu-performance-state-intervals"
+  schema="gpu-shader-profiler-interval"
+  schema="gpu-shader-profiler-sample"
+  schema="metal-application-command-buffer-submissions"
+  schema="metal-application-encoders-list"
+  schema="metal-application-event-interval"
+  schema="metal-application-intervals"
+  schema="metal-ar-events"
+  schema="metal-command-buffer-completed"
+  schema="metal-command-buffer-error"
+  schema="metal-command-buffer-frame-assignment"
+  schema="metal-command-buffer-to-accelerator-id"
+  schema="metal-current-allocated-size"
+  schema="metal-driver-event-intervals"
+  schema="metal-driver-event-per-thread-intervals"
+  schema="metal-driver-intervals"
+  schema="metal-gpu-counter-intervals"
+  schema="metal-gpu-counter-profile"
+  schema="metal-gpu-execution-points"
+  schema="metal-gpu-info"
+  schema="metal-gpu-intervals"
+  schema="metal-gpu-state-intervals"
+  schema="metal-gpu-submission-to-command-buffer-id"
+  schema="metal-io-surface-access"
+  schema="metal-kernel-resource-allocations"
+  schema="metal-known-compositor-process"
+  schema="metal-object-dependency-chain-app"
+  schema="metal-object-dependency-chain-display"
+  schema="metal-object-dependency-chain-driver"
+  schema="metal-object-dependency-chain-gpu"
+  schema="metal-object-label"
+  schema="metal-residency-set-interval"
+  schema="metal-residency-set-resource-event"
+  schema="metal-residency-set-usage-event"
+  schema="metal-resource-allocations"
+  schema="metal-shader-profiler-intervals"
+  schema="metal-shader-profiler-shader-list"
+  schema="metal-visual-highlight-chain-app"
+  schema="metal-visual-highlight-chain-display"
+  schema="metal-visual-highlight-chain-driver"
+  schema="metal-visual-highlight-chain-gpu"
+  schema="metal-wired-sysmem-level-interval"
+metal-application-command-buffer-submissions rows: 1
+processes the table defines:
+  <process id="7" fmt="rust-host (80122)"
+references to rust-host (process id 7) after its first row: 2

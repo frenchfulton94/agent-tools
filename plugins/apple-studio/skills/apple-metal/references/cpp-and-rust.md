@@ -515,28 +515,30 @@ to a Run or Profile action. Pick a route by what the binary is:
 **External Build System target.** This is the External Build System
 template, under Other. It makes a "legacy" target: the installed Xcode 27.1
 template runs a build tool (default `/usr/bin/make`) with the argument string
-`$(ACTION)`, so Xcode's build and clean become `make build` and `make clean`.
-The argument string expands build settings, as that default shows, so
-`$(CONFIGURATION)` passes Debug or Release. Apple's build-phases page
+`$(ACTION)`. Xcode's clean becomes `make clean`, but a build runs plain `make`:
+`xcodebuild build` exported `ACTION` as empty. The argument string expands build
+settings, so `$(CONFIGURATION)` passes Debug or Release. Apple's build-phases page
 calls these "External Build Tool" targets. Such a target cannot have a Compile
 Sources phase or a Link Binary With Libraries phase, so it builds the artifact
 and nothing else.
 
 For cargo, set Build Tool to `/bin/sh` and Arguments to
-`xcode-cargo.sh $(ACTION) $(CONFIGURATION)`, with the working directory at the
-crate root:
+`xcode-cargo.sh $(CONFIGURATION) $(ACTION)`, with the working directory at the
+crate root. Put `$(ACTION)` last. An empty value drops out of the argument list,
+even in quotes, so with `$(ACTION)` first a build passed `Release` as the action,
+and the script failed:
 
 ```sh
 #!/bin/sh
-# Build Tool: /bin/sh   Arguments: xcode-cargo.sh $(ACTION) $(CONFIGURATION)
+# Build Tool: /bin/sh   Arguments: xcode-cargo.sh $(CONFIGURATION) $(ACTION)
 set -eu
 CARGO="${CARGO:-$(command -v cargo || true)}"
 if [ -z "$CARGO" ]; then
   echo "error: cargo is not on this build's PATH; set CARGO to an absolute path"
   exit 1
 fi
-action="${1:-build}"
-config="${2:-Debug}"
+config="${1:-Debug}"
+action="${2:-build}"
 case "$action" in
   "" | build)
     if [ "$config" = "Release" ]; then exec "$CARGO" build --release; fi
@@ -549,8 +551,9 @@ case "$action" in
 esac
 ```
 
-Runtime-checked from a shell, not yet inside Xcode: the script builds, cleans,
-and exits 1 with a message on an unknown action or a PATH without cargo. Do not
+Runtime-checked: through `xcodebuild` on an External Build System target, the
+script builds and cleans. From a shell, it also exits 1 with a message on an
+unknown action or on a PATH without cargo. Do not
 hardcode `~/.cargo/bin/cargo`: on this machine cargo is a Homebrew rustup
 install at `/opt/homebrew/opt/rustup/bin/cargo`, and the guessed path would
 fail.
@@ -561,8 +564,8 @@ Then set up the scheme (Edit Scheme):
   launches it after a successful build, and the debugger attaches.
 - **Run > Options > GPU Frame Capture:** choose **Metal**, not Automatically.
   Automatically decides from whether the target links Metal, and Xcode does not
-  consider this target to link anything. That reasoning is an inference;
-  runtime probe R5 checks it.
+  consider this target to link anything. That reasoning is an inference. It is
+  not runtime-checked, because the check needs Xcode's GUI.
 - **Run > Diagnostics:** API Validation and Shader Validation are Run-only
   options, so they apply to whatever the Run action launches.
 - **Profile > Executable:** the same binary, so that **Product > Profile** opens

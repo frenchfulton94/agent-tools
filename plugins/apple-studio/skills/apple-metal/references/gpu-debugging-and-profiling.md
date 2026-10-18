@@ -357,8 +357,16 @@ pins the GPU performance state; `--exec overlapping|serial` chooses concurrent o
 serialized passes; `--embed` saves the result into the trace. `profile load` reads
 a profile that is already embedded.
 
+**Embed the profile, then load it in a new session.** A plain `profile run` printed
+"Profile data collected", but every list under `/performance` stayed empty, and
+`profile load` in the same session did not fill them. Embedding, closing the
+session, and loading the profile in a new session worked (runtime-checked):
+
 ```bash
-gpudebug -s "$id" -c "profile run"                               # "Profile data collected. (6.5s)"
+gpudebug -s "$id" -c "profile run --embed"                       # "Profile data collected. (6.6s)"
+gpudebug --terminate "$id"
+id=$(gpudebug -q -t Frame.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p')
+gpudebug -s "$id" -c "profile load"                              # "Profile data loaded. (2.9s)"
 gpudebug -s "$id" -c "go /performance" -c "go commands"         # draws ranked by cost
 gpudebug -s "$id" -c "go /performance" -c "go shaders"          # frag0, vert0, ... with cost share
 gpudebug -s "$id" -c "go /performance" -c "go commands" -c "go draw0" -c "go heatmap" -c "go fragment" -c "fetch cost --out $PWD/cost.png"
@@ -375,9 +383,15 @@ GUI's heat-map and cost data, readable by an agent.
   status 0. Read the output, not the exit code.
 - **The session remembers where you are.** A relative `go cb0` after an earlier
   `go /commands/cb1/re0` failed. Start every scripted path with `/`.
-- **Under `/performance`, go one level at a time.** `go /performance/commands` failed
-  with `'commands' has no info`, but `go /performance` followed by `go commands` worked.
-  Paths under `/commands` work in one step.
+- **`'commands' has no info` means that no profile is loaded.** Every `go` into
+  `/performance` printed it after a plain `profile run`, and the lists were `(empty)`.
+  With a profile loaded, `go /performance/commands` worked in one step.
+- **Compile pipelines before you start the capture.** In one trace, the capture
+  recorded an `MTL4Compiler` compute-pipeline compile. On that trace, `profile run`
+  never returned, because the replay service crashed in
+  `MakeMTL4PipelineStageDynamicLinkingDescriptor`. `list`, `find`, `info`, and
+  `fetch` still worked. The same frames, with the pipeline compiled before
+  `startCapture`, profiled in 6.7 s.
 - **Performance names are their own.** `/performance/commands/draw0` linked (`:d`) to
   `/commands/cb1/.../draw0`, not to `cb0`. Follow the `:d` link before you blame a draw.
 - **`--list-devices` numbered the local Mac `0`.** The article's example shows the local
@@ -648,8 +662,22 @@ xcrun xctrace export --input run.trace --xpath '/trace-toc/run[@number="1"]/data
 
 All four ran. The recording exited 0 when the target quit by itself. The probe's
 `MTL4CommandQueue` commits appeared as three rows of
-`metal-application-command-buffer-submissions` (runtime-checked). For the template
-picker, call trees, and `xctrace`'s exit code 54 on timed captures, see
+`metal-application-command-buffer-submissions` (runtime-checked). Two more results
+came from a probe that commits about 20,000 command buffers a second
+(runtime-checked):
+
+- **Keep Metal System Trace recordings short.** `xctrace export` crashed with SIGBUS
+  (exit 138) while it loaded recordings of 50,000 and 100,000 frames (280 MB and
+  520 MB). Recordings of 20,000 frames (142 MB) and of a 1 s `--time-limit` (112 MB)
+  exported. A Game Performance recording of the same 100,000 frames (380 MB) also
+  exported.
+- **Exit 54 does not mean that the target succeeded.** `record` returned 54 when
+  `--time-limit` ended the recording, and also when the target exited non-zero
+  (`/usr/bin/false`). In the `--toc` output, read `return-exit-status` and
+  `termination-reason` on the `<process>` element whose `type` is `launched`. `record` passes the
+  target's stdout through only with `--target-stdout <file>`, and never its stderr.
+
+For the template picker and call trees, see
 `apple-performance/references/profiling-workflow.md`.
 
 Reading the Game Performance timeline: a display interval far longer than its
