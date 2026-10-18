@@ -1,7 +1,7 @@
 #!/bin/bash
 # Runs one runtime claim and prints its log to stdout.
 #
-#   run.sh r1 | r2 | r3 | r5
+#   run.sh r1 | r2 | r3 | r4 | r4-finding | r4-selftest | r5
 #
 # Build first: `swift build -c release` here (R1-R3), and the two hosts (R5,
 # see README.md). Traces go to the pipeline's gitignored tmp/ directory, never
@@ -346,10 +346,78 @@ r5() {
   done
 }
 
+# Task 9. R4's signpost: the sim's `tick` interval. The analysis knows only
+# this; heaviest_under_interval.py never searches for a function name.
+SIM_SUBSYSTEM=dev.frenchfultonjr.apple-studio.metal-probe
+heaviest() {   # heaviest <trace> <label>
+  step "heaviest symbol under 'tick', $2" python3 "$HERE/heaviest_under_interval.py" "$1" \
+    --subsystem "$SIM_SUBSYSTEM" --interval tick --work-dir "${1%.trace}-export"
+  show
+}
+
+# record_sim <template> <trace> <sim arguments...>: records the sim with
+# --target-stdout, then prints the target's output, the bundle size, and the
+# launched process from the toc. A failed recording still saves a bundle, so
+# the toc step shows what the bundle holds.
+record_sim() {
+  local template="$1" trace="$2"
+  shift 2
+  rm -rf "$trace" "${trace%.trace}.stdout" "${trace%.trace}-export"
+  step "xctrace record, $template, sim $*" xcrun xctrace record --template "$template" \
+    --time-limit 10s --output "$trace" --target-stdout "${trace%.trace}.stdout" \
+    --launch -- .build/release/MetalProbe sim "$@"
+  show
+  local record_status=$STATUS
+  echo "target stdout ($(wc -c < "${trace%.trace}.stdout" | tr -d ' ') bytes):"
+  cat "${trace%.trace}.stdout"
+  echo "recording size: $(du -sh "$trace" | cut -f1)"
+  step "xctrace export --toc, $template, sim $*" xcrun xctrace export --input "$trace" --toc
+  if [ "$STATUS" -eq 0 ]; then
+    echo "launched process:"
+    grep -o '<process [^>]*type="launched"[^>]*>' "$OUT"
+    echo "tables: $(grep -o 'schema="[^"]*"' "$OUT" | sort -u | tr '\n' ' ')"
+  else
+    show
+  fi
+  STATUS=$record_status
+}
+
+# R4: the brief's Processor Trace command, plus --target-stdout. The control
+# run leaves out --slow; its heaviest symbol under `tick` must differ.
+r4() {
+  header
+  record_sim 'Processor Trace' "$TMP/r4.trace" --ticks 100000 --slow
+  if [ "$STATUS" -eq 2 ]; then
+    echo "(exit 2: the recording failed; see the Run issues above)"
+    return 1
+  fi
+  record_sim 'Processor Trace' "$TMP/r4-control.trace" --ticks 100000
+}
+
+r4_finding() {
+  header
+  heaviest "$TMP/r4.trace" "Processor Trace, sim --slow"
+  heaviest "$TMP/r4-control.trace" "Processor Trace, sim without --slow (control)"
+}
+
+# The analysis script's own check, on Time Profiler recordings: it must name a
+# different symbol for the slow and the normal sim. This is not R4, which
+# needs Processor Trace.
+r4_selftest() {
+  header
+  record_sim 'Time Profiler' "$TMP/r4-selftest-slow.trace" --ticks 5000 --slow
+  heaviest "$TMP/r4-selftest-slow.trace" "Time Profiler, sim --slow"
+  record_sim 'Time Profiler' "$TMP/r4-selftest-normal.trace" --ticks 200000
+  heaviest "$TMP/r4-selftest-normal.trace" "Time Profiler, sim without --slow"
+}
+
 case "${1:-}" in
   r1) r1 ;;
   r2) r2 ;;
   r3) r3 ;;
+  r4) r4 ;;
+  r4-finding) r4_finding ;;
+  r4-selftest) r4_selftest ;;
   r5) r5 ;;
-  *) echo "usage: run.sh r1|r2|r3|r5" >&2; exit 2 ;;
+  *) echo "usage: run.sh r1|r2|r3|r4|r4-finding|r4-selftest|r5" >&2; exit 2 ;;
 esac

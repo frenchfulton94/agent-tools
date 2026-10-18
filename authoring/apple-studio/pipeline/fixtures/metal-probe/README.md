@@ -1,7 +1,8 @@
 # metal-probe
 
 Runtime checks for the `apple-metal` references (Phase 10, Task 6: claims R1,
-R2, R3, and R5). The probe runs reference code as the references print it, on a
+R2, R3, and R5), and for `apple-performance`'s game-frame section (Task 9:
+claim R4). The probe runs reference code as the references print it, on a
 real GPU. Where the probe and a reference disagree, the probe wins, and the
 reference changes. The evidence is in
 `authoring/apple-studio/records/2026-10-18-phase10-games/task-6-probe/`.
@@ -20,6 +21,7 @@ Xcode, and rustup's cargo. CMake is not used. Nothing here is installed.
 | `ExternalHosts.xcodeproj` | Two External Build System (`PBXLegacyTarget`) targets: `CppHost` runs `build.sh`, and `RustHost` runs `xcode-cargo.sh` |
 | `check_verbatim.py` | Checks that the pasted blocks still match the references |
 | `run.sh` | Runs one claim and prints its log |
+| `heaviest_under_interval.py` | Names the heaviest symbol inside a signpost interval, from an `xctrace` export (R4) |
 
 ## Pasted blocks
 
@@ -90,7 +92,17 @@ swift build -c release && sh cpp/build.sh && (cd rust && cargo build --release)
 ./run.sh r2    # programmatic capture, then the gpudebug blocks, verbatim
 ./run.sh r3    # xctrace, Metal System Trace and Game Performance
 ./run.sh r5    # External Build System targets, both hosts, capture, xctrace
+./run.sh r4             # Processor Trace on sim --slow, and on sim (control)
+./run.sh r4-finding     # the heaviest symbol under `tick` in each R4 trace
+./run.sh r4-selftest    # the same analysis on Time Profiler recordings (not R4)
 ```
+
+R4 needs the Processor Trace setting in System Settings > Privacy & Security >
+Developer Tools. Without it, `record` exits 2 and `r4` stops. The evidence is in
+`authoring/apple-studio/records/2026-10-18-phase10-games/task-9-r4/`.
+`heaviest_under_interval.py` knows only the signpost's subsystem and interval
+name. It never searches for a function name, so the probe's planted function
+has to come out of the export.
 
 Traces go to `authoring/apple-studio/pipeline/tmp/`, which is gitignored.
 `.build/`, `build/`, `target/`, `*.gputrace/`, and `*.trace/` are ignored here

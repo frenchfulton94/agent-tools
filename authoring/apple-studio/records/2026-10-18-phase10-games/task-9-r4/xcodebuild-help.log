@@ -1,0 +1,5 @@
+Machine: Apple M4 Pro, macOS 27.0.1 26A434, Xcode 27.1, 2026-10-18
+$ xcodebuild -help 2>&1 | grep -n -e '-testPlan' -e 'test-configuration'
+97:    -testPlan                                                specifies the name of the test plan associated with the scheme to use for testing
+109:    -only-test-configuration                                 constrains testing by specifying test configurations to include, and excluding other test configurations
+110:    -skip-test-configuration                                 constrains testing by specifying test configurations to exclude, but including other test configurations
