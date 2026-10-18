@@ -969,6 +969,24 @@ block Phase 2; each has an explicit trigger for when to act.
     `raw/task-12-evals-session-logs.tar.xz`, file
     `baseline/ar-fire-5.log:51` (on the recording machine only).
 
+23. **`swift-concurrency`'s `conc-fire` row fails on a missing referent
+    (found 2026-10-18, Phase 10 Task 12).** "Should this be an actor or a
+    @MainActor class?" passed in Phase 7. In Phase 10 it failed on a clean
+    fixture: the session searched for a class, found none, and answered
+    without loading the skill. The same question in how-to form ("How do I
+    decide whether to use an actor or a @MainActor class?") loaded
+    `swift-concurrency` first. Phase 10 changed nothing in
+    `swift-concurrency`, so the controller recorded the row as a known-open
+    prompt defect that does not gate (SDD ruling P43). That is the same
+    missing-referent pattern as `test-fire` and item 13. It is unknown
+    whether Phase 9's `MailboxScreen.swift` or a newer model caused the
+    change. **Action:** reword the row to the how-to form, and re-run it
+    through `run_evals.py`. **Trigger: the next phase that edits
+    `swift-concurrency` or runs its trigger evals.** Evidence:
+    `records/2026-10-18-phase10-games/task-12-evals/classification.md`,
+    section "`conc-fire`", and `rerun-conc-fire/` and `diagnostic/` beside
+    it.
+
 ## Accepted (no action)
 
 Phase 3 minors reviewed and accepted as-is — no follow-up action needed:
