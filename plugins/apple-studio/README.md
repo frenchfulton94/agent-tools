@@ -2,7 +2,9 @@
 
 Studio-quality Apple app development — distilled architecture, concurrency,
 testing, design, release, on-device intelligence, and performance guidance for
-SwiftUI and Swift 6 apps.
+SwiftUI and Swift 6 apps. It also covers game development on Metal 4 for Apple
+silicon: rendering and MSL, GPU debugging and profiling, the game loop, input,
+audio, Game Center, and direct distribution outside the Mac App Store.
 
 ## Install
 
@@ -77,7 +79,7 @@ topic.
 
 ## Provenance
 
-Authored by Michael French Fulton Jr. Built over eight phases against live
+Authored by Michael French Fulton Jr. Built over eleven phases against live
 Apple documentation, the shipped SDK's `.swiftinterface` files, and runtime
 measurement on Xcode 27 / macOS 27 / Swift 6.4. The distillation pipeline,
 design specs, and phase plans live in `authoring/apple-studio/`.

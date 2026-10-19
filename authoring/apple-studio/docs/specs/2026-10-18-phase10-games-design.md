@@ -579,3 +579,177 @@ Evidence pointers use `<file>:<line-range>`, per CONVENTIONS.md.
 - Whether `docc.py` gains an `--md` mode.
 - The eval fixture approach (Deliverable 6).
 - Where metal-cpp's headers are cached.
+
+## Verification results (appended 2026-10-18, Phase 10 Task 13)
+
+Evidence root: `records/2026-10-18-phase10-games/`. Pointers are
+`<file>:<line-range>` per CONVENTIONS.md, and a bare `task-13-release/` path
+is under that root. Where this phase found a statement in this spec wrong,
+the correction sits in the item that the statement belongs to. The approved
+text above is not edited. That is the Phase 7 and Phase 9 precedent.
+
+Pointers into raw session transcripts resolve only on the recording machine.
+The record's `README.md` explains which archives hold them and why they are
+not committed.
+
+### 1. The read ledger covers every manifest row — PASS
+`check_ledger.py` over the whole corpus, with no `--only`, exits 0. The
+ledgers hold 1,222 rows, one for each row of `slices.tsv`. That is the 1,176
+manifest pages plus 46 `sources.tsv` rows: the MSL specification, the Feature
+Set Tables, and the book. 1,218 rows read "yes". The other 4 read
+`no-unfetchable:404`, and each one names a `docs/deferred.md` item. Item 19
+is one `apple-metal` figure link. Item 20 is two legacy kernel symbol pages.
+Item 21 is the man-page reading article. No shipped claim depends on any of
+the four pages, so none blocks the close. Each item says what replaced the
+missing page. Evidence: `task-13-release/ledger-check.log:1-13`;
+`docs/deferred.md:891-939`.
+
+### 2. Every Swift, MSL, C++, and Rust block is clean, and each gate's invented-symbol self-test fails as it should — PASS
+- **Swift gate, whole catalog.** 153/170 snippets typecheck clean, against
+  39/56 in Task 2's `catalog-before.log`. No snippet flipped from PASS to
+  FAIL, and none flipped from FAIL to PASS. The 17 failures are the
+  pre-existing ones that `docs/deferred.md` item 7 tracks. All 114 new
+  snippets are in references that this phase wrote or edited, and all 114
+  pass. No Phase 10 reference has a FAIL. Evidence:
+  `task-13-release/catalog-diff.log:1-47`, from
+  `task-13-release/catalog-after.log` (its `TOTAL` line is the last before
+  `exit:`).
+- **Native gate.** The `apple-metal` and `apple-games` references compile
+  31/31 MSL, C++, and Rust blocks clean, exit 0
+  (`task-13-release/native.log:80-81`). The other four Phase 10 references
+  give 1/1 (`profiling-workflow.md`) and 0/0, each with exit 0
+  (`task-13-release/native-other.log:1-33`).
+- **Self-tests.** `test_typecheck_snippets.sh` and
+  `test_typecheck_native.sh` both exit 0. Each invented-symbol fixture exits
+  1, as it must: Swift (`invented.md`, `multi-target-invented.md`), MSL, C++,
+  and Rust, and all six rounds of the Rust race case. Evidence:
+  `task-13-release/selftest.log:5`, `:13`, `:18`, `:22`, `:25`, `:36-42`.
+
+**A deviation decided in planning.** Deliverable 4 says that Metal 3
+snippets under the "Maintaining older code" heading carry their own lower
+target. The `> typecheck:` directive applies to a whole file. The Metal 3
+snippets therefore compile at their file's macOS 26.0 floor. That still
+catches an invented symbol. It does not prove that a snippet runs on an
+earlier OS. Each of the nine `## Maintaining older code: Metal 3` sections
+says so in one sentence (SDD ruling P24), for example
+`plugins/apple-studio/skills/apple-metal/references/command-model.md:647-649`.
+
+**A gate gap found in this phase.** The Swift gate passes a block wrapped in
+`#if os(iOS)` on the macOS target as empty code. A wrapped block is therefore
+not checked on its real platform. No shipped snippet is wrapped (ruling P38).
+Task 13 reproduced the gap with two fixtures, and `docs/deferred.md` item 39
+records the fix. Evidence: `task-13-release/wrapped-block-probe/run.log:6`,
+`:75`.
+
+### 3. R1–R6 each carry runtime evidence or the "not runtime-checked" marker — PASS (R1–R5 with runtime evidence; R6 not run, P44)
+
+| Claim | Verdict | Evidence |
+|---|---|---|
+| R1. The Metal 4 frame structure runs as `command-model.md` describes it. | PASS, as written. | `task-6-probe/report.md:23`; `task-6-probe/r1.log` |
+| R2. Programmatic capture writes a trace that `gpudebug` opens and queries. | PASS after a reference fix: the profiling block as first written left every `/performance` list empty. | `task-6-probe/report.md:24`; `task-6-probe/r2.log` |
+| R3. `xctrace` records the probe with Metal System Trace and with Game Performance. | PASS for Game Performance. Metal System Trace records, but `xctrace export --toc` crashed on a 100,000-frame trace; it passes for short recordings, and the reference was changed to match. | `task-6-probe/report.md:25`; `task-6-probe/r3-toc.log` |
+| R4. Processor Trace finds a deliberately slow tick on the M4 Pro. | PASS after the user enabled Processor Trace and restarted. The `--slow` trace names `plantedSlowStep(_:dt:)` at 99.89% in `processor-trace-intervals`; the control names `simulationStep(_:dt:)` at 38.84%. | `task-9-r4/report.md:102-119`; `task-9-r4/r4-toc.log`; `task-9-r4/r4-finding.log` |
+| R5. Minimal C++ and Rust hosts build from Xcode, and capture attaches. | PASS for the command-line parts, after a reference fix. Attaching Xcode's GPU debugger is GUI-only and carries the marker (items 34 and 35). | `task-6-probe/report.md:26`; `task-6-probe/r5.log` |
+| R6. The probe goes through direct distribution end to end. | Not run — P44. Neither of the user's teams can create a Developer ID Application identity, so nothing was signed with Developer ID or submitted. The user chose to ship without R6. The checks that need no Developer ID ran: help-text spellings, `bundle.sh`, an ad hoc signature, the `spctl` rejection, packaging, and ARCHS. Every notarization step carries "not runtime-checked: needs a Developer ID identity (deferred item 24)". | `task-10-r6/report.md:177-224`; `task-10-r6/identity.log:1-34`; `plugins/apple-studio/skills/app-release/references/direct-distribution.md:42-45`, `:310-312`, `:348-351`, `:362-364`; `docs/deferred.md:990-1020` |
+
+R4 left a side effect. Each Processor Trace recording left a stopped copy of
+the probe, which the clean-state check found and the controller ended
+(`task-9-r4/orphans.log`). `docs/deferred.md` item 41 asks the fixture to end
+the copy itself.
+
+**A correction to the R6 text.** The R6 bullet above says that this machine
+holds an *Apple Development* certificate "for team `RTC3TK2XFJ`".
+`RTC3TK2XFJ` is the ID in the identity's name, not a team ID. The team is
+the certificate subject's OU, `ULQJ329QSN`. The machine also holds a second
+Apple Development identity, for team `2F7J72JV48`. Evidence:
+`task-10-r6/identity.log:18-34`.
+
+Every other "not runtime-checked" claim in a Phase 10 file has a deferred
+item: items 25–38. Item 24 covers the notarization claims in
+`direct-distribution.md`, and the Manage Certificates observation beside
+them (`:83-87`).
+
+### 4. Trigger evals through `run_evals.py` — PARTIAL
+**Fixture decision (Deliverable 6): every new-skill row uses how-to
+phrasing, and StudioFixture is not seeded.** One baseline sweep ran: 58/60
+PASS. A re-run and a diagnostic sweep followed for `conc-fire` only. No
+description was edited, so no after-edit sweep was needed.
+
+- Every row on the two new skills passes: `apple-metal` 14/14 and
+  `apple-games` 14/14. The two skills split their shared boundary cleanly
+  in both directions.
+- Prior skills scored 30/32. `test-fire` failed, as it last did. It is
+  known-open (`docs/deferred.md` item 6) and does not gate.
+- **`conc-fire` regressed from its last recorded verdict.** "Should this be
+  an actor or a @MainActor class?" passed in Phase 7 and failed here. It
+  failed again on a restored fixture, and the how-to control routed
+  correctly. Phase 10 changed nothing in `swift-concurrency`, so ruling P43
+  records it as a known-open prompt defect that does not gate. The user
+  confirmed that ruling. `docs/deferred.md` item 23 records the reword.
+  This bar is not met, so the verdict is PARTIAL.
+- The sweep also found a driver gap. One row switched the fixture's branch,
+  and the guard compares only `git status --porcelain`, so it did not see
+  the switch. `docs/deferred.md` item 22 records the fix.
+- `git -C ~/Projects/StudioFixture status --porcelain` is empty at close,
+  and the fixture is on `main` (`task-13-release/clean-state.log:2-5`).
+
+Evidence: `task-12-evals/classification.md:1-36`, and the `conc-fire` and
+`test-fire` sections after it; `task-12-evals/baseline/results.tsv`;
+`docs/deferred.md:941-988`.
+
+### 5. `bun test`, `bun run audit`, `bun run audit --since main` — PASS for `apple-studio`, with one warning outside it
+`bun test`: 542 pass, 0 fail. `bun run audit`: 0 errors, 54 warnings, all
+pre-existing. `bun run audit --since main` reports no unbumped change for
+`apple-studio`: its version moved from 0.10.0 to 0.11.0.
+
+It warns that `security` is still at 0.4.0. This branch changed
+`plugins/security/skills/reviewing-code-security/evals/manifest.json` in two
+commits. Each one added a new skill to `acknowledgedOmissions`, as
+`tests/security-evals.test.ts` requires (ruling P4). The local `main` ref is
+behind `origin/main`, so it also counts the two commits that landed there
+before this branch (#14 and #15). Those commits made the same kind of edit
+without a bump. Against `origin/main`, the branch's real base, the count is
+2. The edit changes the eval roster, not what the `security` plugin does.
+Evidence: `task-13-release/gates.log:3-9`, `:11-74`, `:76-140`,
+`:142-208`.
+
+### 6. `claude plugin validate . --strict` and the load check — PASS
+`claude plugin validate . --strict` and `bun run validate` both pass. The
+spec's load command starts an interactive session, so the check ran as
+`claude -p --plugin-dir plugins/apple-studio` with a debug file and the
+`stream-json` init event. The debug log shows 13 skills loaded from the
+`--plugin-dir` copy. The init event lists the plugin at version 0.11.0, from
+that path, and names `apple-studio:apple-metal` and `apple-studio:apple-games`
+among its 13 skills. The version moved in
+`plugins/apple-studio/.claude-plugin/plugin.json` only. The description
+gained game development on Metal in `plugin.json` and in
+`.claude-plugin/marketplace.json`, which match. The keywords gained `metal`
+and `games`. Evidence: `task-13-release/gates.log:210-223`;
+`task-13-release/load-check.log:1-46`.
+
+### 7. No simulator left booted, and no probe process left running — PASS
+`xcrun simctl list devices booted` lists no device, and
+`pgrep -fl 'MetalProbe|cpp-host|rust-host'` prints nothing. Evidence:
+`task-13-release/clean-state.log:6-17`.
+
+### Carried forward
+- **Items 19–21**: the four unfetchable pages. Each one's trigger is that
+  Apple publishes the page, or that a writer needs a claim only that page
+  supports.
+- **Item 22**: the eval driver's guard misses a branch switch. Fix it before
+  the next sweep.
+- **Item 23**: reword `conc-fire` to the how-to form when a phase next
+  touches `swift-concurrency`.
+- **Item 24**: run R6 when the user has a Developer ID Application identity.
+- **Items 25–38** record the claims in this phase's references that are
+  not runtime-checked. Six of them (items 26, 27, 28, 32, 34, and 35) need a
+  GUI session with the user present. Three (items 29, 30, and 33) need the
+  metal-probe extended. The rest need an Apple7 or Apple8 Mac (31), an older
+  OS (37), CMake (36), a Developer ID identity (25), or a signpost run (38).
+- **Items 39–41** record three findings: the Swift gate's platform-wrapped
+  block gap, the `sendOverDTLS` wait on OS 26, and the stopped Processor
+  Trace copy.
+- **Item 7** is unchanged: 17 untriaged snippet failures outside Phase 10
+  files.
+- **The `security` version.** If the eval-roster edit should reach users,
+  `security` needs its own bump. This release does not make one.

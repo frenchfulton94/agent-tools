@@ -1,0 +1,13 @@
+# Task 13 Step 1: whole-corpus ledger check (no --only), 2026-10-18T21:12-0400
+$ python3 authoring/apple-studio/pipeline/check_ledger.py $REC/task-1-manifest/manifest.tsv $REC/task-3-slices/sources.tsv $REC/task-3-slices/slices.tsv $REC/ledger
+exit: 0
+
+# Row counts
+slices.tsv data rows: 1222
+ledger rows (all slices, header excluded): 1222
+ledger rows read_in_full=yes: 1218
+ledger rows no-unfetchable:
+authoring/apple-studio/records/2026-10-18-phase10-games/ledger/g09.tsv:2:/documentation/kernel/1387446-sysctlbyname	no-unfetchable:404:deferred-20
+authoring/apple-studio/records/2026-10-18-phase10-games/ledger/g09.tsv:3:/documentation/kernel/1462446-mach_absolute_time	no-unfetchable:404:deferred-20
+authoring/apple-studio/records/2026-10-18-phase10-games/ledger/m05.tsv:23:/documentation/metal/compute_passes/creating_threads_and_threadgroups	no-unfetchable:404:deferred-19
+authoring/apple-studio/records/2026-10-18-phase10-games/ledger/r01.tsv:28:/documentation/os/reading-unix-manual-pages	no-unfetchable:404:deferred-21

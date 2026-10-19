@@ -1,0 +1,46 @@
+# Task 13 Step 4: plugin load check, 2026-10-18T21:18-0400, claude 2.1.292 (Claude Code)
+# <worktree> stands for this worktree's absolute path. Raw debug logs and the
+# stream are in authoring/apple-studio/pipeline/tmp/task-13/ (gitignored).
+# 'claude --plugin-dir ... --debug' is interactive, so both runs use -p with the prompt on stdin:
+#   Without using any tool, list the names of every skill available to you that comes from the apple-studio plugin, one per line, exactly as the skill list names them.
+
+## Run 1
+$ claude -p --plugin-dir plugins/apple-studio --debug-file $TMP/task-13/load-check-debug.log --tools "" < load-check-prompt.txt
+Result: with no tools, the session had no Skill tool and so no skill list; it named no skill (answer in $TMP/task-13/load-check-answer.txt).
+Debug lines:
+2026-10-19T01:17:50.970Z [DEBUG] clearPluginCache: invalidating loadAllPlugins cache (preAction: --plugin-dir inline plugins)
+2026-10-19T01:17:50.998Z [DEBUG] --plugin-dir <worktree>/plugins/apple-studio is one plugin: .claude-plugin at its top marks it
+2026-10-19T01:17:51.037Z [DEBUG] Loaded inline plugin from path: apple-studio
+2026-10-19T01:17:51.092Z [DEBUG] Attempting to load skills from plugin apple-studio default skillsPath: <worktree>/plugins/apple-studio/skills
+2026-10-19T01:17:51.110Z [DEBUG] Loaded 13 skills from plugin apple-studio default directory
+2026-10-19T01:17:51.110Z [DEBUG] Total plugin skills loaded: 31 (0 duplicate/user-owned entries skipped)
+
+## Run 2
+$ claude -p --plugin-dir plugins/apple-studio --debug-file $TMP/task-13/load-check-debug-2.log --output-format stream-json --verbose --tools Skill < load-check-prompt.txt
+Debug lines:
+2026-10-19T01:18:20.930Z [DEBUG] clearPluginCache: invalidating loadAllPlugins cache (preAction: --plugin-dir inline plugins)
+2026-10-19T01:18:20.957Z [DEBUG] --plugin-dir <worktree>/plugins/apple-studio is one plugin: .claude-plugin at its top marks it
+2026-10-19T01:18:20.997Z [DEBUG] Loaded inline plugin from path: apple-studio
+2026-10-19T01:18:21.039Z [DEBUG] Attempting to load skills from plugin apple-studio default skillsPath: <worktree>/plugins/apple-studio/skills
+2026-10-19T01:18:21.057Z [DEBUG] Loaded 13 skills from plugin apple-studio default directory
+2026-10-19T01:18:21.057Z [DEBUG] Total plugin skills loaded: 31 (0 duplicate/user-owned entries skipped)
+init event (type=system, subtype=init):
+  plugins[]: {"name": "apple-studio", "path": "<worktree>/plugins/apple-studio", "source": "apple-studio@inline", "version": "0.11.0"}
+  skills[] from apple-studio: 13
+    apple-studio:app-release
+    apple-studio:apple-animations
+    apple-studio:apple-design
+    apple-studio:apple-frameworks
+    apple-studio:apple-games
+    apple-studio:apple-intelligence
+    apple-studio:apple-macos
+    apple-studio:apple-metal
+    apple-studio:apple-performance
+    apple-studio:swift-architecture
+    apple-studio:swift-concurrency
+    apple-studio:swift-testing
+    apple-studio:xcode-loop
+  apple-studio:apple-metal registered: True
+  apple-studio:apple-games registered: True
+result event: is_error=False, subtype=success
+exit (run 2): 0

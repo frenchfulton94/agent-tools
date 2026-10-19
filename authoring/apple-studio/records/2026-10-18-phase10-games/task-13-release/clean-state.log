@@ -1,0 +1,16 @@
+# Task 13 Step 6: clean-state check (Global Constraints), 2026-10-18T21:32-0400
+$ git -C ~/Projects/StudioFixture status --porcelain
+exit: 0 (no output above means a clean tree)
+$ git -C ~/Projects/StudioFixture rev-parse --abbrev-ref HEAD
+main
+$ pgrep -fl 'MetalProbe|cpp-host|rust-host'
+exit: 1 (1 means no process matched)
+$ xcrun simctl list devices booted
+== Devices ==
+-- iOS 26.5 --
+-- iOS 27.0 --
+-- iOS 27.0 --
+-- iOS 27.1 --
+-- tvOS 27.0 --
+-- watchOS 27.0 --
+exit: 0 (runtime headers with no device under them mean none is booted)

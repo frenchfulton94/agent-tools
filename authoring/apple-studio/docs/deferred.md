@@ -1019,6 +1019,244 @@ block Phase 2; each has an explicit trigger for when to act.
     `records/2026-10-18-phase10-games/task-10-r6/report.md`, section
     "Closed without R6 (P44)"; `task-10-r6/identity.log`.
 
+25. **The Developer ID column of the Game Center table is not
+    runtime-checked (found 2026-10-18, Phase 10 Task 8).**
+    `apple-games/references/game-center-and-online.md` tells a Mac game
+    what a Developer ID build loses: Game Center, In-App Purchase, and Sign
+    in with Apple. It also says that iCloud and push work only with an
+    embedded Developer ID provisioning profile. Apple's macOS capability
+    table is the source. This machine has no Developer ID identity, so no
+    Developer ID build was made, and the file says so. Cost while open: a
+    wrong row can make a game avoid a capability that works, or ship one
+    that fails. **Trigger: the user
+    has a Developer ID Application identity (the same trigger as item
+    24).** Then sign a probe build with an embedded Developer ID profile,
+    call one GameKit API and one iCloud API, and record each result.
+    Evidence: `apple-games/references/game-center-and-online.md:30-64`.
+
+26. **VoiceOver output for drawn menu elements is not runtime-checked
+    (found 2026-10-18, Phase 10 Task 8).**
+    `apple-games/references/game-design.md` gives an `NSAccessibilityElement`
+    subclass for a button that a game draws in Metal, and names the UIKit
+    counterpart. The Swift gate compiled the snippet. No VoiceOver session
+    read the elements, because the check needs the GUI. Cost while open: a
+    game can ship a menu that VoiceOver does not read. **Trigger: a phase
+    that runs a GUI check with the user present.** Then run a small host
+    view with VoiceOver on, on the Mac and on an iPhone or iPad, and record
+    what VoiceOver reads. Evidence:
+    `apple-games/references/game-design.md:331-370`.
+
+27. **Whether a live window resize is an event-tracking loop is not
+    runtime-checked (found 2026-10-18, Phase 10 Task 8).**
+    `apple-games/references/game-loop-and-threading.md` tells a Mac game to
+    add its main-thread display link for `.default` and `.eventTracking`,
+    because a modal mouse-drag loop runs the run loop in `.eventTracking`.
+    It does not state whether a live resize is such a loop. That needs a
+    window that a person resizes. Cost while open: a game that adds its link
+    for `.default` only can stall during a resize. The advice to add both
+    modes avoids the stall either way. **Trigger: a phase that runs a GUI
+    check with the user present.** Then log the run loop's current mode from
+    the link's callback during a live resize. Evidence:
+    `apple-games/references/game-loop-and-threading.md:68-73`.
+
+28. **The HUD's Game Mode indicator is not runtime-checked (found
+    2026-10-18, Phase 10 Task 8).**
+    `apple-games/references/game-loop-and-threading.md` tells a reader to
+    confirm Game Mode in the Metal Performance HUD. The HUD draws over the
+    game's window, so reading it needs the GUI. Cost while open: a reader
+    can look for an indicator that the HUD shows differently or not at all.
+    **Trigger: a phase that runs a GUI check with the user present.** Then
+    run a full-screen build with `LSSupportsGameMode` and the HUD on, and
+    record what the HUD shows.
+    Evidence: `apple-games/references/game-loop-and-threading.md:737-748`.
+
+29. **The Metal 4 GPU-driven frame shape is not runtime-checked (found
+    2026-10-18, Phase 10 Task 5).**
+    `apple-metal/references/compute-and-gpu-driven.md` gives the per-frame
+    order for GPU encoding into an indirect command buffer. That order is
+    reset, barrier, culling dispatch, barrier, an optional optimize, and then
+    a consumer barrier before the render pass executes the commands. The
+    snippet compiles. No probe ran it, so no run shows that each barrier is
+    needed or that the barriers are enough. Cost while open: a missing
+    barrier gives intermittent wrong draws, which are hard to trace to the
+    reference. **Trigger: the next phase that extends
+    `pipeline/fixtures/metal-probe/`.** Then add a culling-and-ICB frame to
+    the probe. Run it under API and Shader Validation, and compare its output
+    with a CPU-encoded frame. Evidence:
+    `apple-metal/references/compute-and-gpu-driven.md:310-366`.
+
+30. **Writing an ICB's `gpuResourceID` into a Tier 2 argument buffer is not
+    runtime-checked (found 2026-10-18, Phase 10 Task 5).**
+    `apple-metal/references/compute-and-gpu-driven.md` names two host routes
+    that give a kernel its `command_buffer`. The documented route is
+    `MTLArgumentEncoder.setIndirectCommandBuffer(_:index:)`. The other route
+    writes `icb.gpuResourceID` into a Tier 2 struct, and the file marks it
+    not runtime-checked. Cost while open: a reader who takes the second route
+    can get a kernel that writes to no ICB. **Trigger: the probe work in item
+    29.** Then encode the same culling kernel both ways and compare the draws.
+    Evidence: `apple-metal/references/compute-and-gpu-driven.md:368-371`.
+
+31. **The Apple7–8 acceleration-structure build path is an inference (found
+    2026-10-18, Phase 10 Task 5).**
+    `apple-metal/references/compute-and-gpu-driven.md` reads the Feature Set
+    Tables' "address-driven acceleration structure builds" row (Apple9) as
+    the gate on the `MTL4…` build path. On Apple7 and Apple8 it sends the
+    build through `MTLAccelerationStructureCommandEncoder`. This Mac is
+    Apple9, so neither branch below Apple9 ran. Cost while open: on an M1 or
+    M2, the Metal 4 build path can work, and then the Metal 3 detour is not
+    necessary. It can also fail in a way the file does not predict.
+    **Trigger: access to an Apple7 or Apple8 Mac, or a newer Feature Set
+    Tables release that states the gate.** Then build one acceleration
+    structure each way on that GPU and record what happens. Evidence:
+    `apple-metal/references/compute-and-gpu-driven.md:585-589`.
+
+32. **A Metal 4 queue capture scope as `defaultCaptureScope` is not
+    runtime-checked (found 2026-10-18, Phase 10 Task 5).** On macOS 27.0.1,
+    a scope from `makeCaptureScope(commandQueue:)` with an
+    `MTL4CommandQueue` crashed `startCapture(with:)` when it was the
+    `captureObject` (runtime-checked).
+    `apple-metal/references/gpu-debugging-and-profiling.md` sends readers to
+    the device scope. It leaves open whether the queue scope works as
+    `defaultCaptureScope` behind Xcode's Capture button, which needs the GUI.
+    Cost while open: readers must avoid the queue scope everywhere.
+    **Trigger: a GUI check with the user present, or a macOS update.** Then
+    set the queue scope as `defaultCaptureScope` and press Capture in Xcode.
+    Re-run the crash case too.
+    Evidence: `apple-metal/references/gpu-debugging-and-profiling.md:239-247`.
+
+33. **A `gpucapture` Queue boundary on an `MTL4CommandQueue` is not
+    runtime-checked (found 2026-10-18, Phase 10 Task 5).** The `gpucapture`
+    man page describes Device and Queue boundaries in terms of
+    `MTLCommandBuffer`. A Device boundary captured Metal 4 command buffers.
+    No run tried a Queue boundary on a Metal 4 queue. Cost while open: a
+    reader who picks the Queue boundary for a Metal 4 engine can get an empty
+    or failed capture. **Trigger: the next phase that runs the R2 capture
+    steps.** Then run `gpucapture boundaries` on the probe, start a capture
+    on its Queue boundary, and open the trace with `gpudebug`. Evidence:
+    `apple-metal/references/gpu-debugging-and-profiling.md:256-285`.
+
+34. **Debug Executable on a bare executable is not runtime-checked (found
+    2026-10-18, Phase 10 Task 5; SDD ruling P33).**
+    `apple-metal/references/cpp-and-rust.md` offers **Debug > Debug
+    Executable** for a one-off capture of a binary that Xcode did not build.
+    Apple's page describes choosing an app bundle. Nobody chose a bare
+    command-line executable, because the check needs the GUI. The Task 6
+    checkpoint offered this GUI step, and it was not run. Cost while open:
+    the route can fail for a cargo or `clang++` binary, and the reader must
+    then fall back to an External Build System target. **Trigger: a phase
+    that runs a GUI check with the user present.** Then debug the R5 C++
+    host's binary through Debug Executable with GPU Frame Capture on, and
+    record whether a capture attaches. Evidence:
+    `apple-metal/references/cpp-and-rust.md:508-513`.
+
+35. **The scheme's GPU Frame Capture "Automatically" setting is an inference
+    for external builds (found 2026-10-18, Phase 10 Task 5).**
+    `apple-metal/references/cpp-and-rust.md` tells a reader to set GPU Frame
+    Capture to **Metal** on an External Build System scheme. Its reason is
+    that **Automatically** decides from whether the target links Metal, and
+    Xcode does not see this target link anything. No GUI run checked that
+    reasoning. Cost while open: none for a reader who follows the advice.
+    The inference only explains the advice. **Trigger: the GUI check in item
+    34.** Then run the R5 External Build System scheme with the setting at
+    Automatically, and record whether a capture attaches. Evidence:
+    `apple-metal/references/cpp-and-rust.md:561-568`.
+
+36. **The CMake routes are not runtime-checked (found 2026-10-18, Phase 10
+    Task 5).** CMake is not installed here, and Phase 10 installs nothing.
+    `apple-metal/references/cpp-and-rust.md` describes two routes from
+    Apple's Hydra sample: generate an Xcode project with CMake, or call
+    `cmake --build` from an External Build System target. Cost while open: a
+    wrong flag in the generator step fails loudly at the reader's first run.
+    The External Build System route is checked with cargo, and only the
+    build tool differs. **Trigger: CMake is installed on the authoring
+    machine.** Then run both routes on the R5 C++ host and record each one's
+    result. Evidence: `apple-metal/references/cpp-and-rust.md:513`,
+    `:598-604`.
+
+37. **metal-cpp and objc2-metal behaviour before OS 26 is an inference
+    (found 2026-10-18, Phase 10 Task 5).** The Metal 3 section of
+    `apple-metal/references/cpp-and-rust.md` says that neither binding checks
+    availability at compile time. It says that metal-cpp's `supports…()`
+    calls return `false` when a selector is missing. It also says that a
+    direct `MTL4` call then fails at run time. The
+    file marks this an inference. Every run in this phase was on macOS
+    27.0.1. Cost while open: an engine that relies on a `false` result for
+    its fallback can crash on an older OS instead. **Trigger: access to a
+    Mac or a virtual machine on macOS 15 or earlier.** Then run both hosts'
+    Metal 4 check there and record what each call does. Evidence:
+    `apple-metal/references/cpp-and-rust.md:713-727`.
+
+38. **The dynamic-tracing signpost category is not runtime-checked (found
+    2026-10-18, Phase 10 Task 9).**
+    `apple-performance/references/profiling-workflow.md` says, from the SDK
+    header, that the category `OS_LOG_CATEGORY_DYNAMIC_TRACING` keeps
+    signposts off and `os_signpost_enabled` false until a tool such as
+    Instruments records. That makes per-frame signposts almost free in
+    normal play. The file says it has not runtime-checked that category.
+    Cost while open: if the header overstates the effect, per-frame
+    signposts cost more in shipped builds than the file implies. **Trigger:
+    the next phase that edits `profiling-workflow.md` or the metal-probe
+    fixture.** Then log `os_signpost_enabled` for that category with and
+    without an Instruments recording, and time a signpost loop both ways.
+    Evidence: `apple-performance/references/profiling-workflow.md:318-323`.
+
+39. **The Swift gate passes a platform-wrapped block as empty code
+    (found 2026-10-18, Phase 10 Task 8; SDD ruling P38).**
+    `pipeline/typecheck_snippets.py` compiles each block for each listed
+    target. A block passes when it compiles on at least one of them. A
+    block inside `#if os(iOS)` is empty code on macOS, so it passes there
+    even when its iOS code does not compile. In a file that lists
+    macOS only, nothing compiles the iOS code at all. Task 13 reproduced
+    both cases with a deliberate type error. Ruling P38 keeps iOS-only
+    snippets in dual-target files unwrapped for that reason, and their prose
+    tells readers to wrap them. Cost while open: a writer who wraps a block
+    ships it unchecked on its real platform, and the gate prints PASS. Only
+    the target name in the PASS line shows it. **Action:** compile a block
+    that holds `#if os(...)` on each target that its condition selects, and
+    require a pass there. Add both probe fixtures to
+    `pipeline/test_typecheck_snippets.sh` as cases that must fail.
+    **Trigger: the next phase that edits `typecheck_snippets.py`, or the
+    first reference that needs a platform-wrapped block.** Evidence:
+    `records/2026-10-18-phase10-games/task-13-release/wrapped-block-probe/run.log:6`
+    (`dual-target.md` block 1 passes at macOS 26.0) and `:75`
+    (`macos-only.md` block 1 passes).
+
+40. **`sendOverDTLS` can wait forever on its OS 26 branch (found
+    2026-10-18, Phase 10 Task 8).** The OS 26 branch in
+    `apple-games/references/game-center-and-online.md` starts an
+    `NWConnection`, sends one datagram, and waits on the send's completion
+    through a checked continuation. It sets no state handler and no timeout.
+    A connection with no route stays in `.waiting`, so the send does not
+    complete, and the `await` does not return. The `defer` that cancels the
+    connection never runs. The Task 8 fix round closed the connection leak
+    and left this path open. Cost while open: a caller on OS 26 that copies
+    the snippet can hang a task each time the peer cannot be reached.
+    **Action:** add a `stateUpdateHandler` that resumes the continuation
+    with an error on `.waiting`, `.failed`, or `.cancelled`, and resumes it
+    exactly once. Or race the send against a timeout in a task group.
+    **Trigger: the next phase that edits `game-center-and-online.md`.**
+    Evidence: `apple-games/references/game-center-and-online.md:533-554`.
+
+41. **The metal-probe's `record_sim` leaves a stopped copy of the target
+    (found 2026-10-18, Phase 10 Task 9).** `run.sh r4` in
+    `pipeline/fixtures/metal-probe/` makes two Processor Trace recordings
+    through `record_sim`. Each one left a second MetalProbe process from
+    `build/MetalProbe.app`, not from the `.build/release/MetalProbe` path
+    given to `--launch`. Each copy was in state `T` (stopped), had parent 1,
+    and had a PID one below the traced process's PID. The controller found
+    both at the R4 clean-state check and ended them with `kill -KILL`; the
+    kill is not logged. The Task 6 recordings (Metal System Trace, Game
+    Performance) left none. `profiling-workflow.md` tells readers to
+    check for the copy. The fixture does not. Cost while open: each R4 run
+    fails the clean-state check (no probe process left running) until
+    someone ends the copies by hand. **Action:** after each recording,
+    `record_sim` should find a stopped MetalProbe process with parent 1 from
+    `build/MetalProbe.app`, log it, and end it. **Trigger: the next run of
+    `run.sh r4`.** Evidence:
+    `records/2026-10-18-phase10-games/task-9-r4/orphans.log`;
+    `records/2026-10-18-phase10-games/task-9-r4/report.md:121-127`;
+    `pipeline/fixtures/metal-probe/run.sh:360-385`.
+
 ## Accepted (no action)
 
 Phase 3 minors reviewed and accepted as-is — no follow-up action needed:

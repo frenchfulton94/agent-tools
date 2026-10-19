@@ -1,0 +1,81 @@
+# Task 13 Step 2b: native gate over apple-metal and apple-games references, 2026-10-18T21:31-0400
+$ python3 authoring/apple-studio/pipeline/typecheck_native.py plugins/apple-studio/skills/apple-metal/references/*.md plugins/apple-studio/skills/apple-games/references/*.md
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/apple-gpu-tbdr.md   (3 gated blocks)   target: -std=metal4.0
+  [PASS:metal:as-written   ] line 246  // The pass's attachments as a lighting fragment sees them.
+  [PASS:metal:as-written   ] line 425  struct OITLayers {
+  [PASS:metal:as-written   ] line 488  struct ResolveColor {
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/command-model.md   (1 gated blocks)   target: -std=metal4.0
+  [PASS:metal:as-written   ] line 138  #include <metal_stdlib>
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/compute-and-gpu-driven.md   (4 gated blocks)   target: -std=metal4.0
+  [PASS:metal:as-written   ] line 206  [[kernel, required_threads_per_threadgroup(16, 16, 1)]]
+  [PASS:metal:as-written   ] line 373  struct CullArgs {
+  [PASS:metal:as-written   ] line 497  struct Meshlet {
+  [PASS:metal:as-written   ] line 673  kernel void shadowRays(raytracing::primitive_acceleration_structure scen
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/cpp-and-rust.md   (6 gated blocks)   target: metal-cpp 26.4, -std=c++20; cargo check, objc2 = "=0.6.5", objc2-foundation = "=0.3.2", objc2-metal = "=0.3.2"
+  [PASS:cpp:as-written   ] line 177  // main.cpp: the one translation unit that defines the private implement
+  [PASS:cpp:as-written   ] line 635  // Call before the frame's beginCommandBuffer; after the frame-done wait
+  [PASS:cpp:as-written   ] line 745  void encodeFrameMetal3(MTL::CommandQueue* queue, MTL::RenderPassDescript
+  [PASS:rust:as-written   ] line 390  use core::ptr::NonNull;
+  [PASS:rust:as-written   ] line 662  use objc2::rc::Retained;
+  [PASS:rust:as-written   ] line 757  use objc2::rc::autoreleasepool;
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/display-and-upscaling.md   (1 gated blocks)   target: -std=metal4.0
+  [PASS:metal:as-written   ] line 498  #include <metal_stdlib>
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/gpu-debugging-and-profiling.md   (1 gated blocks)   target: -std=metal4.0
+  [PASS:metal:as-written   ] line 487  #include <metal_logging>
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/pipelines-and-render-passes.md   (2 gated blocks)   target: -std=metal4.0
+  [PASS:metal:as-written   ] line 197  constant bool has_normal_map [[function_constant(0)]];
+  [PASS:metal:as-written   ] line 654  struct DecalOut {
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/resources-and-memory.md   (2 gated blocks)   target: -std=metal4.0
+  [PASS:metal:as-written   ] line 159  #include <metal_stdlib>
+  [PASS:metal:as-written   ] line 481  #include <metal_stdlib>
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/shading-language.md   (7 gated blocks)   target: -std=metal4.1
+  [PASS:metal:as-written   ] line 154  struct Particle {
+  [PASS:metal:as-written   ] line 197  #if __METAL_VERSION__ >= 410
+  [PASS:metal:as-written   ] line 211  inline void add_count(int* counter, int amount) {
+  [PASS:metal:as-written   ] line 261  struct Light {
+  [PASS:metal:as-written   ] line 366  // Only this function body keeps IEEE semantics.
+  [PASS:metal:as-written   ] line 478  kernel void single_pass_sum(device const float* input [[buffer(0)]],
+  [PASS:metal:as-written   ] line 524  constexpr sampler trilinear_repeat(filter::linear, mip_filter::linear,
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/assets.md   (0 gated blocks)   target: (no gated blocks)
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/audio-and-haptics.md   (3 gated blocks)   target: metal-cpp 26.4, -std=c++20
+  [PASS:cpp:as-written   ] line 504  #include <Accelerate/Accelerate.h>
+  [PASS:cpp:as-written   ] line 575  #include <AudioToolbox/AudioToolbox.h>
+  [PASS:cpp:as-written   ] line 634  #include <Accelerate/Accelerate.h>
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/game-center-and-online.md   (1 gated blocks)   target: metal-cpp 26.4, -std=c++20
+  [PASS:cpp:as-written   ] line 571  #include <Network/Network.h>
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/game-design.md   (0 gated blocks)   target: (no gated blocks)
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/game-loop-and-threading.md   (0 gated blocks)   target: (no gated blocks)
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/input.md   (0 gated blocks)   target: (no gated blocks)
+
+TOTAL: 31/31 snippets compile clean
+exit: 0
