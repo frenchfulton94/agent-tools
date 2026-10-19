@@ -562,8 +562,9 @@ fail.
 `clean`, and exits 1 for any other action. No log here shows which `ACTION`
 **Product > Archive** passes, so do not archive this target. For a release,
 build with `xcodebuild -configuration Release build` (or `cargo build
---release`). Then sign, notarize, and staple the binary by hand, as
-`app-release/references/direct-distribution.md` describes.
+--release`). Then sign and notarize the binary by hand, as
+`app-release/references/direct-distribution.md` describes. A bare executable
+cannot be stapled; to staple, wrap it in an app bundle and staple the bundle.
 
 Then set up the scheme (Edit Scheme):
 

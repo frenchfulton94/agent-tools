@@ -541,8 +541,8 @@ func lanParameters() -> NWParameters {
 }
 
 /// Sends one DTLS message, and gives up after `timeout`. A peer that never
-/// answers the handshake keeps the connection preparing, and no route or a
-/// local network refusal keeps it waiting. Neither ends a send by itself.
+/// answers the handshake keeps the connection preparing, and a name that does
+/// not resolve keeps it waiting. Neither ends a send by itself.
 func sendOverDTLS(_ payload: Data, to endpoint: NWEndpoint,
                   timeout: Duration = .seconds(5)) async throws {
     let lastWait = OSAllocatedUnfairLock<NWError?>(initialState: nil)
@@ -565,7 +565,7 @@ func sendOverDTLS(_ payload: Data, to endpoint: NWEndpoint,
             throw lastWait.withLock { $0 } ?? NWError.posix(.ETIMEDOUT)
         }
         // The first child to finish decides. Both children end when cancelled,
-        // so the group never waits on a stuck send at scope exit.
+        // except in one OS 27 window that the text after this block describes.
         _ = try await group.next()
         group.cancelAll()
     }
@@ -622,7 +622,8 @@ and not on macOS 26:
   the Swift runtime reported that `send` leaked its continuation. The
   `Task.checkCancellation()` call before the send prevents that case. A
   cancellation between that check and the send was not reproduced, and it is
-  not ruled out.
+  not ruled out. If it happens, the send child never ends. The deadline does
+  not bound that call, because the task group waits for every child.
 - **Not runtime-checked:** a send that succeeds, because the probe had no
   DTLS peer, and `.failed`, which did not occur. The OS 26 branch cancels on
   `.failed` as a precaution.
@@ -736,9 +737,10 @@ for an iPhone over USB. Find the Wi-Fi interface with `networksetup
   macOS 15.
 - **Assuming the Swift `DTLS` stack is OS 26.** It is OS 27. On OS 26, use
   `NWParameters(dtls:udp:)` or QUIC.
-- **Awaiting a send with no deadline.** A connection that is waiting, or a
-  DTLS peer that never answers, keeps the send pending for minutes. On the
-  first launch, a local network refusal is such a wait.
+- **Awaiting a send with no deadline.** A DTLS peer that never answers kept
+  the send pending for the full 180 s of the probe. A connection that was
+  waiting had not returned after 8 s. On the first launch, a local network
+  refusal is such a wait.
 
 ## Where else to look
 

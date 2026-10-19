@@ -7,7 +7,7 @@ Base: `3d25847`. Ruling P52 set the scope: fix F1 to F8, and defer D1 to D6. Lin
 | File | What it holds |
 |---|---|
 | `probe/run.sh`, `probe/main.swift`, `probe/instrumented.swift` | The F1 probe. `run.sh` takes the reference's `sendOverDTLS` block out of the file and compiles it verbatim with Swift 6 at `-target arm64-apple-macos26.0`. It then runs each case. Each case has its own deadline inside the probe, and `perl alarm` ends the process if the probe hangs. |
-| `f1-probe.log` | `run.sh <build-dir>`: 23 short cases. They cover the 3d25847 branches, the fixed function forced onto each branch, and the verbatim snippet. |
+| `f1-probe.log` | `run.sh <build-dir>`: 20 short cases (21 `==` headers, counting the build). They cover the 3d25847 branches, the fixed function forced onto each branch, and the verbatim snippet. |
 | `f1-probe-long.log` | `run.sh <build-dir> long`: the 3d25847 branches against the two peers that never answer, with a 180 s deadline |
 | `run_typecheck.sh`, `typecheck.log` | The Swift gate, the native gate, and `bash -n` on each shell block, over every edited reference |
 | `run_vale.sh`, `vale.log` | Vale on every edited file, at `3d25847` and now |
@@ -136,3 +136,25 @@ Vale on `deferred.md`: 0 errors and 91 alerts, before and after.
 2. **The Network framework has a fault on OS 27.** A `NetworkConnection.send` started in an already-cancelled task leaks its continuation and never returns. The `Task.checkCancellation()` before the send handles the case the probe could reproduce. A cancellation that lands between the check and the send was not reproduced, and it is not ruled out. It may be worth a Feedback Assistant report; nothing was sent.
 3. **A successful send was never observed.** No DTLS peer was available, so the success path is compiled but not runtime-checked. That covers the completion with `nil` and the OS 27 `send` returning normally. The reference says so.
 4. **Bookkeeping:** the controller needs to write `$REC/final-fix/report.md` and `.superpowers/sdd/2026-10-18-phase10-games/final-fix-report.md` from this text (P10), because the harness refused the Write.
+
+## Controller residual fixes after the re-review (P36 size)
+
+The re-review (opus) found every item addressed and four Minor wording faults.
+The controller fixed them:
+
+- `game-center-and-online.md`: the group comment no longer says the group
+  "never" waits on a stuck send. It points to the OS 27 window, and the text
+  after the block now says the deadline does not bound that window. The doc
+  comment names the tested case (a name that does not resolve) instead of "no
+  route". The pitfall gives the logged durations (180 s preparing, 8 s waiting)
+  instead of "minutes".
+- `cpp-and-rust.md`: a bare executable is signed and notarized, not stapled.
+  To staple, wrap it in an app bundle.
+- `input.md`: the frames-in-flight wait proves the slot is free only when a
+  Metal 4 frame commits after every `encode(before:)` call.
+- This report: 20 short cases, not 23.
+
+The two block edits are comments only. `residuals.log` shows the probed block
+(sha256 `7058b6cb…ee54`, the value in both probe logs), the shipped block
+(`34dc5dba…369d`), their diff, and "none" for changed lines that are not
+comments. It also holds the gates after the edits.

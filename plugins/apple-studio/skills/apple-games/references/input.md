@@ -467,8 +467,11 @@ Without a wait, its clear can overwrite a slot that the GPU still samples.
 Call `encode(before:)` once per frame, after that frame's frames-in-flight
 wait returns (step 1 of `## Frame structure` in
 `apple-metal/references/command-model.md`). Call it before the Metal 4 commit
-that composites the overlay. That wait proves that the frame one ring length back,
-which last used the slot, is finished. The overlay textures must also be in
+that composites the overlay. That wait proves that the frame one ring length
+back is finished. That frame last used the slot. The proof holds only when a
+Metal 4 frame commits after every `encode(before:)` call. A frame can end early
+after `encode(before:)`, for example on a nil drawable. Then the ring falls out
+of step with the frame number, and the proof fails. The overlay textures must also be in
 the Metal 4 queue's residency set. A Metal 3 renderer passes its own final-pass
 encoder to `render(using:)` and needs none of this.
 
