@@ -1,0 +1,27 @@
+base: 3d25847; vale 3.24.0
+
+== plugins/apple-studio/skills/apple-games/references/game-center-and-online.md
+errors: 0 -> 0   all alerts: 14 -> 14   [ok]
+
+== plugins/apple-studio/skills/apple-games/references/input.md
+errors: 0 -> 0   all alerts: 7 -> 7   [ok]
+
+== plugins/apple-studio/skills/apple-metal/references/command-model.md
+errors: 0 -> 0   all alerts: 23 -> 23   [ok]
+
+== plugins/apple-studio/skills/apple-metal/references/cpp-and-rust.md
+errors: 0 -> 0   all alerts: 14 -> 14   [ok]
+
+== plugins/apple-studio/skills/app-release/references/direct-distribution.md
+errors: 0 -> 0   all alerts: 4 -> 4   [ok]
+
+== plugins/apple-studio/skills/apple-games/SKILL.md
+errors: 0 -> 0   all alerts: 0 -> 0   [ok]
+
+== plugins/apple-studio/skills/apple-frameworks/SKILL.md
+errors: 0 -> 0   all alerts: 0 -> 0   [ok]
+
+== authoring/apple-studio/docs/deferred.md
+errors: 0 -> 0   all alerts: 91 -> 91   [ok]
+
+== overall: PASS (no new errors)

@@ -1260,9 +1260,37 @@ block Phase 2; each has an explicit trigger for when to act.
     the snippet can hang a task each time the peer cannot be reached.
     **Action:** add a `stateUpdateHandler` that resumes the continuation
     with an error on `.waiting`, `.failed`, or `.cancelled`, and resumes it
-    exactly once. Or race the send against a timeout in a task group.
+    exactly once. (This item first also offered a second route: race the
+    send against a timeout in a task group. That route alone hangs too. See
+    the correction below.)
     **Trigger: the next phase that edits `game-center-and-online.md`.**
     Evidence: `apple-games/references/game-center-and-online.md:533-554`.
+
+    **Resolved 2026-10-18, Phase 10 final review (ruling P52).** A probe
+    found the gap wider than this item says. Both branches hang, not only
+    the OS 26 branch. A connection waits for more than 8 s when the name
+    does not resolve. A DTLS peer that never answers keeps it in `.preparing`
+    for more than 180 s, so a state handler alone does not bound the send.
+    The OS 27 `send` also never returns when it starts in a task that is
+    already cancelled: the Swift runtime reported a leaked continuation.
+    `sendOverDTLS` now takes a `timeout`, and runs the send beside a deadline
+    in a task group. The OS 26 branch wraps its continuation in
+    `withTaskCancellationHandler`, and its `onCancel` cancels the
+    `NWConnection`. The probe showed that cancelling the connection calls the
+    pending send completion with `ECANCELED` within 2 ms, so that completion
+    stays the only resume path. The OS 27 branch calls
+    `Task.checkCancellation()` before its send.
+
+    **Correction to the task-group route.** A task group waits at scope exit
+    for every child, also a cancelled one. The continuation at `3d25847`
+    ignored cancellation, so a group around it hangs the same way. The group
+    works now only because each branch ends when its task is cancelled, and
+    the probe checked that for both branches. A cancellation that lands
+    between the OS 27 check and its send is not ruled out. Evidence:
+    `records/2026-10-18-phase10-games/final-fix/f1-probe.log` (the
+    `original*` cases show the hangs, and the `fixed*` and `verbatim*` cases
+    show the fix) and `f1-probe-long.log` (180 s in `.preparing`), both made
+    by `final-fix/probe/run.sh`.
 
 41. **The metal-probe's `record_sim` leaves a stopped copy of the target
     (found 2026-10-18, Phase 10 Task 9).** `run.sh r4` in
@@ -1283,6 +1311,99 @@ block Phase 2; each has an explicit trigger for when to act.
     `records/2026-10-18-phase10-games/task-9-r4/orphans.log`;
     `records/2026-10-18-phase10-games/task-9-r4/report.md:121-127`;
     `pipeline/fixtures/metal-probe/run.sh:360-385`.
+
+42. **The native gate compiles C++ at the host's default target (found
+    2026-10-18, Phase 10 final review).** `pipeline/typecheck_native.py`
+    runs `clang++ -std=c++20 -fsyntax-only` with no `-mmacosx-version-min`
+    taken from the file's `> typecheck:` floor. It also passes a block that
+    produces only warnings, which includes an unguarded-availability warning.
+    A C++ call to an OS 27 API with no `__builtin_available` check therefore
+    passes in a `macos 26.0` file. The Swift gate fails the same mistake.
+    `apple-games/SKILL.md` now says that the C++ gate does not check the
+    floor. Cost while open: a C++ snippet can ship a call below its file's
+    floor, and the gate prints PASS. **Action:** pass the floor from
+    `> typecheck:` as the deployment target, and add
+    `-Werror=unguarded-availability-new`. Add a fixture with an unguarded
+    OS 27 call to `pipeline/test_typecheck_native.sh` as a case that must
+    fail. **Trigger: the next phase that edits `typecheck_native.py`, or the
+    first C++ snippet that calls an API newer than its file's floor.**
+    Evidence: `pipeline/typecheck_native.py:261`.
+
+43. **`shading-language.md` says its unlabelled blocks compile at MSL 4.0
+    (found 2026-10-18, Phase 10 final review).** Lines 35-36 say that the
+    blocks that need 4.1 are labelled, and that the rest compile at 4.0 too.
+    The file's directive is `> typecheck-metal: metal4.1`, and the native
+    gate compiles each file at one MSL version only. Nothing has compiled
+    those blocks at 4.0. Cost while open: a shader copied into a
+    `-std=metal4.0` build can fail, against what the file says. **Action:**
+    compile the unlabelled blocks with `-std=metal4.0` once and log the
+    result. Keep the sentence only if they pass, or reword it to what was
+    compiled. A gate that accepts several MSL versions is the general fix.
+    **Trigger: the next phase that edits `shading-language.md` or
+    `typecheck_native.py`.** Evidence:
+    `apple-metal/references/shading-language.md:4` and `:35-36`.
+
+44. **`apple-performance`'s description claims "the render loop" with no
+    exclusion (found 2026-10-18, Phase 10 final review).** Its description
+    lists "the render loop" among its topics. Its `Not for` clause names no
+    exclusion for GPU frame time, which `apple-metal` owns, or for frame
+    pacing, which `apple-games` owns. A prompt about a game's frame time can
+    route to `apple-performance` first. Cost while open: a GPU-bound or
+    pacing problem can get CPU-side profiling advice before the right
+    skill loads. **Action:** add both exclusions to the description, then
+    run the trigger-eval sweep for the three skills through
+    `pipeline/run_evals.py`. A description change without a sweep is not
+    allowed. **Trigger: the next phase that runs a trigger-eval sweep, or
+    that edits `apple-performance/SKILL.md`.** Evidence:
+    `apple-performance/SKILL.md:3` and `:16`.
+
+45. **The metal-probe's `r4_finding` does not compare the two verdicts
+    (found 2026-10-18, Phase 10 final review).** `r4_finding` in
+    `pipeline/fixtures/metal-probe/run.sh` prints the heaviest symbol of the
+    `--slow` recording and of the control recording. It does not check that
+    the two differ. A rerun therefore exits 0 when a regression makes both
+    recordings name the same symbol. `r4_selftest` has the same output shape
+    and the same gap. Cost while open: an R4 rerun can pass while the
+    finding it supports no longer holds. **Action:** capture both verdicts in
+    `r4_finding`, and exit non-zero when they are equal. **Trigger: the next
+    run of `run.sh r4` or `r4-finding`, or the next phase that edits the
+    metal-probe fixture.** Evidence:
+    `pipeline/fixtures/metal-probe/run.sh:399-403`.
+
+46. **Some compile conditions take the Swift gate's one-target path (found
+    2026-10-18, Phase 10 final review; addendum to item 39).** The gate
+    compiles a block on every declared target only when the block holds the
+    literal text `#if os(`. A block that holds only `#if !os(`, an
+    `#elseif os(` with no `#if os(`, `#if canImport(`, or
+    `#if targetEnvironment(` passes when it compiles on one target. A
+    `targetEnvironment(simulator)` branch is never compiled, in any file,
+    because the gate never builds for a Simulator SDK. One shipped block has
+    such a branch: `apple-metal/references/apple-gpu-tbdr.md` block 1. Cost
+    while open: code under those conditions can ship unchecked on the
+    platform it is for, and the gate prints PASS. **Action:** match every
+    compile condition (`#if`, `#elseif`, negated forms, `canImport`,
+    `targetEnvironment`), not only `#if os(`. Add a Simulator SDK target, or
+    state in CONVENTIONS.md that Simulator branches are not compiled.
+    **Trigger: the next phase that edits `typecheck_snippets.py`, or the
+    first reference that needs a block under one of those conditions.**
+    Evidence: `pipeline/typecheck_snippets.py:342`;
+    `apple-metal/references/apple-gpu-tbdr.md:99`.
+
+47. **Ruling P38's reason no longer holds (found 2026-10-18, Phase 10 final
+    review).** P38 kept iOS-only snippets in dual-target files unwrapped.
+    Its reason was that the gate passed a wrapped block on macOS without
+    compiling its iOS code (item 39). Ruling P50 changed the gate: a block that holds
+    `#if os(` now compiles on every declared target. A wrapped iOS-only
+    block is therefore compiled on iOS. Cost while open: dual-target files
+    keep unwrapped iOS-only snippets, and their prose tells the reader to
+    wrap them. A reader who copies one as written into a multiplatform
+    target can get a macOS build error. **Action:** decide again whether
+    iOS-only snippets in dual-target files should ship wrapped in
+    `#if os(iOS)`. If they should, wrap them, rerun the gate, and delete the
+    prose that tells readers to wrap them. **Trigger: the next phase that
+    edits a dual-target reference with an iOS-only snippet.** Evidence:
+    item 39 and its resolution above; the `#if os(` rule in
+    `CONVENTIONS.md` (Pipeline tooling, ruling P50).
 
 ## Accepted (no action)
 

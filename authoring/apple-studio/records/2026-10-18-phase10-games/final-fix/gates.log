@@ -1,0 +1,27 @@
+Phase 10 final fix: commit gates, run 2026-10-19T02:37Z from the worktree root, before the commit.
+Result lines only (CONVENTIONS: keep a build log's result line).
+
+$ bun test
+ 542 pass
+ 0 fail
+ 1373 expect() calls
+Ran 542 tests across 16 files. [12.09s]
+exit: 0
+
+$ bun run audit
+0 error(s), 54 warning(s)
+exit: 0
+
+$ bun run validate
+✔ Validation passed
+exit: 0
+
+$ claude plugin validate . --strict
+✔ Validation passed
+exit: 0
+
+$ python3 authoring/apple-studio/pipeline/fixtures/metal-probe/check_verbatim.py
+12 of 12 pasted blocks match
+
+$ pgrep -fl 'MetalProbe|cpp-host|rust-host|dtls-probe'
+(no output; exit 1)

@@ -53,7 +53,9 @@ Name the symptom before you pick the skill:
 
 The OS floor:
 - **The floor is macOS 26.0 and iOS 26.0.** Every reference compiles its
-  snippets at that deployment target.
+  Swift snippets at that deployment target. Its C++ snippets compile at the
+  host's default target. The gate therefore does not catch a C++ call below
+  the floor, so check each call's availability in its header.
 - **Gate every OS 27 symbol with `#available(macOS 27, iOS 27, *)`, and keep
   the 26 path beside it.** Examples are the throwing AVAudioEngine `connect`,
   the iOS 27 audio-session interruption notifications, the Swift `DTLS` type,

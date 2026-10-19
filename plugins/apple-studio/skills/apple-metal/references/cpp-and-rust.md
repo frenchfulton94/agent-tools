@@ -558,6 +558,13 @@ hardcode `~/.cargo/bin/cargo`: on this machine cargo is a Homebrew rustup
 install at `/opt/homebrew/opt/rustup/bin/cargo`, and the guessed path would
 fail.
 
+**The script does not archive.** It handles only an empty action, `build`, and
+`clean`, and exits 1 for any other action. No log here shows which `ACTION`
+**Product > Archive** passes, so do not archive this target. For a release,
+build with `xcodebuild -configuration Release build` (or `cargo build
+--release`). Then sign, notarize, and staple the binary by hand, as
+`app-release/references/direct-distribution.md` describes.
+
 Then set up the scheme (Edit Scheme):
 
 - **Run > Info > Executable:** the built binary (`target/debug/<name>`). Xcode

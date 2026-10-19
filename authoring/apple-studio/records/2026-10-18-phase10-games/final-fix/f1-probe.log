@@ -1,0 +1,207 @@
+== build
+reference: plugins/apple-studio/skills/apple-games/references/game-center-and-online.md
+snippet sha256: 7058b6cb5bb896fc7ecf7d592e1be34459a52f0d857f96bfa98744e2efe1ee54
+build: ok (swiftc -swift-version 6 -target arm64-apple-macos26.0)
+ProductName:		macOS
+ProductVersion:		27.0.1
+BuildVersion:		26A434
+
+== original26 unresolvable plain 8
+case: function=original26 endpoint=unresolvable (dtls-probe.invalid:4433) mode=plain probe-deadline=8.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.001s] state: preparing
+[  0.006s] state: waiting(-65554: NoSuchRecord)
+[  8.001s] TIMEOUT: the function did not return within 8.0 s
+exit: 3
+
+== original27 unresolvable plain 8
+case: function=original27 endpoint=unresolvable (dtls-probe.invalid:4433) mode=plain probe-deadline=8.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.001s] send enqueued
+[  0.003s] state: preparing
+[  0.003s] state: waiting(-65554: NoSuchRecord)
+[  8.004s] TIMEOUT: the function did not return within 8.0 s
+exit: 3
+
+== original27 unresolvable cancel-after-1s
+case: function=original27 endpoint=unresolvable (dtls-probe.invalid:4433) mode=cancel-after-1s probe-deadline=10.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.001s] send enqueued
+[  0.002s] state: preparing
+[  0.003s] state: waiting(-65554: NoSuchRecord)
+[  1.044s] cancelling the task
+[  1.045s] RETURNED, threw: POSIXErrorCode(rawValue: 89): Operation canceled
+exit: 0
+
+== original27 unresolvable precancelled 4
+case: function=original27 endpoint=unresolvable (dtls-probe.invalid:4433) mode=precancelled probe-deadline=4.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.000s] task cancelled before the call
+[  0.001s] send enqueued
+SWIFT TASK CONTINUATION MISUSE: send(content:context:isComplete:) leaked its continuation without resuming it. This may cause tasks waiting on it to remain suspended forever.
+[  4.001s] TIMEOUT: the function did not return within 4.0 s
+exit: 3
+
+== fixed26 unresolvable plain
+case: function=fixed26 endpoint=unresolvable (dtls-probe.invalid:4433) mode=plain probe-deadline=10.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.001s] send enqueued (OS 26 branch)
+[  0.002s] state: preparing
+[  0.003s] state: waiting(-65554: NoSuchRecord)
+[  2.092s] deadline reached
+[  2.093s] deadline child ended
+[  2.093s] onCancel: cancel()
+[  2.093s] state: cancelled
+[  2.093s] send completion fired, error: Optional(POSIXErrorCode(rawValue: 89): Operation canceled)
+[  2.093s] send child ended
+[  2.093s] RETURNED, threw: -65554: NoSuchRecord
+exit: 0
+
+== fixed26 refused plain
+case: function=fixed26 endpoint=refused (127.0.0.1:9) mode=plain probe-deadline=10.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.001s] send enqueued (OS 26 branch)
+[  0.002s] state: preparing
+[  2.002s] deadline reached
+[  2.003s] deadline child ended
+[  2.003s] onCancel: cancel()
+[  2.005s] state: cancelled
+[  2.005s] send completion fired, error: Optional(POSIXErrorCode(rawValue: 89): Operation canceled)
+[  2.005s] send child ended
+[  2.005s] RETURNED, threw: POSIXErrorCode(rawValue: 60): Operation timed out
+exit: 0
+
+== fixed26 blackhole plain
+case: function=fixed26 endpoint=blackhole (192.0.2.1:4433) mode=plain probe-deadline=10.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.001s] send enqueued (OS 26 branch)
+[  0.002s] state: preparing
+[  2.006s] deadline reached
+[  2.006s] deadline child ended
+[  2.006s] onCancel: cancel()
+[  2.008s] state: cancelled
+[  2.008s] send completion fired, error: Optional(POSIXErrorCode(rawValue: 89): Operation canceled)
+[  2.008s] send child ended
+[  2.008s] RETURNED, threw: POSIXErrorCode(rawValue: 60): Operation timed out
+exit: 0
+
+== fixed26 blackhole cancel-after-1s
+case: function=fixed26 endpoint=blackhole (192.0.2.1:4433) mode=cancel-after-1s probe-deadline=10.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.001s] send enqueued (OS 26 branch)
+[  0.002s] state: preparing
+[  1.048s] cancelling the task
+[  1.048s] onCancel: cancel()
+[  1.048s] deadline child ended
+[  1.049s] state: cancelled
+[  1.049s] send completion fired, error: Optional(POSIXErrorCode(rawValue: 89): Operation canceled)
+[  1.049s] send child ended
+[  1.050s] RETURNED, threw: CancellationError()
+exit: 0
+
+== fixed26 unresolvable precancelled
+case: function=fixed26 endpoint=unresolvable (dtls-probe.invalid:4433) mode=precancelled probe-deadline=10.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.000s] task cancelled before the call
+[  0.000s] deadline child ended
+[  0.001s] onCancel: cancel()
+[  0.001s] send enqueued (OS 26 branch)
+[  0.002s] state: preparing
+[  0.002s] state: cancelled
+[  0.003s] send completion fired, error: Optional(POSIXErrorCode(rawValue: 89): Operation canceled)
+[  0.003s] send child ended
+[  0.003s] RETURNED, threw: CancellationError()
+exit: 0
+
+== fixed27 unresolvable plain
+case: function=fixed27 endpoint=unresolvable (dtls-probe.invalid:4433) mode=plain probe-deadline=10.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.001s] send enqueued (OS 27 branch)
+[  0.001s] state: preparing
+[  0.002s] state: waiting(-65554: NoSuchRecord)
+[  2.115s] deadline reached
+[  2.115s] deadline child ended
+[  2.116s] send child ended
+[  2.116s] RETURNED, threw: -65554: NoSuchRecord
+exit: 0
+
+== fixed27 refused plain
+case: function=fixed27 endpoint=refused (127.0.0.1:9) mode=plain probe-deadline=10.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.001s] send enqueued (OS 27 branch)
+[  0.002s] state: preparing
+[  2.009s] deadline reached
+[  2.009s] deadline child ended
+[  2.010s] send child ended
+[  2.011s] RETURNED, threw: POSIXErrorCode(rawValue: 60): Operation timed out
+exit: 0
+
+== fixed27 blackhole plain
+case: function=fixed27 endpoint=blackhole (192.0.2.1:4433) mode=plain probe-deadline=10.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.001s] send enqueued (OS 27 branch)
+[  0.002s] state: preparing
+[  2.013s] deadline reached
+[  2.013s] deadline child ended
+[  2.015s] send child ended
+[  2.015s] RETURNED, threw: POSIXErrorCode(rawValue: 60): Operation timed out
+exit: 0
+
+== fixed27 blackhole cancel-after-1s
+case: function=fixed27 endpoint=blackhole (192.0.2.1:4433) mode=cancel-after-1s probe-deadline=10.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.001s] send enqueued (OS 27 branch)
+[  0.002s] state: preparing
+[  1.047s] cancelling the task
+[  1.048s] deadline child ended
+[  1.049s] send child ended
+[  1.049s] RETURNED, threw: CancellationError()
+exit: 0
+
+== fixed27 unresolvable precancelled
+case: function=fixed27 endpoint=unresolvable (dtls-probe.invalid:4433) mode=precancelled probe-deadline=10.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.000s] task cancelled before the call
+[  0.000s] deadline child ended
+[  0.001s] send child ended
+[  0.001s] RETURNED, threw: CancellationError()
+exit: 0
+
+== verbatim unresolvable plain
+case: function=verbatim endpoint=unresolvable (dtls-probe.invalid:4433) mode=plain probe-deadline=10.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  2.014s] RETURNED, threw: -65554: NoSuchRecord
+exit: 0
+
+== verbatim blackhole plain
+case: function=verbatim endpoint=blackhole (192.0.2.1:4433) mode=plain probe-deadline=10.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  2.016s] RETURNED, threw: POSIXErrorCode(rawValue: 60): Operation timed out
+exit: 0
+
+== verbatim blackhole cancel-after-1s
+case: function=verbatim endpoint=blackhole (192.0.2.1:4433) mode=cancel-after-1s probe-deadline=10.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  1.048s] cancelling the task
+[  1.051s] RETURNED, threw: CancellationError()
+exit: 0
+
+== verbatim unresolvable precancelled
+case: function=verbatim endpoint=unresolvable (dtls-probe.invalid:4433) mode=precancelled probe-deadline=10.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.000s] task cancelled before the call
+[  0.001s] RETURNED, threw: CancellationError()
+exit: 0
+
+== verbatimClassic unresolvable plain 4
+case: function=verbatimClassic endpoint=unresolvable (dtls-probe.invalid:4433) mode=plain probe-deadline=4.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  4.005s] TIMEOUT: the function did not return within 4.0 s
+exit: 3
+
+== verbatimClassic blackhole cancel-after-1s
+case: function=verbatimClassic endpoint=blackhole (192.0.2.1:4433) mode=cancel-after-1s probe-deadline=10.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  1.047s] cancelling the task
+[  1.049s] RETURNED, threw: POSIXErrorCode(rawValue: 89): Operation canceled
+exit: 0

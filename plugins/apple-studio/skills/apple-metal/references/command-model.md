@@ -341,6 +341,16 @@ extension FrameLoop {
 
     @MainActor   // MTKView's properties are main-actor isolated
     func drawFrame(in metalView: MTKView, color: SIMD4<Float>) throws {
+        // The frames-in-flight wait of encodeFrame, done here before the drawable
+        // is taken, so the drawable is never held through a wait of up to 1 s.
+        // encodeFrame's own wait then returns at once.
+        let next = frameNumber + 1
+        if next > UInt64(maxFramesInFlight) {
+            let previousUser = next - UInt64(maxFramesInFlight)
+            guard frameEvent.wait(untilSignaledValue: previousUser, timeoutMS: 1_000) else {
+                throw FrameLoopError.gpuTimeout(waitingForFrame: previousUser)
+            }
+        }
         // Return before encodeFrame, so a skipped frame never takes a slot.
         guard let drawable = metalView.currentDrawable else { return }
         try encodeFrame(into: drawable.texture, color: color)

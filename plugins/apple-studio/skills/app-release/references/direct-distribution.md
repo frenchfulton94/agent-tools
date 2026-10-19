@@ -55,11 +55,13 @@ There are two Developer ID certificate types:
 
 Apple's pages write the name as `Developer ID Application: <Team ID>`. The
 account help says the keychain name holds the team name and the Team ID.
-**Do not take the Team ID from an identity name.** Measured on this machine,
-two `Apple Development` identities had the Apple ID and the IDs `RTC3TK2XFJ`
-and `G4MYV6D63X` in their names. Their Team IDs, in the certificate subject's
-OU field, were `ULQJ329QSN` and `2F7J72JV48`. No Developer ID name was
-available to check. Read the OU, and the O field for the team name:
+**The ID in an `Apple Development` identity name is not the Team ID.**
+Measured on this machine (the record's `task-10-r6/identity.log`), two
+`Apple Development` identities had the Apple ID and the IDs `RTC3TK2XFJ` and
+`G4MYV6D63X` in their names. Their Team IDs, in the certificate subject's OU
+field, were `ULQJ329QSN` and `2F7J72JV48`. No Developer ID name was available
+to check. For any identity, read the Team ID from the certificate subject's
+OU field, and the team name from its O field:
 
 ```bash
 security find-certificate -c "<part of the identity name>" -p > cert.pem
@@ -251,7 +253,9 @@ There are three routes to distribution-signed Mac code:
 3. **An External Build System or Aggregate target** (cargo, CMake, make).
    Xcode archives it as a "Generic Xcode Archive", which Organizer cannot
    notarize. Sign by hand and use `notarytool`.
-   `apple-metal/references/cpp-and-rust.md` covers that build. An app target
+   `apple-metal/references/cpp-and-rust.md` covers that build. Its cargo
+   script does not archive: build Release, then sign the built binary by
+   hand. An app target
    also becomes a Generic Xcode Archive when a dependency has
    `SKIP_INSTALL = NO`. Set Skip Install to Yes on every embedded target.
 
@@ -304,8 +308,10 @@ syspolicy_check notary-submission "MyGame.app"
 
 These are the commands for one app, in order. Steps 1 and 2 are one-time
 setup. Step 1 prompts for a password, and step 2 prints the identity name
-that step 3 needs, so run them by hand first. Steps 3 to 8 are one block
-that you run as written, after you set the variables at its top.
+that step 3 needs, so run them by hand first. Steps 3 to 8 are one script.
+Set the variables at its top, save it as a file, and run it with `bash`. Do
+not paste it into an interactive shell: `set -e` closes that shell at the
+first failed step.
 
 **The notarization steps are not runtime-checked: needs a Developer ID identity (deferred item 24).** Each spelling matches its `--help`
 text or man page on this machine. The expected results come from Apple's
@@ -328,6 +334,9 @@ security find-identity -v -p codesigning
 The release block:
 
 ```bash
+#!/bin/bash
+set -euo pipefail   # stop at the first failed step: never zip, submit, or staple after one
+
 APP="MyGame.app"
 ZIP="MyGame.zip"
 PROFILE="<profile name from step 1>"
@@ -340,7 +349,8 @@ codesign --force --sign "$IDENTITY" --options runtime --timestamp "$APP"
 codesign --verify --strict --verbose=2 "$APP"
 
 # 4. Negative control. Signed but not notarized: expect "rejected" (exit 3).
-spctl --assess -vv --type execute "$APP"
+#    This step is expected to fail, so its exit status does not stop the script.
+spctl --assess -vv --type execute "$APP" || true
 
 # 5. The notary service takes a zip, a DMG, or a pkg. It rejects a bare .app.
 ditto -c -k --keepParent "$APP" "$ZIP"
@@ -348,12 +358,19 @@ ditto -c -k --keepParent "$APP" "$ZIP"
 # 6. Submit and wait, keep the JSON result, then fetch the log, also when
 #    the status is Accepted. The help documents -f json, but not the keys in
 #    the result: the "id" and "status" keys are not runtime-checked
-#    (needs a Developer ID identity, deferred item 24).
-#    plutil exits 1 if the key is missing.
-xcrun notarytool submit "$ZIP" --keychain-profile "$PROFILE" --wait -f json > "$SUBMIT_JSON"
-plutil -extract status raw -o - "$SUBMIT_JSON"
+#    (needs a Developer ID identity, deferred item 24). The help also does
+#    not give submit's exit status for an Invalid result, so the script
+#    records it and fetches the log before it decides.
+#    plutil exits 1 if the key is missing, which stops the script.
+SUBMIT_EXIT=0
+xcrun notarytool submit "$ZIP" --keychain-profile "$PROFILE" --wait -f json > "$SUBMIT_JSON" || SUBMIT_EXIT=$?
 SUBMISSION_ID="$(plutil -extract id raw -o - "$SUBMIT_JSON")"
 xcrun notarytool log "$SUBMISSION_ID" --keychain-profile "$PROFILE" "$LOG"
+STATUS="$(plutil -extract status raw -o - "$SUBMIT_JSON")"
+if [ "$STATUS" != "Accepted" ] || [ "$SUBMIT_EXIT" -ne 0 ]; then
+    echo "notarization status: $STATUS (submit exit $SUBMIT_EXIT). Read $LOG." >&2
+    exit 1
+fi
 
 # 7. Staple the ticket to the app (a zip cannot be stapled), then check it.
 xcrun stapler staple "$APP"

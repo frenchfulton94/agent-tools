@@ -20,6 +20,7 @@ into this directory. One directory per task, each with its report:
 | `task-10-r6/` | 10 | The direct-distribution checks, and the reason R6 did not run |
 | `task-12-evals/` | 12 | The trigger-eval sweep and its classification |
 | `task-13-release/` | 13 | The release gates, the load check, and the clean-state check |
+| `final-fix/` | final review | The fix round after the whole-branch review: the `sendOverDTLS` probe and its logs, the snippet-gate, Vale, and commit-gate logs, and the report |
 
 Task 11 has no directory. It was a two-line edit that the controller made,
 and its gate counts are in the SDD ledger. The controller copies that ledger

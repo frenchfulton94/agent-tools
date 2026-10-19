@@ -437,7 +437,8 @@ final class TouchOverlay {
     }
 
     /// Encode this frame's controls, then make the Metal 4 queue wait for them.
-    /// Returns the texture the Metal 4 composite pass samples.
+    /// Returns the texture the Metal 4 composite pass samples. Call it once per
+    /// frame, after the frames-in-flight wait: that wait frees the slot.
     func encode(before metal4Queue: any MTL4CommandQueue) -> (any MTLTexture)? {
         frame += 1
         let target = overlays[Int(frame % UInt64(overlays.count))]
@@ -458,10 +459,17 @@ final class TouchOverlay {
 }
 ```
 
-The ring of overlays assumes the Metal 4 frame that samples a texture has
-finished before the ring comes back to it. That holds when the ring length
-equals your frames-in-flight bound. The overlay textures must also be in the
-Metal 4 queue's residency set. A Metal 3 renderer passes its own final-pass
+The ring of overlays is safe only when the Metal 4 frame that last sampled a
+slot has finished before `encode(before:)` clears that slot again. A ring
+length equal to your frames-in-flight bound is necessary, but it is not
+sufficient. The Metal 3 queue is not ordered after the Metal 4 composite.
+Without a wait, its clear can overwrite a slot that the GPU still samples.
+Call `encode(before:)` once per frame, after that frame's frames-in-flight
+wait returns (step 1 of `## Frame structure` in
+`apple-metal/references/command-model.md`). Call it before the Metal 4 commit
+that composites the overlay. That wait proves that the frame one ring length back,
+which last used the slot, is finished. The overlay textures must also be in
+the Metal 4 queue's residency set. A Metal 3 renderer passes its own final-pass
 encoder to `render(using:)` and needs none of this.
 
 **`GCVirtualController` specifics.** Build it in `viewDidLoad` from a

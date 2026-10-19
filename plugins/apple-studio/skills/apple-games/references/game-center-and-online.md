@@ -1,4 +1,4 @@
-> verified: 2026-10 against https://developer.apple.com/help/account/reference/supported-capabilities-macos, https://developer.apple.com/documentation/technotes/tn3125-inside-code-signing-provisioning-profiles.md, https://developer.apple.com/documentation/gamekit.md, https://developer.apple.com/documentation/gamekit/initializing-and-configuring-game-center.md, https://developer.apple.com/documentation/gamekit/authenticating-a-player.md, https://developer.apple.com/documentation/gamekit/gklocalplayer/authenticatehandler.md, https://developer.apple.com/documentation/gamekit/gklocalplayerlistener.md, https://developer.apple.com/documentation/gamekit/protecting-the-player-s-privacy-using-scoped-identifiers.md, https://developer.apple.com/documentation/gamekit/gkplayer/scopedidsarepersistent().md, https://developer.apple.com/documentation/gamekit/connecting-players-with-their-friends-in-your-game.md, https://developer.apple.com/documentation/xcode/resetting-access-to-protected-resources-in-macos.md, https://developer.apple.com/documentation/gamekit/adding-an-access-point-to-your-game.md, https://developer.apple.com/documentation/gamekit/gkaccesspoint.md, https://developer.apple.com/documentation/gamekit/gkaccesspoint/showhighlights.md, https://developer.apple.com/documentation/gamekit/gkaccesspoint/triggerforplaytogether(handler:).md, https://developer.apple.com/documentation/gamekit/gkaccesspoint/trigger(challengedefinitionid:handler:).md, https://developer.apple.com/documentation/gamekit/displaying-the-game-center-dashboard.md, https://developer.apple.com/documentation/gamekit/gkgamecenterviewcontroller.md, https://developer.apple.com/documentation/gamekit/gkdialogcontroller.md, https://developer.apple.com/documentation/gamekit/deprecated-symbols.md, https://developer.apple.com/documentation/gamekit/rewarding-players-with-achievements.md, https://developer.apple.com/documentation/gamekit/encourage-progress-and-competition-with-leaderboards.md, https://developer.apple.com/documentation/gamekit/creating-recurring-leaderboards.md, https://developer.apple.com/documentation/gamekit/gkleaderboard/submitscore(_:context:player:leaderboardids:completionhandler:).md, https://developer.apple.com/documentation/gamekit/gkleaderboard/submitscore(_:context:player:completionhandler:).md, https://developer.apple.com/documentation/gamekit/creating-engaging-challenges-from-leaderboards.md, https://developer.apple.com/documentation/gamekit/choosing-a-leaderboard-for-your-challenges.md, https://developer.apple.com/documentation/gamekit/gkchallengedefinition.md, https://developer.apple.com/documentation/gamekit/creating-activities-for-your-game.md, https://developer.apple.com/documentation/gamekit/gkgameactivity.md, https://developer.apple.com/documentation/gamekit/gkgameactivity/start(definition:partycode:).md, https://developer.apple.com/documentation/gamekit/gkgameactivity/isvalidpartycode(_:).md, https://developer.apple.com/documentation/gamekit/gkgameactivity/end().md, https://developer.apple.com/documentation/gamekit/gkgameactivitydefinition.md, https://developer.apple.com/documentation/gamekit/gkgameactivitylistener.md, https://developer.apple.com/documentation/gamekit/gkgameactivitylistener/player(_:wantstoplay:completionhandler:).md, https://developer.apple.com/documentation/gamekit/letting-players-join-matches-using-party-codes.md, https://developer.apple.com/documentation/gamekit/creating-real-time-games.md, https://developer.apple.com/documentation/gamekit/exchanging-data-between-players-in-real-time-games.md, https://developer.apple.com/documentation/gamekit/finding-multiple-players-for-a-game.md, https://developer.apple.com/documentation/gamekit/finding-players-for-custom-server-based-games.md, https://developer.apple.com/documentation/gamekit/finding-players-using-matchmaking-rules.md, https://developer.apple.com/documentation/gamekit/gkmatch/senddata(toallplayers:with:).md, https://developer.apple.com/documentation/gamekit/gkmatch/senddatamode/reliable.md, https://developer.apple.com/documentation/gamekit/gkmatch/senddatamode/unreliable.md, https://developer.apple.com/documentation/gamekit/gkmatchdelegate/match(_:player:didchange:)-8ohgr.md, https://developer.apple.com/documentation/gamekit/gkmatchmaker/startgroupactivity(playerhandler:).md, https://developer.apple.com/documentation/gamekit/adding-voice-chat-to-multiplayer-games.md, https://developer.apple.com/documentation/gamekit/gkvoicechat.md, https://developer.apple.com/documentation/gamekit/starting-turn-based-matches-and-passing-turns-between-players.md, https://developer.apple.com/documentation/gamekit/creating-turn-based-games.md, https://developer.apple.com/documentation/gamekit/sending-messages-to-players-in-turn-based-games.md, https://developer.apple.com/documentation/gamekit/gkturnbasedmatch/matchdatamaximumsize.md, https://developer.apple.com/documentation/gamekit/gkturnbasedmatch/matchid.md, https://developer.apple.com/documentation/gamekit/gkturnbasedmatch/endturn(withnextparticipants:turntimeout:match:completionhandler:).md, https://developer.apple.com/documentation/gamekit/gkturnbasedmatch/sendreminder(to:localizablemessagekey:arguments:completionhandler:).md, https://developer.apple.com/documentation/gamekit/gkturnbasedeventlistener/player(_:receivedturneventfor:didbecomeactive:).md, https://developer.apple.com/documentation/gamekit/saving-the-player-s-game-data-to-an-icloud-account.md, https://developer.apple.com/documentation/gamekit/gksavedgame.md, https://developer.apple.com/documentation/gamekit/gklocalplayer/savegamedata(_:withname:completionhandler:).md, https://developer.apple.com/documentation/gamesave.md, https://developer.apple.com/documentation/gamesave/gamesavesynceddirectory.md, https://developer.apple.com/documentation/technologyoverviews/shared-data.md, https://developer.apple.com/documentation/technologyoverviews/games-technologies.md, https://developer.apple.com/documentation/xcode/configuring-icloud-services.md, https://developer.apple.com/documentation/network.md, https://developer.apple.com/documentation/network/networkconnection.md, https://developer.apple.com/documentation/network/networklistener.md, https://developer.apple.com/documentation/network/networkbrowser.md, https://developer.apple.com/documentation/network/bonjour.md, https://developer.apple.com/documentation/network/quic.md, https://developer.apple.com/documentation/network/quicdatagram.md, https://developer.apple.com/documentation/network/tlv.md, https://developer.apple.com/documentation/network/dtls.md, https://developer.apple.com/documentation/network/nwconnectiongroup.md, https://developer.apple.com/documentation/network/nw_tcp_set_max_pacing_rate(_:_:).md, https://developer.apple.com/documentation/network/nw_path_get_link_quality(_:).md, https://developer.apple.com/documentation/network/network-functions.md, https://developer.apple.com/documentation/network/security-options.md, https://developer.apple.com/documentation/network/implementing-netcat-with-network-framework.md, https://developer.apple.com/documentation/network/testing-and-debugging-l4s-in-your-app.md, https://developer.apple.com/documentation/network/recording-a-packet-trace.md, https://developer.apple.com/documentation/technotes/tn3179-understanding-local-network-privacy.md, https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.multicast.md, https://developer.apple.com/documentation/bundleresources/information-property-list/nslocalnetworkusagedescription.md, https://developer.apple.com/documentation/bundleresources/information-property-list/nsbonjourservices.md, https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.network.client.md, https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.network.server.md, https://developer.apple.com/documentation/xcode/addressing-watchdog-terminations.md
+> verified: 2026-10 against https://developer.apple.com/help/account/reference/supported-capabilities-macos, https://developer.apple.com/documentation/technotes/tn3125-inside-code-signing-provisioning-profiles.md, https://developer.apple.com/documentation/gamekit.md, https://developer.apple.com/documentation/gamekit/initializing-and-configuring-game-center.md, https://developer.apple.com/documentation/gamekit/authenticating-a-player.md, https://developer.apple.com/documentation/gamekit/gklocalplayer/authenticatehandler.md, https://developer.apple.com/documentation/gamekit/gklocalplayerlistener.md, https://developer.apple.com/documentation/gamekit/protecting-the-player-s-privacy-using-scoped-identifiers.md, https://developer.apple.com/documentation/gamekit/gkplayer/scopedidsarepersistent().md, https://developer.apple.com/documentation/gamekit/connecting-players-with-their-friends-in-your-game.md, https://developer.apple.com/documentation/xcode/resetting-access-to-protected-resources-in-macos.md, https://developer.apple.com/documentation/gamekit/adding-an-access-point-to-your-game.md, https://developer.apple.com/documentation/gamekit/gkaccesspoint.md, https://developer.apple.com/documentation/gamekit/gkaccesspoint/showhighlights.md, https://developer.apple.com/documentation/gamekit/gkaccesspoint/triggerforplaytogether(handler:).md, https://developer.apple.com/documentation/gamekit/gkaccesspoint/trigger(challengedefinitionid:handler:).md, https://developer.apple.com/documentation/gamekit/displaying-the-game-center-dashboard.md, https://developer.apple.com/documentation/gamekit/gkgamecenterviewcontroller.md, https://developer.apple.com/documentation/gamekit/gkdialogcontroller.md, https://developer.apple.com/documentation/gamekit/deprecated-symbols.md, https://developer.apple.com/documentation/gamekit/rewarding-players-with-achievements.md, https://developer.apple.com/documentation/gamekit/encourage-progress-and-competition-with-leaderboards.md, https://developer.apple.com/documentation/gamekit/creating-recurring-leaderboards.md, https://developer.apple.com/documentation/gamekit/gkleaderboard/submitscore(_:context:player:leaderboardids:completionhandler:).md, https://developer.apple.com/documentation/gamekit/gkleaderboard/submitscore(_:context:player:completionhandler:).md, https://developer.apple.com/documentation/gamekit/creating-engaging-challenges-from-leaderboards.md, https://developer.apple.com/documentation/gamekit/choosing-a-leaderboard-for-your-challenges.md, https://developer.apple.com/documentation/gamekit/gkchallengedefinition.md, https://developer.apple.com/documentation/gamekit/creating-activities-for-your-game.md, https://developer.apple.com/documentation/gamekit/gkgameactivity.md, https://developer.apple.com/documentation/gamekit/gkgameactivity/start(definition:partycode:).md, https://developer.apple.com/documentation/gamekit/gkgameactivity/isvalidpartycode(_:).md, https://developer.apple.com/documentation/gamekit/gkgameactivity/end().md, https://developer.apple.com/documentation/gamekit/gkgameactivitydefinition.md, https://developer.apple.com/documentation/gamekit/gkgameactivitylistener.md, https://developer.apple.com/documentation/gamekit/gkgameactivitylistener/player(_:wantstoplay:completionhandler:).md, https://developer.apple.com/documentation/gamekit/letting-players-join-matches-using-party-codes.md, https://developer.apple.com/documentation/gamekit/creating-real-time-games.md, https://developer.apple.com/documentation/gamekit/exchanging-data-between-players-in-real-time-games.md, https://developer.apple.com/documentation/gamekit/finding-multiple-players-for-a-game.md, https://developer.apple.com/documentation/gamekit/finding-players-for-custom-server-based-games.md, https://developer.apple.com/documentation/gamekit/finding-players-using-matchmaking-rules.md, https://developer.apple.com/documentation/gamekit/gkmatch/senddata(toallplayers:with:).md, https://developer.apple.com/documentation/gamekit/gkmatch/senddatamode/reliable.md, https://developer.apple.com/documentation/gamekit/gkmatch/senddatamode/unreliable.md, https://developer.apple.com/documentation/gamekit/gkmatchdelegate/match(_:player:didchange:)-8ohgr.md, https://developer.apple.com/documentation/gamekit/gkmatchmaker/startgroupactivity(playerhandler:).md, https://developer.apple.com/documentation/gamekit/adding-voice-chat-to-multiplayer-games.md, https://developer.apple.com/documentation/gamekit/gkvoicechat.md, https://developer.apple.com/documentation/gamekit/starting-turn-based-matches-and-passing-turns-between-players.md, https://developer.apple.com/documentation/gamekit/creating-turn-based-games.md, https://developer.apple.com/documentation/gamekit/sending-messages-to-players-in-turn-based-games.md, https://developer.apple.com/documentation/gamekit/gkturnbasedmatch/matchdatamaximumsize.md, https://developer.apple.com/documentation/gamekit/gkturnbasedmatch/matchid.md, https://developer.apple.com/documentation/gamekit/gkturnbasedmatch/endturn(withnextparticipants:turntimeout:match:completionhandler:).md, https://developer.apple.com/documentation/gamekit/gkturnbasedmatch/sendreminder(to:localizablemessagekey:arguments:completionhandler:).md, https://developer.apple.com/documentation/gamekit/gkturnbasedeventlistener/player(_:receivedturneventfor:didbecomeactive:).md, https://developer.apple.com/documentation/gamekit/saving-the-player-s-game-data-to-an-icloud-account.md, https://developer.apple.com/documentation/gamekit/gksavedgame.md, https://developer.apple.com/documentation/gamekit/gklocalplayer/savegamedata(_:withname:completionhandler:).md, https://developer.apple.com/documentation/gamesave.md, https://developer.apple.com/documentation/gamesave/gamesavesynceddirectory.md, https://developer.apple.com/documentation/technologyoverviews/shared-data.md, https://developer.apple.com/documentation/technologyoverviews/games-technologies.md, https://developer.apple.com/documentation/xcode/configuring-icloud-services.md, https://developer.apple.com/documentation/network.md, https://developer.apple.com/documentation/network/networkconnection.md, https://developer.apple.com/documentation/network/networklistener.md, https://developer.apple.com/documentation/network/networkbrowser.md, https://developer.apple.com/documentation/network/bonjour.md, https://developer.apple.com/documentation/network/quic.md, https://developer.apple.com/documentation/network/quicdatagram.md, https://developer.apple.com/documentation/network/tlv.md, https://developer.apple.com/documentation/network/dtls.md, https://developer.apple.com/documentation/network/nwconnectiongroup.md, https://developer.apple.com/documentation/network/nw_tcp_set_max_pacing_rate(_:_:).md, https://developer.apple.com/documentation/network/nw_path_get_link_quality(_:).md, https://developer.apple.com/documentation/network/network-functions.md, https://developer.apple.com/documentation/network/security-options.md, https://developer.apple.com/documentation/network/implementing-netcat-with-network-framework.md, https://developer.apple.com/documentation/network/testing-and-debugging-l4s-in-your-app.md, https://developer.apple.com/documentation/network/recording-a-packet-trace.md, https://developer.apple.com/documentation/technotes/tn3179-understanding-local-network-privacy.md, https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.multicast.md, https://developer.apple.com/documentation/bundleresources/information-property-list/nslocalnetworkusagedescription.md, https://developer.apple.com/documentation/bundleresources/information-property-list/nsbonjourservices.md, https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.network.client.md, https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.network.server.md, https://developer.apple.com/documentation/xcode/addressing-watchdog-terminations.md, https://developer.apple.com/documentation/network/nwconnection.md, https://developer.apple.com/documentation/network/nwconnection/state-swift.enum.md, https://developer.apple.com/documentation/network/nwconnection/stateupdatehandler.md, https://developer.apple.com/documentation/network/nwconnection/cancel().md, https://developer.apple.com/documentation/network/nwconnection/sendcompletion/contentprocessed(_:).md, https://developer.apple.com/documentation/swift/withtaskcancellationhandler(operation:oncancel:isolation:).md, https://developer.apple.com/documentation/swift/withthrowingtaskgroup(of:returning:isolation:body:).md, https://developer.apple.com/documentation/swift/task/sleep(for:tolerance:clock:).md, https://developer.apple.com/documentation/os/osallocatedunfairlock.md
 > typecheck: macos 26.0
 > typecheck-cpp: metal-cpp 26.4
 
@@ -531,28 +531,101 @@ A LAN game that wants DTLS rather than QUIC must use different code on each
 OS version:
 
 ```swift
+import Foundation
+import Network
+import os
+
 func lanParameters() -> NWParameters {
     // OS 26 path: DTLS through the classic NWParameters.
     NWParameters(dtls: NWProtocolTLS.Options(), udp: NWProtocolUDP.Options())
 }
 
-func sendOverDTLS(_ payload: Data, to endpoint: NWEndpoint) async throws {
-    if #available(macOS 27, iOS 27, *) {
-        try await withNetworkConnection(to: endpoint, using: { DTLS() }) { connection in
-            try await connection.send(payload)
+/// Sends one DTLS message, and gives up after `timeout`. A peer that never
+/// answers the handshake keeps the connection preparing, and no route or a
+/// local network refusal keeps it waiting. Neither ends a send by itself.
+func sendOverDTLS(_ payload: Data, to endpoint: NWEndpoint,
+                  timeout: Duration = .seconds(5)) async throws {
+    let lastWait = OSAllocatedUnfairLock<NWError?>(initialState: nil)
+    try await withThrowingTaskGroup(of: Void.self) { group in
+        group.addTask {
+            if #available(macOS 27, iOS 27, *) {
+                try await withNetworkConnection(to: endpoint, using: { DTLS() }) { connection in
+                    connection.onStateUpdate { _, state in
+                        if case .waiting(let error) = state { lastWait.withLock { $0 = error } }
+                    }
+                    try Task.checkCancellation()   // a send that starts cancelled never returns
+                    try await connection.send(payload)
+                }
+            } else {
+                try await sendOverClassicDTLS(payload, to: endpoint, lastWait: lastWait)
+            }
         }
-    } else {
-        let connection = NWConnection(to: endpoint, using: lanParameters())
-        connection.start(queue: .global(qos: .userInitiated))
-        defer { connection.cancel() }   // an uncancelled connection leaks its DTLS session
+        group.addTask {
+            try await Task.sleep(for: timeout)
+            throw lastWait.withLock { $0 } ?? NWError.posix(.ETIMEDOUT)
+        }
+        // The first child to finish decides. Both children end when cancelled,
+        // so the group never waits on a stuck send at scope exit.
+        _ = try await group.next()
+        group.cancelAll()
+    }
+}
+
+/// The OS 26 branch. It has no deadline of its own: call it through sendOverDTLS.
+func sendOverClassicDTLS(_ payload: Data, to endpoint: NWEndpoint,
+                         lastWait: OSAllocatedUnfairLock<NWError?>) async throws {
+    let connection = NWConnection(to: endpoint, using: lanParameters())
+    connection.stateUpdateHandler = { [weak connection] state in
+        switch state {
+        case .waiting(let error):
+            lastWait.withLock { $0 = error }   // no path yet, or local network denied
+        case .failed:
+            connection?.cancel()
+        default:
+            break
+        }
+    }
+    connection.start(queue: .global(qos: .userInitiated))
+    defer { connection.cancel() }   // an uncancelled connection leaks its DTLS session
+    try await withTaskCancellationHandler {
         try await withCheckedThrowingContinuation { (sent: CheckedContinuation<Void, any Error>) in
+            // The only resume. Cancelling the connection makes NWConnection call
+            // this completion with an error, so every exit passes through here.
             connection.send(content: payload, completion: .contentProcessed { error in
                 if let error { sent.resume(throwing: error) } else { sent.resume() }
             })
         }
+    } onCancel: {
+        connection.cancel()   // the deadline, or the caller's own cancellation
     }
 }
 ```
+
+Runtime-checked on this machine, macOS 27.0.1 (the record's
+`final-fix/f1-probe.log` and `final-fix/f1-probe-long.log`, made by
+`final-fix/probe/run.sh`). The OS 26 branch ran on macOS 27, called directly,
+and not on macOS 26:
+
+- **Neither branch ends a send by itself.** Against a name that does not
+  resolve, both connections went to `.waiting` within 10 ms. The send had
+  not returned 8 s later. Against a loopback port with no listener, both
+  connections stayed in `.preparing` for the full 180 s that the probe
+  waited. They did the same against an address that never answers. The
+  deadline ends each of these cases at `timeout`. The error is the last `.waiting` reason if there was one
+  (`-65554: NoSuchRecord` here), and `ETIMEDOUT` if there was none.
+- **Cancelling an `NWConnection` calls its pending send completion** with
+  `ECANCELED` (POSIX 89), within 2 ms. It did so also when the connection was
+  cancelled before the send started. For that reason the OS 26 branch has one
+  resume path.
+- **The OS 27 `send` returns when its task is cancelled**, with `ECANCELED`.
+  **A send that starts in a task that is already cancelled never returns**:
+  the Swift runtime reported that `send` leaked its continuation. The
+  `Task.checkCancellation()` call before the send prevents that case. A
+  cancellation between that check and the send was not reproduced, and it is
+  not ruled out.
+- **Not runtime-checked:** a send that succeeds, because the probe had no
+  DTLS peer, and `.failed`, which did not occur. The OS 26 branch cancels on
+  `.failed` as a precaution.
 
 Both branches open, use, and close one connection per call, which costs one
 DTLS handshake each time. For game traffic, keep one connection per peer for
@@ -663,6 +736,9 @@ for an iPhone over USB. Find the Wi-Fi interface with `networksetup
   macOS 15.
 - **Assuming the Swift `DTLS` stack is OS 26.** It is OS 27. On OS 26, use
   `NWParameters(dtls:udp:)` or QUIC.
+- **Awaiting a send with no deadline.** A connection that is waiting, or a
+  DTLS peer that never answers, keeps the send pending for minutes. On the
+  first launch, a local network refusal is such a wait.
 
 ## Where else to look
 
