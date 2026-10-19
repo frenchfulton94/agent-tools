@@ -1,0 +1,118 @@
+Machine: Apple M4 Pro
+OS: macOS 27.0.1 26A434
+Toolchain: Xcode 27.1
+Date: 2026-10-18 15:41 EDT
+$TMP below is authoring/apple-studio/pipeline/tmp, the gitignored pipeline scratch
+
+## xctrace record, Time Profiler, sim --ticks 5000 --slow
+$ xcrun xctrace record --template Time Profiler --time-limit 10s --output $TMP/r4-selftest-slow.trace --target-stdout $TMP/r4-selftest-slow.stdout --launch -- .build/release/MetalProbe sim --ticks 5000 --slow
+exit: 0
+Starting recording with the Time Profiler template. Launching process: MetalProbe. Time limit: 10.0 s
+Ctrl-C to stop the recording
+Target app exited, ending recording...
+Recording completed. Saving output file...
+Output file saved as: r4-selftest-slow.trace
+target stdout (41 bytes):
+sim ok 5000 ticks slow checksum 5009.181
+recording size:  11M
+
+## xctrace export --toc, Time Profiler, sim --ticks 5000 --slow
+$ xcrun xctrace export --input $TMP/r4-selftest-slow.trace --toc
+exit: 0
+launched process:
+<process arguments="sim --ticks 5000 --slow" type="launched" return-exit-status="0" name="MetalProbe" pid="73266" termination-reason="exit(0)"/>
+tables: schema="device-thermal-state-intervals" schema="dyld-library-load" schema="hang-risks" schema="kdebug-strings" schema="kdebug" schema="life-cycle-period" schema="os-log" schema="os-signpost-arg" schema="os-signpost" schema="OSSignpostIntervals" schema="PointsOfInterestEvents" schema="potential-hangs" schema="process-info" schema="runloop-events" schema="StateReportingIntervals" schema="thread-info" schema="tick" schema="time-profile" schema="time-sample" 
+
+## heaviest symbol under 'tick', Time Profiler, sim --slow
+$ python3 heaviest_under_interval.py $TMP/r4-selftest-slow.trace --subsystem dev.frenchfultonjr.apple-studio.metal-probe --interval tick --work-dir $TMP/r4-selftest-slow-export
+exit: 0
+$ xcrun xctrace export --input $TMP/r4-selftest-slow.trace --output $WORK/toc.xml --toc
+exit: 0
+tables in run 1: 19 schemas
+  OSSignpostIntervals PointsOfInterestEvents StateReportingIntervals device-thermal-state-intervals dyld-library-load hang-risks kdebug kdebug-strings life-cycle-period os-log os-signpost os-signpost-arg potential-hangs process-info runloop-events thread-info tick time-profile time-sample
+launched process: arguments="sim --ticks 5000 --slow" type="launched" return-exit-status="0" name="MetalProbe" pid="73266" termination-reason="exit(0)"
+$ xcrun xctrace export --input $TMP/r4-selftest-slow.trace --output $WORK/OSSignpostIntervals.xml --xpath '/trace-toc/run[@number="1"]/data/table[@schema="OSSignpostIntervals"]'
+exit: 0
+first matching row: start 669539125 (fmt 00:00.669.539), duration 216500 (fmt 216.50 µs), thread Main Thread (0x47831a) (MetalProbe, pid: 73266)
+columns: start:start-time, duration:duration, layout-qualifier:layout-id, name:signpost-name, category:category, subsystem:subsystem, identifier:os-signpost-identifier, process:process, end-process:process, start-thread:thread, end-thread:thread, start-message:os-log-metadata, end-message:os-log-metadata, start-backtrace:text-backtrace, end-backtrace:text-backtrace, start-emit-location:return-location, end-emit-location:return-location, signature:os-log-metadata
+'tick' intervals in dev.frenchfultonjr.apple-studio.metal-probe: 5000, on 1 thread(s), 0.876 s in all
+
+## time-profile
+$ xcrun xctrace export --input $TMP/r4-selftest-slow.trace --output $WORK/time-profile.xml --xpath '/trace-toc/run[@number="1"]/data/table[@schema="time-profile"]'
+exit: 0
+columns: time:sample-time, thread:thread, process:process, core:core, thread-state:thread-state, weight:weight, stack:tagged-backtrace
+rows: 887
+mode: samples: cost goes to the leaf function (self weight)
+cost inside 'tick' intervals: 876000000 weight
+   99.32%  plantedSlowStep(_:dt:)
+    0.46%  _os_log_impl_flatten_and_send
+    0.11%  ___chkstk_darwin
+    0.11%  mach_continuous_time
+for comparison, the raw leaf frame, with inlined frames not grouped:
+   47.95%  specialized IndexingIterator.next()
+   35.16%  specialized Array._checkSubscript(_:wasNativeTypeChecked:)
+   15.18%  plantedSlowStep(_:dt:)
+first backtrace charged to plantedSlowStep(_:dt:), leaf first:
+  addr 0x102f9fb89  specialized IndexingIterator.next()
+  addr 0x102f9fb89  plantedSlowStep(_:dt:)  (inlined=true)
+  addr 0x102f9f6d7  runSim(ticks:slow:)
+  addr 0x102f9998b  main
+
+heaviest symbol under 'tick': plantedSlowStep(_:dt:) (time-profile, 99.32%)
+
+## xctrace record, Time Profiler, sim --ticks 200000
+$ xcrun xctrace record --template Time Profiler --time-limit 10s --output $TMP/r4-selftest-normal.trace --target-stdout $TMP/r4-selftest-normal.stdout --launch -- .build/release/MetalProbe sim --ticks 200000
+exit: 0
+Starting recording with the Time Profiler template. Launching process: MetalProbe. Time limit: 10.0 s
+Ctrl-C to stop the recording
+Target app exited, ending recording...
+Recording completed. Saving output file...
+Output file saved as: r4-selftest-normal.trace
+target stdout (38 bytes):
+sim ok 200000 ticks checksum 199466.4
+recording size:  44M
+
+## xctrace export --toc, Time Profiler, sim --ticks 200000
+$ xcrun xctrace export --input $TMP/r4-selftest-normal.trace --toc
+exit: 0
+launched process:
+<process arguments="sim --ticks 200000" type="launched" return-exit-status="0" name="MetalProbe" pid="73317" termination-reason="exit(0)"/>
+tables: schema="device-thermal-state-intervals" schema="dyld-library-load" schema="hang-risks" schema="kdebug-strings" schema="kdebug" schema="life-cycle-period" schema="os-log" schema="os-signpost-arg" schema="os-signpost" schema="OSSignpostIntervals" schema="PointsOfInterestEvents" schema="potential-hangs" schema="process-info" schema="runloop-events" schema="StateReportingIntervals" schema="thread-info" schema="tick" schema="time-profile" schema="time-sample" 
+
+## heaviest symbol under 'tick', Time Profiler, sim without --slow
+$ python3 heaviest_under_interval.py $TMP/r4-selftest-normal.trace --subsystem dev.frenchfultonjr.apple-studio.metal-probe --interval tick --work-dir $TMP/r4-selftest-normal-export
+exit: 0
+$ xcrun xctrace export --input $TMP/r4-selftest-normal.trace --output $WORK/toc.xml --toc
+exit: 0
+tables in run 1: 19 schemas
+  OSSignpostIntervals PointsOfInterestEvents StateReportingIntervals device-thermal-state-intervals dyld-library-load hang-risks kdebug kdebug-strings life-cycle-period os-log os-signpost os-signpost-arg potential-hangs process-info runloop-events thread-info tick time-profile time-sample
+launched process: arguments="sim --ticks 200000" type="launched" return-exit-status="0" name="MetalProbe" pid="73317" termination-reason="exit(0)"
+$ xcrun xctrace export --input $TMP/r4-selftest-normal.trace --output $WORK/OSSignpostIntervals.xml --xpath '/trace-toc/run[@number="1"]/data/table[@schema="OSSignpostIntervals"]'
+exit: 0
+first matching row: start 663506041 (fmt 00:00.663.506), duration 1000 (fmt 1.00 µs), thread Main Thread (0x478808) (MetalProbe, pid: 73317)
+columns: start:start-time, duration:duration, layout-qualifier:layout-id, name:signpost-name, category:category, subsystem:subsystem, identifier:os-signpost-identifier, process:process, end-process:process, start-thread:thread, end-thread:thread, start-message:os-log-metadata, end-message:os-log-metadata, start-backtrace:text-backtrace, end-backtrace:text-backtrace, start-emit-location:return-location, end-emit-location:return-location, signature:os-log-metadata
+'tick' intervals in dev.frenchfultonjr.apple-studio.metal-probe: 200000, on 1 thread(s), 0.086 s in all
+
+## time-profile
+$ xcrun xctrace export --input $TMP/r4-selftest-normal.trace --output $WORK/time-profile.xml --xpath '/trace-toc/run[@number="1"]/data/table[@schema="time-profile"]'
+exit: 0
+columns: time:sample-time, thread:thread, process:process, core:core, thread-state:thread-state, weight:weight, stack:tagged-backtrace
+rows: 189
+mode: samples: cost goes to the leaf function (self weight)
+cost inside 'tick' intervals: 58000000 weight
+   65.52%  simulationStep(_:dt:)
+    8.62%  mach_msg2_trap
+    3.45%  swift_cvw_initWithCopyImpl(swift::OpaqueValue*, swift::OpaqueValue*, swift::TargetMetadata<swift::InProcess> const*)
+    3.45%  _os_log_impl_flatten_and_send
+    3.45%  swift_retain
+for comparison, the raw leaf frame, with inlined frames not grouped:
+   44.83%  specialized Array._endMutation()
+   20.69%  specialized Collection._failEarlyRangeCheck(_:bounds:)
+    8.62%  mach_msg2_trap
+first backtrace charged to simulationStep(_:dt:), leaf first:
+  addr 0x104f93a75  specialized Collection._failEarlyRangeCheck(_:bounds:)
+  addr 0x104f93a75  specialized protocol witness for Collection.formIndex(after:) in conformance <> Range<A>  (inlined=true)
+  addr 0x104f93a75  specialized IndexingIterator.next()  (inlined=true)
+  addr 0x104f93a75  simulationStep(_:dt:)  (inlined=true)
+
+heaviest symbol under 'tick': simulationStep(_:dt:) (time-profile, 65.52%)

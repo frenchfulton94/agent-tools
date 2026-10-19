@@ -1,0 +1,499 @@
+Machine: Apple M4 Pro
+OS: macOS 27.0.1 26A434
+Toolchain: Xcode 27.1
+Date: 2026-10-18 11:22 EDT
+$TMP below is authoring/apple-studio/pipeline/tmp, the gitignored pipeline scratch
+
+## Capture without MTL_CAPTURE_ENABLED
+$ .build/release/MetalProbe capture --out $TMP/nocap.gputrace
+exit: 1
+MetalProbe: Error Domain=MTLCaptureError Code=1 "Capture layer is not inserted." UserInfo={NSLocalizedDescription=Capture layer is not inserted., NSLocalizedRecoverySuggestion=Enable GPU Frame Capture in your Xcode scheme or run with MTL_CAPTURE_ENABLED=1.}
+supports gpuTraceDocument: false
+MetalProbe: error: Error Domain=MTLCaptureError Code=1 "Capture layer is not inserted." UserInfo={NSLocalizedDescription=Capture layer is not inserted., NSLocalizedRecoverySuggestion=Enable GPU Frame Capture in your Xcode scheme or run with MTL_CAPTURE_ENABLED=1.}
+trace written: no
+
+## Capture with MTL_CAPTURE_ENABLED=1
+$ env MTL_CAPTURE_ENABLED=1 .build/release/MetalProbe capture --out $TMP/probe.gputrace
+exit: 0
+supports gpuTraceDocument: true
+frame 0 ok
+frame 1 ok
+frame 2 ok
+compute ok 4096
+isCapturing after end: false
+wrote $TMP/probe.gputrace
+
+## gpudebug: the Sessions block, verbatim (trace name changed), run in $TMP/r2
+id=$(gpudebug -q -t $TMP/probe.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p')
+gpudebug -q -t $TMP/probe.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p'
+gpudebug -s "$id" -c "status"                                  # replayer: loading... / ready
+Trace:     $TMP/probe.gputrace
+Device:    Apple M4 Pro
+Summary:   4 command buffers, 4 encoders, 3 draw calls, 1 dispatches
+Replayer:  loading...
+Anchor:    PID 39285 (zsh)
+gpudebug -s "$id" -c "go /commands"                            # command buffers cb0, cb1, ...
+Name  Summary    Label                  Actions
+────  ─────────  ─────────────────────  ───────
+cb0   1 encoder  "MTL4CommandBuffer 1"       go
+cb1   1 encoder  "MTL4CommandBuffer 1"       go
+cb2   1 encoder  "MTL4CommandBuffer 1"       go
+cb3   1 encoder  "MTL4CommandBuffer 2"       go
+(4 items)
+gpudebug -s "$id" -c "find opaque"                             # labels and groups, as absolute paths
+  commands/cb0/grp0/re0/grp0  "Opaque"  1 draw
+  commands/cb1/grp0/re0/grp0  "Opaque"  1 draw
+  commands/cb2/grp0/re0/grp0  "Opaque"  1 draw
+  api_calls/api5  [MTL4RenderCommandEncoder pushDebugGroup:"Opaque"]
+  api_calls/api23  [MTL4RenderCommandEncoder pushDebugGroup:"Opaque"]
+  api_calls/api40  [MTL4RenderCommandEncoder pushDebugGroup:"Opaque"]
+(6 matches)
+gpudebug -s "$id" -c "go /commands/cb0/grp0/re0/grp0/draw0" -c "info" -c "info pipeline"
+Name      Label                       Summary                 Actions
+────────  ──────────────────────────  ──────────────────────  ───────────
+pipeline  "MTLRenderPipelineState 1"  @rps0                          info
+vertex    "fullscreenVertex"                                           go
+fragment  "flatColorFragment"         1 buffer                         go
+color0    "Offscreen target"          @tex0 64x64 RGBA8Unorm  info, fetch
+(4 items)
+
+Links:
+  :a   /api_calls/api9
+-[MTL4RenderCommandEncoder drawPrimitives:vertexStart:vertexCount:]
+  primitiveType:  Triangle
+  vertexStart:    0
+  vertexCount:    3
+
+-- Encoder State --
+Cull mode             None
+Front facing winding  Clockwise
+label:  (none)
+name:   rps0
+
+-- -- Entry Points -- --
+vertex:    fullscreenVertex (lib0 "MTLLibrary 1")
+fragment:  flatColorFragment (lib0 "MTLLibrary 1")
+
+-- -- Color Attachments -- --
+colorAttachments:
+  color0:  RGBA8Unorm  (opaque)
+
+-- -- Rasterization -- --
+sampleCount:  1
+  Use --all for more details.
+gpudebug -s "$id" -c "go /commands/cb0/grp0/re0/grp0/draw0" -c "fetch color0 --out $PWD/draw0.png"
+Name      Label                       Summary                 Actions
+────────  ──────────────────────────  ──────────────────────  ───────────
+pipeline  "MTLRenderPipelineState 1"  @rps0                          info
+vertex    "fullscreenVertex"                                           go
+fragment  "flatColorFragment"         1 buffer                         go
+color0    "Offscreen target"          @tex0 64x64 RGBA8Unorm  info, fetch
+(4 items)
+
+Links:
+  :a   /api_calls/api9
+Fetched $TMP/r2/draw0.png (1.32 KiB)
+gpudebug -s "$id" -c "go /api_calls" -c "list --all"
+Name   Result  API Call                                                                        Actions
+─────  ──────  ──────────────────────────────────────────────────────────────────────────────  ────────
+api0           [MTL4CommandAllocator reset:]                                                       info
+api1           [MTL4CommandBuffer beginCommandBufferWithAllocator:]                                info
+api2           [MTL4CommandBuffer pushDebugGroup:]                                                 info
+api3           [MTL4CommandBuffer renderCommandEncoderWithDescriptor:options:]                     info
+api4           [MTL4RenderCommandEncoder setLabel:"Forward pass"]                                  info
+api5           [MTL4RenderCommandEncoder pushDebugGroup:"Opaque"]                                  info
+api6           [MTL4RenderCommandEncoder setRenderPipelineState:@rps0]                             info
+api7           [MTL4RenderCommandEncoder setArgumentTable:(unresolved) atStages:ragment]           info
+api8           [MTL4ArgumentTable setAddress:@buf0 atIndex:0]                                      info
+api9           [MTL4RenderCommandEncoder drawPrimitives:Triangle vertexStart:0 vertexCount:3]  go, info
+api10          [MTL4RenderCommandEncoder popDebugGroup]                                            info
+api11          [MTL4RenderCommandEncoder insertDebugSignpost:"Transparent begins"]                 info
+api12          [MTL4RenderCommandEncoder endEncoding]                                              info
+api13          [MTL4CommandBuffer popDebugGroup:]                                                  info
+api14          [MTL4CommandBuffer endCommandBuffer:]                                               info
+api15          [MTL4CommandQueue commit:count:]                                                    info
+api16          [MTL4CommandQueue signalEvent:value:]                                               info
+api17          [@sevt0 waitUntilSignaledValue:1 timeoutMS:95000]                                   info
+api18          [MTL4CommandAllocator reset:]                                                       info
+api19          [MTL4CommandBuffer beginCommandBufferWithAllocator:]                                info
+(showing 20 of 82 — use list N-M or list --all for more)
+Name   Result  API Call                                                                          Actions
+─────  ──────  ────────────────────────────────────────────────────────────────────────────────  ────────
+api0           [MTL4CommandAllocator reset:]                                                         info
+api1           [MTL4CommandBuffer beginCommandBufferWithAllocator:]                                  info
+api2           [MTL4CommandBuffer pushDebugGroup:]                                                   info
+api3           [MTL4CommandBuffer renderCommandEncoderWithDescriptor:options:]                       info
+api4           [MTL4RenderCommandEncoder setLabel:"Forward pass"]                                    info
+api5           [MTL4RenderCommandEncoder pushDebugGroup:"Opaque"]                                    info
+api6           [MTL4RenderCommandEncoder setRenderPipelineState:@rps0]                               info
+api7           [MTL4RenderCommandEncoder setArgumentTable:(unresolved) atStages:ragment]             info
+api8           [MTL4ArgumentTable setAddress:@buf0 atIndex:0]                                        info
+api9           [MTL4RenderCommandEncoder drawPrimitives:Triangle vertexStart:0 vertexCount:3]    go, info
+api10          [MTL4RenderCommandEncoder popDebugGroup]                                              info
+api11          [MTL4RenderCommandEncoder insertDebugSignpost:"Transparent begins"]                   info
+api12          [MTL4RenderCommandEncoder endEncoding]                                                info
+api13          [MTL4CommandBuffer popDebugGroup:]                                                    info
+api14          [MTL4CommandBuffer endCommandBuffer:]                                                 info
+api15          [MTL4CommandQueue commit:count:]                                                      info
+api16          [MTL4CommandQueue signalEvent:value:]                                                 info
+api17          [@sevt0 waitUntilSignaledValue:1 timeoutMS:95000]                                     info
+api18          [MTL4CommandAllocator reset:]                                                         info
+api19          [MTL4CommandBuffer beginCommandBufferWithAllocator:]                                  info
+api20          [MTL4CommandBuffer pushDebugGroup:]                                                   info
+api21          [MTL4CommandBuffer renderCommandEncoderWithDescriptor:options:]                       info
+api22          [MTL4RenderCommandEncoder setLabel:"Forward pass"]                                    info
+api23          [MTL4RenderCommandEncoder pushDebugGroup:"Opaque"]                                    info
+api24          [MTL4RenderCommandEncoder setRenderPipelineState:@rps0]                               info
+api25          [MTL4RenderCommandEncoder setArgumentTable:(unresolved) atStages:ragment]             info
+api26          [MTL4RenderCommandEncoder drawPrimitives:Triangle vertexStart:0 vertexCount:3]    go, info
+api27          [MTL4RenderCommandEncoder popDebugGroup]                                              info
+api28          [MTL4RenderCommandEncoder insertDebugSignpost:"Transparent begins"]                   info
+api29          [MTL4RenderCommandEncoder endEncoding]                                                info
+api30          [MTL4CommandBuffer popDebugGroup:]                                                    info
+api31          [MTL4CommandBuffer endCommandBuffer:]                                                 info
+api32          [MTL4CommandQueue commit:count:]                                                      info
+api33          [MTL4CommandQueue signalEvent:value:]                                                 info
+api34          [@sevt0 waitUntilSignaledValue:2 timeoutMS:95000]                                     info
+api35          [MTL4CommandAllocator reset:]                                                         info
+api36          [MTL4CommandBuffer beginCommandBufferWithAllocator:]                                  info
+api37          [MTL4CommandBuffer pushDebugGroup:]                                                   info
+api38          [MTL4CommandBuffer renderCommandEncoderWithDescriptor:options:]                       info
+api39          [MTL4RenderCommandEncoder setLabel:"Forward pass"]                                    info
+api40          [MTL4RenderCommandEncoder pushDebugGroup:"Opaque"]                                    info
+api41          [MTL4RenderCommandEncoder setRenderPipelineState:@rps0]                               info
+api42          [MTL4RenderCommandEncoder setArgumentTable:(unresolved) atStages:ragment]             info
+api43          [MTL4RenderCommandEncoder drawPrimitives:Triangle vertexStart:0 vertexCount:3]    go, info
+api44          [MTL4RenderCommandEncoder popDebugGroup]                                              info
+api45          [MTL4RenderCommandEncoder insertDebugSignpost:"Transparent begins"]                   info
+api46          [MTL4RenderCommandEncoder endEncoding]                                                info
+api47          [MTL4CommandBuffer popDebugGroup:]                                                    info
+api48          [MTL4CommandBuffer endCommandBuffer:]                                                 info
+api49          [MTL4CommandQueue commit:count:]                                                      info
+api50          [MTL4CommandQueue signalEvent:value:]                                                 info
+api51          [@sevt0 waitUntilSignaledValue:3 timeoutMS:95000]                                     info
+api52  @buf1   [MTLDevice newBufferWithLength:16384 options:eModeDefaultCache]                       info
+api53  @buf2   [MTLDevice newBufferWithLength:16384 options:eModeDefaultCache]                       info
+api54  @buf3   [MTLDevice newBufferWithLength:16384 options:eModeDefaultCache]                       info
+api55          [MTLDevice newCommandAllocator:]                                                      info
+api56  @sevt1  [MTLDevice newSharedEvent]                                                            info
+api57          [@buf1 setLabel:"a"]                                                                  info
+api58          [@buf2 setLabel:"b"]                                                                  info
+api59          [@buf3 setLabel:"sum"]                                                                info
+api60  @rset1  [MTLDevice newResidencySetWithDescriptor:<descriptor> error:0]                        info
+api61          [@rset1 addAllocations:(unresolved) count:3]                                          info
+api62          [@rset1 commit]                                                                       info
+api63          [MTLDevice newArgumentTableWithDescriptor:<descriptor> error:0]                       info
+api64          [MTLDevice newCommandBuffer:]                                                         info
+api65          [MTL4CommandBuffer beginCommandBufferWithAllocator:]                                  info
+api66          [MTL4CommandBuffer useResidencySet:]                                                  info
+api67          [MTL4CommandBuffer pushDebugGroup:]                                                   info
+api68          [MTL4CommandBuffer computeCommandEncoder:]                                            info
+api69          [MTL4ComputeCommandEncoder setLabel:"Add arrays"]                                     info
+api70          [MTL4ComputeCommandEncoder setComputePipelineState:@cps0]                             info
+api71          [MTL4ComputeCommandEncoder setArgumentTable:(unresolved)]                             info
+api72          [MTL4ArgumentTable setAddress:@buf1 atIndex:0]                                        info
+api73          [MTL4ArgumentTable setAddress:@buf2 atIndex:1]                                        info
+api74          [MTL4ArgumentTable setAddress:@buf3 atIndex:2]                                        info
+api75          [MTL4ComputeCommandEncoder dispatchThreads:4096x1x1 threadsPerThreadgroup:102...  go, info
+api76          [MTL4ComputeCommandEncoder endEncoding]                                               info
+api77          [MTL4CommandBuffer popDebugGroup:]                                                    info
+api78          [MTL4CommandBuffer endCommandBuffer:]                                                 info
+api79          [MTL4CommandQueue commit:count:]                                                      info
+api80          [MTL4CommandQueue signalEvent:value:]                                                 info
+api81          [@sevt1 waitUntilSignaledValue:1 timeoutMS:95000]                                     info
+(82 items)
+gpudebug --terminate "$id"
+Session 354 terminated.
+
+## gpudebug: the profiling block as previously written (c053d5c), in a new session
+(a plain profile run, then the same session's profile load, and the one-step path)
+id=$(gpudebug -q -t $TMP/probe.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p')
+gpudebug -q -t $TMP/probe.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p'
+gpudebug -s "$id" -c "profile run"                               # "Profile data collected. (6.5s)"
+Profile data collected. (6.5s)
+gpudebug -s "$id" -c "go /performance" -c "go commands"         # draws ranked by cost
+Name      Summary         Actions
+────────  ──────────────  ────────
+timeline                  go, info
+encoders  sorted by cost        go
+commands  sorted by cost        go
+shaders                         go
+(4 items)
+error: 'commands' has no info. Available actions: go
+gpudebug -s "$id" -c "go /performance" -c "go shaders"          # frag0, vert0, ... with cost share
+Name      Summary         Actions
+────────  ──────────────  ────────
+timeline                  go, info
+encoders  sorted by cost        go
+commands  sorted by cost        go
+shaders                         go
+(4 items)
+error: 'shaders' has no info. Available actions: go
+gpudebug -s "$id" -c "go /performance" -c "go commands" -c "go draw0" -c "go heatmap" -c "go fragment" -c "fetch cost --out $PWD/cost.png"
+Name      Summary         Actions
+────────  ──────────────  ────────
+timeline                  go, info
+encoders  sorted by cost        go
+commands  sorted by cost        go
+shaders                         go
+(4 items)
+error: 'commands' has no info. Available actions: go
+error: 'draw0' not found in commands
+error: 'heatmap' not found in commands
+error: 'fragment' not found in commands
+error: 'cost' not found in commands
+gpudebug -s "$id" -c "go /performance" -c "go commands" -c "list"
+Name      Summary         Actions
+────────  ──────────────  ────────
+timeline                  go, info
+encoders  sorted by cost        go
+commands  sorted by cost        go
+shaders                         go
+(4 items)
+error: 'commands' has no info. Available actions: go
+(empty)
+gpudebug -s "$id" -c "profile load"
+Profile data already loaded.
+gpudebug -s "$id" -c "go /performance" -c "go commands" -c "list"
+Name      Summary         Actions
+────────  ──────────────  ────────
+timeline                  go, info
+encoders  sorted by cost        go
+commands  sorted by cost        go
+shaders                         go
+(4 items)
+error: 'commands' has no info. Available actions: go
+(empty)
+gpudebug -s "$id" -c "go /performance/commands"
+error: 'commands' has no info. Available actions: go
+gpudebug --terminate "$id"
+Session 357 terminated.
+
+## gpudebug: the profiling block, verbatim, after the Sessions block's first line
+id=$(gpudebug -q -t $TMP/probe.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p')
+gpudebug -q -t $TMP/probe.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p'
+gpudebug -s "$id" -c "profile run --embed"                       # prints "Profile data collected."
+Profile data collected. (6.3s)
+gpudebug --terminate "$id"
+Session 360 terminated.
+id=$(gpudebug -q -t $TMP/probe.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p')
+gpudebug -q -t $TMP/probe.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p'
+gpudebug -s "$id" -c "profile load"                              # prints "Profile data loaded."
+Profile data loaded. (266ms)
+gpudebug -s "$id" -c "go /performance" -c "go commands"         # draws ranked by cost
+Name      Summary                     Actions
+────────  ──────────────────────────  ────────
+timeline                              go, info
+encoders  4 encoders, sorted by cost        go
+commands  4 commands, sorted by cost        go
+shaders   3 shaders, sorted by cost         go
+(4 items)
+Name   Shaders                                 Pipeline                        Cost    Actions
+─────  ──────────────────────────────────────  ──────────────────────────────  ──────  ────────
+draw0  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  28.72%  go, info
+draw1  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  26.76%  go, info
+draw2  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  19.84%  go, info
+disp0  "addArrays"                             @cps0 "MTLComputePipelineSt...  19.32%  go, info
+(4 items)
+gpudebug -s "$id" -c "go /performance" -c "go shaders"          # frag0, vert0, ... with cost share
+Name      Summary                     Actions
+────────  ──────────────────────────  ────────
+timeline                              go, info
+encoders  4 encoders, sorted by cost        go
+commands  4 commands, sorted by cost        go
+shaders   3 shaders, sorted by cost         go
+(4 items)
+Name   Function           Pipeline                        Cost    Invocations  Actions
+─────  ─────────────────  ──────────────────────────────  ──────  ──────────  ────────
+frag0  flatColorFragment  @rps0 "MTLRenderPipelineSta...  46.11%  3           go, info
+vert0  fullscreenVertex   @rps0 "MTLRenderPipelineSta...  29.21%  3           go, info
+comp0  addArrays          @cps0 "MTLComputePipelineSt...  19.32%  1           go, info
+(3 items)
+gpudebug -s "$id" -c "go /performance" -c "go commands" -c "go draw0" -c "go heatmap" -c "go fragment" -c "fetch cost --out $PWD/cost.png"
+Name      Summary                     Actions
+────────  ──────────────────────────  ────────
+timeline                              go, info
+encoders  4 encoders, sorted by cost        go
+commands  4 commands, sorted by cost        go
+shaders   3 shaders, sorted by cost         go
+(4 items)
+Name   Shaders                                 Pipeline                        Cost    Actions
+─────  ──────────────────────────────────────  ──────────────────────────────  ──────  ────────
+draw0  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  28.72%  go, info
+draw1  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  26.76%  go, info
+draw2  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  19.84%  go, info
+disp0  "addArrays"                             @cps0 "MTLComputePipelineSt...  19.32%  go, info
+(4 items)
+Name      Summary  Actions
+────────  ───────  ───────
+heatmap                 go
+counters                go
+(2 items)
+
+Links:
+  :d   /commands/cb2/grp0/re0/grp0/draw0
+  :pt  /performance/timeline/encoders/re2
+  :pe  /performance/encoders/re2/commands/draw0
+  :a   /api_calls/api43
+Name      Summary  Actions
+────────  ───────  ───────
+fragment                go
+vertex                  go
+(2 items)
+Name          Summary                   Actions
+────────────  ────────────────────────  ───────────
+cost          Shader Execution Cost     info, fetch
+alu           ALU Cost                  info, fetch
+nonalu        Non-ALU Cost              info, fetch
+duration      SIMD Group Latency        info, fetch
+divergence    Thread Divergence         info, fetch
+count         Number of SIMDs           info, fetch
+scheduling    SIMD Scheduling Overhead  info, fetch
+instr_count   Instruction Count         info, fetch
+overdraw      Overdraw                  info, fetch
+draw_mapping  Draw ID                   info, fetch
+raytracing    Raytracing Latency        info, fetch
+(11 items)
+Fetched:
+  $TMP/r2/cost.png (442 bytes)
+  $TMP/r2/draw0_fragment_cost_top100.json (11.7 KiB)
+gpudebug -s "$id" -c "go /performance/commands"
+Name   Shaders                                 Pipeline                        Cost    Actions
+─────  ──────────────────────────────────────  ──────────────────────────────  ──────  ────────
+draw0  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  28.72%  go, info
+draw1  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  26.76%  go, info
+draw2  "fullscreenVertex / flatColorFragment"  @rps0 "MTLRenderPipelineSta...  19.84%  go, info
+disp0  "addArrays"                             @cps0 "MTLComputePipelineSt...  19.32%  go, info
+(4 items)
+gpudebug -s "$id" -c "go /performance/shaders"
+Name   Function           Pipeline                        Cost    Invocations  Actions
+─────  ─────────────────  ──────────────────────────────  ──────  ──────────  ────────
+frag0  flatColorFragment  @rps0 "MTLRenderPipelineSta...  46.11%  3           go, info
+vert0  fullscreenVertex   @rps0 "MTLRenderPipelineSta...  29.21%  3           go, info
+comp0  addArrays          @cps0 "MTLComputePipelineSt...  19.32%  1           go, info
+(3 items)
+gpudebug -s "$id" -c "find add arrays"
+  commands/cb3/grp0/ce0  "Add arrays"  1 dispatch
+  commands/cb3/grp0/ce0/disp0  "addArrays"  4096x1x1
+  performance/timeline/encoders/ce0  "Add arrays"  0.00µs
+  performance/timeline/encoders/ce0/shaders/comp0  addArrays  @cps0 "MTLComputePipelineState 1"
+  performance/timeline/counters/address_generation  Address Generation  2 counters
+  performance/timeline/counters/address_generation/address_generation_limiter
+  performance/timeline/counters/address_generation/address_generation_utilization
+  performance/timeline/shaders/comp0  addArrays  @cps0 "MTLComputePipelineState 1"
+  performance/encoders/ce0  "Add arrays"  19.32%
+  performance/encoders/ce0/commands/disp0  "addArrays"  @cps0 "MTLComputePipelineState 1"
+  performance/commands/disp0  "addArrays"  @cps0 "MTLComputePipelineState 1"
+  performance/shaders/comp0  addArrays  @cps0 "MTLComputePipelineState 1"
+  api_calls/api8  [MTL4ArgumentTable setAddress:@buf0 atIndex:0]
+  api_calls/api61  [@rset1 addAllocations:(unresolved) count:3]
+  api_calls/api69  [MTL4ComputeCommandEncoder setLabel:"Add arrays"]
+  api_calls/api72  [MTL4ArgumentTable setAddress:@buf1 atIndex:0]
+  api_calls/api73  [MTL4ArgumentTable setAddress:@buf2 atIndex:1]
+  api_calls/api74  [MTL4ArgumentTable setAddress:@buf3 atIndex:2]
+(18 matches)
+gpudebug -s "$id" -c "go /commands/cb3" -c "list"
+Name  Label      Summary     Actions
+────  ─────────  ──────────  ───────
+grp0  "Compute"  1 dispatch       go
+(1 items)
+Name  Label      Summary     Actions
+────  ─────────  ──────────  ───────
+grp0  "Compute"  1 dispatch       go
+(1 items)
+gpudebug -s "$id" -c "go /commands/cb3/grp0/ce0" -c "list"
+Name   Label        Summary   Actions
+─────  ───────────  ────────  ────────
+disp0  "addArrays"  4096x1x1  go, info
+(1 items)
+
+Links:
+  :pt  /performance/timeline/encoders/ce0
+  :pe  /performance/encoders/ce0
+Name   Label        Summary   Actions
+─────  ───────────  ────────  ────────
+disp0  "addArrays"  4096x1x1  go, info
+(1 items)
+
+Links:
+  :pt  /performance/timeline/encoders/ce0
+  :pe  /performance/encoders/ce0
+gpudebug --terminate "$id"
+Session 363 terminated.
+
+## Files the blocks wrote
+cost.png
+draw0_fragment_cost_top100.json
+draw0.png
+pre-fix-gpu-debugging.md
+pre-fix-profile.sh
+profile.sh
+sessions.sh
+
+## Capture with the compute pipeline compiled inside the capture
+$ env MTL_CAPTURE_ENABLED=1 .build/release/MetalProbe capture --out $TMP/probe-compile-in-capture.gputrace --compile-in-capture
+exit: 0
+supports gpuTraceDocument: true
+frame 0 ok
+frame 1 ok
+frame 2 ok
+compute ok 4096
+isCapturing after end: false
+wrote $TMP/probe-compile-in-capture.gputrace
+
+## Browsing that trace: list, find, info, fetch
+$ gpudebug --oneshot -t $TMP/probe-compile-in-capture.gputrace -c go /commands -c list -c find opaque -c go /commands/cb0/grp0/re0/grp0/draw0 -c info -c fetch color0 --out $TMP/r2/compile-in-capture-draw0.png
+exit: 0
+Name  Summary    Label                  Actions
+────  ─────────  ─────────────────────  ───────
+cb0   1 encoder  "MTL4CommandBuffer 1"       go
+cb1   1 encoder  "MTL4CommandBuffer 1"       go
+cb2   1 encoder  "MTL4CommandBuffer 1"       go
+cb3   1 encoder  "MTL4CommandBuffer 2"       go
+(4 items)
+Name  Summary    Label                  Actions
+────  ─────────  ─────────────────────  ───────
+cb0   1 encoder  "MTL4CommandBuffer 1"       go
+cb1   1 encoder  "MTL4CommandBuffer 1"       go
+cb2   1 encoder  "MTL4CommandBuffer 1"       go
+cb3   1 encoder  "MTL4CommandBuffer 2"       go
+(4 items)
+  commands/cb0/grp0/re0/grp0  "Opaque"  1 draw
+  commands/cb1/grp0/re0/grp0  "Opaque"  1 draw
+  commands/cb2/grp0/re0/grp0  "Opaque"  1 draw
+  api_calls/api5  [MTL4RenderCommandEncoder pushDebugGroup:"Opaque"]
+  api_calls/api23  [MTL4RenderCommandEncoder pushDebugGroup:"Opaque"]
+  api_calls/api40  [MTL4RenderCommandEncoder pushDebugGroup:"Opaque"]
+(6 matches)
+Name      Label                       Summary                 Actions
+────────  ──────────────────────────  ──────────────────────  ───────────
+pipeline  "MTLRenderPipelineState 1"  @rps0                          info
+vertex    "fullscreenVertex"                                           go
+fragment  "flatColorFragment"         1 buffer                         go
+color0    "Offscreen target"          @tex0 64x64 RGBA8Unorm  info, fetch
+(4 items)
+
+Links:
+  :a   /api_calls/api9
+-[MTL4RenderCommandEncoder drawPrimitives:vertexStart:vertexCount:]
+  primitiveType:  Triangle
+  vertexStart:    0
+  vertexCount:    3
+
+-- Encoder State --
+Cull mode             None
+Front facing winding  Clockwise
+Fetched $TMP/r2/compile-in-capture-draw0.png (1.32 KiB)
+
+## profile run on that trace, killed after 120 s
+$ perl -e alarm 120; exec @ARGV gpudebug --oneshot -t $TMP/probe-compile-in-capture.gputrace -c status -c profile run
+run.sh: line 37: 89481 Alarm clock: 14         "$@" > "$OUT" 2>&1
+exit: 142
+Trace:     $TMP/probe-compile-in-capture.gputrace
+Device:    Apple M4 Pro
+Summary:   4 command buffers, 4 encoders, 3 draw calls, 1 dispatches
+Replayer:  loading...
+Anchor:    PID 39285 (zsh)
+(exit 142 is SIGALRM: the profile had not returned after 120 s)
+new GPUTools crash reports: 1
+  GPUToolsReplayService: EXC_BAD_ACCESS, top frames ['MakeMTL4PipelineStageDynamicLinkingDescriptor', 'GTMTLReplayController_defaultDispatchFunction_noPinning']

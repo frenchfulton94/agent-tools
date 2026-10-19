@@ -1,0 +1,75 @@
+path	words	read_in_full	fed
+/documentation/Accelerate/single-precision-floating-point-vectors	239	yes	game-loop-and-threading.md
+/documentation/Accelerate/single-precision-horizontal-shearing	441	yes	nothing: vImage shear symbol list, image-processing only, no game judgment
+/documentation/Accelerate/single-precision-vertical-shearing	441	yes	nothing: vImage shear symbol list, image-processing only, no game judgment
+/documentation/Accelerate/sliding-window-reduction-functions	268	yes	nothing: vDSP sliding-window max/sum symbol list, no game judgment
+/documentation/Accelerate/solving-systems-of-linear-equations-with-lapack	2244	yes	nothing: LAPACK dense solver selection sample, general numerics, no game-specific judgment
+/documentation/Accelerate/solving-systems-using-direct-methods	652	yes	nothing: sparse Cholesky walkthrough, general numerics, no game judgment
+/documentation/Accelerate/solving-systems-using-iterative-methods	579	yes	nothing: sparse LSMR walkthrough, general numerics, no game judgment
+/documentation/Accelerate/sparse-direct-solving-functions-matrix-rhs	547	yes	game-loop-and-threading.md
+/documentation/Accelerate/sparse-direct-solving-functions-vector-rhs	462	yes	game-loop-and-threading.md
+/documentation/Accelerate/sparse-iterate-functions	368	yes	nothing: SparseIterate symbol list, general numerics, no game judgment
+/documentation/Accelerate/sparse-iterative-methods	249	yes	nothing: CG/GMRES/LSMR selection, general numerics, no game judgment
+/documentation/Accelerate/sparse-iterative-solving-functions-matrix-rhs	680	yes	nothing: iterative SparseSolve symbol list, general numerics, no game judgment
+/documentation/Accelerate/sparse-iterative-solving-functions-vector-rhs	498	yes	nothing: iterative SparseSolve symbol list, general numerics, no game judgment
+/documentation/Accelerate/sparse-matrix-and-dense-matrix-multiplication	344	yes	nothing: SparseMultiply symbol list, general numerics, no game judgment
+/documentation/Accelerate/sparse-matrix-and-dense-vector-multiplication	335	yes	nothing: SparseMultiply symbol list, general numerics, no game judgment
+/documentation/Accelerate/sparse-matrix-factor-functions	407	yes	nothing: SparseFactor/SparseUpdateFactor symbol list, general numerics, no game judgment
+/documentation/Accelerate/sparse-refactor-functions	435	yes	game-loop-and-threading.md
+/documentation/Accelerate/sparse-solvers-library	1249	yes	game-loop-and-threading.md
+/documentation/Accelerate/sparse-symbolic-factorization-functions	516	yes	game-loop-and-threading.md
+/documentation/Accelerate/sparse-vector-utility-operations	190	yes	nothing: sparse vector pack/unpack symbol list, no game judgment
+/documentation/Accelerate/specifying-histograms-with-vimage	578	yes	nothing: vImage histogram-matching sample for CGImage photo processing, no game judgment
+/documentation/Accelerate/subfactor-functions	211	yes	nothing: SparseCreateSubfactor symbol list, general numerics, no game judgment
+/documentation/Accelerate/subfactor-multiplication-functions	741	yes	nothing: subfactor SparseMultiply symbol list, general numerics, no game judgment
+/documentation/Accelerate/subfactor-solve-functions	614	yes	nothing: subfactor SparseSolve symbol list, general numerics, no game judgment
+/documentation/Accelerate/supporting-real-time-ml-inference-on-the-cpu	60	yes	audio-and-haptics.md
+/documentation/Accelerate/swapping-bytes	39	yes	nothing: single vImageByteSwap_Planar16U entry, no game judgment
+/documentation/Accelerate/training-a-neural-network-to-recognize-digits	2168	yes	nothing: BNNS CPU training walkthrough (legacy layer API), no game-loop or GPU ML judgment
+/documentation/Accelerate/transforming-an-image-in-three-dimensions	683	yes	nothing: vImage CPU perspective warp of CGImages with Vision, photo compositing, no game judgment
+/documentation/Accelerate/transforming-with-a-gamma-function	405	yes	nothing: vImage CPU gamma symbol list; game color work belongs on GPU
+/documentation/Accelerate/transforming-with-lookup-tables	483	yes	nothing: vImage CPU LUT symbol list; game color grading belongs on GPU
+/documentation/Accelerate/transforming-with-matrix-multiplication	344	yes	nothing: vImage CPU color-matrix symbol list, no game judgment
+/documentation/Accelerate/transforming-with-polynomials	199	yes	nothing: vImage CPU tone-curve symbol list, no game judgment
+/documentation/Accelerate/transposition	331	yes	nothing: SparseGetTranspose symbol list, general numerics
+/documentation/Accelerate/transposition-vdsp	68	yes	nothing: vDSP_mtrans entry, general numerics
+/documentation/Accelerate/type-conversion	155	yes	nothing: vDSP float/double conversion symbol list, no game judgment
+/documentation/Accelerate/understanding-data-packing-for-fourier-transforms	2446	yes	audio-and-haptics.md
+/documentation/Accelerate/using-linear-interpolation-to-construct-new-data-points	886	yes	nothing: vDSP linear interpolation for graphs, general technique, no Apple-specific game judgment
+/documentation/Accelerate/using-long-short-term-memory-layers-lstm	581	yes	nothing: BNNS LSTM direct-apply API, ML training detail, no game judgment
+/documentation/Accelerate/using-vdsp-for-vector-based-arithmetic	478	yes	audio-and-haptics.md
+/documentation/Accelerate/using-vimage-pixel-buffers-to-generate-video-effects	865	yes	nothing: CPU camera-video effects via vImage; game post effects belong on GPU
+/documentation/Accelerate/vbasicops	920	yes	nothing: legacy vBasicOps 128-bit integer ops; simd covers this today
+/documentation/Accelerate/vbignum	943	yes	nothing: vBigNum 128-1024-bit integer symbol list, no game judgment
+/documentation/Accelerate/vdsp-compile-time-version-information	46	yes	nothing: two vDSP version constants
+/documentation/Accelerate/vdsp-library	547	yes	game-loop-and-threading.md;audio-and-haptics.md
+/documentation/Accelerate/vdsp-protocols	157	yes	nothing: vDSP Swift protocol list, no game judgment
+/documentation/Accelerate/veclib	321	yes	nothing: vecLib header overview, general portability advice, no game judgment
+/documentation/Accelerate/veclib-macros	133	yes	nothing: LA_ macro list, no game judgment
+/documentation/Accelerate/veclibtypes	226	yes	nothing: 128-bit vector typedef list, no game judgment
+/documentation/Accelerate/vector-average-calculation	374	yes	audio-and-haptics.md
+/documentation/Accelerate/vector-clear-and-fill-functions	225	yes	nothing: vDSP clear/fill symbol list, no game judgment
+/documentation/Accelerate/vector-distance-and-pythagorean-computation	572	yes	nothing: vDSP hypot/distance symbol list; simd covers game geometry
+/documentation/Accelerate/vector-extrema-calculation	593	yes	audio-and-haptics.md
+/documentation/Accelerate/vector-generation	1800	yes	audio-and-haptics.md
+/documentation/Accelerate/vector-scalar-real-arithmetic-functions	2092	yes	audio-and-haptics.md
+/documentation/Accelerate/vector-squaring-functions	464	yes	audio-and-haptics.md
+/documentation/Accelerate/vector-summation	348	yes	nothing: vDSP sum symbol list, no game judgment
+/documentation/Accelerate/vector-to-vector-minima-and-maxima	457	yes	nothing: vDSP element-wise min/max symbol list, no game judgment
+/documentation/Accelerate/vector-vector-real-arithmetic-functions	2465	yes	audio-and-haptics.md
+/documentation/Accelerate/vectorops	639	yes	nothing: legacy vectorOps BLAS on 128-bit vFloat arrays (count multiple of 4); simd/BLAS supersede
+/documentation/Accelerate/vforce-library	4745	yes	audio-and-haptics.md;game-loop-and-threading.md
+/documentation/Accelerate/vfp-library	970	yes	nothing: legacy vfp 128-bit vFloat math; simd and vForce supersede
+/documentation/Accelerate/vimage-buffers	203	yes	nothing: vImage_Buffer init/copy symbols, CPU imaging only
+/documentation/Accelerate/vimage-library	224	yes	assets.md
+/documentation/Accelerate/vimage-macros	154	yes	nothing: vImage conversion macro list, CPU imaging only
+/documentation/Accelerate/vimage-operations	154	yes	nothing: vImage operation index page, CPU imaging only
+/documentation/Accelerate/visualizing-sound-as-an-audio-spectrogram	2171	yes	audio-and-haptics.md
+/documentation/Accelerate/working-with-matrices	916	yes	game-loop-and-threading.md
+/documentation/Accelerate/working-with-quaternions	931	yes	game-loop-and-threading.md
+/documentation/Accelerate/working-with-vectors	1469	yes	nothing: simd dot/length/reflect/mix/smoothstep basics a game engineer already knows
+/documentation/Accelerate/zero-crossing-search	139	yes	nothing: vDSP_nzcros symbol list, no game judgment
+/documentation/AppKit/accessibility-for-appkit	540	yes	game-design.md
+/documentation/AppKit/accessibility-functions	357	yes	game-design.md
+/documentation/AppKit/actions	199	yes	game-design.md
+/documentation/AppKit/add-functionality-to-finder-with-action-extensions	1129	yes	nothing: Finder Action Extension sample, not a game surface

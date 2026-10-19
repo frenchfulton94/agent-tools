@@ -1,0 +1,132 @@
+Machine: Apple M4 Pro
+OS: macOS 27.0.1 26A434
+Toolchain: Xcode 27.1
+Run: 2026-10-18, Task 5 fix round 1 (re-run of the writers' probes)
+$S below is the session scratchpad that held the probe binaries.
+
+NOTE: gpucapture's relative --output failure and gpudebug 'profile run' (about 6.5 s) were not re-run here; the writer's session output was not saved.
+
+## supportsDestination without MTL_CAPTURE_ENABLED
+$ ./capprobe/probe device $S/fixrun/work/nocap.gputrace
+exit: 1
+  supports gpuTraceDocument: false
+  startCapture failed: Error Domain=MTLCaptureError Code=1 "Capture layer is not inserted." UserInfo={NSLocalizedDescription=Capture layer is not inserted., NSLocalizedRecoverySuggestion=Enable GPU Frame Capture in your Xcode scheme or run with MTL_CAPTURE_ENABLED=1.}
+
+## Reused MTL4CommandBuffer across three commits: labels in the trace
+$ MTL_CAPTURE_ENABLED=1 ./capprobe/probe device $S/fixrun/work/labels.gputrace && gpudebug --oneshot -t $S/fixrun/work/labels.gputrace -c 'go /commands' -c list | head -7
+exit: 0
+  supports gpuTraceDocument: true
+  isCapturing: true
+  isCapturing after: false
+  exists: true
+  Name  Summary    Label      Actions   [x2]
+  ────  ─────────  ─────────  ───────
+  cb0   1 encoder  "Frame 2"       go
+  cb1   1 encoder  "Frame 2"       go
+  cb2   1 encoder  "Frame 2"       go
+  (3 items)
+
+## startTrace/stopTrace with captureObject = device
+$ MTL_CAPTURE_ENABLED=1 ./capprobe/drawprobe $S/fixrun/work/draw.gputrace
+exit: 0
+  wrote $S/fixrun/work/draw.gputrace true
+
+## gpudebug: the tree of that trace
+$ gpudebug --oneshot -t $S/fixrun/work/draw.gputrace -c list
+exit: 0
+  Name         Summary            Actions
+  ───────────  ─────────────────  ───────
+  commands     2 command buffers       go
+  performance  see 'profile ?'
+  api_calls    32 API calls            go
+  resources    5 objects               go
+  (4 items)
+
+## gpudebug: session commands
+$ id=$(gpudebug -q -t $S/fixrun/work/draw.gputrace -c list | sed -n 's/^Session \([0-9]*\) created\./\1/p'); echo id=$id; gpudebug -s $id -c status | head -4; gpudebug -s $id -c 'go /commands/cb0/grp0/re0/grp0/draw0' -c 'info pipeline' | head -6; gpudebug --terminate $id
+exit: 0
+  id=173
+  Trace:     $S/fixrun/work/draw.gputrace
+  Device:    Apple M4 Pro
+  Summary:   2 command buffers, 2 encoders, 2 draw calls
+  Replayer:  loading...
+  Name      Label               Summary                   Actions
+  ────────  ──────────────────  ────────────────────────  ───────────
+  pipeline  "Triangle PSO"      @rps0                            info
+  vertex    "tri_vertex"                                           go
+  fragment  "tri_fragment"                                         go
+  color0    "Offscreen target"  @tex0 128x128 RGBA8Unorm  info, fetch
+  Session 173 terminated.
+
+## Device capture scope: three frames, one recorded
+$ MTL_CAPTURE_ENABLED=1 ./capprobe/probe2 devscope $S/fixrun/work/devscope.gputrace; gpudebug --oneshot -t $S/fixrun/work/devscope.gputrace -c list | head -20
+exit: 0
+  supports gpuTraceDocument: true
+  isCapturing: true
+  isCapturing after: false
+  exists: true
+  Name         Summary           Actions
+  ───────────  ────────────────  ───────
+  commands     1 command buffer       go
+  performance  see 'profile ?'
+  api_calls    10 API calls           go
+  resources    3 objects              go
+  (4 items)
+
+## MTL4CommandQueue scope as captureObject
+$ MTL_CAPTURE_ENABLED=1 ./capprobe/probe scope $S/fixrun/work/scope.gputrace > $S/fixrun/work/scope.out 2>&1; echo probe exit $?; grep -m1 Terminating $S/fixrun/work/scope.out
+exit: 0
+  probe exit 134
+  *** Terminating app due to uncaught exception 'NSInvalidArgumentException', reason: '-[MTLCaptureScope traceStream]: unrecognized selector sent to instance 0x…'
+  bash: line 1: 32931 Abort trap: 6           MTL_CAPTURE_ENABLED=1 ./capprobe/probe scope $S/fixrun/work/scope.gputrace > $S/fixrun/work/scope.out 2>&1
+
+## Render target in no residency set, API Validation
+$ SKIP_RESIDENCY=1 MTL_DEBUG_LAYER=1 ./capprobe/drawprobe2 $S/fixrun/work/skipres.gputrace
+exit: 0
+  wrote $S/fixrun/work/skipres.gputrace false
+  drawprobe2: Metal API Validation Enabled
+
+## Render target in no residency set, Shader Validation to stderr
+$ SKIP_RESIDENCY=1 MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1 ./capprobe/drawprobe2 $S/fixrun/work/skipres.gputrace
+exit: 0
+  wrote $S/fixrun/work/skipres.gputrace false
+  drawprobe2: Metal GPU Validation Enabled
+  Invalid Metal usage: Resource residency error - MTLTexture is not resident at the time of commit.   [x2]
+  MTLTexture:(label:"Offscreen target", gpuResourceID:1)   [x2]
+  Resource is used in color attachment, in encoder with label:Forward pass   [x2]
+  MTLTexture allocated here:   [x2]
+  0   drawprobe2                          0x… main + 860   [x2]
+  1   dyld                                0x… start + 6688   [x2]
+
+## Shader logging and counter-heap timing
+$ ./capprobe/timing
+exit: 0
+  entry size: 8 freq: 24000000
+  bytes: 16 ticks: [2053783120456, 2053783703367]
+  heap GPU ms: 24.287958333333336
+  [GPU log] com.example.engine/gpu 2: thread 0 says 1.497408
+  feedback GPU ms: 24.288000000524335
+
+## Shader source symbols, one step
+$ cd $S/fixrun/work && rm -f default.metallib default.metallibsym && xcrun -sdk macosx metal -frecord-sources=flat $S/symtest/a.metal && ls default.metallib default.metallibsym
+exit: 0
+  default.metallib
+  default.metallibsym
+
+## Instruments templates
+$ xcrun xctrace list templates | grep -E 'Metal System Trace|Game Performance|Game Memory'
+exit: 0
+  Game Memory
+  Game Performance
+  Game Performance Overview
+  Metal System Trace
+
+## Metal System Trace record (writer's run, preserved log)
+$ cat capprobe/xct.log
+exit: 0
+  Starting recording with the Metal System Trace template. Launching process: probe3.
+  Ctrl-C to stop the recording
+  Target app exited, ending recording...
+  Recording completed. Saving output file...
+  Output file saved as: mst.trace
+

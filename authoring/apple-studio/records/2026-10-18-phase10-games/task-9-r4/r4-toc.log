@@ -1,0 +1,43 @@
+Machine: Apple M4 Pro
+OS: macOS 27.0.1 26A434
+Toolchain: Xcode 27.1
+Date: 2026-10-18 19:50 EDT
+$TMP below is authoring/apple-studio/pipeline/tmp, the gitignored pipeline scratch
+
+## xctrace record, Processor Trace, sim --ticks 100000 --slow
+$ xcrun xctrace record --template Processor Trace --time-limit 10s --output $TMP/r4.trace --target-stdout $TMP/r4.stdout --launch -- .build/release/MetalProbe sim --ticks 100000 --slow
+exit: 0
+Starting recording with the Processor Trace template. Launching process: MetalProbe. Time limit: 10.0 s
+Ctrl-C to stop the recording
+Reached specified time limit, ending recording...
+Recording completed. Saving output file...
+Output file saved as: r4.trace
+target stdout (44 bytes):
+sim ok 100000 ticks slow checksum 100016.35
+recording size: 390M
+
+## xctrace export --toc, Processor Trace, sim --ticks 100000 --slow
+$ xcrun xctrace export --input $TMP/r4.trace --toc
+exit: 0
+launched process:
+<process arguments="sim --ticks 100000 --slow" type="launched" return-exit-status="0" name="MetalProbe" pid="6501" termination-reason="exit(0)"/>
+tables: schema="context-switch-sample" schema="context-switch" schema="cpu-narrative" schema="cpu-state" schema="dyld-library-load" schema="kdebug-strings" schema="kdebug" schema="os-log" schema="os-signpost-arg" schema="os-signpost" schema="OSSignpostIntervals" schema="PointsOfInterestEvents" schema="process-info" schema="processor-trace-gaps" schema="processor-trace-intervals" schema="processor-trace-points" schema="processor-trace-threads" schema="stackshot-info" schema="StateReportingIntervals" schema="syscall-name-map" schema="syscall" schema="thread-info" schema="thread-snapshot" schema="thread-state" schema="ThreadActivity" schema="ThreadPriority" schema="ThreadQoSTable" schema="ThreadTermination" schema="tick" schema="time-profile" schema="time-sample" schema="virtual-memory" 
+
+## xctrace record, Processor Trace, sim --ticks 100000
+$ xcrun xctrace record --template Processor Trace --time-limit 10s --output $TMP/r4-control.trace --target-stdout $TMP/r4-control.stdout --launch -- .build/release/MetalProbe sim --ticks 100000
+exit: 0
+Starting recording with the Processor Trace template. Launching process: MetalProbe. Time limit: 10.0 s
+Ctrl-C to stop the recording
+Target app exited, ending recording...
+Recording completed. Saving output file...
+Output file saved as: r4-control.trace
+target stdout (38 bytes):
+sim ok 100000 ticks checksum 99728.04
+recording size: 767M
+
+## xctrace export --toc, Processor Trace, sim --ticks 100000
+$ xcrun xctrace export --input $TMP/r4-control.trace --toc
+exit: 0
+launched process:
+<process arguments="sim --ticks 100000" type="launched" return-exit-status="0" name="MetalProbe" pid="6653" termination-reason="exit(0)"/>
+tables: schema="context-switch-sample" schema="context-switch" schema="cpu-narrative" schema="cpu-state" schema="dyld-library-load" schema="kdebug-strings" schema="kdebug" schema="os-log" schema="os-signpost-arg" schema="os-signpost" schema="OSSignpostIntervals" schema="PointsOfInterestEvents" schema="process-info" schema="processor-trace-gaps" schema="processor-trace-intervals" schema="processor-trace-points" schema="processor-trace-threads" schema="stackshot-info" schema="StateReportingIntervals" schema="syscall-name-map" schema="syscall" schema="thread-info" schema="thread-snapshot" schema="thread-state" schema="ThreadActivity" schema="ThreadPriority" schema="ThreadQoSTable" schema="ThreadTermination" schema="tick" schema="time-profile" schema="time-sample" schema="virtual-memory" 

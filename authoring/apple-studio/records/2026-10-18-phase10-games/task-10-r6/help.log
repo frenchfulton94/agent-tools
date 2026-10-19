@@ -1,0 +1,258 @@
+Machine: Apple M4 Pro, macOS 27.0.1 26A434, Xcode 27.1 (Build version 27A9275)
+Date: 2026-10-18 16:16 EDT
+Active developer directory: /Applications/Xcode.app/Contents/Developer
+
+## notarytool version
+$ xcrun notarytool --version 2>&1 | grep -n -E '.'
+1:1.1.3 (42)
+
+## notarytool subcommands
+$ xcrun notarytool --help 2>&1 | grep -n -E '^  (store-credentials|submit|info|wait|history|log) '
+10:  store-credentials       Save Notary service credentials to the Keychain.
+13:  submit                  Submit an archive to the Notary service
+14:  info                    Get status information for a submission
+15:  wait                    Wait for completion of a previous submission
+16:  history                 Get a list of previous submissions for your team
+17:  log                     Retrieve notarization log for a single completed
+
+## notarytool store-credentials
+$ xcrun notarytool store-credentials --help 2>&1 | grep -n -E 'USAGE|<profile-name>|--apple-id|--team-id|--password|--key |--key-id|--issuer|Required for Team|Do not provide|--validate|--keychain <'
+4:USAGE: notarytool global-options app-store-connect-options app-specific-password-options store-credentials [--verbose ...] [--key <key>] [--key-id <key-id>] [--issuer <issuer>] [--apple-id <apple-id>] [--password <password>] [--team-id <team-id>] [<profile-name>] [--sync] [--validate] [--no-validate] [--keychain <keychain>]
+7:  <profile-name>          The profile name to create or update
+11:  -k, --key <key>         App Store Connect API key. File system path to the
+13:  -d, --key-id <key-id>   App Store Connect API Key ID. Usually 10 or more
+15:  -i, --issuer <issuer>   App Store Connect API Issuer ID, UUID format.
+16:                          Required for Team API Keys. Do not provide for
+18:  --apple-id <apple-id>   Developer Apple ID.
+19:  --password <password>   App-specific password for your Apple ID. You will be
+21:                          and Team ID are provided and '--password' option is
+23:  --team-id <team-id>     Developer Team ID.
+28:  --validate/--no-validate
+31:  --keychain <keychain>   Pass the path to a keychain file to use for reading
+
+## notarytool submit
+$ xcrun notarytool submit --help 2>&1 | grep -n -E 'USAGE|keychain-profile|--wait|--timeout|continue processing|output-format|are incompatible|single update|Choices|"json"|--webhook|s3-acceleration|--force'
+3:USAGE: notarytool submit [<options>] <file-path>
+23:  -p, --keychain-profile <keychain-profile>
+30:  -f, --output-format <output-format>
+32:                          are incompatible with '--progress'; a single update
+33:                          will be output at the end of the operation. Choices:
+34:                          ["normal", "json", "plist"] (default: normal)
+39:  --webhook <webhook>     Designate a public webhook URL to receive HTTP
+41:  --wait/--no-wait        Wait until processing is complete. Optionally set a
+42:                          '--timeout' if waiting. (default: false)
+43:  --timeout <duration>    Optional time limit for 'wait'. notarytool will exit
+45:                          continue processing even if the timeout is reached.
+48:  --s3-acceleration/--no-s3-acceleration
+51:  --force                 Upload the file even if pre-flight validation or
+
+## notarytool log
+$ xcrun notarytool log --help 2>&1 | grep -n -E 'USAGE|pretty printed|output-format|<output-path>|default: stdout'
+3:  Notarization log will be pretty printed JSON. `-f, --output-format` does not
+6:USAGE: notarytool log [<options>] <submission-id> <output-path>
+10:  <output-path>           Optional location to write notarization log.
+11:                          (default: stdout)
+35:  -f, --output-format <output-format>
+
+## notarytool history
+$ xcrun notarytool history --help 2>&1 | grep -n -E 'USAGE|OVERVIEW'
+1:OVERVIEW: Get a list of previous submissions for your team
+3:USAGE: notarytool global-options app-store-connect-options app-specific-password-options keychain-options credential-options output-options history [--verbose ...] [--key <key>] [--key-id <key-id>] [--issuer <issuer>] [--apple-id <apple-id>] [--password <password>] [--team-id <team-id>] [--keychain-profile <keychain-profile>] [--keychain <keychain>] [--output-format <output-format>] [--progress] [--no-progress]
+
+## stapler usage
+$ xcrun stapler 2>&1 | grep -n -E 'Usage|Supported file formats|bundles, and signed'
+1:Usage: stapler staple [-q] [-v] path
+5:Usage: stapler validate [-q] [-v] path
+8:Supported file formats are: UDIF disk images, code-signed executable
+9:bundles, and signed "flat" installer packages.
+
+## codesign(1)
+$ man codesign | col -b | grep -n -E '<flags below>'
+64:     --check-notarization
+83:     --deep  (DEPRECATED for signing as of macOS 13.0) When signing a bundle,
+177:     -f, --force
+178:	     When signing, causes codesign to replace any existing signature
+179:	     on the path(s) given. Without this option, existing signatures
+182:     --force-library-entitlements
+184:	     signature of libraries (non-main-executables).  Not embedding
+201:     -i, --identifier identifier
+209:     -o, --options flag,...
+228:     -r, --requirements requirements
+243:     -s, --sign identity
+274:     --entitlements path
+281:	     representation. If needed --xml or --der may be passed in to
+283:	     then DER will be printed. Use "-" as the path to write to
+398:     --strict options
+413:	     --strict or --strict=all to be as strict as possible. Note that
+414:	     --strict=all may include more checking types over time.
+418:     --timestamp [=URL]
+422:	     without a value, a default server provided by Apple is used.
+426:	     or refuses service, the signing operation will fail.
+427:	     If this option is not given at all, a system-specific default
+430:	     The special value none explicitly disables the use of timestamp
+503:     signing operation will fail, unless the --deep option is given, in which
+508:     --deep options results in forcible replacement of all signatures within
+540:     If the --entitlements path option is given, embedded entitlement data
+668:     runtime  On macOS versions >= 10.14.0, opts signed processes into a
+669:	      hardened runtime environment which includes runtime code signing
+672:	      entitlements. Note: macOS versions older than 10.14.0 ignore the
+707:     overwriting any existing signature, using the signing identifier
+$ man codesign | col -b | grep -n -A4 -E -- '^     --force-library-entitlements|^     --deep '
+83:     --deep  (DEPRECATED for signing as of macOS 13.0) When signing a bundle,
+84-	     specifies that nested code content such as helpers, frameworks,
+85-	     and plug-ins, should be recursively signed in turn.
+86-	     Beware:
+87-
+--
+182:     --force-library-entitlements
+183-	     When signing, forcefully embed the supplied entitlements in the
+184-	     signature of libraries (non-main-executables).  Not embedding
+185-	     entitlements in library signatures is default behavior as of
+186-	     macOS 15.0 when signing for all platforms.
+--
+508:     --deep options results in forcible replacement of all signatures within
+509-     the target bundle.
+510-
+511-     In the second synopsis form, codesign verifies the code signatures on all
+512-     the path(s) given. The verification confirms that the code at those
+
+## spctl(8)
+$ man spctl | col -b | grep -n -E '<flags below>'
+23:     -a, --assess
+62:     --raw    When displaying the outcome of an assessment, write it as a
+67:     -t, --type
+68:	      Specify which type of assessment is desired: execute to assess
+69:	      code execution, install to assess installation of an installer
+70:	      package, and open to assess the opening of documents.  The
+71:	      default is to assess execution.
+73:     -v, --verbose
+78:     As of MacOS 15.0, operations that modify the rule database or the global
+79:     state of the assessment subsystem will no longer be supported.
+172:     spctl exits zero on success, or one if an operation has failed.  Exit
+175:     the exit code is three. Exit code four indicates the operation is now
+
+## syspolicy_check subcommands
+$ syspolicy_check --help 2>&1 | grep -n -E '^  (distribution|notary-submission) '
+10:  distribution            Check if an application is ready to be distributed.
+11:  notary-submission       Check if an application is ready to be submitted for
+
+## syspolicy_check distribution
+$ syspolicy_check help distribution 2>&1 | grep -n -E 'USAGE|Gatekeeper|--json'
+4:determining if your app can be executed. This includes Gatekeeper checks,
+10:USAGE: syspolicy_check distribution <bundle-path> [--verbose ...] [--json ...]
+17:  -j, --json              Output json to stdout. All other output goes to
+
+## syspolicy_check notary-submission
+$ syspolicy_check help notary-submission 2>&1 | grep -n -E 'USAGE|--json'
+21:USAGE: syspolicy_check notary-submission <bundle-path> [--verbose ...] [--json ...]
+29:  -j, --json              Output json to stdout. All other output goes to
+
+## hdiutil create
+$ hdiutil create -help 2>&1 | grep -n -E 'WARNING|Usage|-srcfolder|-volname|-format|^	    -ov|-fs <'
+1:hdiutil: WARNING: 'hdiutil create ...' is deprecated. Please use 'diskutil image create ...' instead.
+3:Usage:	hdiutil create <sizespec> <imagepath>
+22:	    -ov
+25:	    -fs <filesystem>
+38:	   -volname <volumename>		["untitled"]
+50:	   -srcfolder <source folder>
+60:	   -format <image type>			[UDZO]
+80:	Note: Filesystem options (-fs, -volname, -stretch) ignored with -srcdevice
+82:	   -format <image type>			[UDZO]
+
+## hdiutil(1) deprecation notice
+$ man hdiutil | col -b | grep -n -E 'DEPRECATION|preferred interface|create -srcfolder'
+9:DEPRECATION NOTICE
+14:       ||   is the preferred interface. 		       ||
+28:	   create -srcfolder	diskutil image create from
+75:     hand, hdiutil create -srcfolder creates a disk image container, puts a
+556:		By default, create -srcfolder attempts to maintain the
+1348:	   hdiutil create -srcfolder mydir mydir.dmg
+1353:	   hdiutil create -srcfolder mydir -format UDSB mydir.sparsebundle
+
+## diskutil image create from
+$ diskutil image create from 2>&1 | grep -n -E 'USAGE|--format|ULFO unless|--volumeName'
+10:USAGE: diskutil image create from [--encrypt] [--verbose] [--stdinpassphrase] [--plist] [--format <format>] [--volumeName <volumeName>] [--shadow <shadow> ...] <source> <destination>
+24:  -f, --format <format>   Format for the disk image, one of ["ASIF", "RAW",
+26:                          ULFO unless the destination path has .asif or
+28:  --volumeName, --volname <volumeName>
+
+## hdiutil verify
+$ hdiutil verify -help 2>&1 | grep -n -E 'Usage'
+2:Usage:	hdiutil verify <image>
+
+## ditto(1)
+$ man ditto | col -b | grep -n -E '<flags below>'
+70:     -c 	   Create an archive at the destination path.  The default
+85:     -k 	   Create or extract from a PKZip archive instead of the
+89:     --keepParent  When creating an archive, embed the parent directory name
+272:	   ditto -c -k --sequesterRsrc --keepParent src_directory archive.zip
+322:     this bug-like behavior.  --keepParent for non-archive copies will
+
+## pkgbuild usage
+$ pkgbuild 2>&1 | grep -n -E 'Usage'
+1:Usage: pkgbuild [options] --root <root-path> [--component-plist <plist-path>] <package-output-path>
+4:Usage: pkgbuild --analyze --root <root-path> <plist-output-path>
+7:Usage: pkgbuild [options] {--component <component-path>} <package-output-path>
+
+## pkgbuild(1)
+$ man pkgbuild | col -b | grep -n -E '<flags below>'
+61:     --scripts scripts-path
+77:     --identifier pkg-identifier
+86:     --version pkg-version
+93:     --install-location install-path
+182:     --sign identity-name
+186:     --keychain keychain-path
+194:     --timestamp
+198:     --timestamp=none
+292:     --sign option. The identity's name is the same as the “Common Name” of
+308:     by default when signing with a Developer ID identity, but it can be
+
+## productbuild usage
+$ productbuild 2>&1 | grep -n -E 'Usage'
+1:Usage: productbuild [--product <requirements-plist>] {--component <component-path> <install-path>} <product-output-path>
+4:Usage: productbuild {--content <content-path>} <product-output-path>
+7:Usage: productbuild [--product <requirements-plist>] {--root <root-path> <install-path>} <product-output-path>
+10:Usage: productbuild [options] --distribution <dist-path> [--package-path <search-path>] <product-output-path>
+13:Usage: productbuild --synthesize [--product <requirements-plist>] {--package <pkg-path>} <distribution-output-path>
+
+## productbuild(1)
+$ man productbuild | col -b | grep -n -E '<flags below>'
+67:     --distribution dist-path
+78:     --package-path search-path
+110:     --component component-path [install-path]
+184:     --synthesize
+216:     --sign identity-name
+220:     --keychain keychain-path
+228:     --timestamp
+232:     --timestamp=none
+
+## productsign usage
+$ productsign 2>&1 | grep -n -E 'Usage'
+1:Usage: productsign [options] --sign <identity> <input-product-path> <output-product-path>
+
+## pkgutil(1)
+$ man pkgutil | col -b | grep -n -E -- '--check-signature'
+156:     --check-signature pkg-path
+159:	     associated certificate chain will be shown.
+
+## security(1) find-identity
+$ man security | col -b | grep -n -E 'find-identity|-p policy|-v  '
+479:     find-identity [-h] [-p policy] [-s string] [-v] [keychain...] Find an
+485:	    -p policy	    Specify policy to evaluate (multiple -p options
+492:	    -v		    Show valid identities only (default is to show all
+
+## Developer ID identity check (read-only; names redacted after the certificate type)
+$ security find-identity -v -p codesigning
+  Apple Development: <name redacted>
+     1 valid identities found
+$ security find-identity -v    # installer identities are hidden by -p codesigning
+  Apple Development: <name redacted>
+     1 valid identities found
+Developer ID Application identities: 0
+Developer ID Installer identities: 0
+
+## plutil
+$ plutil -help 2>&1 | grep -n -E -- '-lint|-convert|-extract'
+6: -lint                         check the property list files for syntax errors
+7: -convert fmt                  rewrite property list files in format
+31: -extract keypath fmt          outputs the value at 'keypath' in the property list as a new plist of type 'fmt'

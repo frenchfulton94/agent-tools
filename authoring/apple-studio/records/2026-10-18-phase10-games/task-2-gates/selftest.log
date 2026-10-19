@@ -1,0 +1,38 @@
+ok   ios-only.md -> 0
+ok   macos-default.md -> 1
+ok   invented.md -> 1
+ok   bad-directive.md -> 2
+ok   too-new.md -> 2
+ok   uikit.md -> 0
+ok   macos-floor-ok.md -> 0
+ok   macos-floor-too-old.md -> 1
+ok   macos-too-new.md -> 2
+ok   multi-target.md -> 0
+ok   multi-target-invented.md -> 1
+test_typecheck_snippets.sh exit 0
+ok   metal-ok.md -> 0
+ok   metal-invented.md -> 1
+ok   metal-no-directive.md -> 2
+ok   metal-bad-std.md -> 2
+ok   cpp-ok.md -> 0
+ok   cpp-invented.md -> 1
+ok   cpp-missing-cache.md -> 2
+ok   rust-ok.md -> 0
+ok   rust-invented.md -> 1
+ok   rust-unresolvable.md -> 2
+ok   ungated-fence.md -> 2
+ok   ungated-config-ok.md -> 0
+ok   swift-case.md -> 2
+ok   bare-fence.md -> 2
+ok   fence-info.md -> 2
+ok   fence-tilde.md -> 2
+ok   rust-prior.md -> 0
+ok   rust-dup-use.md -> 0
+ok   swift-formfeed.md -> 2
+ok   rust-race round 1 -> invented 1, correct 0
+ok   rust-race round 2 -> invented 1, correct 0
+ok   rust-race round 3 -> invented 1, correct 0
+ok   rust-race round 4 -> invented 1, correct 0
+ok   rust-race round 5 -> invented 1, correct 0
+ok   rust-race round 6 -> invented 1, correct 0
+test_typecheck_native.sh exit 0

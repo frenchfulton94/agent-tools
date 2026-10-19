@@ -1,0 +1,6 @@
+path	words	read_in_full	fed
+pdf:msl-4.1#ch1	3934	yes	shading-language.md;pipelines-and-render-passes.md;gpu-debugging-and-profiling.md;cpp-and-rust.md
+pdf:msl-4.1#ch2	20747	yes	shading-language.md;compute-and-gpu-driven.md;apple-gpu-tbdr.md;resources-and-memory.md
+pdf:msl-4.1#ch3	2325	yes	shading-language.md;compute-and-gpu-driven.md
+pdf:msl-4.1#ch4	1834	yes	shading-language.md;compute-and-gpu-driven.md;apple-gpu-tbdr.md
+pdf:msl-4.1#ch5	20077	yes	shading-language.md;pipelines-and-render-passes.md;apple-gpu-tbdr.md;compute-and-gpu-driven.md;resources-and-memory.md

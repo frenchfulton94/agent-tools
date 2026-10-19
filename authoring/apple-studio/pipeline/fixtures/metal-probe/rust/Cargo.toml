@@ -1,0 +1,12 @@
+[package]
+name = "metal4-host"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+objc2 = "=0.6.5"
+objc2-foundation = "=0.3.2"
+objc2-metal = "=0.3.2"
+[[bin]] # probe: the binary name the probe's scripts use
+name = "rust-host" # probe
+path = "src/main.rs" # probe

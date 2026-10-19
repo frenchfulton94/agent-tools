@@ -1,0 +1,51 @@
+game-design.md runtime checks (Phase 10 Task 8)
+
+Machine: Apple M4 Pro (Mac16,8), macOS 27.0.1 (sw_vers BuildVersion 26A434),
+Swift 6.4 (swiftlang-6.4.0.34.1), MacOSX 27.0 SDK. Run 2026-10-18.
+No window, no GUI session, no simulator: ImageRenderer renders offscreen.
+The binary exits on its own; `pgrep -fl dts_mac` afterwards found no process.
+
+Claim checked: on macOS, SwiftUI text styles ignore an app-set DynamicTypeSize,
+so a Mac game's text-size setting must scale point sizes itself.
+
+Source: dynamic_type_size_mac.swift (this directory)
+
+Commands (run from the session scratchpad, binary not kept):
+  xcrun swiftc -O -target arm64-apple-macos26.0 dynamic_type_size_mac.swift -o ./dts_mac
+  ./dts_mac
+
+Output (rendered height in points at scale 1):
+  style=body size=environment default heightPt=16.0
+  style=body size=xSmall heightPt=16.0
+  style=body size=large heightPt=16.0
+  style=body size=xxxLarge heightPt=16.0
+  style=body size=accessibility5 heightPt=16.0
+  style=title size=environment default heightPt=26.0
+  style=title size=xSmall heightPt=26.0
+  style=title size=large heightPt=26.0
+  style=title size=xxxLarge heightPt=26.0
+  style=title size=accessibility5 heightPt=26.0
+  fixed13pt size=accessibility5 heightPt=16.0
+  fixed13pt size=default heightPt=16.0
+  explicit size=13.0pt heightPt=16.0
+  explicit size=19.5pt heightPt=24.0
+  explicit size=26.0pt heightPt=30.0
+  exit=0
+
+Reading: .body and .title render at the same height from xSmall to
+accessibility5 (16 pt and 26 pt, which match the HIG macOS Body 13/16 and
+Title 1 22/26 line heights). Scaling the point size directly does change the
+rendered height. Checked on macOS 27.0.1 only; the binary targets 26.0, but the
+behavior is the running OS's.
+
+Compile-only checks (not runtime) recorded for the reference's notes:
+  xcrun swiftc -typecheck -swift-version 6 -target arm64-apple-macos26.0 nsaccessibilitybutton_conformance.swift
+  The file declares `final class B1: NSAccessibilityElement, NSAccessibilityButton`
+  with accessibilityLabel() and accessibilityPerformPress() overrides:
+    error: result of 'accessibilityIdentifier()' has different optionality than
+    required by protocol 'NSAccessibilityElementProtocol'
+  Same error without -swift-version 6. Cause in the SDK: NSAccessibilityProtocols.h
+  line 26 (`- (NSString *)accessibilityIdentifier;`, nonnull, in @protocol
+  NSAccessibilityElement) against line 362 (`@property (nullable, copy) NSString
+  *accessibilityIdentifier`). The same class without the NSAccessibilityButton
+  conformance typechecks clean.

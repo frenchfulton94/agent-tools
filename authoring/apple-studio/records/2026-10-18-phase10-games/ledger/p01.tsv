@@ -1,0 +1,40 @@
+path	words	read_in_full	fed
+/documentation/Apple-Silicon/cpu-optimization-guide	227	yes	profiling-workflow.md;apple-games/game-loop-and-threading.md
+/documentation/BackgroundTasks/choosing-background-strategies-for-your-app	842	yes	apple-games/game-loop-and-threading.md
+/documentation/Foundation/downloading-files-in-the-background	1365	yes	apple-games/assets.md
+/documentation/Foundation/optimizing-your-app-s-data-for-icloud-backup	702	yes	apple-games/assets.md
+/documentation/Xcode/addressing-watchdog-terminations	1772	yes	apple-games/game-loop-and-threading.md;apple-games/game-center-and-online.md;apple-games/assets.md
+/documentation/Xcode/analyzing-the-performance-of-your-shipping-app	1184	yes	nothing: Organizer overview already distilled in profiling-workflow.md; no frame-loop material
+/documentation/Xcode/building-your-app-to-include-debugging-information	544	yes	profiling-workflow.md;app-release/direct-distribution.md
+/documentation/Xcode/gathering-information-about-memory-use	758	yes	profiling-workflow.md
+/documentation/Xcode/identifying-high-memory-use-with-jetsam-event-reports	1304	yes	apple-games/assets.md
+/documentation/Xcode/improving-app-responsiveness	3646	yes	profiling-workflow.md;apple-games/game-loop-and-threading.md
+/documentation/Xcode/making-changes-to-reduce-memory-use	644	yes	apple-games/game-loop-and-threading.md
+/documentation/Xcode/measuring-your-app-s-power-use-with-power-profiler	1287	yes	profiling-workflow.md
+/documentation/Xcode/organizing-tests-to-improve-feedback	2397	yes	profiling-workflow.md
+/documentation/Xcode/preventing-memory-use-regressions	178	yes	nothing: XCTMemoryMetric already in memory-power-and-size.md; no frame-loop material
+/documentation/Xcode/responding-to-low-memory-warnings	440	yes	apple-games/game-loop-and-threading.md;apple-metal/resources-and-memory.md
+/documentation/Xcode/testing	526	yes	nothing: Xcode testing collection index (test pyramid, links); no frame-loop or game judgment
+/documentation/Xcode/understanding-hangs-in-your-app	2566	yes	apple-games/game-loop-and-threading.md;apple-games/input.md
+/documentation/Xcode/understanding-user-interface-responsiveness	1796	yes	apple-games/game-loop-and-threading.md
+/documentation/Xcode/writing-and-running-performance-tests	1007	yes	profiling-workflow.md
+/documentation/Xcode/writing-code-with-intelligence-in-xcode	1917	yes	nothing: Xcode coding-assistant UI walkthrough; no profiling or game judgment
+/documentation/os/collecting-log-messages-in-activities	662	yes	profiling-workflow.md
+/documentation/os/customizing-logging-behavior-while-debugging	468	yes	profiling-workflow.md
+/documentation/os/generating-log-messages-from-your-code	1953	yes	profiling-workflow.md;apple-metal/cpp-and-rust.md
+/documentation/os/legacy-logging-symbols	121	yes	profiling-workflow.md
+/documentation/os/legacy-signpost-symbols	207	yes	profiling-workflow.md
+/documentation/os/logging	683	yes	profiling-workflow.md
+/documentation/os/message-argument-formatters	139	yes	nothing: index of Swift OSLog formatter types; formatting covered from generating-log-messages page
+/documentation/os/os-activity-t	247	yes	apple-metal/cpp-and-rust.md
+/documentation/os/os-log-t	181	yes	profiling-workflow.md
+/documentation/os/recording-performance-data	739	yes	profiling-workflow.md
+/documentation/os/viewing-log-messages	208	yes	nothing: lists log viewers (Console, log, Xcode, OSLog); no game or frame-loop judgment
+/documentation/visionOS/analyzing-the-performance-of-your-visionOS-app	2963	yes	profiling-workflow.md;apple-metal/gpu-debugging-and-profiling.md;apple-games/audio-and-haptics.md
+/documentation/xcode/addressing-cpu-bottlenecks	1649	yes	profiling-workflow.md;apple-games/game-loop-and-threading.md
+/documentation/xcode/analyzing-cpu-profiles-with-call-tree-views	1568	yes	profiling-workflow.md
+/documentation/xcode/analyzing-cpu-usage-with-processor-trace	1768	yes	profiling-workflow.md
+/documentation/xcode/diagnosing-performance-issues-early	1290	yes	profiling-workflow.md;apple-games/game-loop-and-threading.md;apple-metal/command-model.md
+/documentation/xcode/improving-your-app-s-performance	1272	yes	profiling-workflow.md
+/documentation/xcode/reducing-your-app-s-memory-use	763	yes	apple-metal/resources-and-memory.md
+/documentation/xcode/understanding-hitches-in-your-app	4989	yes	apple-games/game-loop-and-threading.md

@@ -1,0 +1,24 @@
+metal-cpp archive used by the C++ compile gate (read 2026-10-18)
+
+url:     https://developer.apple.com/metal/cpp/files/metal-cpp_26.4.zip
+version: 26.4
+sha256:  4e7587c0f351d782f1f3e7c67c649b40d0ba780c051b2f6729f00ddc61ada28c
+size:    262432 bytes (Content-Length), Last-Modified Fri, 27 Mar 2026 18:33:16 GMT
+Metal 4: the archive carries Metal/MTL4CommandQueue.hpp, and MTL::Device has newMTL4CommandQueue().
+layout:  metal-cpp/{Foundation,Metal,MetalFX,QuartzCore,SingleHeader}, LICENSE.txt, README.md
+         fetch_metal_cpp.sh unpacks the metal-cpp/ folder to pipeline/tmp/metal-cpp/26.4/
+
+How the URL was found
+1. https://developer.apple.com/metal/cpp/ (HTTP 200, 108 KB) no longer links an archive.
+   No ".zip" appears in its HTML, and none of its scripts builds one. The installation
+   steps point at https://github.com/apple/metal-cpp ("Access source code").
+2. The conventional path https://developer.apple.com/metal/cpp/files/metal-cpp_<version>.zip
+   still serves archives. HEAD probes, 2026-10-18:
+     200 application/zip   26, 26.4
+     300 text/html         26.1, 26.2, 26.3, 26.4.1, 26.5 through 26.10
+     404                   14.2, 15, 15.2, 27, 27.0, 27.1, 27.2, 28
+3. 26.4 is the newest version that returns an archive. The Metal 4 headers confirm it.
+
+fetch_metal_cpp.sh pins the sha256 above and refuses an archive that differs.
+The download lands in the gitignored pipeline/tmp/metal-cpp/. Nothing from the archive
+is committed.

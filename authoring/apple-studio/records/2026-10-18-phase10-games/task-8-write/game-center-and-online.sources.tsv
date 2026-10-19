@@ -1,0 +1,92 @@
+section	claim	source
+Distribution decides the architecture	Developer ID cannot use Game Center, In-App Purchase, Sign in with Apple (ADP column only)	$TMP/r01-extra/supported-capabilities-macos.html rows at raw lines 2468 (Game Center), 2560 (In-App Purchase), 2732 (Sign in with Apple); r01.md:149; r01.md:75; task-7 report finding 22
+Distribution decides the architecture	iCloud CloudKit, iCloud documents, KVS and Push notifications are allowed for Developer ID	$TMP/r01-extra/supported-capabilities-macos.html raw lines 2524, 2536, 2548, 2700
+Distribution decides the architecture	Restricted entitlements need an embedded Developer ID profile at Contents/embedded.provisionprofile (.provisionprofile on macOS)	r01.md:71; r01.md:75 (TN3125)
+Distribution decides the architecture	GameKit calls fail with GKError.Code.notAuthenticated before sign-in, so GKSavedGame goes with Game Center	g09.md:45; GKSavedGame.h:22-37 (methods are a GKLocalPlayer category)
+Distribution decides the architecture	Developer ID column not runtime-checked: no Developer ID identity on this machine	task-7 report finding 46 (r01.md:86)
+Project setup	Game Center capability adds com.apple.developer.game-center; GameKit Bundle in Xcode 16.3+	g09.md:45; g08.md:138
+Project setup	Game Progress Manager needs iOS 18.4 / macOS 15.4, physical device; local delete does not remove from App Store Connect	g08.md:139; g08.md:88; g08.md:106; g08.md:121
+Project setup	Mac sandbox needs Incoming and Outgoing Connections for Game Center	documentation__gamekit__initializing-and-configuring-game-center.md lines 45-46; g08.md:137; m04.md:111
+Project setup	network.client/server restrict TCP initiation only; for UDP they restrict data direction; UDP apps need both	documentation__bundleresources__entitlements__com.apple.security.network.client.md (Discussion note); ...network.server.md (Discussion note)
+Project setup	SharePlay button in matchmaker sheet needs Group Activities capability on macOS	g08.md:128; documentation__gamekit__gkmatchmaker__startgroupactivity(playerhandler_).md Discussion
+Project setup	NSGKFriendListUsageDescription required (missing key errors); tccutil reset GameCenterFriends	g08.md:84; r01.md:150
+Project setup	NSLocalNetworkUsageDescription and NSBonjourServices for LAN/Bonjour	nslocalnetworkusagedescription.md; nsbonjourservices.md; TN3179 Essentials
+Project setup	iCloud Documents + container needed by GameSave and GKSavedGame; removing capability does not disable App ID	documentation__gamesave.md Important box; g08.md:147; g09.md:44
+Authentication and the listener	authenticateHandler: VC to present, nil/nil when signed in, error when declined; NSViewController on macOS, UIViewController on iOS	documentation__gamekit__gklocalplayer__authenticatehandler.md; GKLocalPlayer.h:255-257; g08.md:76
+Authentication and the listener	Register the listener immediately after auth or events are dropped	g08.md:154; documentation__gamekit__gkturnbasedmatch__endturn(...).md Discussion
+Authentication and the listener	Handler thread is undocumented, so the snippet hops to MainActor	authenticatehandler.md (no thread stated); snippet compiles clean with swiftc -swift-version 6 -target arm64-apple-macos26.0 (scratch check)
+Authentication and the listener	isUnderage, isMultiplayerGamingRestricted, isPersonalizedCommunicationRestricted checks	g08.md:78
+Authentication and the listener	gamePlayerID persistence, scopedIDsArePersistent, teamPlayerID changes on team transfer	g08.md:143; g08.md:144; documentation__gamekit__gkplayer__scopedidsarepersistent().md
+Authentication and the listener	fetchItems(forIdentityVerificationSignature:) for own server; Game Center is not SSO	g08.md:77; g08.md:140
+The access point replaces the dashboard view controller	GKGameCenterViewController deprecated, replaced by GKAccessPoint	GKGameCenterViewController.h:34-45 (API_DEPRECATED_WITH_REPLACEMENT ios(6.0,26.0) macos(10.9,26.0)); gkgamecenterviewcontroller.md availability ends 26.0; g08.md:116
+The access point replaces the dashboard view controller	showHighlights deprecated "No longer supported" yet GKAccessPoint page still says to set it	GKAccessPoint.h:46; documentation__gamekit__gkaccesspoint.md Overview paragraph 3; gkaccesspoint__showhighlights.md availability 14.0-26.0
+The access point replaces the dashboard view controller	GKGameCenterViewControllerState.challenges deprecated, replaced by GKChallengeDefinition	GKGameCenterViewController.h:17
+The access point replaces the dashboard view controller	GKDialogController page still presents GKGameCenterViewController on macOS	documentation__gamekit__gkdialogcontroller.md Overview sample
+The access point replaces the dashboard view controller	Set location/parentWindow then isActive; corners flip RTL; hide in gameplay; observe isPresentingGameCenter and frameInScreenCoordinates	g08.md:67; g08.md:68; GKAccessPoint.h:37-65
+The access point replaces the dashboard view controller	ID triggers need iOS 18 / macOS 15; state triggers older	GKAccessPoint.h:68-80
+The access point replaces the dashboard view controller	PlayTogether, Challenges, challengeDefinitionID, gameActivityDefinitionID, gameActivity, Friending triggers iOS/macOS 26 only, unavailable tvOS/visionOS	GKAccessPoint.h:83-101; triggerforplaytogether(handler_).md and trigger(challengedefinitionid_handler_).md availability (iOS, iPadOS, Catalyst, macOS 26 only)
+The access point replaces the dashboard view controller	Custom-focus games must hit-test and trigger themselves	g08.md:69
+The access point replaces the dashboard view controller	presentFriendRequestCreator(from:) takes NSWindow? on macOS (macOS 12), view controller on iOS	GKLocalPlayer.h:275-316
+Achievements and leaderboards	loadAchievements returns only achievements with progress; create GKAchievement(identifier:); percentComplete; report	g08.md:146
+Achievements and leaderboards	100 achievements / 1,000 points; spread across versions	g08.md:145
+Achievements and leaderboards	Scores are integers; Elapsed Time to the hundredth in centiseconds (10,000 -> 0:01:40:00)	g08.md:122
+Achievements and leaderboards	Class submitScore targets current occurrence; instance method fails on ended occurrence; page contradiction	g08.md:107; submitscore(__context_player_leaderboardids_completionhandler_).md; submitscore(__context_player_completionhandler_).md; task-7 report finding 25
+Achievements and leaderboards	Leaderboard IDs permanent; sets one-way; 500 in 100 sets vs 100 without	g08.md:120
+Achievements and leaderboards	GKScore deprecated iOS 14 / macOS 11; GKLeaderboardViewController and GKAchievementViewController deprecated iOS 7 / macOS 10.10; all still in the SDK (fix round 1: was "gone"); GKChallenge and GKChallengeListener deprecated at 26	g08.md:119; GKChallenge.h:19-21; GKEventListener.h:9; MacOSX 27.0 SDK GKScore.h:12, GKLeaderboardViewController.h:11, GKAchievementViewController.h:17
+Challenges and activities (OS 26)	GKChallengeDefinition, GKGameActivity, GKGameActivityDefinition, GKGameActivityListener are OS 26	GKGameActivity.h:21; GKGameActivityDefinition.h:23; GKGameActivityListener.h:13; GKChallengeDefinition.h:17; symbol page availability blocks; g08.md:87; task-7 finding 26
+Challenges and activities (OS 26)	Scores to the challenge board count; each submission consumes an attempt; submit at end, on early quit, latest score; Best Score type; repeatable needs recurring board	g08.md:94; g08.md:96; g08.md:80; g08.md:81; GKChallengeDefinition.h (leaderboard property comment)
+Challenges and activities (OS 26)	hasActiveChallenges to badge entry points	GKChallengeDefinition.h (State category); g08.md:95
+Challenges and activities (OS 26)	Activity scores/progress tracked locally, submitted at end()	g08.md:93; documentation__gamekit__gkgameactivity__end().md Discussion
+Challenges and activities (OS 26)	Article misspellings: associatedAchievementDescriptions, activity.activityIdentifier, start(_:partyCode:), ObjC selector names	creating-activities-for-your-game.md lines 99, 114, 186; GKGameActivityDefinition.h:66-71; GKGameActivity.h:26,29,89-91,135; task-7 finding 24
+Challenges and activities (OS 26)	player(_:wantsToPlay:) async -> Bool, folded into GKLocalPlayerListener	gkgameactivitylistener__player(__wantstoplay_completionhandler_).md; gklocalplayerlistener.md; GKLocalPlayer.h:82
+Challenges and activities (OS 26)	GKGameActivityDefinition.all, supportsPartyCode, leaderboards async getter	GKGameActivityDefinition.h:51,66-71; snippet compiles (typecheck_snippets.py PASS #4)
+Challenges and activities (OS 26)	Alphabet is 20 chars 23456789CFGHJMPQRVWX; halves 2-6 equal length; pure digits 0-9 allowed; isValidPartyCode rejects lowercase	$REC/task-8-write/runtime/game-center-and-online/runs.txt; isvalidpartycode(__).md Discussion
+Challenges and activities (OS 26)	start(definition:partyCode:) uppercases the code	documentation__gamekit__gkgameactivity__start(definition_partycode_).md Discussion; GKGameActivity.h:86-88
+Challenges and activities (OS 26)	findPlayersForHostedMatch for own networking; fallbackURL format	g08.md:91; g08.md:92; g01.md:136
+Real-time matches	GKMatch full mesh; chooseBestHostingPlayer on every device at once; hosted returns GKPlayers	g08.md:125; g08.md:130; g08.md:132
+Real-time matches	Set delegate at once; start when expectedPlayerCount == 0	g08.md:102; g08.md:124; gkmatchdelegate__match(__player_didchange_)-8ohgr.md Discussion
+Real-time matches	.unreliable sends once, may reorder; .reliable retries, ordered	gkmatch__senddatamode__unreliable.md; gkmatch__senddatamode__reliable.md
+Real-time matches	sendData queues until network is available	gkmatch__senddata(toallplayers_with_).md Discussion
+Real-time matches	maxPlayersAllowedForMatch(of:) for limits	g08.md:127
+Real-time matches	GKMatchmakerViewController is an NSViewController on macOS; GKDialogController presents NSViewController & GKViewController and is not deprecated	GKMatchmakerViewController.h:31-32; GKDialogController.h:13-28; gkdialogcontroller.md Topics
+Real-time matches	Rules configured via App Store Connect API; playerGroup/playerAttributes ignored with rules; threshold-before-age; rules endpoint; gc/team pseudo-code	g08.md:133; g08.md:135; g08.md:136; g08.md:141; g08.md:75; task-7 finding 25
+Real-time matches	GKVoiceChat deprecated iOS 18 / macOS 15; use startGroupActivity	GKVoiceChat.h:11-23; gkvoicechat.md availability; g08.md:71; gkmatchmaker__startgroupactivity(playerhandler_).md
+Real-time matches	Testing needs ASC record, two devices, two Apple Accounts	g08.md:103
+Turn-based matches	Most events arrive at player(_:receivedTurnEventFor:didBecomeActive:)	gkturnbasedeventlistener__player(__receivedturneventfor_didbecomeactive_).md; g08.md:110
+Turn-based matches	Turn-based matchmaking does not support rules	g08.md:152
+Turn-based matches	Sample || filter bug, needs &&	starting-turn-based-matches-and-passing-turns-between-players.md line 102; g08.md:156; task-7 finding 25
+Turn-based matches	matchDataMaximumSize has no published number; oversized send errors	gkturnbasedmatch__matchdatamaximumsize.md; GKTurnBasedMatch.h:136-137; task-7 finding 27 (resolved: page and header carry no number)
+Turn-based matches	GKTurnTimeoutDefault is a C global var of one week; Swift 6 rejects reference	GKTurnBasedMatch.h:104; swiftc -typecheck -swift-version 6 -target arm64-apple-macos26.0 on the file's swift blocks (error: reference to var 'GKTurnTimeoutDefault' is not concurrency-safe), scratch check 2026-10-18
+Turn-based matches	Next participants order; timeout max 90 days	endturn(withnextparticipants_turntimeout_match_completionhandler_).md Parameters
+Turn-based matches	Keep matchID, reload with load(withID:); your turn check	gkturnbasedmatch__matchid.md; g08.md:111
+Turn-based matches	Invites sent after first turn ends	g08.md:111
+Turn-based matches	Quit in/out of turn; exchanges merged by current participant before end	g08.md:114; g08.md:115; g08.md:126
+Turn-based matches	sendReminder rate limit 10 minutes, GKServerTurnBasedMaxSessionOtherError	g08.md:151; sendreminder(...).md
+Saves across devices	GameSave availability iOS/iPadOS/macOS/visionOS 26, not tvOS	GSSyncedDirectory.h (API_AVAILABLE macos 26 ios 26 visionos 26, API_UNAVAILABLE watchos tvos); GameSave.swiftinterface; documentation__gamesave.md availability
+Saves across devices	GKSavedGame iOS/macOS only, unavailable tvOS/watchOS	GKSavedGame.h:8; gksavedgame.md
+Saves across devices	KVS limits 1,024 keys / 1 MB	g09.md:42; g09.md:44
+Saves across devices	openDirectory starts sync in background, nil uses first container in icloud-container-identifiers	GSSyncedDirectory.h (openDirectoryForContainerIdentifier doc comment); gamesavesynceddirectory.md Overview
+Saves across devices	finishSyncing(statusDisplay:) shows progress and conflict UI; falls back to local save when not signed in	GSSyncedDirectory.h (finishSyncing doc comment); documentation__gamesave.md Overview
+Saves across devices	Syncing pauses after ready until close or deallocation; close and reopen to resume	gamesavesynceddirectory.md Overview; GSSyncedDirectory.h class comment
+Saves across devices	State cases ready/offline/local/syncing/conflicted/error/closed; resolveConflicts(with:)	GameSave arm64e-apple-macos.swiftinterface (State enum, resolveConflicts)
+Saves across devices	File package, versioned platform-neutral format; keep caches out	g09.md:43; g01.md:128
+Saves across devices	GKSavedGame conflicts via player(_:hasConflictingSavedGames:) and resolveConflictingSavedGames	GKSavedGameListener.h:19; GKSavedGame.h:37; g08.md:149
+Custom multiplayer on the Network framework	Network for custom protocols, URLSession for HTTP	documentation__network.md Overview
+Custom multiplayer on the Network framework	NetworkConnection/Listener/Browser OS 26	networkconnection.md, networklistener.md, networkbrowser.md availability; Network.swiftinterface @available(macOS 26.0, iOS 26.0 ...)
+Custom multiplayer on the Network framework	Swift DTLS struct is OS 27 (g09.md:51 lists it among OS 26 types; SDK wins)	Network arm64e-apple-macos.swiftinterface line 1521; documentation__network__dtls.md availability 27.0
+Custom multiplayer on the Network framework	QUICDatagram unreliable RFC 9221 datagrams; datagrams async getter; usableDatagramFrameSize	quicdatagram.md; networkconnection.md (datagrams, usableDatagramFrameSize); Network.swiftinterface lines 1899-1910
+Custom multiplayer on the Network framework	L4S full only on QUIC, TCP receiver-side, raw UDP no Apple congestion control	g09.md:36
+Custom multiplayer on the Network framework	NWParameters(dtls:udp:) exists for the OS 26 path	Network.swiftinterface line 2480; snippet #9 PASS
+Custom multiplayer on the Network framework	OS 26 NWConnection branch cancels its connection after the send completes (fix round 1: the first version never cancelled it and leaked a DTLS session per call); keep one connection per peer for game traffic	review finding (fix round 1); snippet compiles: PASS in typecheck.log
+Custom multiplayer on the Network framework	C knobs: max datagram size, batch, expiration, receive time, data transfer report; set queue before start	g09.md:24; g09.md:25; g09.md:21; g09.md:26; g09.md:16
+Custom multiplayer on the Network framework	nw_path_get_link_quality OS 26; tune initial values, do not gate connections	path.h:366-385; nw_path_get_link_quality(__).md
+Custom multiplayer on the Network framework	nw_tcp_set_max_pacing_rate anyappleos 27; 0/UINT64_MAX disables; (0,12500) clamped to 12500; returns errno	tcp_options.h:414-453; nw_tcp_set_max_pacing_rate(____).md; task-7 bullet sampling g09:52 accurate
+Custom multiplayer on the Network framework	Doc names nw_connection_access_established_protocol_metadata, absent from SDK; use nw_connection_copy_protocol_metadata	grep of Network.framework headers finds the name only in the tcp_options.h:439 comment; connection.h:667-690
+Custom multiplayer on the Network framework	Local network operations table; macOS 15 / iOS 14; may deny before user answers; Network waits	TN3179 Overview table, Local network operations table, Essentials
+Custom multiplayer on the Network framework	localNetworkDenied unsatisfied reason	TN3179 Check for local network access; g09.md:22
+Custom multiplayer on the Network framework	Multicast entitlement required on iOS (Apple approval), not on macOS; covers arbitrary Bonjour types	documentation__bundleresources__entitlements__com.apple.developer.networking.multicast.md; TN3179 Essentials (important box) and Multicast operations; task-7 finding 27 (resolved)
+Custom multiplayer on the Network framework	Prefer Bonjour over broadcast; do not hard-code en0	TN3179 Identify the Wi-Fi interface correctly
+Custom multiplayer on the Network framework	Privilege tracks code signature; reset button macOS 27.2; simulator lacks privacy	TN3179 Build-time considerations, Reset local network state, iOS considerations
+Custom multiplayer on the Network framework	TLS-PSK from join code vs local CA	g09.md:32; g09.md:9
+Custom multiplayer on the Network framework	gethostbyname never main-thread safe; getaddrinfo only numeric; NWPathMonitor instead of reachability	p01.md:68
+Custom multiplayer on the Network framework	tcpdump, rvictl, networksetup -listallhardwareports	g09.md:30

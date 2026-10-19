@@ -1,0 +1,47 @@
+path	seed	bound	depth	documentType	role	words	http	dest
+pdf:msl-4.1#front	pdf:msl-4.1	page	0	pdf-chapter	MSL 4.1 Front matter, contents, table lists (pages 1-10)	2812	200	apple-metal
+pdf:msl-4.1#ch1	pdf:msl-4.1	page	0	pdf-chapter	MSL 4.1 Introduction (pages 11-24)	3934	200	apple-metal
+pdf:msl-4.1#ch2	pdf:msl-4.1	page	0	pdf-chapter	MSL 4.1 Data Types (pages 25-111)	20747	200	apple-metal
+pdf:msl-4.1#ch3	pdf:msl-4.1	page	0	pdf-chapter	MSL 4.1 Operators (pages 112-117)	2325	200	apple-metal
+pdf:msl-4.1#ch4	pdf:msl-4.1	page	0	pdf-chapter	MSL 4.1 Address Spaces (pages 118-123)	1834	200	apple-metal
+pdf:msl-4.1#ch5	pdf:msl-4.1	page	0	pdf-chapter	MSL 4.1 Function and Variable Declarations (pages 124-199)	20077	200	apple-metal
+pdf:msl-4.1#ch6	pdf:msl-4.1	page	0	pdf-chapter	MSL 4.1 Metal Standard Library (pages 200-348)	37675	200	apple-metal
+pdf:msl-4.1#ch7	pdf:msl-4.1	page	0	pdf-chapter	MSL 4.1 Metal Performance Primitives (pages 349-367)	3795	200	apple-metal
+pdf:msl-4.1#ch8	pdf:msl-4.1	page	0	pdf-chapter	MSL 4.1 Numerical Compliance (pages 368-381)	3705	200	apple-metal
+pdf:msl-4.1#ch9	pdf:msl-4.1	page	0	pdf-chapter	MSL 4.1 Appendix (pages 382-383)	437	200	apple-metal
+pdf:fst#all	pdf:fst	page	0	pdf	Metal Feature Set Tables (18 pages)	6587	200	apple-metal
+book:metal-by-tutorials/chapters/ch01-hello-metal.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1592	200	apple-metal
+book:metal-by-tutorials/chapters/ch02-3d-models.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1597	200	apple-metal
+book:metal-by-tutorials/chapters/ch03-rendering-pipeline.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1717	200	apple-metal
+book:metal-by-tutorials/chapters/ch04-vertex-function.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1647	200	apple-metal
+book:metal-by-tutorials/chapters/ch05-3d-transformations.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1454	200	apple-metal
+book:metal-by-tutorials/chapters/ch06-coordinate-spaces.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1570	200	apple-metal
+book:metal-by-tutorials/chapters/ch07-fragment-function.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1404	200	apple-metal
+book:metal-by-tutorials/chapters/ch08-textures.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1609	200	apple-metal
+book:metal-by-tutorials/chapters/ch09-navigating-3d-scene.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1627	200	apple-metal
+book:metal-by-tutorials/chapters/ch10-lighting-fundamentals.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1671	200	apple-metal
+book:metal-by-tutorials/chapters/ch11-maps-materials.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1628	200	apple-metal
+book:metal-by-tutorials/chapters/ch12-render-passes.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1411	200	apple-metal
+book:metal-by-tutorials/chapters/ch13-shadows.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1482	200	apple-metal
+book:metal-by-tutorials/chapters/ch14-deferred-rendering.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1662	200	apple-metal
+book:metal-by-tutorials/chapters/ch15-tile-based-deferred-rendering.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1628	200	apple-metal
+book:metal-by-tutorials/chapters/ch16-gpu-compute.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1537	200	apple-metal
+book:metal-by-tutorials/chapters/ch17-particle-systems.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1665	200	apple-metal
+book:metal-by-tutorials/chapters/ch18-particle-behavior.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1604	200	apple-metal
+book:metal-by-tutorials/chapters/ch19-tessellation-terrains.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1938	200	apple-metal
+book:metal-by-tutorials/chapters/ch20-fragment-post-processing.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1679	200	apple-metal
+book:metal-by-tutorials/chapters/ch21-image-based-lighting.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1618	200	apple-metal
+book:metal-by-tutorials/chapters/ch22-reflection-refraction.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1534	200	apple-metal
+book:metal-by-tutorials/chapters/ch23-animation.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1497	200	apple-metal
+book:metal-by-tutorials/chapters/ch24-character-animation.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1608	200	apple-metal
+book:metal-by-tutorials/chapters/ch25-managing-resources.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1608	200	apple-metal
+book:metal-by-tutorials/chapters/ch26-indirect-command-encoding.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1489	200	apple-metal
+book:metal-by-tutorials/chapters/ch27-gpu-command-encoding.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1552	200	apple-metal
+book:metal-by-tutorials/chapters/ch28-mesh-shaders.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1887	200	apple-metal
+book:metal-by-tutorials/chapters/ch29-metal-performance-shaders.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1468	200	apple-metal
+book:metal-by-tutorials/chapters/ch30-profiling.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1776	200	apple-metal
+book:metal-by-tutorials/chapters/ch31-best-practices.md	book:metal-by-tutorials	page	0	book	Metal by Tutorials	1645	200	apple-metal
+book:metal-by-tutorials/glossary.md	book:metal-by-tutorials	page	0	book	book skill file	909	200	apple-metal
+book:metal-by-tutorials/patterns.md	book:metal-by-tutorials	page	0	book	book skill file	1135	200	apple-metal
+book:metal-by-tutorials/cheatsheet.md	book:metal-by-tutorials	page	0	book	book skill file	754	200	apple-metal
+book:metal-by-tutorials/SKILL.md	book:metal-by-tutorials	page	0	book	book skill file	2328	200	apple-metal

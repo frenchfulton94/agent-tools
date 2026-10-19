@@ -1,0 +1,6 @@
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-performance/references/profiling-workflow.md   (1 swift blocks)   target: macos 26.0
+  [PASS:parse-as-library] #1  import os
+
+TOTAL: 1/1 snippets typecheck clean

@@ -1,0 +1,50 @@
+Machine: Apple M4 Pro
+OS: macOS 27.0.1 26A434
+Toolchain: Xcode 27.1
+Date: 2026-10-18 15:22 EDT (attempt 1), 15:26 EDT (attempt 2)
+$TMP below is authoring/apple-studio/pipeline/tmp, the gitignored pipeline scratch
+
+Both recordings ran by hand from authoring/apple-studio/pipeline/fixtures/metal-probe/,
+before `run.sh r4` existed. The record output below is copied from the terminal.
+After attempt 1, the user turned on Processor Trace. Attempt 2 checked the
+setting. The setting takes effect only after a restart, which the user has
+deferred. The checks after each record step can be run again on the saved
+bundles in $TMP.
+
+## Attempt 1: the brief's command, plus --target-stdout
+$ xcrun xctrace record --template 'Processor Trace' --time-limit 10s --output $TMP/r4-explore.trace --target-stdout $TMP/r4-explore.stdout --launch -- .build/release/MetalProbe sim --ticks 100000 --slow
+exit: 2
+Starting recording with the Processor Trace template. Launching process: MetalProbe. Time limit: 10.0 s
+Ctrl-C to stop the recording
+Run issues were detected (trace is still ready to be viewed):
+* [Error] The target device is not configured for tracing. Enable Processor Trace in System Settings → Privacy & Security → Developer Tools to capture traces.
+
+Recording failed with errors. Saving output file...
+Output file saved as: r4-explore.trace
+
+$ du -sh $TMP/r4-explore.trace
+484K	$TMP/r4-explore.trace
+$ wc -c < $TMP/r4-explore.stdout
+       0
+$ xcrun xctrace export --input $TMP/r4-explore.trace --toc
+exit: 10
+Export failed: Trace is malformed - run data is missing.
+
+## Attempt 2: after the user turned the setting on, before a restart
+$ xcrun xctrace record --template 'Processor Trace' --time-limit 2s --output $TMP/r4-check.trace --target-stdout $TMP/r4-check.stdout --launch -- .build/release/MetalProbe sim --ticks 1000 --slow
+exit: 2
+Starting recording with the Processor Trace template. Launching process: MetalProbe. Time limit: 2.0 s
+Ctrl-C to stop the recording
+Run issues were detected (trace is still ready to be viewed):
+* [Error] The target device is not configured for tracing. Enable Processor Trace in System Settings → Privacy & Security → Developer Tools to capture traces.
+
+Recording failed with errors. Saving output file...
+Output file saved as: r4-check.trace
+
+$ du -sh $TMP/r4-check.trace
+484K	$TMP/r4-check.trace
+$ wc -c < $TMP/r4-check.stdout
+       0
+$ xcrun xctrace export --input $TMP/r4-check.trace --toc
+exit: 10
+Export failed: Trace is malformed - run data is missing.

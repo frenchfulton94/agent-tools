@@ -1,0 +1,4 @@
+path	words	read_in_full	fed
+/documentation/metal/a	120	yes	metal-pipelines.md#Setup;metal-pipelines.md#Notes
+/documentation/x	80	yes	nothing: marketing overview
+/documentation/dead	0	no-unfetchable:404:deferred-3	nothing: page does not exist

@@ -1,0 +1,4 @@
+path	words	read_in_full	fed
+/documentation/Metal/a	120	yes	metal-pipelines.md#Setup
+/documentation/x	80	yes	nothing: a
+/documentation/dead	0	no-unfetchable:404	nothing: gone

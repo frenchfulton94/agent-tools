@@ -1,0 +1,14 @@
+# Task 13 fix round 1: row counts behind spec append item 1, 2026-10-18T21:48-0400
+$ wc -l $REC/task-1-manifest/manifest.tsv $REC/task-3-slices/sources.tsv $REC/task-3-slices/slices.tsv   (each file has one header line)
+    1177 task-1-manifest/manifest.tsv
+      47 task-3-slices/sources.tsv
+    1223 task-3-slices/slices.tsv
+    2447 total
+manifest data rows: 1176
+sources data rows:  46
+slices data rows:   1222
+sources rows by seed (column 2):
+  35 book:metal-by-tutorials
+   1 pdf:fst
+  10 pdf:msl-4.1
+slice paths found in manifest or sources: 1176 in manifest, 46 in sources, 0 in neither

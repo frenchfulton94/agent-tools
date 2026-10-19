@@ -1,0 +1,157 @@
+Machine: Apple M4 Pro
+OS: macOS 27.0.1 26A434
+Toolchain: Xcode 27.1
+Date: 2026-10-18 20:05 EDT
+$TMP below is authoring/apple-studio/pipeline/tmp, the gitignored pipeline scratch
+
+## heaviest symbol under 'tick', Processor Trace, sim --slow
+$ python3 heaviest_under_interval.py $TMP/r4.trace --subsystem dev.frenchfultonjr.apple-studio.metal-probe --interval tick --work-dir $TMP/r4-export --require processor-trace-
+exit: 0
+$ xcrun xctrace export --input $TMP/r4.trace --output $WORK/toc.xml --toc
+exit: 0
+tables in run 1: 32 schemas
+  OSSignpostIntervals PointsOfInterestEvents StateReportingIntervals ThreadActivity ThreadPriority ThreadQoSTable ThreadTermination context-switch context-switch-sample cpu-narrative cpu-state dyld-library-load kdebug kdebug-strings os-log os-signpost os-signpost-arg process-info processor-trace-gaps processor-trace-intervals processor-trace-points processor-trace-threads stackshot-info syscall syscall-name-map thread-info thread-snapshot thread-state tick time-profile time-sample virtual-memory
+launched process: arguments="sim --ticks 100000 --slow" type="launched" return-exit-status="0" name="MetalProbe" pid="6501" termination-reason="exit(0)"
+$ xcrun xctrace export --input $TMP/r4.trace --output $WORK/OSSignpostIntervals.xml --xpath '/trace-toc/run[@number="1"]/data/table[@schema="OSSignpostIntervals"]'
+exit: 0
+first matching row: start 653212250 (fmt 00:00.653.212), duration 221875 (fmt 221.88 µs), category PointsOfInterest, thread Main Thread (0x6c8e) (MetalProbe, pid: 6501)
+columns: start:start-time, duration:duration, layout-qualifier:layout-id, name:signpost-name, category:category, subsystem:subsystem, identifier:os-signpost-identifier, process:process, end-process:process, start-thread:thread, end-thread:thread, start-message:os-log-metadata, end-message:os-log-metadata, start-backtrace:text-backtrace, end-backtrace:text-backtrace, start-emit-location:return-location, end-emit-location:return-location, signature:os-log-metadata
+'tick' intervals in dev.frenchfultonjr.apple-studio.metal-probe: 53644, on 1 thread(s), 9.960 s in all
+
+## processor-trace-gaps
+$ xcrun xctrace export --input $TMP/r4.trace --output $WORK/processor-trace-gaps.xml --xpath '/trace-toc/run[@number="1"]/data/table[@schema="processor-trace-gaps"]'
+exit: 0
+columns: timestamp:start-time, process:process, thread:thread, description:string
+rows: 869
+mode: none: no backtrace, or no duration and symbol
+nothing charged inside the intervals
+
+## processor-trace-intervals
+$ xcrun xctrace export --input $TMP/r4.trace --output $WORK/processor-trace-intervals.xml --xpath '/trace-toc/run[@number="1"]/data/table[@schema="processor-trace-intervals"]'
+exit: 0
+columns: start:start-time, duration:duration, process:process, thread:thread, depth:layout-id, name:text-location, color:event-concept, self-instructions:uint64, self-cycles:uint64, self-duration:duration, backtrace:text-backtrace
+rows: 2173169
+mode: intervals: time goes to the innermost open call (self time)
+cost inside 'tick' intervals: 486132849 ns of self time
+   99.89%  plantedSlowStep(_:dt:)
+    0.03%  OS_os_log.signpostsEnabled.getter
+    0.02%  firehose_buffer_ring_enqueue
+    0.02%  runSim(ticks:slow:)
+    0.01%  _os_signpost_emit_with_name_impl
+
+## processor-trace-points
+$ xcrun xctrace export --input $TMP/r4.trace --output $WORK/processor-trace-points.xml --xpath '/trace-toc/run[@number="1"]/data/table[@schema="processor-trace-points"]'
+exit: 0
+columns: timestamp:start-time, process:process, thread:thread, instructions:uint64, cycles:uint64
+rows: 4939
+mode: none: no backtrace, or no duration and symbol
+nothing charged inside the intervals
+
+## processor-trace-threads
+$ xcrun xctrace export --input $TMP/r4.trace --output $WORK/processor-trace-threads.xml --xpath '/trace-toc/run[@number="1"]/data/table[@schema="processor-trace-threads"]'
+exit: 0
+columns: start:start-time, process:process, thread:thread, depths:typed-array
+rows: 1
+mode: none: no backtrace, or no duration and symbol
+nothing charged inside the intervals
+
+## time-profile
+$ xcrun xctrace export --input $TMP/r4.trace --output $WORK/time-profile.xml --xpath '/trace-toc/run[@number="1"]/data/table[@schema="time-profile"]'
+exit: 0
+columns: time:sample-time, thread:thread, process:process, core:core, thread-state:thread-state, weight:weight, stack:tagged-backtrace
+rows: 9987
+mode: samples: cost goes to the leaf function (self weight)
+cost inside 'tick' intervals: 9958000000 weight
+   99.87%  plantedSlowStep(_:dt:)
+    0.05%  mach_continuous_time
+    0.02%  swift_cvw_initWithCopyImpl(swift::OpaqueValue*, swift::OpaqueValue*, swift::TargetMetadata<swift::InProcess> const*)
+    0.01%  0x19d40494d
+    0.01%  clock_gettime_nsec_np
+for comparison, the raw leaf frame, with inlined frames not grouped:
+   49.51%  $ss16IndexingIteratorV4next7ElementQzSgyFSnySiG_Tg5
+   33.21%  $sSa15_checkSubscript_20wasNativeTypeCheckeds16_DependenceTokenVSi_SbtF10MetalProbe8ParticleV_Tg5
+   15.63%  plantedSlowStep(_:dt:)
+first backtrace charged to plantedSlowStep(_:dt:), leaf first:
+  addr 0x104d83ba1  $sSa15_checkSubscript_20wasNativeTypeCheckeds16_DependenceTokenVSi_SbtF10MetalProbe8ParticleV_Tg5
+  addr 0x104d83ba1  $sSayxSicig10MetalProbe8ParticleV_Tg5  (inlined=true)
+  addr 0x104d83ba1  plantedSlowStep(_:dt:)  (inlined=true)
+  addr 0x104d836d7  runSim(ticks:slow:)
+
+heaviest symbol under 'tick': plantedSlowStep(_:dt:) (processor-trace-intervals, 99.89%)
+heaviest symbol under 'tick': plantedSlowStep(_:dt:) (time-profile, 99.87%)
+
+## heaviest symbol under 'tick', Processor Trace, sim without --slow (control)
+$ python3 heaviest_under_interval.py $TMP/r4-control.trace --subsystem dev.frenchfultonjr.apple-studio.metal-probe --interval tick --work-dir $TMP/r4-control-export --require processor-trace-
+exit: 0
+$ xcrun xctrace export --input $TMP/r4-control.trace --output $WORK/toc.xml --toc
+exit: 0
+tables in run 1: 32 schemas
+  OSSignpostIntervals PointsOfInterestEvents StateReportingIntervals ThreadActivity ThreadPriority ThreadQoSTable ThreadTermination context-switch context-switch-sample cpu-narrative cpu-state dyld-library-load kdebug kdebug-strings os-log os-signpost os-signpost-arg process-info processor-trace-gaps processor-trace-intervals processor-trace-points processor-trace-threads stackshot-info syscall syscall-name-map thread-info thread-snapshot thread-state tick time-profile time-sample virtual-memory
+launched process: arguments="sim --ticks 100000" type="launched" return-exit-status="0" name="MetalProbe" pid="6653" termination-reason="exit(0)"
+$ xcrun xctrace export --input $TMP/r4-control.trace --output $WORK/OSSignpostIntervals.xml --xpath '/trace-toc/run[@number="1"]/data/table[@schema="OSSignpostIntervals"]'
+exit: 0
+first matching row: start 648138333 (fmt 00:00.648.138), duration 917 (fmt 917 ns), category PointsOfInterest, thread Main Thread (0x7c54) (MetalProbe, pid: 6653)
+columns: start:start-time, duration:duration, layout-qualifier:layout-id, name:signpost-name, category:category, subsystem:subsystem, identifier:os-signpost-identifier, process:process, end-process:process, start-thread:thread, end-thread:thread, start-message:os-log-metadata, end-message:os-log-metadata, start-backtrace:text-backtrace, end-backtrace:text-backtrace, start-emit-location:return-location, end-emit-location:return-location, signature:os-log-metadata
+'tick' intervals in dev.frenchfultonjr.apple-studio.metal-probe: 100000, on 1 thread(s), 0.050 s in all
+
+## processor-trace-gaps
+$ xcrun xctrace export --input $TMP/r4-control.trace --output $WORK/processor-trace-gaps.xml --xpath '/trace-toc/run[@number="1"]/data/table[@schema="processor-trace-gaps"]'
+exit: 0
+columns: timestamp:start-time, process:process, thread:thread, description:string
+rows: 1738
+mode: none: no backtrace, or no duration and symbol
+nothing charged inside the intervals
+
+## processor-trace-intervals
+$ xcrun xctrace export --input $TMP/r4-control.trace --output $WORK/processor-trace-intervals.xml --xpath '/trace-toc/run[@number="1"]/data/table[@schema="processor-trace-intervals"]'
+exit: 0
+columns: start:start-time, duration:duration, process:process, thread:thread, depth:layout-id, name:text-location, color:event-concept, self-instructions:uint64, self-cycles:uint64, self-duration:duration, backtrace:text-backtrace
+rows: 58598788
+mode: intervals: time goes to the innermost open call (self time)
+cost inside 'tick' intervals: 50360734 ns of self time
+   38.84%  simulationStep(_:dt:)
+   14.59%  mach_msg2_trap
+    9.48%  mach_msg_overwrite
+    7.07%  0x195b83894
+    6.70%  mach_msg
+
+## processor-trace-points
+$ xcrun xctrace export --input $TMP/r4-control.trace --output $WORK/processor-trace-points.xml --xpath '/trace-toc/run[@number="1"]/data/table[@schema="processor-trace-points"]'
+exit: 0
+columns: timestamp:start-time, process:process, thread:thread, instructions:uint64, cycles:uint64
+rows: 1280
+mode: none: no backtrace, or no duration and symbol
+nothing charged inside the intervals
+
+## processor-trace-threads
+$ xcrun xctrace export --input $TMP/r4-control.trace --output $WORK/processor-trace-threads.xml --xpath '/trace-toc/run[@number="1"]/data/table[@schema="processor-trace-threads"]'
+exit: 0
+columns: start:start-time, process:process, thread:thread, depths:typed-array
+rows: 1
+mode: none: no backtrace, or no duration and symbol
+nothing charged inside the intervals
+
+## time-profile
+$ xcrun xctrace export --input $TMP/r4-control.trace --output $WORK/time-profile.xml --xpath '/trace-toc/run[@number="1"]/data/table[@schema="time-profile"]'
+exit: 0
+columns: time:sample-time, thread:thread, process:process, core:core, thread-state:thread-state, weight:weight, stack:tagged-backtrace
+rows: 94
+mode: samples: cost goes to the leaf function (self weight)
+cost inside 'tick' intervals: 31000000 weight
+   61.29%  simulationStep(_:dt:)
+    6.45%  _os_object_retain
+    6.45%  mach_msg2_trap
+    3.23%  malloc_type_malloc
+    3.23%  objc_msgSend
+for comparison, the raw leaf frame, with inlined frames not grouped:
+   41.94%  $sSa12_endMutationyyF10MetalProbe8ParticleV_Tg5
+   12.90%  $sSlsE20_failEarlyRangeCheck_6boundsy5IndexQz_SnyADGtFSnySiG_Tg5
+    6.45%  _os_object_retain
+first backtrace charged to simulationStep(_:dt:), leaf first:
+  addr 0x100027aa5  $sSa12_endMutationyyF10MetalProbe8ParticleV_Tg5
+  addr 0x100027aa5  $sSayxSiciM6$deferL_yylF10MetalProbe8ParticleV_Tg5  (inlined=true)
+  addr 0x100027aa5  $sSayxSiciM10MetalProbe8ParticleV_Tg5  (inlined=true)
+  addr 0x100027aa5  simulationStep(_:dt:)  (inlined=true)
+
+heaviest symbol under 'tick': simulationStep(_:dt:) (processor-trace-intervals, 38.84%)
+heaviest symbol under 'tick': simulationStep(_:dt:) (time-profile, 61.29%)

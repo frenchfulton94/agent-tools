@@ -1,0 +1,89 @@
+Runtime checks for plugins/apple-studio/skills/apple-games/references/game-loop-and-threading.md
+Machine: Apple M4 Pro (14 logical CPUs: 10 Performance, 4 Efficiency), MacBook on battery
+OS: macOS 27.0.1 (26A434). Toolchain: Xcode 27.1 (27A9275), macOS SDK 27.0.
+Date: 2026-10-18. Binaries built into the session scratchpad ($O below), not the repo.
+Every program exits on its own; none leaves a process running. No simulator, no GUI,
+no StudioFixture.
+
+== 1. mach timebase ratio, native and translated (timebase.c) ==
+$ clang -O1 -arch arm64  -o $O/timebase-arm64  timebase.c
+$ clang -O1 -arch x86_64 -o $O/timebase-x86_64 timebase.c
+$ $O/timebase-arm64
+arch=arm64 numer=125 denom=3
+ticks=2457040 scaled_ns=102376666 clock_uptime_raw_ns=102376625
+raw_ticks_as_ns_error=-97.6%
+$ arch -x86_64 $O/timebase-x86_64          # Rosetta 2
+arch=x86_64 numer=1 denom=1
+ticks=105024459 scaled_ns=105024459 clock_uptime_raw_ns=105025291
+raw_ticks_as_ns_error=-0.0%
+Reading: a native arm64 tick is 125/3 ns (24 MHz); a tick count read as
+nanoseconds runs 41.7x slow. Under Rosetta the ratio is 1/1. Ticks scaled by
+the ratio agree with clock_gettime_nsec_np(CLOCK_UPTIME_RAW) to within 41 ns
+over 100 ms.
+
+== 2. Metal 3 completed-handler thread and QoS (completion_qos.swift) ==
+$ swiftc -O completion_qos.swift -o $O/completion_qos && $O/completion_qos
+device=Apple M4 Pro
+[userInteractive round 0] commit:  main=false qos=userInteractive pthread_name='' queue_label='com.apple.root.user-interactive-qos'
+[userInteractive round 0] handler: main=false qos=userInteractive pthread_name='' queue_label='com.Metal.CompletionQueueDispatch'
+  (rounds 1-4 identical)
+[utility round 0] commit:  main=false qos=utility pthread_name='' queue_label='com.apple.root.utility-qos'
+[utility round 0] handler: main=false qos=userInteractive pthread_name='' queue_label='com.Metal.CompletionQueueDispatch'
+  (rounds 1-4 identical)
+finished
+Reading: 10 of 10 handlers ran off the main thread, on the dispatch queue
+labelled com.Metal.CompletionQueueDispatch, at userInteractive QoS, whatever
+the committing thread's QoS (userInteractive or utility). Neither the
+addCompletedHandler(_:) page nor MTLCommandBuffer.h states this; it is
+observed behavior, not contract.
+
+== 3. Raw priority 45 against QoS (thread_priority.c) ==
+$ clang -O1 -o $O/thread_priority thread_priority.c && $O/thread_priority
+attr qos userInteractive           qos_class_self=userInteractive  sched_priority=31 policy=1
+attr qos userInitiated             qos_class_self=userInitiated    sched_priority=31 policy=1
+attr qos default                   qos_class_self=default          sched_priority=31 policy=1
+attr qos utility                   qos_class_self=utility          sched_priority=31 policy=1
+attr qos background                qos_class_self=background       sched_priority=31 policy=1
+pthread_attr_setschedparam(45) rc=0
+attr setschedparam 45 (rc above)   qos_class_self=unspecified      sched_priority=45 policy=1
+plain pthread_create               qos_class_self=default          sched_priority=31 policy=1
+main thread (CLI process)          qos_class_self=userInteractive  sched_priority=31 policy=1
+Reading: the priority-45 recipe leaves the thread with QOS_CLASS_UNSPECIFIED,
+so it opts out of QoS rather than ranking within it. pthread_getschedparam
+reports 31 for every QoS class, so it cannot be used to confirm a thread's QoS;
+use qos_class_self().
+
+== 4. Foundation Thread QoS (thread_qos.swift) ==
+$ swiftc -O thread_qos.swift -o $O/thread_qos && $O/thread_qos
+Thread, no QoS set: qos_class_self=default Thread.qualityOfService.rawValue=-1
+Thread, qualityOfService = .userInteractive before start: qos_class_self=userInteractive Thread.qualityOfService.rawValue=33
+Thread, qualityOfService = .utility before start: qos_class_self=utility Thread.qualityOfService.rawValue=17
+Reading: a Thread started with no QoS runs at default, not at the main
+thread's userInteractive. Setting qualityOfService before start() takes effect.
+
+== 5. Power, thermal, and performance-profile reads (power_state.swift) ==
+$ swiftc -O power_state.swift -o $O/power_state && $O/power_state
+thermalState=0 (0 nominal, 1 fair, 2 serious, 3 critical)
+isLowPowerModeEnabled=false
+hasPerformanceProfile(.default)=true
+hasPerformanceProfile(.sustained)=false
+isDeviceCertified(for: .iPhonePerformanceGaming)=true
+Reading: an unentitled CLI process on a Mac reports the default profile only,
+and isDeviceCertified(for: .iPhonePerformanceGaming) returns true on this Mac,
+so it does not identify an iPhone.
+
+== 6. Core-count sysctl keys (perflevels.c, plus the sysctl CLI) ==
+$ clang -O1 -o $O/perflevels perflevels.c && $O/perflevels
+hw.perflevels              : error 2 (No such file or directory)
+hw.nperflevels             = 2
+hw.perflevel0.logicalcpu   = 10
+hw.perflevel1.logicalcpu   = 4
+hw.logicalcpu              = 14
+$ sysctl hw.perflevels
+sysctl: unknown oid 'hw.perflevels'
+$ sysctl hw.perflevel0.name hw.perflevel1.name
+hw.perflevel0.name: Performance
+hw.perflevel1.name: Efficiency
+Reading: the key the Metal games-settings article names, hw.perflevels, does
+not exist; the SDK's sys/sysctl.h (line 679) documents hw.nperflevels, which
+returns 2 here.

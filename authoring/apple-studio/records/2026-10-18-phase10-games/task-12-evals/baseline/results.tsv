@@ -1,0 +1,61 @@
+id	skill	expect	fired	verdict	note	wrote	log
+metal-fire-1	apple-metal	FIRE	apple-metal	PASS			metal-fire-1.log
+metal-fire-2	apple-metal	FIRE	apple-metal	PASS			metal-fire-2.log
+metal-fire-3	apple-metal	FIRE	apple-metal	PASS			metal-fire-3.log
+metal-fire-4	apple-metal	FIRE	apple-metal	PASS			metal-fire-4.log
+metal-fire-5	apple-metal	FIRE	apple-metal	PASS			metal-fire-5.log
+metal-fire-6	apple-metal	FIRE	apple-metal	PASS			metal-fire-6.log
+metal-fire-7	apple-metal	FIRE	apple-metal	PASS	max_turns		metal-fire-7.log
+metal-fire-8	apple-metal	FIRE	apple-metal	PASS			metal-fire-8.log
+metal-not-1	apple-metal	NOFIRE	apple-animations	PASS			metal-not-1.log
+metal-not-2	apple-metal	NOFIRE	apple-performance	PASS	max_turns		metal-not-2.log
+metal-not-3	apple-metal	NOFIRE	(none)	PASS			metal-not-3.log
+metal-not-4	apple-metal	NOFIRE	(none)	PASS			metal-not-4.log
+metal-not-5	apple-metal	NOFIRE	(none)	PASS			metal-not-5.log
+metal-not-6	apple-metal	NOFIRE	apple-games	PASS			metal-not-6.log
+games-fire-1	apple-games	FIRE	apple-games	PASS			games-fire-1.log
+games-fire-2	apple-games	FIRE	apple-games	PASS			games-fire-2.log
+games-fire-3	apple-games	FIRE	apple-games	PASS			games-fire-3.log
+games-fire-4	apple-games	FIRE	apple-games	PASS			games-fire-4.log
+games-fire-5	apple-games	FIRE	apple-games	PASS	max_turns		games-fire-5.log
+games-fire-6	apple-games	FIRE	apple-games	PASS			games-fire-6.log
+games-fire-7	apple-games	FIRE	apple-games	PASS			games-fire-7.log
+games-fire-8	apple-games	FIRE	apple-games	PASS			games-fire-8.log
+games-not-1	apple-games	NOFIRE	apple-metal	PASS			games-not-1.log
+games-not-2	apple-games	NOFIRE	apple-performance	PASS			games-not-2.log
+games-not-3	apple-games	NOFIRE	(none)	PASS			games-not-3.log
+games-not-4	apple-games	NOFIRE	(none)	PASS			games-not-4.log
+games-not-5	apple-games	NOFIRE	apple-design	PASS			games-not-5.log
+games-not-6	apple-games	NOFIRE	app-release	PASS			games-not-6.log
+ar-fire-1	app-release	FIRE	app-release	PASS			ar-fire-1.log
+ar-fire-2	app-release	FIRE	app-release	PASS			ar-fire-2.log
+ar-fire-3	app-release	FIRE	app-release	PASS			ar-fire-3.log
+ar-fire-4	app-release	FIRE	app-release	PASS			ar-fire-4.log
+ar-fire-5	app-release	FIRE	app-release	PASS	max_turns	StudioFixture.xcodeproj/project.pbxproj;StudioFixture/StudioFixture-macOS.entitlements;StudioFixture/StudioFixture.entitlements	ar-fire-5.log
+ar-fire-6	app-release	FIRE	app-release	PASS	max_turns	StudioFixture.xcodeproj/xcshareddata/;ci_scripts/	ar-fire-6.log
+ar-fire-7	app-release	FIRE	app-release	PASS			ar-fire-7.log
+ar-fire-8	app-release	FIRE	app-release	PASS			ar-fire-8.log
+ar-nofire-1	app-release	NOFIRE	xcode-loop	PASS	max_turns		ar-nofire-1.log
+ar-nofire-2	app-release	NOFIRE	(none)	PASS			ar-nofire-2.log
+ar-nofire-3	app-release	NOFIRE	apple-design	PASS	max_turns		ar-nofire-3.log
+ar-nofire-4	app-release	NOFIRE	swift-architecture	PASS			ar-nofire-4.log
+anim-fire	apple-animations	FIRE	apple-animations	PASS	max_turns	StudioFixture/MailboxScreen.swift;StudioFixture/Ripple.metal;StudioFixture/RippleEffect.swift	anim-fire.log
+anim-not	apple-animations	NOFIRE	apple-performance	PASS			anim-not.log
+design-fire	apple-design	FIRE	apple-design	PASS			design-fire.log
+design-not	apple-design	NOFIRE	(none)	PASS	max_turns		design-not.log
+fw-fire	apple-frameworks	FIRE	apple-frameworks	PASS			fw-fire.log
+fw-not	apple-frameworks	NOFIRE	swift-architecture	PASS	max_turns		fw-not.log
+ai-fire	apple-intelligence	FIRE	apple-intelligence	PASS	max_turns		ai-fire.log
+ai-not	apple-intelligence	NOFIRE	(none)	PASS			ai-not.log
+macos-fire	apple-macos	FIRE	apple-macos	PASS	max_turns	StudioFixture/MailboxScreen.swift;StudioFixture/StudioFixtureApp.swift;StudioFixture/SettingsView.swift	macos-fire.log
+macos-not	apple-macos	NOFIRE	apple-design	PASS	max_turns		macos-not.log
+perf-fire	apple-performance	FIRE	apple-performance	PASS			perf-fire.log
+perf-not	apple-performance	NOFIRE	(none)	PASS			perf-not.log
+arch-fire	swift-architecture	FIRE	swift-architecture	PASS			arch-fire.log
+arch-not	swift-architecture	NOFIRE	apple-frameworks	PASS			arch-not.log
+conc-fire	swift-concurrency	FIRE	(none)	FAIL			conc-fire.log
+conc-not	swift-concurrency	NOFIRE	apple-design	PASS			conc-not.log
+test-fire	swift-testing	FIRE	(none)	FAIL			test-fire.log
+test-not	swift-testing	NOFIRE	(none)	PASS			test-not.log
+xcode-fire	xcode-loop	FIRE	xcode-loop	PASS	max_turns		xcode-fire.log
+xcode-not	xcode-loop	NOFIRE	(none)	PASS			xcode-not.log

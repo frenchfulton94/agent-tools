@@ -1,0 +1,12 @@
+== m01: 67 source files, notes m01.md
+== m02: 59 source files, notes m02.md
+== m03: 53 source files, notes m03.md
+== m04: 52 source files, notes m04.md
+HIT m04.md:61 (19 words, src documentation__xcode__customizing-metal-performance-hud.md): device rosetta layersize layerscale memory fps frameinterval gputime thermal frameintervalgraph presentdelay frameintervalhistogram metalcpu gputimeline shaders framenumber disk fpsgraph toplabeledcommandbuffers
+== m05: 45 source files, notes m05.md
+== m06: 1 source files, notes m06.md
+== m07: 3 source files, notes m07.md
+EXCLUDED m07.md:80 (12 words, src msl-4.1.txt): read(sampler s int2 coord int2 offset = 0 uint lod = 0)
+== m08: 34 source files, notes m08.md
+hits: 1
+excluded (symbol/path/signature): 1

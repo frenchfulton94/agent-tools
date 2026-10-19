@@ -1,0 +1,3 @@
+  PID  PPID STAT  %CPU  ELAPSED COMMAND
+ 6500     1 T      0.0 01:17:05 /Users/michaelfrenchfultonjr/Projects/agent-tools/.claude/worktrees/apple-studio-phase10-games/authoring/apple-studio/pipeline/fixtures/metal-probe/build/MetalProbe.app/Contents/MacOS/MetalProbe sim --ticks 100000 --slow
+ 6652     1 T      0.0 01:15:48 /Users/michaelfrenchfultonjr/Projects/agent-tools/.claude/worktrees/apple-studio-phase10-games/authoring/apple-studio/pipeline/fixtures/metal-probe/build/MetalProbe.app/Contents/MacOS/MetalProbe sim --ticks 100000

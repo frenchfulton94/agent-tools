@@ -1,0 +1,34 @@
+Machine: Apple M4 Pro, macOS 27.0.1 26A434, Xcode 27.1
+Date: 2026-10-18 (Task 10 close without R6, ruling P44)
+Redactions: the two Apple ID email addresses are <Apple ID 1> and <Apple ID 2>;
+SHA-1 hashes are <sha1>; the certificate subject's UID field is <uid>.
+Team IDs and team names are kept. Read-only: nothing was signed or submitted.
+
+## Code-signing identities
+$ security find-identity -v -p codesigning
+  1) <sha1> "Apple Development: <Apple ID 2> (RTC3TK2XFJ)"
+  2) <sha1> "Apple Development: <Apple ID 1> (G4MYV6D63X)"
+     2 valid identities found
+Developer ID Application identities: 0
+
+## Team fields of each certificate
+The certificate is exported to the gitignored $TMP, then read in a separate command.
+
+$ security find-certificate -c "G4MYV6D63X" -p -Z > $TMP/r06-certs/apple-id-1.pem
+$ openssl x509 -noout -subject -enddate -in $TMP/r06-certs/apple-id-1.pem
+subject=UID=<uid>, CN=Apple Development: <Apple ID 1> (G4MYV6D63X), OU=2F7J72JV48, O=Michael Fulton Jr., C=US
+notAfter=Oct 18 21:56:38 2027 GMT
+
+$ security find-certificate -c "RTC3TK2XFJ" -p -Z > $TMP/r06-certs/apple-id-2.pem
+$ openssl x509 -noout -subject -enddate -in $TMP/r06-certs/apple-id-2.pem
+subject=UID=<uid>, CN=Apple Development: <Apple ID 2> (RTC3TK2XFJ), OU=ULQJ329QSN, O=Michael Fulton, C=US
+notAfter=Aug  3 21:30:54 2027 GMT
+
+## Reading
+| Identity name suffix | Subject OU (Team ID) | Subject O (team name) | Apple ID |
+|---|---|---|---|
+| G4MYV6D63X | 2F7J72JV48 | Michael Fulton Jr. | <Apple ID 1> |
+| RTC3TK2XFJ | ULQJ329QSN | Michael Fulton | <Apple ID 2> |
+
+The parenthesised ID in each identity name is not the Team ID. The OU field is.
+Team ULQJ329QSN belongs to <Apple ID 2>'s certificate, not <Apple ID 1>'s.

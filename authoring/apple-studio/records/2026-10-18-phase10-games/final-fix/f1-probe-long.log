@@ -1,0 +1,33 @@
+== build
+reference: plugins/apple-studio/skills/apple-games/references/game-center-and-online.md
+snippet sha256: 7058b6cb5bb896fc7ecf7d592e1be34459a52f0d857f96bfa98744e2efe1ee54
+build: ok (swiftc -swift-version 6 -target arm64-apple-macos26.0)
+ProductName:		macOS
+ProductVersion:		27.0.1
+BuildVersion:		26A434
+
+== original26 refused plain 180
+case: function=original26 endpoint=refused (127.0.0.1:9) mode=plain probe-deadline=180.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.001s] state: preparing
+[180.005s] TIMEOUT: the function did not return within 180.0 s
+
+== original26 blackhole plain 180
+case: function=original26 endpoint=blackhole (192.0.2.1:4433) mode=plain probe-deadline=180.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.001s] state: preparing
+[180.005s] TIMEOUT: the function did not return within 180.0 s
+
+== original27 refused plain 180
+case: function=original27 endpoint=refused (127.0.0.1:9) mode=plain probe-deadline=180.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.000s] send enqueued
+[  0.001s] state: preparing
+[180.006s] TIMEOUT: the function did not return within 180.0 s
+
+== original27 blackhole plain 180
+case: function=original27 endpoint=blackhole (192.0.2.1:4433) mode=plain probe-deadline=180.0s send-timeout=2.0 seconds
+os: Version 27.0.1 (Build 26A434)
+[  0.000s] send enqueued
+[  0.001s] state: preparing
+[180.006s] TIMEOUT: the function did not return within 180.0 s

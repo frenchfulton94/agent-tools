@@ -1,0 +1,92 @@
+path	words	read_in_full	fed
+/documentation/Accelerate/bnns-library	1279	yes	apple-metal/compute-and-gpu-driven.md
+/documentation/Accelerate/buffer-types	39	yes	nothing: one-symbol index page for vImage.BufferType
+/documentation/Accelerate/building-a-basic-image-conversion-workflow	410	yes	assets.md
+/documentation/Accelerate/building-a-basic-image-processing-workflow	505	yes	assets.md
+/documentation/Accelerate/calculating-the-dominant-colors-in-an-image	1608	yes	nothing: k-means palette extraction sample (vDSP/BNNS), no game-relevant judgment
+/documentation/Accelerate/classic-bnns-api	3765	yes	nothing: deprecated classic BNNS layer index, superseded by BNNSGraph
+/documentation/Accelerate/clipping-data	55	yes	nothing: single vImageClip_PlanarF index entry
+/documentation/Accelerate/clipping-limit-and-threshold-operations	817	yes	nothing: vDSP clip/limit/threshold symbol index, general DSP
+/documentation/Accelerate/coherence-function-computation	79	yes	nothing: vDSP_zcoher symbol index
+/documentation/Accelerate/complex-basic-arithmetic	1092	yes	nothing: vDSP split-complex arithmetic symbol index
+/documentation/Accelerate/complex-conjugation-functions	146	yes	nothing: vDSP conjugate symbol index
+/documentation/Accelerate/complex-vector-conversion	236	yes	nothing: vDSP ctoz/ztoc symbol index
+/documentation/Accelerate/compositing-images-with-alpha-blending	1191	yes	nothing: CPU vImage compositing; a game composites on the GPU
+/documentation/Accelerate/compositing-images-with-vimage-blend-modes	1346	yes	nothing: CPU vImage blend modes; games blend on the GPU
+/documentation/Accelerate/compressing-an-image-using-linear-algebra	1535	yes	nothing: LAPACK SVD image-compression demo, not a shipping texture technique
+/documentation/Accelerate/compressing-and-decompressing-data-with-buffer-compression	723	yes	assets.md
+/documentation/Accelerate/compressing-and-decompressing-data-with-input-and-output-filters	1007	yes	assets.md
+/documentation/Accelerate/compressing-and-decompressing-files-with-stream-compression	1572	yes	assets.md
+/documentation/Accelerate/compressing-and-saving-a-string-to-the-file-system	754	yes	assets.md
+/documentation/Accelerate/compressing-file-system-directories	373	yes	assets.md
+/documentation/Accelerate/compressing-single-files	326	yes	assets.md
+/documentation/Accelerate/compression-and-gathering-functions	581	yes	nothing: vDSP gating-vector compress/gather index; not data compression
+/documentation/Accelerate/controlling-vdsp-operations-with-stride	1153	yes	audio-and-haptics.md
+/documentation/Accelerate/conversion	73	yes	nothing: vImage conversion topic index (links only)
+/documentation/Accelerate/conversion-from-other-formats	411	yes	nothing: Sparse solver COO/BLAS conversion index
+/documentation/Accelerate/conversion-to-decibel-equivalents	236	yes	audio-and-haptics.md
+/documentation/Accelerate/converting-bitmap-data-between-core-graphics-images-and-vimage-buffers	818	yes	assets.md
+/documentation/Accelerate/converting-chroma-subsampled-images	995	yes	nothing: CPU YCbCr 4:2:0 conversion for video; a game converts video frames in a shader
+/documentation/Accelerate/converting-color-images-to-grayscale	697	yes	nothing: vImage matrix-multiply grayscale sample, general imaging
+/documentation/Accelerate/converting-luminance-and-chrominance-planes-to-an-argb-image	474	yes	nothing: camera-feed YpCbCr-to-ARGB on CPU, not a game path
+/documentation/Accelerate/convolution	1002	yes	nothing: vImage CPU convolution index; games filter on the GPU
+/documentation/Accelerate/copying-element-swapping-and-merging-functions	324	yes	nothing: vDSP copy/swap/tapered-merge symbol index
+/documentation/Accelerate/core-graphics-interoperability	555	yes	assets.md
+/documentation/Accelerate/core-video-image-format-utilities	455	yes	nothing: vImageCVImageFormat accessor index
+/documentation/Accelerate/core-video-interoperability	809	yes	nothing: CVPixelBuffer and vImage copy or share for Core Image kernels; games use CVMetalTextureCache
+/documentation/Accelerate/creating-a-core-graphics-image-from-a-vimage-buffer	141	yes	nothing: createCGImage(format:) one-liner for UI display
+/documentation/Accelerate/creating-a-sparse-matrix-from-coordinate-format-arrays	565	yes	nothing: Sparse solver COO construction, no game-relevant judgment
+/documentation/Accelerate/creating-an-audio-unit-extension-using-the-vdsp-library	769	yes	audio-and-haptics.md
+/documentation/Accelerate/creating-and-populating-buffers-from-core-graphics-images	300	yes	nothing: vImage_Buffer init and free basics, covered by the conversion notes
+/documentation/Accelerate/creating-sparse-matrices	977	yes	nothing: Sparse solver CSC construction, no game-relevant judgment
+/documentation/Accelerate/cropping-to-the-subject-in-a-chroma-keyed-image	1121	yes	assets.md
+/documentation/Accelerate/cross-spectrum-computation	81	yes	nothing: vDSP_zcspec symbol index
+/documentation/Accelerate/data-types-and-constants	346	yes	nothing: vImage pixel typealias and constant index
+/documentation/Accelerate/decode-arrays	45	yes	nothing: single 16Q12 decode-array constant
+/documentation/Accelerate/decompressing-and-extracting-an-archived-directory	396	yes	assets.md
+/documentation/Accelerate/decompressing-and-parsing-an-archived-string	654	yes	assets.md
+/documentation/Accelerate/decompressing-single-files	299	yes	assets.md
+/documentation/Accelerate/decompression-filtering	55	yes	nothing: single vImagePNGDecompressionFilter entry
+/documentation/Accelerate/discrete-cosine-transforms	143	yes	nothing: DCT symbol index; the DCT EQ article carries the usable material
+/documentation/Accelerate/discrete-fourier-transforms	464	yes	nothing: DFT setup and execute symbol index
+/documentation/Accelerate/dot-product-calculation	435	yes	nothing: vDSP dot-product symbol index
+/documentation/Accelerate/double-precision-floating-point-matrices	210	yes	nothing: simd_doubleNxM type list
+/documentation/Accelerate/double-precision-floating-point-to-integer-conversion	580	yes	nothing: vDSP vfix rounding-conversion symbol index
+/documentation/Accelerate/double-precision-floating-point-vectors	220	yes	game-loop-and-threading.md
+/documentation/Accelerate/double-precision-horizontal-shearing	330	yes	nothing: vImage shear symbol index
+/documentation/Accelerate/double-precision-vertical-shearing	330	yes	nothing: vImage shear symbol index
+/documentation/Accelerate/enhancing-image-contrast-with-histogram-manipulation	1435	yes	nothing: vImage photo contrast tools, no game-relevant judgment
+/documentation/Accelerate/equalizing-audio-with-discrete-cosine-transforms-dcts	951	yes	audio-and-haptics.md
+/documentation/Accelerate/extracting-channels	112	yes	nothing: vImageExtractChannel symbol index
+/documentation/Accelerate/extrema-finding-functions	109	yes	nothing: vDSP_venvlp symbol index
+/documentation/Accelerate/fast-fourier-transforms	351	yes	audio-and-haptics.md
+/documentation/Accelerate/filling-buffers	154	yes	nothing: vImageBufferFill symbol index
+/documentation/Accelerate/finding-an-interpolating-polynomial-using-the-vandermonde-method	1256	yes	nothing: LAPACK dgels polynomial-fit demo, no game-relevant judgment
+/documentation/Accelerate/finding-the-component-frequencies-in-a-composite-sine-wave	1306	yes	audio-and-haptics.md
+/documentation/Accelerate/finding-the-sharpest-image-in-a-sequence-of-captured-images	1496	yes	assets.md
+/documentation/Accelerate/finite-impulse-response-filters	276	yes	nothing: vDSP FIR and decimation symbol index
+/documentation/Accelerate/flattening-data	432	yes	nothing: vImageFlatten symbol index
+/documentation/Accelerate/fractional-part-extraction	181	yes	nothing: vDSP trunc and vfrac symbol index
+/documentation/Accelerate/functions-that-add-an-alpha-channel-to-three-channel-buffers	553	yes	assets.md
+/documentation/Accelerate/functions-that-convert-between-integer-interleaved-buffers	319	yes	nothing: vImage 8/16-bit and 565/1555 interleaved conversion index
+/documentation/Accelerate/functions-that-convert-between-integer-planar-buffers	376	yes	nothing: vImage planar bit-depth conversion index
+/documentation/Accelerate/functions-that-convert-between-noninteger-interleaved-buffers	367	yes	nothing: vImage 2101010 and 16Q12 conversion index
+/documentation/Accelerate/functions-that-convert-between-noninteger-planar-buffers	165	yes	assets.md
+/documentation/Accelerate/functions-that-convert-from-integer-interleaved-buffers-to-noninteger-interleaved-buffers	192	yes	nothing: vImage 8/16-bit to 10-bit packed conversion index
+/documentation/Accelerate/functions-that-convert-from-integer-planar-buffers-to-noninteger-planar-buffers	186	yes	nothing: vImage integer-to-float planar conversion index
+/documentation/Accelerate/functions-that-convert-from-noninteger-interleaved-buffers-to-integer-interleaved-buffers	258	yes	nothing: vImage float and 10-bit to integer conversion index
+/documentation/Accelerate/functions-that-convert-from-noninteger-planar-buffers-to-integer-planar-buffers	212	yes	nothing: vImage float-to-integer planar conversion index
+/documentation/Accelerate/functions-that-convert-from-rgb-to-ycbcr	493	yes	nothing: vImage RGB-to-YpCbCr symbol index, video path
+/documentation/Accelerate/functions-that-convert-from-ycbcr-to-rgb	504	yes	nothing: vImage YpCbCr-to-RGB symbol index, video path
+/documentation/Accelerate/functions-that-deinterleave-integer-interleaved-buffers	344	yes	nothing: vImage integer deinterleave symbol index
+/documentation/Accelerate/functions-that-deinterleave-noninteger-interleaved-buffers	201	yes	nothing: vImage float deinterleave symbol index
+/documentation/Accelerate/functions-that-interleave-integer-planar-buffers	405	yes	nothing: vImage integer interleave symbol index
+/documentation/Accelerate/functions-that-interleave-noninteger-planar-buffers	409	yes	nothing: vImage float interleave symbol index
+/documentation/Accelerate/functions-that-perform-any-to-any-conversion	313	yes	assets.md
+/documentation/Accelerate/functions-that-remove-an-alpha-channel-from-four-channel-buffers	511	yes	nothing: vImage alpha-removal index; GPU uploads want four channels
+/documentation/Accelerate/general-sparse-matrix-management-operations	187	yes	nothing: Sparse BLAS matrix-property index
+/documentation/Accelerate/getting-the-buffer-size	68	yes	nothing: single kvImageGetTempBufferSize flag entry
+/documentation/Accelerate/half-precision-floating-point-matrices	210	yes	apple-metal/shading-language.md
+/documentation/Accelerate/half-precision-floating-point-vectors	203	yes	apple-metal/shading-language.md;game-loop-and-threading.md
+/documentation/Accelerate/halftone-descreening-with-2d-fast-fourier-transform	864	yes	nothing: 2D FFT photo descreening; setup-reuse rule already noted from the 1D FFT article
+/documentation/Accelerate/histogram	391	yes	nothing: vImage histogram symbol index

@@ -1,0 +1,118 @@
+# Swift gate on platform-wrapped blocks, 2026-10-18T21:46-0400, swift-driver version: 1.168.6 Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)
+$ python3 authoring/apple-studio/pipeline/typecheck_snippets.py authoring/apple-studio/records/2026-10-18-phase10-games/task-13-release/wrapped-block-probe/dual-target.md authoring/apple-studio/records/2026-10-18-phase10-games/task-13-release/wrapped-block-probe/macos-only.md
+
+==============================================================================
+FILE: authoring/apple-studio/records/2026-10-18-phase10-games/task-13-release/wrapped-block-probe/dual-target.md   (2 swift blocks)   target: macos 26.0, ios 26.0
+  [pass:parse-as-library @ macos 26.0] #1  #if os(iOS)
+  [FAIL] #1  #if os(iOS)   (#if os(...) block: must pass on every target)
+      imports tried: (none)
+      === target: ios 26.0 ===
+      --- mode: parse-as-library ---
+      <snippet>:2:19: error: cannot convert value of type 'String' to specified type 'Int'
+      1 | #if os(iOS)
+      2 | let broken: Int = "a type error the iOS compile must catch"
+        |                   `- error: cannot convert value of type 'String' to specified type 'Int'
+      3 | #endif
+      4 |
+      --- mode: with-prior ---
+      <snippet>:2:19: error: cannot convert value of type 'String' to specified type 'Int'
+      1 | #if os(iOS)
+      2 | let broken: Int = "a type error the iOS compile must catch"
+        |                   `- error: cannot convert value of type 'String' to specified type 'Int'
+      3 | #endif
+      4 |
+      --- mode: with-prior+ctx ---
+      <snippet>:3:19: error: cannot convert value of type 'String' to specified type 'Int'
+      1 | func __probe() async throws {
+      2 | #if os(iOS)
+      3 | let broken: Int = "a type error the iOS compile must catch"
+        |                   `- error: cannot convert value of type 'String' to specified type 'Int'
+      4 | #endif
+      5 |
+      --- mode: top-level ---
+      <snippet>:2:19: error: cannot convert value of type 'String' to specified type 'Int'
+      1 | #if os(iOS)
+      2 | let broken: Int = "a type error the iOS compile must catch"
+        |                   `- error: cannot convert value of type 'String' to specified type 'Int'
+      3 | #endif
+      4 |
+      --- mode: wrapped-in-func ---
+      <snippet>:3:19: error: cannot convert value of type 'String' to specified type 'Int'
+      1 | func __probe() async throws {
+      2 | #if os(iOS)
+      3 | let broken: Int = "a type error the iOS compile must catch"
+        |                   `- error: cannot convert value of type 'String' to specified type 'Int'
+      4 | #endif
+      5 |
+  [FAIL] #2  let alsoBroken: Int = "the same error, unwrapped"
+      imports tried: (none)
+      === target: macos 26.0 ===
+      --- mode: parse-as-library ---
+      <snippet>:1:23: error: cannot convert value of type 'String' to specified type 'Int'
+      1 | let alsoBroken: Int = "the same error, unwrapped"
+        |                       `- error: cannot convert value of type 'String' to specified type 'Int'
+      2 |
+      --- mode: with-prior ---
+      <snippet>:5:23: error: cannot convert value of type 'String' to specified type 'Int'
+      3 | #endif
+      4 | 
+      5 | let alsoBroken: Int = "the same error, unwrapped"
+        |                       `- error: cannot convert value of type 'String' to specified type 'Int'
+      6 |
+      --- mode: with-prior+ctx ---
+      <snippet>:6:23: error: cannot convert value of type 'String' to specified type 'Int'
+      4 | 
+      5 | func __probe() async throws {
+      6 | let alsoBroken: Int = "the same error, unwrapped"
+        |                       `- error: cannot convert value of type 'String' to specified type 'Int'
+      7 | 
+      8 | }
+      --- mode: top-level ---
+      <snippet>:1:23: error: cannot convert value of type 'String' to specified type 'Int'
+      1 | let alsoBroken: Int = "the same error, unwrapped"
+        |                       `- error: cannot convert value of type 'String' to specified type 'Int'
+      2 |
+      --- mode: wrapped-in-func ---
+      <snippet>:2:23: error: cannot convert value of type 'String' to specified type 'Int'
+      1 | func __probe() async throws {
+      2 | let alsoBroken: Int = "the same error, unwrapped"
+        |                       `- error: cannot convert value of type 'String' to specified type 'Int'
+      3 | 
+      4 | }
+      === target: ios 26.0 ===
+      --- mode: parse-as-library ---
+      <snippet>:1:23: error: cannot convert value of type 'String' to specified type 'Int'
+      1 | let alsoBroken: Int = "the same error, unwrapped"
+        |                       `- error: cannot convert value of type 'String' to specified type 'Int'
+      2 |
+      --- mode: with-prior ---
+      <snippet>:1:23: error: cannot convert value of type 'String' to specified type 'Int'
+      1 | let alsoBroken: Int = "the same error, unwrapped"
+        |                       `- error: cannot convert value of type 'String' to specified type 'Int'
+      2 |
+      --- mode: with-prior+ctx ---
+      <snippet>:2:23: error: cannot convert value of type 'String' to specified type 'Int'
+      1 | func __probe() async throws {
+      2 | let alsoBroken: Int = "the same error, unwrapped"
+        |                       `- error: cannot convert value of type 'String' to specified type 'Int'
+      3 | 
+      4 | }
+      --- mode: top-level ---
+      <snippet>:1:23: error: cannot convert value of type 'String' to specified type 'Int'
+      1 | let alsoBroken: Int = "the same error, unwrapped"
+        |                       `- error: cannot convert value of type 'String' to specified type 'Int'
+      2 |
+      --- mode: wrapped-in-func ---
+      <snippet>:2:23: error: cannot convert value of type 'String' to specified type 'Int'
+      1 | func __probe() async throws {
+      2 | let alsoBroken: Int = "the same error, unwrapped"
+        |                       `- error: cannot convert value of type 'String' to specified type 'Int'
+      3 | 
+      4 | }
+
+==============================================================================
+FILE: authoring/apple-studio/records/2026-10-18-phase10-games/task-13-release/wrapped-block-probe/macos-only.md   (1 swift blocks)   target: macos 26.0
+  [PASS:parse-as-library] #1  #if os(iOS)
+
+TOTAL: 1/3 snippets typecheck clean
+exit: 1

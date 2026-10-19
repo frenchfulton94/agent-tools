@@ -1,0 +1,104 @@
+section	claim	source
+Scope and hand-offs	Layout page revised 2026-09-09; per-device size tables gone	g01.md:55; task-7 report finding 34; corpus layout.md change log (September 9, 2026 row) and section list (no device tables)
+Scope and hand-offs	HIG renamed In-App Purchase to Apple In-App Purchase on 2026-09-17; StoreKit still the API	g01.md:24; finding 34; corpus apple-in-app-purchase.md change log; storekit/appstore/canmakepayments.md (links StoreKit "Apple In-App Purchase")
+Platform expectations: Mac	Mac viewed at 1-3 ft; players run several apps and expect smooth active/inactive transitions	g01.md:35-36; designing-for-macos.md (Ergonomics, App interactions)
+Platform expectations: Mac	Resizable, movable, hideable windows; system full screen; never auto-exit	g01.md:36, g01.md:146; designing-for-macos.md best practices; going-full-screen.md
+Platform expectations: Mac	Do not change display mode on full screen; HIG says it does not improve performance	g01.md:143; going-full-screen.md macOS section
+Platform expectations: Mac	Hiding the Dock allowed only for games	g01.md:144; going-full-screen.md ("Except in games")
+Platform expectations: Mac	Menu bar holds every command	g01.md:36, g01.md:61; designing-for-macos.md
+Platform expectations: Mac	Keep controls off window bottom; avoid camera housing	g01.md:52; layout.md macOS section
+Platform expectations: Mac	Multiple displays including iPad	g01.md:36; designing-for-macos.md Display
+Platform expectations: Mac	Fast user switching: do not assume who is signed in	g01.md:69; privacy.md line 184
+Platform expectations: Mac	Launch screens not used on macOS; required on iOS, iPadOS, tvOS	g01.md:44; launching.md
+Platform expectations: Mac	Pick a few tested presets from GPU family and memory; fewer settings on iPhone than Mac	g01.md:72; metal/improving-your-games-graphics-performance-and-settings.md ("Choose the initial defaults", "Support features on devices")
+Platform expectations: Mac	Never duplicate system-wide settings in game settings	g01.md:72; settings.md best practices
+Platform expectations: iPhone and iPad	iPhone 1-2 ft, orientation changes, frequent app switching	g01.md:35, g01.md:37; designing-for-ios.md
+Platform expectations: iPhone and iPad	Launch screen nearly identical to first frame, no text (not localized), no logo unless on first screen	g01.md:44; launching.md Launch screens
+Platform expectations: iPhone and iPad	Landscape-only game handles both landscape orientations	g01.md:45; launching.md iOS, iPadOS
+Platform expectations: iPhone and iPad	iPad ~3 ft; touch default plus keyboard, pointer, Pencil; carry over to macOS	g01.md:35, g01.md:37; designing-for-ipados.md
+Platform expectations: iPhone and iPad	Layout from size classes not idiom or orientation, even for landscape-locked games; iPhone Mirroring resizes freely	g01.md:49; layout.md Adaptability and Size classes
+Platform expectations: iPhone and iPad	Keep single-swipe Home indicator exit; two swipes only on accidental exits	g01.md:145; going-full-screen.md iOS, iPadOS
+Input	Default and additional input per platform table	g01.md:11; designing-for-games.md interaction table
+Input	Controller is optional; game must work with default input	g01.md:12, g01.md:83; game-controls.md Physical controllers
+Input	HIG: tvOS and visionOS may require a controller	game-controls.md ("Tell people about game controller requirements")
+Input	GCRequiresControllerUserInteraction: visionOS YES = required (Controller Required badge); iOS YES = recommended (Controller Recommended badge); availability iOS, iPadOS, visionOS only	bundleresources/information-property-list/gcrequirescontrolleruserinteraction.md (+ /ios.md, /visionos.md); doc-vs-doc: the HIG (and g01.md:83) word the badge "Game Controller Required" and do not mention the iOS "recommended" entry
+Input	Key requires Game Controllers capability + ExtendedGamepad; Xcode writes GCSupportsControllerUserInteraction	gcrequirescontrolleruserinteraction.md; gcsupportscontrolleruserinteraction.md
+Input	Game launched without a required controller must detect and prompt	game-controls.md
+Gates	visionOS entry applies to a compatible iPhone/iPad app on Vision Pro	gcrequirescontrolleruserinteraction.md ("For iOS apps, you can include iOS or visionOS platform keys")
+Controls the HIG specifies	Out-of-gameplay controller mapping (A, B, shoulders, sticks, Menu, Home; X/Y/triggers none)	g01.md:85; game-controls.md table
+Controls the HIG specifies	Use connected controller's glyphs; switch with active controller	g01.md:84; game-controls.md
+Controls the HIG specifies	Keyboard: single keys, proximity, Control to Command on Apple keyboards, rebinding	g01.md:86; game-controls.md Keyboards
+Controls the HIG specifies	Esc opens settings in games; Command-Comma in apps; App menu Settings item	g01.md:73; settings.md
+Controls the HIG specifies	Never redefine system-wide trackpad/mouse gestures	g01.md:95 (pointing-devices)
+Controls the HIG specifies	Touch: direct interaction, left movement/right camera, floating stick, top secondary controls, 44/28 pt, press state with sound and haptics, action art, hide unavailable, combine chords	g01.md:80-82; game-controls.md Touch controls
+Controls the HIG specifies	Custom gestures need feedback, unavailable cue, alternative path	g01.md:87 (gestures)
+Text size and legibility	Text sizes macOS 13/10, iOS/iPadOS 17/11 (tvOS 29/23, visionOS 17/12)	g01.md:8, g02.md:5; designing-for-games.md table; typography.md table
+Text size and legibility	Thin weights need larger sizes; prefer Regular-Bold	g02.md:5-7; typography.md Ensuring legibility
+Text size and legibility	World labels need backing shape (lozenge)	g02.md:6; typography.md image pair
+Text size and legibility	Enlarge text to at least 200 percent via Dynamic Type or custom UI	g01.md:14; accessibility.md line 34
+Text size and legibility	Scale dialog, not transient hit-damage numbers	g02.md:8; typography.md Conveying hierarchy
+Text size and legibility	Points to drawable pixels = drawableSize.width / bounds.width with default contentsGravity	m01.md:185; metal/adapting-your-game-interface-for-smaller-screens.md code; quartzcore/cametallayer/drawablesize.md
+Text size and legibility	Draw text after the upscale	hand-off to apple-metal/references/display-and-upscaling.md (MetalFX section)
+Text size and legibility	macOS has no Dynamic Type	g02.md:11; typography.md macOS section ("macOS doesn't support Dynamic Type"); finding 35
+Text size and legibility	UIFontMetrics not available on macOS	uikit/uifontmetrics.md availability (iOS, iPadOS, Mac Catalyst, tvOS, visionOS, watchOS)
+Text size and legibility	SwiftUI .dynamicTypeSize(_:) does not change .body/.title rendering on macOS 27.0.1; explicit point sizes scale	runtime: task-8-write/runtime/game-design/runs.txt (dynamic_type_size_mac.swift)
+Text size and legibility	scaledFont(for:compatibleWith:) scales to Dynamic Type; already-scaled base font raises an exception	uikit/uifontmetrics/scaledfont(for:compatiblewith:).md
+Text size and legibility	maximumPointSize caps the scaled font	uikit/uifontmetrics/scaledfont(for:maximumpointsize:compatiblewith:).md
+Text size and legibility	Rebuild on UIContentSizeCategory.didChangeNotification	uikit/uicontentsizecategory/didchangenotification.md
+Menus, buttons, and layout	Menus use platform default input	g01.md:58; menus.md In-game menus; designing-for-games.md
+Menus, buttons, and layout	Resize menu targets per screen rather than scaling down	g01.md:58; menus.md In-game menus
+Menus, buttons, and layout	Aspect ratios 16:10, 19.5:9, 4:3; relative constraints; device-specific layout last	g01.md:10; designing-for-games.md
+Menus, buttons, and layout	Button sizes macOS 28/20, iOS 44/28 vs Buttons page general 44x44 hit region	g01.md:9, g01.md:31; designing-for-games.md table; accessibility.md lines 133-139; buttons.md line 32 (doc-vs-doc disagreement noted)
+Menus, buttons, and layout	One or two prominent buttons; style not size; destructive never default	g01.md:31-32 (buttons)
+Menus, buttons, and layout	Game menu items rarely show keyboard commands	g01.md:59; menus.md line 26
+Menus, buttons, and layout	Background art scales to fill; author beyond visible area	g01.md:50; layout.md Adaptability
+Menus, buttons, and layout	Device Hub simulates resized iPad windows and iPhone Mirroring; test largest and smallest first	g01.md:54; layout.md line 62
+VoiceOver for menus you draw yourself	Metal-drawn Mac menus invisible to VoiceOver; NSAccessibilityElement subclass parented to host view	g05.md:35, g06.md:48; appkit/nsaccessibilityelement-swift.class.md; appkit/custom-controls.md
+VoiceOver for menus you draw yourself	setAccessibilityFrameInParentSpace keeps the screen frame right as the parent moves	appkit/nsaccessibilityelement-swift.class.md step 3; nsaccessibilityelement-swift.class/accessibilityframeinparentspace.md
+VoiceOver for menus you draw yourself	Custom Controls guide says adopt role-specific protocol; Swift conformance to NSAccessibilityButton on NSAccessibilityElement fails (accessibilityIdentifier optionality)	appkit/custom-controls.md; SDK NSAccessibilityProtocols.h lines 26 and 362 (MacOSX 27.0 SDK); compile log in runtime/game-design/runs.txt (nsaccessibilitybutton_conformance.swift)
+VoiceOver for menus you draw yourself	Legacy key-based NSAccessibility API deprecated	g06.md:48; finding 35
+VoiceOver for menus you draw yourself	accessibilityPerformPress returns whether the action was triggered	appkit/nsaccessibilitybutton/accessibilityperformpress().md
+VoiceOver for menus you draw yourself	Label rules: no type, one capitalized word, no period, localized	appkit/nsaccessibilitybutton/accessibilitylabel().md
+VoiceOver for menus you draw yourself	setAccessibilityChildren; setAccessibilityFocused; post focusedUIElementChanged via NSAccessibility.post	appkit/nsaccessibilityprotocol/setaccessibilitychildren(_:).md; setaccessibilityfocused(_:).md; nsaccessibility-swift.struct/post(element:notification:).md; notification/focuseduielementchanged.md
+VoiceOver for menus you draw yourself	Drawn slider posts valueChanged	g05.md:36; nsaccessibility-swift.struct/notification/valuechanged.md
+VoiceOver for menus you draw yourself	iOS: UIAccessibilityElement, accessibilityFrameInContainerSpace, .button trait, accessibilityActivate	uikit/uiaccessibilityelement.md; uiaccessibilityelement/accessibilityframeincontainerspace.md; objectivec/nsobject-swift.class/accessibilityactivate().md; uikit/uiaccessibilitytraits/button.md
+VoiceOver for menus you draw yourself	VoiceOver reading the elements	not runtime-checked (GUI)
+VoiceOver for menus you draw yourself	Personalization list, difficulty accommodations, captions, visual pointer for off-screen audio, color not alone, Switch Control via controller, Full Keyboard Access	g01.md:13-21; designing-for-games.md Welcome everyone; accessibility.md lines 88, 112, 123, 181, 193
+Pause and interruptions	Pause automatically when player leaves; resume where they left off	g01.md:146; going-full-screen.md
+Pause and interruptions	Return to pause menu rather than live action	recommendation (inference from going-full-screen.md "so they don't miss anything"), labelled "In practice"
+Pause and interruptions	NSApplication.didResignActiveNotification posted immediately after giving up active status, on the main actor	appkit/nsapplication/didresignactivenotification.md
+Pause and interruptions	UIApplication.willResignActiveNotification on focus loss (overlay, lock)	uikit/uiapplication/willresignactivenotification.md
+Pause and interruptions	ScenePhase .inactive = foreground but should pause; no Mac app-switch timing documented	swiftui/scenephase.md
+Pause and interruptions	NSApplication.DidResignActiveMessage is macOS 27	appkit/nsapplication/didresignactivemessage.md availability macOS 27.0
+Pause and interruptions	Pause while Game Overlay up; isPresentingGameCenter observable	game-center.md ("Consider pausing"); gamekit/gkaccesspoint/ispresentinggamecenter.md; adding-an-access-point-to-your-game.md
+Pause and interruptions	Controller Menu button opens settings or pauses	game-controls.md table
+Pause and interruptions	macOS has no audio session	finding 14; g01.md:107
+Launch, onboarding, and requests	Initial download 30 minutes or less; play at install; not just a launcher	g01.md:5; g08.md:182; designing-for-games.md
+Launch, onboarding, and requests	Interactive within a couple of seconds	g01.md:43; launching.md
+Launch, onboarding, and requests	Show something immediately; menus/briefing during load; hints sized to remaining time; custom loader fine	g01.md:48; loading.md
+Launch, onboarding, and requests	Splash at start of onboarding, brief	g01.md:43; launching.md; onboarding.md
+Launch, onboarding, and requests	Teach through play; written tutorial as reference	designing-for-games.md Teach through play
+Launch, onboarding, and requests	Permission inside the scenario (hand-tracking example)	g01.md:7; designing-for-games.md Defer requests
+Launch, onboarding, and requests	Microphone and local network are permission-gated	g01.md:64, g01.md:138 (privacy)
+Launch, onboarding, and requests	Ratings at natural stops, not first launch/onboarding/mid-play; week or two apart	g01.md:71; ratings-and-reviews.md
+Launch, onboarding, and requests	RequestReviewAction availability macOS 13, iOS 16; display criteria; not from a button tap	storekit/requestreviewaction.md
+Game Center presentation	Discovery: Games app, App Store, notifications, Top Played, friend recommendations; check sign-in at launch	g01.md:129-130; game-center.md
+Game Center presentation	Developer ID builds cannot use Game Center, In-App Purchase, Sign in with Apple	finding 22 (r01.md:75, r01.md:149; Supported capabilities (macOS) table in $TMP/r01-extra/)
+Game Center presentation	Access point opens Game Overlay on iOS/iPadOS/macOS, dashboard on tvOS/visionOS	g01.md:131; game-center.md
+Game Center presentation	Show on main menu or settings; never gameplay, splash, cinematics, pre-menu tutorial	g01.md:131; game-center.md
+Game Center presentation	GameKit article says hide in settings (conflicts with HIG)	gamekit/adding-an-access-point-to-your-game.md ("Hide the access point when displaying game intros or settings"); g08.md:179
+Game Center presentation	Four corners, collapsed and expanded sizes; default topLeading flips in RTL	game-center.md; adding-an-access-point-to-your-game.md; gkaccesspoint/location-swift.property.md
+Game Center presentation	frameInScreenCoordinates NSRect on macOS, observable, convert from screen	gkaccesspoint/frameinscreencoordinates.md; GKAccessPoint.h lines 51-57; adding-an-access-point-to-your-game.md
+Game Center presentation	parentWindow NSWindow on macOS; else main window	gkaccesspoint/parentwindow.md; GKAccessPoint.h lines 59-65
+Game Center presentation	isActive shows the access point after local player init	gkaccesspoint/isactive.md
+Game Center presentation	showHighlights deprecated 26.0 "No longer supported"; article still sets it; symbol page shows no deprecation	GKAccessPoint.h line 46 (MacOSX 27.0 SDK); gkaccesspoint/showhighlights.md; adding-an-access-point-to-your-game.md; finding 23
+Game Center presentation	Custom UI terminology table; Apple artwork unaltered	g01.md:132; game-center.md Using custom UI
+Game Center presentation	Challenges/activities entered from Games app, overlay, invite links; deep link to exact level; tutorial first	g01.md:135-136; game-center.md; gamekit/creating-activities-for-your-game.md
+Game Center presentation	Route on warm and cold launch; no unrelated interruptions; explain needed progression	g08.md:181; gamekit/creating-engaging-challenges-from-leaderboards.md lines 179-189
+Game Center presentation	Party codes: late join, early leave, rejoin, show code, manual entry	g01.md:136; game-center.md
+Game Center presentation	Challenges 1-5 minutes, most recent score	g01.md:135, g08.md:180; game-center.md
+Apple In-App Purchase in a game	Four types mapped to game content	g01.md:25; apple-in-app-purchase.md
+Apple In-App Purchase in a game	Play before selling; store in game style; full price; never imitate purchase sheet	g01.md:26; apple-in-app-purchase.md
+Apple In-App Purchase in a game	canMakePayments false under Screen Time or MDM; do not offer purchases	storekit/appstore/canmakepayments.md
+Gates	tvOS and visionOS text and button sizes	designing-for-games.md tables
+Gates	visionOS access point placement depends on game type	adding-an-access-point-to-your-game.md visionOS table; gkaccesspoint/parentwindow.md

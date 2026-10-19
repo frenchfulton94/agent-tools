@@ -1,0 +1,105 @@
+section	claim	source
+Choosing the loop driver	Ship on CAMetalDisplayLink (macOS 14, iOS 17) on a render thread; it hands over drawable plus deadline	quartzcore/cametaldisplaylink.md (availability, overview); apple-metal/references/display-and-upscaling.md table
+Choosing the loop driver	CVDisplayLink.h wholly deprecated macos(10.4, 15.0), message names the three AppKit displayLink methods	MacOSX.sdk 27.0 CoreVideo CVDisplayLink.h:51; g04.md:5; p01.md:44
+Choosing the loop driver	Custom-view sample says CADisplayLink unavailable on macOS and uses CVDisplayLink (stale)	metal/creating-a-custom-metal-view.md:161; m01.md:171
+Choosing the loop driver	Accelerate cube sample advances fixed 0.02 per tick	g04.md:5
+Choosing the loop driver	CADisplayLink init unavailable on macOS	MacOSX.sdk 27.0 QuartzCore CADisplayLink.h:33-34 (API_UNAVAILABLE(macos)); quartzcore/cadisplaylink/init(target:selector:).md lists no macOS
+Choosing the loop driver	NSView/NSWindow/NSScreen.displayLink(target:selector:) are macOS 14	appkit/nsview|nswindow|nsscreen/displaylink(target:selector:).md availability; NSView.h:655 API_AVAILABLE(macos(14.0))
+Choosing the loop driver	View/window link follows display changes; screen link does not	appkit/nsscreen/displaylink(target:selector:).md Discussion
+Choosing the loop driver	NSView link not invoked while hidden or on no display; window link when on no display	appkit/nsview/displaylink(target:selector:).md; appkit/nswindow/displaylink(target:selector:).md
+Choosing the loop driver	Link retains target; run loop retains link; invalidate removes it	quartzcore/cadisplaylink/init(target:selector:).md; quartzcore/cadisplaylink/add(to:formode:).md; quartzcore/cadisplaylink.md
+Choosing the loop driver	Link fires only in modes added; can add several modes; eventTracking is the modal mouse-drag mode; common is a pseudo-mode	quartzcore/cadisplaylink/add(to:formode:).md; foundation/runloop/mode/eventtracking.md; foundation/runloop/mode/common.md; live resize not runtime-checked (GUI)
+Choosing the loop driver	System rounds to factor of max rate; Low Power Mode, critical thermal, accessibility lower rates; default is display max	quartzcore/cadisplaylink/preferredframeraterange.md; quartzcore/cadisplaylink.md
+Choosing the loop driver	Steady lower rate looks smoother than higher missed rate	quartzcore/cadisplaylink.md overview; optimizing-iphone-and-ipad-apps-to-support-promotion-displays.md; m04.md:97
+Choosing the loop driver	CADisableMinimumFrameDurationOnPhone required above 60 Hz on iPhone; iPad Pro not	optimizing-iphone-and-ipad-apps-to-support-promotion-displays.md; m04.md:93
+Choosing the loop driver	No INFOPLIST_KEY_ build setting for CADisableMinimumFrameDurationOnPhone; hand-written plist merges	m04.md:99 (xcode/build-settings-reference)
+Choosing the loop driver	iOS 15+ games get priority at 30/60 Hz if range uses them; 80-120 for first-person	optimizing-iphone-and-ipad-apps-to-support-promotion-displays.md; m04.md:94
+Choosing the loop driver	Do not pace with timers; dispatch timer source is not a frame clock; few display links	optimizing-iphone-and-ipad-apps-to-support-promotion-displays.md; g08.md:14; m04.md:95
+Choosing the loop driver	Main queue, main OperationQueue, main actor are main run loop clients; hangs measured there; own while loop reads as hang (inference, labelled)	p01.md:49 (xcode/understanding-hangs-in-your-app)
+Hosting the Metal view	Window style, minSize 640x360, isReleasedWhenClosed	metal/managing-your-game-window-for-metal-in-macos.md; m02.md:144
+Hosting the Metal view	Direct-to-display needs full screen, opaque CAMetalLayer, RGB, Apple silicon; verify in HUD or Instruments	metal/managing-your-game-window-for-metal-in-macos.md
+Hosting the Metal view	windowDidResize fires including after toggleFullScreen; reset drawableSize	metal/managing-your-game-window-for-metal-in-macos.md; appkit/nswindowdelegate/windowdidresize(_:).md; m02.md:145
+Hosting the Metal view	Empty keyDown override on NSWindow keeps key events for GCController	metal/managing-your-game-window-for-metal-in-macos.md (last section); keyDown(with:) spelling compiled
+Hosting the Metal view	AppKit OpenGL hosting and NSDisableScreenUpdates deprecated	g06.md:12
+Hosting the Metal view	AppKit observation tracking; NSObservationTrackingEnabled on macOS 15	g06.md:15
+Hosting the Metal view	makeBackingLayer / layerClass supply the CAMetalLayer	appkit/nsview/makebackinglayer().md; uikit/uiview/layerclass.md; display-and-upscaling.md
+Hosting the Metal view	UIRequiresFullScreen deprecated, scenes always resizable; scene life cycle warning on 26, required next major; multiple scenes false	metal/managing-your-metal-app-window-in-ipados.md; m02.md:146
+Hosting the Metal view	Doc error MyCustomSceneDelegateClass; real key UISceneDelegateClassName	metal/managing-your-metal-app-window-in-ipados.md (plist example); m02.md:150
+Hosting the Metal view	Keep old size while isInteractivelyResizing (iOS 26); apply in didUpdateEffectiveGeometry; callback on screen moves	metal/managing-your-metal-app-window-in-ipados.md; uikit/uiwindowscene/geometry/isinteractivelyresizing.md (iOS 26.0); uikit/uiwindowscenedelegate/windowscene(_:didupdateeffectivegeometry:).md
+Hosting the Metal view	Pixels = points x contentsScale; displayScale from trait collection in viewIsAppearing; letterbox resizeAspect + black launch screen	metal/managing-your-metal-app-window-in-ipados.md; m02.md:147
+Hosting the Metal view	HUD in safe area; insets valid once in hierarchy; additionalSafeAreaInsets	g09.md:87
+Hosting the Metal view	Multiplatform target vs separate targets; windowResizability(.contentMinSize) with frame(minWidth:)	m05.md:102; m02.md:147
+The frame	Drive animation/physics from targetTimestamp; timestamp is interval start; budget targetTimestamp - CACurrentMediaTime	optimizing-iphone-and-ipad-apps-to-support-promotion-displays.md; quartzcore/cadisplaylink/timestamp.md; quartzcore/cadisplaylink/duration.md
+The frame	CAMetalDisplayLink: animate from targetPresentationTimestamp delta; targetTimestamp is present() deadline	quartzcore/cametaldisplaylink/update/targetpresentationtimestamp.md; quartzcore/cametaldisplaylink/update/targettimestamp.md
+The frame	Overrunning targetTimestamp loses the next callback; recover	optimizing-iphone-and-ipad-apps-to-support-promotion-displays.md; m04.md:95
+The frame	ProMotion ranges 10-120 iPhone, 24-120 iPad Pro; rate cannot be forced	optimizing-iphone-and-ipad-apps-to-support-promotion-displays.md; m04.md:92
+The frame	Drain input per sim step (inputStateQueueDepth, nextInputState)	g08.md:16; GameController GCDevicePhysicalInput.h:70-76
+The frame	PHASE manual update in the update step	g09.md:94; PHASEEngine.h:84; PHASETypes.h:37
+The frame	Frames-in-flight wait and slot write sit inside FrameLoop.encodeFrame steps 1 and 3	apple-metal/references/command-model.md ## Frame structure
+The frame	Do not scale quality from refresh rate in callback; test forced rates min=max=preferred	optimizing-iphone-and-ipad-apps-to-support-promotion-displays.md (Test and validate); m04.md:96
+The frame	simd default/precise/fast and -ffast-math	g03.md:7; g05.md:5
+The frame	Sparse solvers multithreaded; VECLIB_MAXIMUM_THREADS=1	g05.md:8
+The frame	arm64 float-to-int saturation vs x86_64; UBSan float-cast-overflow	g06.md:19
+Clocks and time units	CACurrentMediaTime is mach_absolute_time in seconds; budget formula implies shared clock	quartzcore/cacurrentmediatime().md; promotion article
+Clocks and time units	Always apply timebase; differs native vs translated; clock_gettime_nsec_np alternative	apple-silicon/addressing-architectural-differences-in-your-macos-code.md:293-321; mach/mach_time.h:36-53; _time.h:185
+Clocks and time units	Native timebase 125/3 (41.67 ns), Rosetta 1/1; raw ticks as ns 41.7x slow; scaled ticks match CLOCK_UPTIME_RAW within 41 ns over 100 ms	runtime/game-loop-and-threading/runs.txt section 1
+Threads and QoS	New Thread runs at default QoS; qualityOfService before start takes effect	runtime/game-loop-and-threading/runs.txt section 4; foundation/thread/qualityofservice.md
+Threads and QoS	display-and-upscaling.md RenderLoopThread sets no QoS	apple-metal/references/display-and-upscaling.md:120-141
+Threads and QoS	QoS influences core placement; background on efficiency cores; unassigned hurts	apple-silicon/tuning-your-code-s-performance-for-apple-silicon.md:39-66; g06.md:21
+Threads and QoS	Priority 45 via pthread_attr_setschedparam recommended for render threads; Preempted state	xcode/analyzing-the-performance-of-your-metal-app.md:193-197; m05.md:100
+Threads and QoS	Move off pthread_setschedparam/setpriority/thread_set_policy to QoS (pthread_set_qos_class_self_np)	apple-silicon/tuning-your-code-s-performance-for-apple-silicon.md:68-71
+Threads and QoS	Priority-45 thread reports QOS_CLASS_UNSPECIFIED; getschedparam reports 31 for every QoS	runtime/game-loop-and-threading/runs.txt section 3
+Threads and QoS	MTLSharedEvent wait is NS_SWIFT_UNAVAILABLE_FROM_ASYNC	MacOSX.sdk 27.0 Metal MTLEvent.h:62; command-model.md
+Threads and QoS	Task in @MainActor runs on main; detached defaults .medium	p01.md:45 (xcode/improving-app-responsiveness)
+Threads and QoS	SWIFT_DEFAULT_ACTOR_ISOLATION=MainActor infers @MainActor	m04.md:101
+Threads and QoS	No spin waiting; os_unfair_lock/condition/mutex; avoid pthread_yield_np	g06.md:23
+Threads and QoS	Dynamic allocation over static split; concurrentPerform at least 3x cores	p01.md:51; g06.md:22; dispatch/dispatchqueue/concurrentperform(iterations:execute:).md
+Threads and QoS	hw.perflevel0/1.logicalcpu; article's hw.perflevels does not exist; SDK names hw.nperflevels	metal/improving-your-games-graphics-performance-and-settings.md:120-122; MacOSX.sdk 27.0 sys/sysctl.h:679; runtime/game-loop-and-threading/runs.txt section 6
+Threads and QoS	Weak ordering on Apple silicon; TSan macOS/Simulator only	g06.md:16; g09.md:88
+Threads and QoS	Main Thread Checker flags UI calls off main	g09.md:89
+Dispatch in an engine	Global queues + target queues; no private concurrent per subsystem; never block in concurrent work	g08.md:5
+Dispatch in an engine	Workloop runs highest QoS first; dispatch_set_qos_class_floor	g08.md:10; g09.md:91
+Dispatch in an engine	Group notify not wait; main sync deadlock; autorelease frequency .workItem	g08.md:6; g08.md:13
+Dispatch in an engine	dispatchPrecondition; dispatch_get_current_queue deprecated	g09.md:91; g08.md:9
+Dispatch in an engine	Memory-pressure dispatch source; drop known caches	p01.md:48; g08.md:14
+Dispatch in an engine	Semaphore/group waits cannot propagate priority; waiter QoS <= signaler QoS; Thread Performance Checker	xcode/diagnosing-performance-issues-early.md:47-66; p01.md:52
+Dispatch in an engine	Metal 4 frames-in-flight is shared-event, not semaphore	command-model.md Frame structure and Metal 3 map table; m01.md:172
+Dispatch in an engine	Completed-handler page and header name no thread or QoS	metal/mtlcommandbuffer/addcompletedhandler(_:).md; MTLCommandBuffer.h:345-348
+Dispatch in an engine	Handlers ran on com.Metal.CompletionQueueDispatch at userInteractive regardless of committer QoS, 10/10	runtime/game-loop-and-threading/runs.txt section 2
+os_workgroup	Only audio interval workgroups supported	MacOSX.sdk 27.0 usr/include/os/workgroup_interval.h:44-46
+os_workgroup	os headers declare only parallel_create, create_with_port, create_with_workgroup	workgroup_parallel.h:64-68; workgroup_object.h:114-139
+os_workgroup	AudioWorkIntervalCreate is for async audio realtime threads, Swift-unavailable	AudioToolbox AudioWorkInterval.h:42-52
+os_workgroup	Normal-priority threads cannot join audio workgroups	g07.md:36 (audiotoolbox/understanding-audio-workgroups)
+os_workgroup	Workgroups help scheduler direct work and balance power vs output	os/workgroups.md
+os_workgroup	Swift overlay: WorkGroupParallel(name:), join(), leave(token:), maxParallelThreads	MacOSX.sdk 27.0 usr/lib/swift/os.swiftmodule arm64e-apple-macos.swiftinterface:2335-2377; snippet compiles
+os_workgroup	Creating thread not joined; page names os_workgroup_join_self which SDK lacks	workgroup_parallel.h:46-52; os/os_workgroup_parallel_create.md; grep join_self usr/include/os (no match)
+os_workgroup	join EALREADY if in a workgroup; mismatched leave aborts	os/os_workgroup_join.md
+os_workgroup	maxParallelThreads theoretical, ignores load	os/os_workgroup_max_parallel_threads.md
+os_workgroup	dispatch_workloop_set_os_workgroup needs inactive workloop; workgroup beats scheduler priority; Swift init osWorkgroup:	usr/include/dispatch/workloop.h:141-171; Dispatch.swiftinterface:243; g08.md:11
+Thermal and power	thermalState cases; read before registering for notification	foundation/processinfo/thermalstate-swift.enum.md; foundation/processinfo/thermalstatedidchangenotification.md
+Thermal and power	Low Power Mode iOS 9 / macOS 12; reduces CPU/GPU; NSProcessInfoPowerStateDidChange	foundation/processinfo/islowpowermodeenabled.md; foundation/nsnotification/name-swift.struct/nsprocessinfopowerstatedidchange.md
+Thermal and power	Game adapts: lower resolution, cap rate, lighter assets; presets	metal/improving-your-games-graphics-performance-and-settings.md:79-83,131-137; m02.md:141
+Thermal and power	Sustained-execution entitlement iOS 17 / macOS 15 caps burst; needs Games category	bundleresources/entitlements/com.apple.developer.sustained-execution.md; metal/improving-your-games-graphics-performance-and-settings.md:96-98
+Thermal and power	Performance profile API in MTLDeviceCertification.h (macOS 15, iOS 18), no usage prose	MacOSX.sdk 27.0 Metal MTLDeviceCertification.h:12-26; metal/nsprocessperformanceprofile.md; m02.md:151
+Thermal and power	Unentitled CLI: default true, sustained false; iPhonePerformanceGaming certified true on Mac	runtime/game-loop-and-threading/runs.txt section 5
+Thermal and power	Test unplugged and Low Power Mode	r01.md:141 (xcode/testing-a-release-build)
+Game Mode on macOS	LSSupportsGameMode macOS 26 / iOS 18.6; YES enables, NO opts out; missing key may keep it off	bundleresources/information-property-list/lssupportsgamemode.md
+Game Mode on macOS	GCSupportsGameMode page lists iOS 18.0-18.6 only	bundleresources/information-property-list/gcsupportsgamemode.md
+Game Mode on macOS	Xcode 27.1 has only INFOPLIST_KEY_GCSupportsGameMode, no LSSupportsGameMode setting	xcode/build-settings-reference.md:2396-2400; Xcode 27.1 SWBCore CoreBuildSystem.xcspec:4729-4733 (grep finds no LSSupportsGameMode)
+Game Mode on macOS	public.app-category.games values offered by Xcode; key is App Store category	CoreBuildSystem.xcspec:3891-3900; bundleresources/information-property-list/lsapplicationcategorytype.md
+Game Mode on macOS	HUD shows Game Mode on/off	xcode/monitoring-your-metal-apps-graphics-performance.md:22; m04.md:98; not runtime-checked (GUI)
+Full screen, Dock, cursor	Use system full screen; handles camera housing; no display-mode change; enter via button, View menu, Ctrl-Cmd-F	design/human-interface-guidelines/going-full-screen.md; g01.md:143
+Full screen, Dock, cursor	View menu item with toggleFullScreen: action, nil target; do not customize	appkit/nswindow/togglefullscreen(_:).md; metal/managing-your-game-window-for-metal-in-macos.md
+Full screen, Dock, cursor	Games may hide the Dock; hideDock	design/human-interface-guidelines/going-full-screen.md; appkit/nsapplication/presentationoptions-swift.struct/hidedock.md
+Full screen, Dock, cursor	Option rules: hideDock/autoHideDock exclusive; hideMenuBar needs hideDock; violation raises invalidArgumentException	appkit/nsapplication/presentationoptions-swift.struct.md
+Full screen, Dock, cursor	window(_:willUseFullScreenPresentationOptions:) returns options for full screen	appkit/nswindowdelegate/window(_:willusefullscreenpresentationoptions:).md
+Full screen, Dock, cursor	iPadOS defer bottom edge; setNeedsUpdateOfScreenEdgesDeferringSystemGestures; keep default unless accidental exits	uikit/uiviewcontroller/preferredscreenedgesdeferringsystemgestures.md; going-full-screen.md; g01.md:145
+Full screen, Dock, cursor	NSCursor hide/unhide must balance; hide overrides setHiddenUntilMouseMoves; unhide against it undefined	appkit/nscursor.md; appkit/nscursor/hide().md; appkit/nscursor/unhide().md; appkit/nscursor/sethiddenuntilmousemoves(_:).md
+Full screen, Dock, cursor	CGAssociateMouseAndMouseCursorPosition disconnects; events constant location with deltas	coregraphics/cgassociatemouseandmousecursorposition(_:).md
+Full screen, Dock, cursor	NSTrackingArea for cursor regions	g06.md:13; appkit/nscursor.md cursor rectangles
+Pausing, backgrounding, launch	Pause on switch-away; never exit full screen automatically	design/human-interface-guidelines/going-full-screen.md; g01.md:146
+Pausing, backgrounding, launch	iOS/tvOS refuse background GPU work; stop committing on deactivate; waitUntilScheduled recipe	metal/preparing-your-metal-app-to-run-in-the-background.md; m02.md:152
+Pausing, backgrounding, launch	MTL4 has no waitUntilScheduled; .notPermitted in MTL4CommandQueueError	grep 'scheduled' MTL4CommandQueue.h MTL4CommandBuffer.h (no match); command-model.md Errors and GPU time; .notPermitted compiled
+Pausing, backgrounding, launch	Release rebuildable content when backgrounded	p01.md:47
+Pausing, backgrounding, launch	Watchdog first-frame and busy-main kills 0x8badf00d; debugger disables watchdog	p01.md:42; r01.md:141
+Pausing, backgrounding, launch	beginBackgroundTask / endBackgroundTask for saves	p01.md:40

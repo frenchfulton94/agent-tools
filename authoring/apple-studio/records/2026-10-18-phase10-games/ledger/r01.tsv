@@ -1,0 +1,30 @@
+path	words	read_in_full	fed
+/documentation/Security/customizing-the-notarization-workflow	1652	yes	direct-distribution.md
+/documentation/Security/hardened-runtime	347	yes	direct-distribution.md
+/documentation/Security/notarizing-macos-software-before-distribution	1726	yes	direct-distribution.md
+/documentation/Security/resolving-common-notarization-issues	1972	yes	direct-distribution.md;apple-metal/cpp-and-rust.md
+/documentation/Technotes/tn3125-inside-code-signing-provisioning-profiles	2230	yes	direct-distribution.md;apple-games/game-center-and-online.md
+/documentation/UIKit/requesting-access-to-protected-resources	1400	yes	direct-distribution.md;app-store-submission.md
+/documentation/Xcode/acquiring-operating-system-symbol-information	655	yes	direct-distribution.md;signing-and-provisioning.md
+/documentation/Xcode/changing-the-bundle-identifier	811	yes	signing-and-provisioning.md
+/documentation/Xcode/configuring-command-line-tools-settings	743	yes	direct-distribution.md
+/documentation/Xcode/creating-distribution-signed-code-for-the-mac	2615	yes	direct-distribution.md
+/documentation/Xcode/distributing-your-app-for-beta-testing-and-releases	2303	yes	direct-distribution.md
+/documentation/Xcode/distributing-your-app-to-registered-devices	778	yes	signing-and-provisioning.md
+/documentation/Xcode/installing-the-command-line-tools	799	yes	direct-distribution.md
+/documentation/Xcode/interacting-with-devices-using-the-command-line	1169	yes	apple-games/assets.md
+/documentation/Xcode/locating-a-missing-debug-symbol-file	768	yes	direct-distribution.md
+/documentation/Xcode/locating-device-identifiers	475	yes	signing-and-provisioning.md
+/documentation/Xcode/packaging-mac-software-for-distribution	1863	yes	direct-distribution.md
+/documentation/Xcode/preparing-your-app-for-distribution	1790	yes	direct-distribution.md;app-store-submission.md
+/documentation/Xcode/resetting-access-to-protected-resources-in-macOS	938	yes	direct-distribution.md;apple-games/game-center-and-online.md
+/documentation/Xcode/sharing-your-teams-signing-certificates	822	yes	direct-distribution.md
+/documentation/Xcode/signing-a-daemon-with-a-restricted-entitlement	1035	yes	direct-distribution.md
+/documentation/Xcode/testing-a-beta-os	778	yes	testflight-and-versioning.md
+/documentation/Xcode/testing-a-release-build	2765	yes	testflight-and-versioning.md;apple-games/assets.md;apple-games/game-loop-and-threading.md
+/documentation/Xcode/using-the-latest-code-signature-format	816	yes	signing-and-provisioning.md
+/documentation/Xcode/viewing-and-responding-to-feedback	680	yes	testflight-and-versioning.md
+/documentation/Xcode/xcode-command-line-tool-reference	407	yes	testflight-and-versioning.md;apple-metal/cpp-and-rust.md
+/documentation/os/reading-unix-manual-pages	0	no-unfetchable:404:deferred-21	nothing: 404 confirmed 2026-10-18 by curl on .md and DocC JSON (both HTTP 404); local man pages read instead
+/documentation/xcode/command-line-tools	212	yes	nothing: collection index; every child page is a row of this slice and is noted there
+/documentation/xcode/distribution	286	yes	nothing: collection index; every child page is a row of this slice and is noted there

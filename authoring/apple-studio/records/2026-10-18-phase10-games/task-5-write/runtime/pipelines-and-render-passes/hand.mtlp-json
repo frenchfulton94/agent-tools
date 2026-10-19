@@ -1,0 +1,1 @@
+{"libraries":{"paths":[{"label":"lib","path":"s.metallib"}]},"pipelines":{"render_pipelines":[{"vertex_function":"alias:lib#vs","fragment_function":"alias:lib#fs","color_attachments":[{"pixel_format":"RGBA8Unorm"}]}]}}

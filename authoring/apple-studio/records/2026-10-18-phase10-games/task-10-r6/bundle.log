@@ -1,0 +1,109 @@
+Machine: Apple M4 Pro, macOS 27.0.1 26A434, Xcode 27.1
+Date: 2026-10-18 15:55 EDT
+Paths below are relative to authoring/apple-studio/pipeline/fixtures/metal-probe
+
+## Build and bundle
+$ ./bundle.sh
+Building for production...
+[Planning deferred tasks]
+Build complete! (0.28 sec)
+build/MetalProbe.app/Contents/Info.plist: OK
+build/MetalProbe.app
+exit: 0
+
+## Bundle layout
+$ find build/MetalProbe.app
+build/MetalProbe.app
+build/MetalProbe.app/Contents
+build/MetalProbe.app/Contents/MacOS
+build/MetalProbe.app/Contents/MacOS/MetalProbe
+build/MetalProbe.app/Contents/Info.plist
+build/MetalProbe.app/Contents/PkgInfo
+exit: 0
+
+## Info.plist lint
+$ plutil -lint build/MetalProbe.app/Contents/Info.plist
+build/MetalProbe.app/Contents/Info.plist: OK
+exit: 0
+
+## Info.plist identifier
+$ plutil -extract CFBundleIdentifier raw -o - build/MetalProbe.app/Contents/Info.plist
+dev.frenchfultonjr.apple-studio.metal-probe
+exit: 0
+
+## Bundled binary architecture
+$ lipo -archs build/MetalProbe.app/Contents/MacOS/MetalProbe
+arm64
+exit: 0
+
+## Bundled binary, one frame
+$ build/MetalProbe.app/Contents/MacOS/MetalProbe render --frames 1
+frame 0 ok
+pixel 0 128 64 255
+exit: 0
+
+## Signature as bundled (linker ad hoc on the binary only)
+$ codesign -dv build/MetalProbe.app
+Executable=build/MetalProbe.app/Contents/MacOS/MetalProbe
+Identifier=MetalProbe
+Format=app bundle with Mach-O thin (arm64)
+CodeDirectory v=20400 size=1315 flags=0x20002(adhoc,linker-signed) hashes=38+0 location=embedded
+Signature=adhoc
+Info.plist=not bound
+TeamIdentifier=not set
+Sealed Resources=none
+Internal requirements=none
+exit: 0
+
+## Ad hoc sign the bundle (identity -)
+$ codesign -s - -f -o runtime build/MetalProbe.app
+build/MetalProbe.app: replacing existing signature
+exit: 0
+
+## Verify the ad hoc signature
+$ codesign --verify --strict --verbose=2 build/MetalProbe.app
+build/MetalProbe.app: valid on disk
+build/MetalProbe.app: satisfies its Designated Requirement
+exit: 0
+
+## Display the ad hoc signature
+$ codesign -dvv build/MetalProbe.app
+Executable=build/MetalProbe.app/Contents/MacOS/MetalProbe
+Identifier=dev.frenchfultonjr.apple-studio.metal-probe
+Format=app bundle with Mach-O thin (arm64)
+CodeDirectory v=20500 size=556 flags=0x10002(adhoc,runtime) hashes=10+3 location=embedded
+Signature=adhoc
+Info.plist entries=9
+TeamIdentifier=not set
+Runtime Version=26.0.0
+Sealed Resources version=2 rules=13 files=0
+Internal requirements count=0 size=12
+Total signatures=1
+Chosen signature=1
+exit: 0
+
+## Gatekeeper on the ad hoc bundle (expected: rejected)
+$ spctl --assess -vv --type execute build/MetalProbe.app
+build/MetalProbe.app: rejected
+exit: 3
+
+## Rebuild the bundle unsigned for R6
+$ ./bundle.sh
+Building for production...
+Build complete! (0.14 sec)
+build/MetalProbe.app/Contents/Info.plist: OK
+build/MetalProbe.app
+exit: 0
+
+## Signature after the rebuild
+$ codesign -dv build/MetalProbe.app
+Executable=build/MetalProbe.app/Contents/MacOS/MetalProbe
+Identifier=MetalProbe
+Format=app bundle with Mach-O thin (arm64)
+CodeDirectory v=20400 size=1315 flags=0x20002(adhoc,linker-signed) hashes=38+0 location=embedded
+Signature=adhoc
+Info.plist=not bound
+TeamIdentifier=not set
+Sealed Resources=none
+Internal requirements=none
+exit: 0

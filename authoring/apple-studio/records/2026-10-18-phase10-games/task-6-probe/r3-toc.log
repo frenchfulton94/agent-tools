@@ -1,0 +1,220 @@
+Machine: Apple M4 Pro
+OS: macOS 27.0.1 26A434
+Toolchain: Xcode 27.1
+Date: 2026-10-18 11:15 EDT
+$TMP below is authoring/apple-studio/pipeline/tmp, the gitignored pipeline scratch
+
+## xctrace record, Metal System Trace, the brief's command plus --target-stdout
+$ xcrun xctrace record --template Metal System Trace --time-limit 10s --output $TMP/r3-1.trace --target-stdout $TMP/r3-1.stdout --launch -- .build/release/MetalProbe render --frames 100000
+exit: 0
+Starting recording with the Metal System Trace template. Launching process: MetalProbe. Time limit: 10.0 s
+Ctrl-C to stop the recording
+Target app exited, ending recording...
+Recording completed. Saving output file...
+Output file saved as: r3-1.trace
+probe stdout: 100000 ok lines, then:
+pixel 159 128 64 255
+recording size: 466M
+
+## xctrace export --toc, Metal System Trace
+$ xcrun xctrace export --input $TMP/r3-1.trace --toc
+run.sh: line 37: 87290 Bus error: 10           "$@" > "$OUT" 2>&1
+exit: 138
+(exit 138 is SIGBUS: xctrace itself crashed while it loaded the trace)
+
+## xctrace export --toc, Metal System Trace, second attempt
+$ xcrun xctrace export --input $TMP/r3-1.trace --toc
+run.sh: line 37: 87305 Bus error: 10           "$@" > "$OUT" 2>&1
+exit: 138
+(exit 138 is SIGBUS: xctrace itself crashed while it loaded the trace)
+
+## xctrace record, Game Performance, the brief's command plus --target-stdout
+$ xcrun xctrace record --template Game Performance --time-limit 10s --output $TMP/r3-2.trace --target-stdout $TMP/r3-2.stdout --launch -- .build/release/MetalProbe render --frames 100000
+exit: 0
+Starting recording with the Game Performance template. Launching process: MetalProbe. Time limit: 10.0 s
+Ctrl-C to stop the recording
+Target app exited, ending recording...
+Recording completed. Saving output file...
+Output file saved as: r3-2.trace
+probe stdout: 100000 ok lines, then:
+pixel 159 128 64 255
+recording size: 388M
+
+## xctrace export --toc, Game Performance
+$ xcrun xctrace export --input $TMP/r3-2.trace --toc
+exit: 0
+launched process:
+<process arguments="render --frames 100000" type="launched" return-exit-status="0" name="MetalProbe" pid="87319" termination-reason="exit(0)"/>
+GPU and Metal tables: 48
+  schema="device-gpu-info"
+  schema="gpu-aps-stream"
+  schema="gpu-counter-info"
+  schema="gpu-counter-value"
+  schema="gpu-performance-device-state-intervals"
+  schema="gpu-performance-state-info"
+  schema="gpu-performance-state-intervals"
+  schema="gpu-shader-profiler-interval"
+  schema="gpu-shader-profiler-sample"
+  schema="metal-application-command-buffer-submissions"
+  schema="metal-application-encoders-list"
+  schema="metal-application-event-interval"
+  schema="metal-application-intervals"
+  schema="metal-ar-events"
+  schema="metal-command-buffer-completed"
+  schema="metal-command-buffer-error"
+  schema="metal-command-buffer-frame-assignment"
+  schema="metal-command-buffer-to-accelerator-id"
+  schema="metal-current-allocated-size"
+  schema="metal-driver-event-intervals"
+  schema="metal-driver-event-per-thread-intervals"
+  schema="metal-driver-intervals"
+  schema="metal-gpu-counter-intervals"
+  schema="metal-gpu-counter-profile"
+  schema="metal-gpu-execution-points"
+  schema="metal-gpu-info"
+  schema="metal-gpu-intervals"
+  schema="metal-gpu-state-intervals"
+  schema="metal-gpu-submission-to-command-buffer-id"
+  schema="metal-io-surface-access"
+  schema="metal-kernel-resource-allocations"
+  schema="metal-known-compositor-process"
+  schema="metal-object-dependency-chain-app"
+  schema="metal-object-dependency-chain-display"
+  schema="metal-object-dependency-chain-driver"
+  schema="metal-object-dependency-chain-gpu"
+  schema="metal-object-label"
+  schema="metal-residency-set-interval"
+  schema="metal-residency-set-resource-event"
+  schema="metal-residency-set-usage-event"
+  schema="metal-resource-allocations"
+  schema="metal-shader-profiler-intervals"
+  schema="metal-shader-profiler-shader-list"
+  schema="metal-visual-highlight-chain-app"
+  schema="metal-visual-highlight-chain-display"
+  schema="metal-visual-highlight-chain-driver"
+  schema="metal-visual-highlight-chain-gpu"
+  schema="metal-wired-sysmem-level-interval"
+metal-application-command-buffer-submissions rows: 24059
+processes the table defines:
+  <process id="7" fmt="MetalProbe (87319)"
+references to MetalProbe (process id 7) after its first row: 24645
+
+## xctrace record, Metal System Trace, ended by --time-limit 1s
+$ xcrun xctrace record --template Metal System Trace --time-limit 1s --output $TMP/r3-3.trace --launch -- .build/release/MetalProbe render --frames 10000000
+exit: 54
+Starting recording with the Metal System Trace template. Launching process: MetalProbe. Time limit: 1.0 s
+Ctrl-C to stop the recording
+Reached specified time limit, ending recording...
+Recording completed. Saving output file...
+Output file saved as: r3-3.trace
+recording size:  98M
+
+## xctrace export --toc, Metal System Trace, 1 s
+$ xcrun xctrace export --input $TMP/r3-3.trace --toc
+exit: 0
+launched process:
+<process arguments="render --frames 10000000" type="launched" return-exit-status="9" name="MetalProbe" pid="87460" termination-reason="SIGKILL"/>
+GPU and Metal tables: 48
+  schema="device-gpu-info"
+  schema="gpu-aps-stream"
+  schema="gpu-counter-info"
+  schema="gpu-counter-value"
+  schema="gpu-performance-device-state-intervals"
+  schema="gpu-performance-state-info"
+  schema="gpu-performance-state-intervals"
+  schema="gpu-shader-profiler-interval"
+  schema="gpu-shader-profiler-sample"
+  schema="metal-application-command-buffer-submissions"
+  schema="metal-application-encoders-list"
+  schema="metal-application-event-interval"
+  schema="metal-application-intervals"
+  schema="metal-ar-events"
+  schema="metal-command-buffer-completed"
+  schema="metal-command-buffer-error"
+  schema="metal-command-buffer-frame-assignment"
+  schema="metal-command-buffer-to-accelerator-id"
+  schema="metal-current-allocated-size"
+  schema="metal-driver-event-intervals"
+  schema="metal-driver-event-per-thread-intervals"
+  schema="metal-driver-intervals"
+  schema="metal-gpu-counter-intervals"
+  schema="metal-gpu-counter-profile"
+  schema="metal-gpu-execution-points"
+  schema="metal-gpu-info"
+  schema="metal-gpu-intervals"
+  schema="metal-gpu-state-intervals"
+  schema="metal-gpu-submission-to-command-buffer-id"
+  schema="metal-io-surface-access"
+  schema="metal-kernel-resource-allocations"
+  schema="metal-known-compositor-process"
+  schema="metal-object-dependency-chain-app"
+  schema="metal-object-dependency-chain-display"
+  schema="metal-object-dependency-chain-driver"
+  schema="metal-object-dependency-chain-gpu"
+  schema="metal-object-label"
+  schema="metal-residency-set-interval"
+  schema="metal-residency-set-resource-event"
+  schema="metal-residency-set-usage-event"
+  schema="metal-resource-allocations"
+  schema="metal-shader-profiler-intervals"
+  schema="metal-shader-profiler-shader-list"
+  schema="metal-visual-highlight-chain-app"
+  schema="metal-visual-highlight-chain-display"
+  schema="metal-visual-highlight-chain-driver"
+  schema="metal-visual-highlight-chain-gpu"
+  schema="metal-wired-sysmem-level-interval"
+metal-application-command-buffer-submissions rows: 14626
+processes the table defines:
+  <process id="7" fmt="MetalProbe (87460)"
+references to MetalProbe (process id 7) after its first row: 15160
+
+## xctrace record exit status for /usr/bin/true, which ends at once
+$ xcrun xctrace record --template Time Profiler --time-limit 10s --output $TMP/r3-true.trace --launch -- /usr/bin/true
+exit: 0
+Starting recording with the Time Profiler template. Launching process: true. Time limit: 10.0 s
+Ctrl-C to stop the recording
+Target app exited, ending recording...
+Recording completed. Saving output file...
+Output file saved as: r3-true.trace
+
+## xctrace export --toc, /usr/bin/true
+$ xcrun xctrace export --input $TMP/r3-true.trace --toc
+exit: 0
+<process type="launched" return-exit-status="0" name="true" pid="87534" termination-reason="exit(0)"/>
+
+## xctrace record exit status for /usr/bin/false, which ends at once
+$ xcrun xctrace record --template Time Profiler --time-limit 10s --output $TMP/r3-false.trace --launch -- /usr/bin/false
+exit: 54
+Starting recording with the Time Profiler template. Launching process: false. Time limit: 10.0 s
+Ctrl-C to stop the recording
+Target app exited, ending recording...
+Recording completed. Saving output file...
+Output file saved as: r3-false.trace
+
+## xctrace export --toc, /usr/bin/false
+$ xcrun xctrace export --input $TMP/r3-false.trace --toc
+exit: 0
+<process type="launched" return-exit-status="1" name="false" pid="87554" termination-reason="exit(1)"/>
+
+## xctrace record, a target that writes one line to stdout and one to stderr
+$ xcrun xctrace record --template Time Profiler --time-limit 10s --output $TMP/r3-streams/plain.trace --launch -- /bin/sh -c echo TO-STDOUT; echo TO-STDERR >&2
+exit: 0
+xctrace's own stdout and stderr:
+Starting recording with the Time Profiler template. Launching process: sh. Time limit: 10.0 s
+Ctrl-C to stop the recording
+Target app exited, ending recording...
+Recording completed. Saving output file...
+Output file saved as: plain.trace
+
+## the same, with --target-stdout
+$ xcrun xctrace record --template Time Profiler --time-limit 10s --output $TMP/r3-streams/redirected.trace --target-stdout $TMP/r3-streams/target.out --launch -- /bin/sh -c echo TO-STDOUT; echo TO-STDERR >&2
+exit: 0
+xctrace's own stdout and stderr:
+Starting recording with the Time Profiler template. Launching process: sh. Time limit: 10.0 s
+Ctrl-C to stop the recording
+Target app exited, ending recording...
+Recording completed. Saving output file...
+Output file saved as: redirected.trace
+the --target-stdout file:
+TO-STDOUT
+TO-STDERR

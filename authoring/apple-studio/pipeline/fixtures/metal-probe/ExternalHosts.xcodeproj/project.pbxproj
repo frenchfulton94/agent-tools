@@ -1,0 +1,152 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXGroup section */
+		E1A0000000000000000000A1 /* Main group */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXLegacyTarget section */
+		E1A0000000000000000000C1 /* CppHost */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "build.sh $(ACTION)";
+			buildConfigurationList = E1A0000000000000000000D2 /* Build configuration list for PBXLegacyTarget "CppHost" */;
+			buildPhases = (
+			);
+			buildToolPath = /bin/sh;
+			buildWorkingDirectory = "$(PROJECT_DIR)/cpp";
+			dependencies = (
+			);
+			name = CppHost;
+			passBuildSettingsInEnvironment = 1;
+			productName = CppHost;
+		};
+		E1A0000000000000000000C2 /* RustHost */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "xcode-cargo.sh $(CONFIGURATION) $(ACTION)";
+			buildConfigurationList = E1A0000000000000000000D3 /* Build configuration list for PBXLegacyTarget "RustHost" */;
+			buildPhases = (
+			);
+			buildToolPath = /bin/sh;
+			buildWorkingDirectory = "$(PROJECT_DIR)/rust";
+			dependencies = (
+			);
+			name = RustHost;
+			passBuildSettingsInEnvironment = 1;
+			productName = RustHost;
+		};
+/* End PBXLegacyTarget section */
+
+/* Begin PBXProject section */
+		E1A0000000000000000000B1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 2710;
+			};
+			buildConfigurationList = E1A0000000000000000000D1 /* Build configuration list for PBXProject "ExternalHosts" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E1A0000000000000000000A1 /* Main group */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E1A0000000000000000000C1 /* CppHost */,
+				E1A0000000000000000000C2 /* RustHost */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		E1A0000000000000000000F1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		E1A0000000000000000000F2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		E1A0000000000000000000F3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		E1A0000000000000000000F4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		E1A0000000000000000000F5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		E1A0000000000000000000F6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E1A0000000000000000000D1 /* Build configuration list for PBXProject "ExternalHosts" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E1A0000000000000000000F1 /* Debug */,
+				E1A0000000000000000000F2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E1A0000000000000000000D2 /* Build configuration list for PBXLegacyTarget "CppHost" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E1A0000000000000000000F3 /* Debug */,
+				E1A0000000000000000000F4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E1A0000000000000000000D3 /* Build configuration list for PBXLegacyTarget "RustHost" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E1A0000000000000000000F5 /* Debug */,
+				E1A0000000000000000000F6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E1A0000000000000000000B1 /* Project object */;
+}

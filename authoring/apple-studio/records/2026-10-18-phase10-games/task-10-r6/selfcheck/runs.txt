@@ -1,0 +1,40 @@
+Machine: Apple M4 Pro, macOS 27.0.1 26A434, Xcode 27.1
+Date: 2026-10-18 16:03 EDT
+Extracted 19 lines from direct-distribution.md (last line is the probe call)
+
+## Compile
+$ xcrun swiftc -O -target arm64-apple-macos26.0 $OUT/main.swift -o $OUT/selfcheck
+exit: 0
+
+## Sign ad hoc with get-task-allow
+$ codesign -s - -f --entitlements get-task-allow.entitlements $OUT/selfcheck
+$OUT/selfcheck: replacing existing signature
+exit: 0
+
+## Entitlements as signed
+$ codesign -d --entitlements - --xml $OUT/selfcheck
+Executable=$OUT/selfcheck
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "https://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>com.apple.security.get-task-allow</key><true/></dict></plist>
+exit: 0
+
+
+## Run (expect true)
+$ $OUT/selfcheck
+get-task-allow claimed: true
+exit: 0
+
+## Sign ad hoc with no entitlements
+$ codesign -s - -f $OUT/selfcheck
+$OUT/selfcheck: replacing existing signature
+exit: 0
+
+## Entitlements as signed (expect none)
+$ codesign -d --entitlements - --xml $OUT/selfcheck
+Executable=$OUT/selfcheck
+exit: 0
+
+
+## Run (expect false)
+$ $OUT/selfcheck
+get-task-allow claimed: false
+exit: 0

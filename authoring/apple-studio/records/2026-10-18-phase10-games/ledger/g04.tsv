@@ -1,0 +1,60 @@
+path	words	read_in_full	fed
+/documentation/Accelerate/image-reflection	432	yes	nothing: vImage flip API listing, no game-relevant judgment
+/documentation/Accelerate/image-rotation	489	yes	nothing: vImage rotate API listing, no game-relevant judgment
+/documentation/Accelerate/image-scaling	291	yes	nothing: vImage scale API listing, no judgment beyond names
+/documentation/Accelerate/image-shearing	142	yes	nothing: vImage shear and resampling-filter API listing
+/documentation/Accelerate/improving-the-quality-of-quantized-images-with-dithering	674	yes	assets.md
+/documentation/Accelerate/in-place-functions-for-1d-complex-fft	260	yes	nothing: classic vDSP complex FFT listing, general DSP knowledge
+/documentation/Accelerate/in-place-functions-for-1d-multiple-signal-complex-fft	312	yes	nothing: multi-signal variant listing, no game-relevant judgment
+/documentation/Accelerate/in-place-functions-for-1d-multiple-signal-real-fft	468	yes	audio-and-haptics.md
+/documentation/Accelerate/in-place-functions-for-1d-real-fft	387	yes	audio-and-haptics.md
+/documentation/Accelerate/in-place-functions-for-2d-complex-fft	333	yes	nothing: 2D complex FFT listing, no game-relevant judgment
+/documentation/Accelerate/in-place-functions-for-2d-real-fft	619	yes	nothing: legacy 2D packed-real FFT format, no game-relevant judgment
+/documentation/Accelerate/integer-arithmetic	103	yes	nothing: three vDSP integer vector ops, no judgment
+/documentation/Accelerate/integer-to-double-precision-floating-point-conversion	409	yes	nothing: double variants of conversions covered by the single-precision row
+/documentation/Accelerate/integer-to-single-precision-floating-point-conversion	561	yes	audio-and-haptics.md
+/documentation/Accelerate/integrating-vimage-pixel-buffers-into-a-core-image-workflow	597	yes	nothing: Core Image processor-kernel sample, photo-editing not game
+/documentation/Accelerate/integration-functions	283	yes	nothing: numeric integration listing, no game-relevant judgment
+/documentation/Accelerate/lapack-functions	27199	yes	nothing: LAPACK/BLAS signature listing (4488 lines), scientific computing, no game-relevant judgment
+/documentation/Accelerate/linear-averaging-functions	97	yes	nothing: two vDSP averaging functions, no judgment
+/documentation/Accelerate/linear-interpolation-functions	352	yes	nothing: vDSP lerp listing, general knowledge
+/documentation/Accelerate/macros	28	yes	nothing: three header-guard macros
+/documentation/Accelerate/matrix-and-submatrix-copying-functions	90	yes	nothing: vDSP_mmov listing, no judgment
+/documentation/Accelerate/matrix-and-vector-operations	1011	yes	nothing: Sparse BLAS listing, scientific computing not game
+/documentation/Accelerate/memory-management	454	yes	nothing: Sparse Solvers retain/cleanup listing
+/documentation/Accelerate/morphology	319	yes	nothing: vImage dilate/erode listing, no judgment
+/documentation/Accelerate/multichannel-biquadratic-filters	776	yes	audio-and-haptics.md
+/documentation/Accelerate/multiplication	420	yes	nothing: vDSP matrix multiply listing, simd covers game math
+/documentation/Accelerate/normalization-functions	124	yes	nothing: vDSP_normalize listing, no judgment
+/documentation/Accelerate/optimizing-image-processing-performance	667	yes	assets.md
+/documentation/Accelerate/out-of-place-functions-for-1d-complex-fft	479	yes	nothing: complex, fixed-length and radix-3/5 FFT listing, general DSP
+/documentation/Accelerate/out-of-place-functions-for-1d-multiple-signal-complex-fft	341	yes	nothing: multi-signal complex variant listing
+/documentation/Accelerate/out-of-place-functions-for-1d-multiple-signal-real-fft	497	yes	nothing: out-of-place twin of the in-place multi-signal row, already noted
+/documentation/Accelerate/out-of-place-functions-for-1d-real-fft	408	yes	audio-and-haptics.md
+/documentation/Accelerate/out-of-place-functions-for-2d-complex-fft	369	yes	nothing: 2D complex FFT listing, no game-relevant judgment
+/documentation/Accelerate/out-of-place-functions-for-2d-real-fft	662	yes	nothing: legacy 2D packed-real FFT format, no game-relevant judgment
+/documentation/Accelerate/overwriting-channels	369	yes	assets.md
+/documentation/Accelerate/performing-fourier-transforms-on-interleaved-complex-data	545	yes	audio-and-haptics.md
+/documentation/Accelerate/performing-fourier-transforms-on-multiple-signals	1224	yes	audio-and-haptics.md
+/documentation/Accelerate/permuting-channels	181	yes	assets.md
+/documentation/Accelerate/phase-computation-functions	151	yes	nothing: vDSP phase listing, no judgment
+/documentation/Accelerate/pointwise-matrix-operations	458	yes	nothing: Sparse BLAS construction listing, scientific computing
+/documentation/Accelerate/polar-rectangular-conversion	254	yes	nothing: vDSP polar/rect listing, no judgment
+/documentation/Accelerate/polynomial-evaluation	173	yes	nothing: vDSP_vpoly listing, no judgment
+/documentation/Accelerate/preconditioners	181	yes	nothing: Sparse Solvers preconditioner listing
+/documentation/Accelerate/quadratic-interpolation-functions	83	yes	nothing: vDSP_vqint listing, no judgment
+/documentation/Accelerate/quadrature-collection	1324	yes	nothing: QUADPACK numeric integration, offline math not game runtime
+/documentation/Accelerate/recursive-filters	164	yes	nothing: single-section vDSP_deq22, superseded by biquad row already noted
+/documentation/Accelerate/reducing-artifacts-with-custom-resampling-filters	1089	yes	assets.md
+/documentation/Accelerate/reducing-spectral-leakage-with-windowing	1365	yes	audio-and-haptics.md
+/documentation/Accelerate/resampling-a-signal-with-decimation	564	yes	audio-and-haptics.md
+/documentation/Accelerate/resampling-in-vimage	217	yes	assets.md
+/documentation/Accelerate/reversing-and-sorting-functions	219	yes	nothing: vDSP reverse/sort listing, no judgment
+/documentation/Accelerate/rotating-a-cube-by-transforming-its-vertices	929	yes	game-loop-and-threading.md
+/documentation/Accelerate/sharing-texture-data-between-the-model-io-framework-and-the-vimage-library	546	yes	assets.md
+/documentation/Accelerate/signal-extraction-from-noise	729	yes	audio-and-haptics.md
+/documentation/Accelerate/simd-library	169	yes	game-loop-and-threading.md
+/documentation/Accelerate/simd-macros	265	yes	nothing: simd macro name listing, no judgment
+/documentation/Accelerate/single-channel-biquadratic-filters	358	yes	audio-and-haptics.md
+/documentation/Accelerate/single-precision-floating-point-matrices	210	yes	game-loop-and-threading.md
+/documentation/Accelerate/single-precision-floating-point-to-integer-conversion	715	yes	audio-and-haptics.md

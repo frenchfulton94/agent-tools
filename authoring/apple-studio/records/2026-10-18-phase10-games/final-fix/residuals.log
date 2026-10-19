@@ -1,0 +1,45 @@
+## sendOverDTLS block: probed vs shipped
+probed sha256:  7058b6cb5bb896fc7ecf7d592e1be34459a52f0d857f96bfa98744e2efe1ee54
+shipped sha256: 34dc5dba25097f7d1db7e1f72ce754d9c5138d04ef43c6616f488fe02142369d
+diff (probed -> shipped):
+11,12c11,12
+< /// answers the handshake keeps the connection preparing, and no route or a
+< /// local network refusal keeps it waiting. Neither ends a send by itself.
+---
+> /// answers the handshake keeps the connection preparing, and a name that does
+> /// not resolve keeps it waiting. Neither ends a send by itself.
+35c35
+<         // so the group never waits on a stuck send at scope exit.
+---
+>         // except in one OS 27 window that the text after this block describes.
+changed lines that are not // or /// comments:
+none
+## typecheck_snippets.py plugins/apple-studio/skills/apple-games/references/game-center-and-online.md
+TOTAL: 9/9 snippets typecheck clean
+exit: 0
+## vale plugins/apple-studio/skills/apple-games/references/game-center-and-online.md
+✖ 0 errors, 14 warnings and 0 suggestions in 1 file.
+## typecheck_snippets.py plugins/apple-studio/skills/apple-games/references/input.md
+TOTAL: 11/11 snippets typecheck clean
+exit: 0
+## vale plugins/apple-studio/skills/apple-games/references/input.md
+✖ 0 errors, 7 warnings and 0 suggestions in 1 file.
+## typecheck_snippets.py plugins/apple-studio/skills/apple-metal/references/cpp-and-rust.md
+TOTAL: 0/0 snippets typecheck clean
+exit: 0
+## vale plugins/apple-studio/skills/apple-metal/references/cpp-and-rust.md
+✖ 0 errors, 14 warnings and 0 suggestions in 1 file.
+## typecheck_native.py cpp-and-rust.md
+
+TOTAL: 6/6 snippets compile clean
+exit: 0
+## bun test
+ 542 pass
+ 0 fail
+exit: 0
+## bun run audit
+0 error(s), 54 warning(s)
+exit: 0
+## claude plugin validate . --strict
+✔ Validation passed
+exit: 0

@@ -1,0 +1,6 @@
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-performance/references/profiling-workflow.md   (1 gated blocks)   target: metal-cpp 26.4, -std=c++20
+  [PASS:cpp:as-written   ] line 297  #include <os/log.h>
+
+TOTAL: 1/1 snippets compile clean

@@ -1,0 +1,47 @@
+Machine: Apple M4 Pro, macOS 27.0.1 26A434, Xcode 27.1 (Build version 27A9275)
+Date: 2026-10-18 15:54 EDT
+
+## MACOSX_DEPLOYMENT_TARGET=26.0 (ARCHS not set)
+$ xcodebuild build -scheme ArchsProbe -destination 'generic/platform=macOS' -configuration Release -derivedDataPath <scratch>/dd-t26 MACOSX_DEPLOYMENT_TARGET=26.0 
+exit: 0
+** BUILD SUCCEEDED **
+$ lipo -archs Build/Products/Release/ArchsProbe
+x86_64 arm64
+
+## MACOSX_DEPLOYMENT_TARGET=27.0 (ARCHS not set)
+$ xcodebuild build -scheme ArchsProbe -destination 'generic/platform=macOS' -configuration Release -derivedDataPath <scratch>/dd-t27 MACOSX_DEPLOYMENT_TARGET=27.0 
+exit: 0
+** BUILD SUCCEEDED **
+$ lipo -archs Build/Products/Release/ArchsProbe
+arm64
+
+## MACOSX_DEPLOYMENT_TARGET=27.0 ARCHS=arm64 x86_64
+$ xcodebuild build -scheme ArchsProbe -destination 'generic/platform=macOS' -configuration Release -derivedDataPath <scratch>/dd-t27-x86 MACOSX_DEPLOYMENT_TARGET=27.0 ARCHS=arm64 x86_64
+exit: 0
+** BUILD SUCCEEDED **
+warning: The x86_64 architecture is deprecated for your deployment target (macOS 27.0). You should update your ARCHS build setting to remove the x86_64 architecture. (in target 'ArchsProbe-product' from project 'ArchsProbe')
+$ lipo -archs Build/Products/Release/ArchsProbe
+x86_64 arm64
+
+## MACOSX_DEPLOYMENT_TARGET=26.0 ARCHS=arm64
+$ xcodebuild build -scheme ArchsProbe -destination 'generic/platform=macOS' -configuration Release -derivedDataPath <scratch>/dd-t26-arm MACOSX_DEPLOYMENT_TARGET=26.0 ARCHS=arm64
+exit: 0
+** BUILD SUCCEEDED **
+$ lipo -archs Build/Products/Release/ArchsProbe
+arm64
+
+## ARCHS_STANDARD and the x86_64 deployment range in Xcode's macOS architecture spec
+(Re-run of this grep step only, 2026-10-18 fix round 1, with -e ArchitectureSetting added; the builds above are unchanged.)
+$ grep -n -e RealArchitectures -e ArchitectureSetting -e DeploymentTargetRange -e 'Identifier = "x86_64"' SWBApplePlatform.framework/Resources/macOSArchitectures.xcspec
+22:		RealArchitectures = ( arm64, x86_64 );
+23:		ArchitectureSetting = "ARCHS_STANDARD";
+32:		RealArchitectures = ( arm64, x86_64, i386 );
+33:		ArchitectureSetting = "ARCHS_STANDARD_32_64_BIT";
+40:		RealArchitectures = ( i386 );
+41:		ArchitectureSetting = "ARCHS_STANDARD_32_BIT";
+48:		RealArchitectures = ( arm64, x86_64 );
+49:		ArchitectureSetting = "ARCHS_STANDARD_64_BIT";
+56:		RealArchitectures = ( arm64, x86_64 );
+57:		ArchitectureSetting = "ARCHS_STANDARD_INCLUDING_64_BIT";
+76:		Identifier = "x86_64";
+82:        DeploymentTargetRange = ( "10.4.4", "27" );

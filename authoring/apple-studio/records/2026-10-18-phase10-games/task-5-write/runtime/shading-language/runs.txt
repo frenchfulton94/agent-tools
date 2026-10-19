@@ -1,0 +1,88 @@
+Machine: Apple M4 Pro
+OS: macOS 27.0.1 26A434
+Toolchain: Xcode 27.1
+Run: 2026-10-18, Task 5 fix round 1 (re-run of the writers' probes)
+$S below is the session scratchpad that held the probe binaries.
+
+## __METAL_VERSION__ with no -std and no minimum OS
+$ xcrun -sdk macosx metal -E -dM $S/fixrun/work/version.metal | grep __METAL_VERSION__
+exit: 0
+  #define __METAL_VERSION__ 410
+
+## __METAL_VERSION__ at -mmacosx-version-min=26.0
+$ xcrun -sdk macosx metal -E -dM -mmacosx-version-min=26.0 $S/fixrun/work/version.metal | grep __METAL_VERSION__
+exit: 0
+  #define __METAL_VERSION__ 400
+
+## __METAL_VERSION__ at -mmacosx-version-min=15.0
+$ xcrun -sdk macosx metal -E -dM -mmacosx-version-min=15.0 $S/fixrun/work/version.metal | grep __METAL_VERSION__
+exit: 0
+  #define __METAL_VERSION__ 320
+
+## -std=metal4.1 against a 26.0 deployment target
+$ xcrun -sdk macosx metal -std=metal4.1 -mmacosx-version-min=26.0 -c $S/fixrun/work/version.metal -o $S/fixrun/work/v.air; echo rc=$?
+exit: 0
+  rc=0
+  $S/fixrun/work/version.metal:2:14: warning: unused variable 'v' [-Wunused-const-variable]
+  constant int v = __METAL_VERSION__;
+               ^
+  1 warning generated.
+
+## Unannotated member function at 4.0 with -Wmetal-addr-spaces
+$ xcrun -sdk macosx metal -std=metal4.0 -Wmetal-addr-spaces -c $S/fixrun/work/member.metal -o $S/fixrun/work/m.air 2>&1 | grep warning; echo rc=${PIPESTATUS[0]}
+exit: 0
+  $S/fixrun/work/member.metal:3:30: warning: missing 'thread' address space qualifier [-Wmetal-addr-spaces]
+  1 warning generated.
+  rc=0
+
+## The porting page's threadgroup_barrier(mem_device) and simd_barrier()
+$ xcrun -sdk macosx metal -std=metal4.0 -c $S/fixrun/work/barrier.metal -o $S/fixrun/work/b.air 2>&1 | grep error
+exit: 0
+  $S/fixrun/work/barrier.metal:3:66: error: use of undeclared identifier 'mem_device'
+  $S/fixrun/work/barrier.metal:3:79: error: use of undeclared identifier 'simd_barrier'
+  2 errors generated.
+
+## atomic_store_explicit with memory_order_release and no mem_flags
+$ xcrun -sdk macosx metal -std=metal4.1 -c $S/fixrun/work/order.metal -o $S/fixrun/work/o.air 2>&1 | grep -E "error|'order' argument" | head -3
+exit: 0
+  $S/fixrun/work/order.metal:3:53: error: no matching function for call to 'atomic_store_explicit'
+  /private/var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v27.1.266.1.aloND2/Metal.xctoolchain/usr/metal/32023/lib/clang/32023/include/metal/metal_atomic:667:1: note: candidate disabled: 'order' argument must be 'metal::memory_order_relaxed' if no 'mem_flags' argument is provided
+  /private/var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v27.1.266.1.aloND2/Metal.xctoolchain/usr/metal/32023/lib/clang/32023/include/metal/metal_atomic:688:1: note: candidate disabled: 'order' argument must be 'metal::memory_order_relaxed' if no 'mem_flags' argument is provided
+
+## Non-constant program-scope variable
+$ xcrun -sdk macosx metal -std=metal4.0 -c $S/fixrun/work/scopevar.metal -o $S/fixrun/work/sv.air 2>&1 | grep -m1 error
+exit: 0
+  $S/fixrun/work/scopevar.metal:2:5: error: program scope variable must reside in constant address space
+
+## threadgroup atomic_float add at 4.0
+$ xcrun -sdk macosx metal -std=metal4.0 -c $S/fixrun/work/tgfloat.metal -o $S/fixrun/work/tg.air 2>&1 | grep -m2 error
+exit: 0
+  $S/fixrun/work/tgfloat.metal:5:3: error: no matching function for call to 'atomic_fetch_add_explicit'
+  $S/fixrun/work/tgfloat.metal:6:10: error: no matching function for call to 'atomic_load_explicit'
+
+## threadgroup atomic_float add at 4.1
+$ xcrun -sdk macosx metal -std=metal4.1 -c $S/fixrun/work/tgfloat.metal -o $S/fixrun/work/tg.air; echo rc=$?
+exit: 0
+  rc=0
+
+## Generic pointers at 4.1
+$ xcrun -sdk macosx metal -std=metal4.1 -c probe/g.metal -o $S/fixrun/work/g.air; echo rc=$?
+exit: 0
+  rc=0
+
+## Swift SIMD3<Float> and Light layout
+$ ./probe/l
+exit: 0
+  16 16 36 48 12
+
+## single_pass_sum from the reference, 20 runs of 2^20 ones
+$ ./probe/r $S/fixrun/work/single_pass_sum.metal
+exit: 0
+  all 20 trials exact: true width 32
+
+## MTLCompileOptions defaults (lang 262145 is 0x40001, version 4.1; mathMode 2 is .fast)
+$ ./review5/p1 | grep -E 'mathMode|name'
+exit: 0
+  name Apple M4 Pro
+  mathMode 2 fastMath true lang 262145
+

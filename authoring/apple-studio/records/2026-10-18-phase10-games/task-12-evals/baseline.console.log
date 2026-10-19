@@ -1,0 +1,70 @@
+[1/60] metal-fire-1 -> apple-metal  PASS
+[2/60] metal-fire-2 -> apple-metal  PASS
+[3/60] metal-fire-3 -> apple-metal  PASS
+[4/60] metal-fire-4 -> apple-metal  PASS
+[5/60] metal-fire-5 -> apple-metal  PASS
+[6/60] metal-fire-6 -> apple-metal  PASS
+[7/60] metal-fire-7 -> apple-metal  PASS (max_turns)
+[8/60] metal-fire-8 -> apple-metal  PASS
+[9/60] metal-not-1 -> apple-animations  PASS
+[10/60] metal-not-2 -> apple-performance  PASS (max_turns)
+[11/60] metal-not-3 -> (none)  PASS
+[12/60] metal-not-4 -> (none)  PASS
+[13/60] metal-not-5 -> (none)  PASS
+[14/60] metal-not-6 -> apple-games  PASS
+[15/60] games-fire-1 -> apple-games  PASS
+[16/60] games-fire-2 -> apple-games  PASS
+[17/60] games-fire-3 -> apple-games  PASS
+[18/60] games-fire-4 -> apple-games  PASS
+[19/60] games-fire-5 -> apple-games  PASS (max_turns)
+[20/60] games-fire-6 -> apple-games  PASS
+[21/60] games-fire-7 -> apple-games  PASS
+[22/60] games-fire-8 -> apple-games  PASS
+[23/60] games-not-1 -> apple-metal  PASS
+[24/60] games-not-2 -> apple-performance  PASS
+[25/60] games-not-3 -> (none)  PASS
+[26/60] games-not-4 -> (none)  PASS
+[27/60] games-not-5 -> apple-design  PASS
+[28/60] games-not-6 -> app-release  PASS
+[29/60] ar-fire-1 -> app-release  PASS
+[30/60] ar-fire-2 -> app-release  PASS
+[31/60] ar-fire-3 -> app-release  PASS
+[32/60] ar-fire-4 -> app-release  PASS
+[33/60] ar-fire-5 -> app-release  PASS (max_turns)  WROTE 3 path(s)
+[34/60] ar-fire-6 -> app-release  PASS (max_turns)  WROTE 2 path(s)
+[35/60] ar-fire-7 -> app-release  PASS
+[36/60] ar-fire-8 -> app-release  PASS
+[37/60] ar-nofire-1 -> xcode-loop  PASS (max_turns)
+[38/60] ar-nofire-2 -> (none)  PASS
+[39/60] ar-nofire-3 -> apple-design  PASS (max_turns)
+[40/60] ar-nofire-4 -> swift-architecture  PASS
+[41/60] anim-fire -> apple-animations  PASS (max_turns)  WROTE 3 path(s)
+[42/60] anim-not -> apple-performance  PASS
+[43/60] design-fire -> apple-design  PASS
+[44/60] design-not -> (none)  PASS (max_turns)
+[45/60] fw-fire -> apple-frameworks  PASS
+[46/60] fw-not -> swift-architecture  PASS (max_turns)
+[47/60] ai-fire -> apple-intelligence  PASS (max_turns)
+[48/60] ai-not -> (none)  PASS
+[49/60] macos-fire -> apple-macos  PASS (max_turns)  WROTE 3 path(s)
+[50/60] macos-not -> apple-design  PASS (max_turns)
+[51/60] perf-fire -> apple-performance  PASS
+[52/60] perf-not -> (none)  PASS
+[53/60] arch-fire -> swift-architecture  PASS
+[54/60] arch-not -> apple-frameworks  PASS
+[55/60] conc-fire -> (none)  FAIL
+[56/60] conc-not -> apple-design  PASS
+[57/60] test-fire -> (none)  FAIL
+[58/60] test-not -> (none)  PASS
+[59/60] xcode-fire -> xcode-loop  PASS (max_turns)
+[60/60] xcode-not 
+fixture written to by 4 prompt(s) despite --allowedTools 'Skill Read':
+  ar-fire-5: StudioFixture.xcodeproj/project.pbxproj, StudioFixture/StudioFixture-macOS.entitlements, StudioFixture/StudioFixture.entitlements
+  ar-fire-6: StudioFixture.xcodeproj/xcshareddata/, ci_scripts/
+  anim-fire: StudioFixture/MailboxScreen.swift, StudioFixture/Ripple.metal, StudioFixture/RippleEffect.swift
+  macos-fire: StudioFixture/MailboxScreen.swift, StudioFixture/StudioFixtureApp.swift, StudioFixture/SettingsView.swift
+fixture restored; treat any prompt that reads the project as contaminated.
+-> (none)  PASS
+
+58/60 PASS   results: authoring/apple-studio/records/2026-10-18-phase10-games/task-12-evals/baseline/results.tsv
+driver exit=1

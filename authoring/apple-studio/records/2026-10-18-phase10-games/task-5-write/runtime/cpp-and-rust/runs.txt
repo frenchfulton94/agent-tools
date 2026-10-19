@@ -1,0 +1,121 @@
+Machine: Apple M4 Pro
+OS: macOS 27.0.1 26A434
+Toolchain: Xcode 27.1
+Run: 2026-10-18, Task 5 fix round 1 (re-run of the writers' probes)
+$S below is the session scratchpad that held the probe binaries.
+
+NOTE: The cold cargo build timings (83 s default features, 15 s trimmed) were not re-run; they need a cleared target directory and a full rebuild.
+
+## Plain clang++ language level
+$ echo | clang++ -dM -E -x c++ - | grep __cplusplus
+exit: 0
+  #define __cplusplus 201402L
+
+## metal-cpp host
+$ ./cpphost/host
+exit: 0
+  pixel 255 0 0 255
+
+## metal-cpp host, API Validation
+$ MTL_DEBUG_LAYER=1 ./cpphost/host
+exit: 0
+  pixel 255 0 0 255
+  host: Metal API Validation Enabled
+
+## metal-cpp host built without -framework CoreGraphics
+$ ./cpphost/host-nocg
+exit: 0
+  pixel 255 0 0 255
+
+## No residency set, no validation
+$ ./cpphost/nores
+exit: 0
+  pixel 255 0 0 255
+
+## No residency set, API Validation
+$ MTL_DEBUG_LAYER=1 ./cpphost/nores
+exit: 0
+  pixel 255 0 0 255
+  nores: Metal API Validation Enabled
+
+## No residency set, Shader Validation only
+$ MTL_SHADER_VALIDATION=1 ./cpphost/nores
+exit: 0
+  pixel 255 0 0 255
+  nores: Metal GPU Validation Enabled
+
+## No residency set, Shader Validation to stderr
+$ MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1 ./cpphost/nores
+exit: 0
+  pixel 255 0 0 255
+  nores: Metal GPU Validation Enabled
+  Invalid Metal usage: Resource residency error - MTLTexture is not resident at the time of commit.
+  MTLTexture:(label:"<no label>", gpuResourceID:1)
+  Resource is used in color attachment, in encoder with label:<no label>
+  MTLTexture allocated here:
+  0   nores                               0x… main + 1180
+  1   dyld                                0x… start + 6688
+
+## Capture without MTL_CAPTURE_ENABLED
+$ ./cpphost/capture 1
+exit: 0
+  pixel 255 0 0 255
+  gputrace destination unsupported
+  capturing after endScope: 0
+
+## Capture, device scope (mode 1)
+$ MTL_CAPTURE_ENABLED=1 ./cpphost/capture 1
+exit: 0
+  pixel 255 0 0 255
+  capturing after endScope: 0
+
+## Read the mode-1 trace
+$ gpudebug --oneshot -t cpphost/frame.gputrace -c list
+exit: 0
+  Name         Summary           Actions
+  ───────────  ────────────────  ───────
+  commands     1 command buffer       go
+  performance  see 'profile ?'
+  api_calls    8 API calls            go
+  resources    3 objects              go
+  (4 items)
+
+## helper.cpp without MTL_CAPTURE_ENABLED
+$ ./cpphost/helper; ls -d cpphost/helper.gputrace
+exit: 1
+  pixel 255 0 0 255
+  capturing 0
+  ls: cpphost/helper.gputrace: No such file or directory
+
+## helper.cpp with MTL_CAPTURE_ENABLED
+$ MTL_CAPTURE_ENABLED=1 ./cpphost/helper; ls -d cpphost/helper.gputrace
+exit: 0
+  pixel 255 0 0 255
+  cpphost/helper.gputrace
+  capturing 1
+
+## xcode-cargo.sh: build, clean, unknown action, missing cargo
+$ cd rusthost && sh xcode-cargo.sh build Debug 2>&1 | tail -1; sh xcode-cargo.sh install; echo exit $?; CARGO= PATH=/usr/bin:/bin sh xcode-cargo.sh build; echo exit $?; command -v cargo
+exit: 0
+      Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s
+  error: xcode-cargo.sh does not handle the action 'install'
+  exit 1   [x2]
+  error: cargo is not on this build's PATH; set CARGO to an absolute path
+  /opt/homebrew/opt/rustup/bin/cargo
+
+## objc2-metal host
+$ ./rusthost/target/debug/metal4-host
+exit: 0
+  pixel [255, 0, 0, 255]
+
+## objc2-metal host, API Validation
+$ MTL_DEBUG_LAYER=1 ./rusthost/target/debug/metal4-host
+exit: 0
+  pixel [255, 0, 0, 255]
+  metal4-host: Metal API Validation Enabled
+
+## Offline shader compile, two steps
+$ xcrun -sdk macosx metal -std=metal4.0 -c mslcheck/t.metal -o fixrun/work/t.air && xcrun -sdk macosx metal -o fixrun/work/t.metallib fixrun/work/t.air && wc -c < fixrun/work/t.metallib
+exit: 0
+      4084
+

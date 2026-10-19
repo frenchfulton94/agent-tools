@@ -1,0 +1,44 @@
+## typecheck_snippets.py plugins/apple-studio/skills/apple-performance/references/profiling-workflow.md
+  [PASS:parse-as-library] #1  import os
+
+TOTAL: 1/1 snippets typecheck clean
+exit: 0
+## vale plugins/apple-studio/skills/apple-performance/references/profiling-workflow.md
+ 210:58  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 418:53  warning  Dictionary: use 'send' instead of 'Dispatch'.                    CEE.CoreWords      
+ 436:62  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 444:54  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 454:1   warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 457:43  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 462:46  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 469:1   warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 471:81  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 504:51  warning  Dictionary: use 'keep' instead of 'retain'.                      CEE.CoreWords      
+
+✖ 0 errors, 31 warnings and 0 suggestions in 1 file.
+exit: 0
+## vale authoring/apple-studio/pipeline/fixtures/metal-probe/README.md
+
+ authoring/apple-studio/pipeline/fixtures/metal-probe/README.md
+ 31:50  warning  G-S1: sentence is over 25 words; split it.     CEE.SentenceLength 
+ 58:62  warning  Dictionary: use 'send' instead of 'dispatch'.  CEE.CoreWords      
+ 62:29  warning  Dictionary: use 'send' instead of 'dispatch'.  CEE.CoreWords      
+
+✖ 0 errors, 3 warnings and 0 suggestions in 1 file.
+exit: 0
+## bun test
+ 542 pass
+ 0 fail
+ 1373 expect() calls
+Ran 542 tests across 16 files. [12.26s]
+exit: 0
+## bun run audit
+0 error(s), 54 warning(s)
+Registration, name/directory agreement, versions, skill-name uniqueness, and description
+identity are the test suite's to check — run it too.
+exit: 0
+## claude plugin validate . --strict
+Validating marketplace manifest: /Users/michaelfrenchfultonjr/Projects/agent-tools/.claude/worktrees/apple-studio-phase10-games/.claude-plugin/marketplace.json
+
+✔ Validation passed
+exit: 0

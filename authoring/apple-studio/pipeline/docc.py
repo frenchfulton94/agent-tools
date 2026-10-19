@@ -3,11 +3,20 @@
 
 Written in Phase 6 (2026-09), where it fed eight parallel distillers.
 
-WHY THIS EXISTS: developer.apple.com serves documentation as a JavaScript shell.
-WebFetch on a human doc URL returns navigation chrome and no content. The real
-content is the DocC JSON behind it:
+WHY THIS EXISTS: a human doc URL on developer.apple.com is a JavaScript shell,
+so fetching it as-is returns navigation chrome and no content. Phase 6 took the
+DocC JSON behind it as the only route:
 
     https://developer.apple.com/tutorials/data/documentation/<path>.json
+
+CORRECTED Phase 10 (2026-10): that is no longer the only route, and it is not the
+first one to try. Append `.md` to the documentation URL and Apple returns
+`text/markdown` (200 on all 50 seeds and 1,148 of the 1,180 pages they link; the
+32 misses were the survey's own regex cutting symbol URLs at `)`). The body
+carries a JSON metadata comment (documentType, role, availability), the prose,
+and topic links as Markdown links. Use that route first. This script is the
+fallback, and it stays the tool for `--children` (the exact child URLs of a
+page's navigation). `crawl_corpus.py` fetches the `.md` route in bulk.
 
 Two endpoint traps this handles, both hit for real in Phase 6:
   - Tutorials are NOT under /documentation/. `documentation/instruments` 404s;

@@ -1,0 +1,19 @@
+Machine: Apple M4 Pro, macOS 27.0.1 26A434
+Date: 2026-10-18 16:16 EDT
+Sample (invented) JSON: {"id":"00000000-0000-0000-0000-000000000000","status":"Accepted","message":"sample"}
+
+## status, as the release block prints it
+$ plutil -extract status raw -o - $OUT/sample-submit.json
+Accepted
+exit: 0
+
+## id, as the release block captures it
+$ plutil -extract id raw -o - $OUT/sample-submit.json
+00000000-0000-0000-0000-000000000000
+exit: 0
+SUBMISSION_ID=00000000-0000-0000-0000-000000000000
+
+## a missing key (expected: exit 1)
+$ plutil -extract no-such-key raw -o - $OUT/sample-submit.json
+$OUT/sample-submit.json: Could not extract value, error: No value at that key path or invalid key path: no-such-key
+exit: 1

@@ -1,0 +1,99 @@
+== date: 2026-10-19T02:35Z
+== macOS 27.0.1; swift-driver version: 1.168.6 Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)
+
+== typecheck_snippets.py plugins/apple-studio/skills/apple-games/references/game-center-and-online.md
+  [PASS:parse-as-library] #1  import AppKit
+  [PASS:parse-as-library] #2  @MainActor
+  [PASS:parse-as-library] #3  func finishRun(score: Int) async throws {
+  [PASS:parse-as-library] #4  final class ActivityRouter: NSObject, GKLocalPlayerListener {
+  [PASS:parse-as-library] #5  final class MatchDriver: NSObject, GKMatchDelegate {
+  [PASS:parse-as-library] #6  enum TurnError: Error { case stateTooLarge }
+  [PASS:parse-as-library] #7  import GameSave
+  [PASS:parse-as-library] #8  import Foundation
+  [PASS:parse-as-library] #9  import Foundation
+TOTAL: 9/9 snippets typecheck clean
+exit: 0
+== typecheck_native.py plugins/apple-studio/skills/apple-games/references/game-center-and-online.md
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/game-center-and-online.md   (1 gated blocks)   target: metal-cpp 26.4, -std=c++20
+  [PASS:cpp:as-written   ] line 644  #include <Network/Network.h>
+
+TOTAL: 1/1 snippets compile clean
+exit: 0
+== bash -n on each bash/sh block in plugins/apple-studio/skills/apple-games/references/game-center-and-online.md
+
+== typecheck_snippets.py plugins/apple-studio/skills/apple-games/references/input.md
+  [PASS:parse-as-library @ macos 26.0] #1  import GameController
+  [PASS:parse-as-library @ macos 26.0] #2  import GameController
+  [PASS:parse-as-library @ macos 26.0] #3  import GameController
+  [PASS:parse-as-library @ macos 26.0] #4  import AppKit
+  [PASS:parse-as-library @ macos 26.0] #5  import AppKit
+  [PASS:parse-as-library @ ios 26.0] #6  import UIKit
+  [PASS:parse-as-library @ ios 26.0] #7  import Metal
+  [PASS:parse-as-library @ ios 26.0] #8  import GameController
+  [PASS:parse-as-library @ macos 26.0] #9  import CoreHaptics
+  [PASS:parse-as-library @ macos 26.0] #10  import GameController
+  [PASS:parse-as-library @ macos 26.0] #11  import GameController
+TOTAL: 11/11 snippets typecheck clean
+exit: 0
+== bash -n on each bash/sh block in plugins/apple-studio/skills/apple-games/references/input.md
+
+== typecheck_snippets.py plugins/apple-studio/skills/apple-metal/references/command-model.md
+  [PASS:parse-as-library] #1  import Metal
+  [PASS:parse-as-library] #2  import Metal
+  [PASS:with-prior      ] #3  func renderOffscreen(device: any MTLDevice, target: any MTLTexture, fram
+  [PASS:with-prior      ] #4  import MetalKit
+  [PASS:parse-as-library] #5  func encodeSimulateThenDraw(commandBuffer: any MTL4CommandBuffer,
+  [PASS:parse-as-library] #6  func commitWithFeedback(queue: any MTL4CommandQueue,
+  [PASS:parse-as-library] #7  enum CommandModel {
+  [PASS:parse-as-library] #8  import MetalKit
+TOTAL: 8/8 snippets typecheck clean
+exit: 0
+== typecheck_native.py plugins/apple-studio/skills/apple-metal/references/command-model.md
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/command-model.md   (1 gated blocks)   target: -std=metal4.0
+  [PASS:metal:as-written   ] line 138  #include <metal_stdlib>
+
+TOTAL: 1/1 snippets compile clean
+exit: 0
+== bash -n on each bash/sh block in plugins/apple-studio/skills/apple-metal/references/command-model.md
+
+== typecheck_snippets.py plugins/apple-studio/skills/apple-metal/references/cpp-and-rust.md
+TOTAL: 0/0 snippets typecheck clean
+exit: 0
+== typecheck_native.py plugins/apple-studio/skills/apple-metal/references/cpp-and-rust.md
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-metal/references/cpp-and-rust.md   (6 gated blocks)   target: metal-cpp 26.4, -std=c++20; cargo check, objc2 = "=0.6.5", objc2-foundation = "=0.3.2", objc2-metal = "=0.3.2"
+  [PASS:cpp:as-written   ] line 177  // main.cpp: the one translation unit that defines the private implement
+  [PASS:cpp:as-written   ] line 642  // Call before the frame's beginCommandBuffer; after the frame-done wait
+  [PASS:cpp:as-written   ] line 752  void encodeFrameMetal3(MTL::CommandQueue* queue, MTL::RenderPassDescript
+  [PASS:rust:as-written   ] line 390  use core::ptr::NonNull;
+  [PASS:rust:as-written   ] line 669  use objc2::rc::Retained;
+  [PASS:rust:as-written   ] line 764  use objc2::rc::autoreleasepool;
+
+TOTAL: 6/6 snippets compile clean
+exit: 0
+== bash -n on each bash/sh block in plugins/apple-studio/skills/apple-metal/references/cpp-and-rust.md
+  [PASS] bash #1  clang++ -std=c++20 -I /path/to/metal-cpp main.cpp \
+  [PASS] bash #2  xcrun -sdk macosx metal -std=metal4.0 -c shaders.metal -o sh
+  [PASS] sh #3  #!/bin/sh
+  [PASS] bash #4  MTL_CAPTURE_ENABLED=1 ./host
+
+== typecheck_snippets.py plugins/apple-studio/skills/app-release/references/direct-distribution.md
+  [PASS:parse-as-library] #1  import Foundation
+TOTAL: 1/1 snippets typecheck clean
+exit: 0
+== bash -n on each bash/sh block in plugins/apple-studio/skills/app-release/references/direct-distribution.md
+  [PASS] bash #1  security find-certificate -c "<part of the identity name>" -
+  [PASS] bash #2  security find-identity -v -p codesigning   # Developer ID Ap
+  [PASS] bash #3  codesign -d --entitlements - --xml "$DEV_APP" | plutil -conv
+  [PASS] bash #4  IDENTITY="Developer ID Application: <Team Name> (<Team ID>)"
+  [PASS] bash #5  codesign -vvv --deep --strict "MyGame.app"
+  [PASS] bash #6  # 1. Once per machine: store notary credentials in the keych
+  [PASS] bash #7  #!/bin/bash
+  [PASS] bash #8  # Zip
+
+== overall: PASS

@@ -1,0 +1,193 @@
+Runtime checks for plugins/apple-studio/skills/apple-games/references/assets.md
+Date: 2026-10-18
+Machine: Apple M4 Pro (sysctl machdep.cpu.brand_string), macOS 27.0.1 (26A434), Xcode 27.1 (27A9275)
+SDKs: MacOSX 27.0, iPhoneOS 27.1
+Scratch dir ($S below): the session scratchpad, outside the repository. Nothing left running;
+no simulator booted; ~/Projects/StudioFixture untouched.
+
+==============================================================================
+1. compression_check.c  (stream support, decode truncation, small encode, ratio/speed)
+==============================================================================
+$ cat $(xcrun --show-sdk-path)/System/Library/Frameworks/Metal.framework/Headers/*.h > $S/metal-headers.txt   # 955259 bytes
+$ clang -O2 -Wall -o $S/compression_check compression_check.c -lcompression
+$ $S/compression_check $S/metal-headers.txt /Applications/Xcode.app/Contents/Developer/usr/bin/TextureConverter
+
+== 1. compression_stream_init per algorithm (ENCODE / DECODE)
+LZ4       encode=OK decode=OK
+LZ4_RAW   encode=ERROR decode=ERROR
+ZLIB      encode=OK decode=OK
+LZMA      encode=OK decode=OK
+LZFSE     encode=OK decode=OK
+LZBITMAP  encode=ERROR decode=ERROR
+BROTLI    encode=OK decode=OK
+LZMESH    encode=ERROR decode=ERROR
+LZRAVEN   encode=ERROR decode=ERROR
+
+== 2. decode into a destination 100 bytes too small   (1 MiB synthetic input)
+LZ4       encoded=71604 full_decode=1048576 short_decode(dst=1048476)=1048476
+LZ4_RAW   encoded=12395 full_decode=1048576 short_decode(dst=1048476)=1048476
+ZLIB      encoded=14935 full_decode=1048576 short_decode(dst=1048476)=1048476
+LZMA      encoded=5968 full_decode=1048576 short_decode(dst=1048476)=0
+LZFSE     encoded=8741 full_decode=1048576 short_decode(dst=1048476)=1048476
+LZBITMAP  encoded=13085 full_decode=1048576 short_decode(dst=1048476)=1048476
+BROTLI    encoded=8229 full_decode=1048576 short_decode(dst=1048476)=0
+LZMESH    encoded=7643 full_decode=1048576 short_decode(dst=1048476)=1048476
+LZRAVEN   encoded=7296 full_decode=1048576 short_decode(dst=1048476)=0
+
+== 3. encode 16 bytes of incompressible input, dst == 16 bytes
+(all nine algorithms) returned=0
+
+== 4. ratio and throughput (best of 3, single thread, scratch buffer reused)
+payload metal-headers.txt (955259 bytes)
+  LZ4       ratio=3.480 enc=   992.5 MB/s dec=  4439.6 MB/s roundtrip=ok
+  LZ4_RAW   ratio=3.501 enc=  1058.2 MB/s dec=  4562.4 MB/s roundtrip=ok
+  ZLIB      ratio=5.737 enc=   117.3 MB/s dec=  1237.1 MB/s roundtrip=ok
+  LZMA      ratio=8.145 enc=     9.5 MB/s dec=   357.4 MB/s roundtrip=ok
+  LZFSE     ratio=6.071 enc=   205.4 MB/s dec=  3362.6 MB/s roundtrip=ok
+  LZBITMAP  ratio=4.106 enc=   505.1 MB/s dec=  6513.1 MB/s roundtrip=ok
+  BROTLI    ratio=5.799 enc=   368.5 MB/s dec=  1197.3 MB/s roundtrip=ok
+  LZMESH    ratio=6.276 enc=   529.4 MB/s dec=  3103.2 MB/s roundtrip=ok
+  LZRAVEN   ratio=8.070 enc=    11.3 MB/s dec=   946.2 MB/s roundtrip=ok
+payload TextureConverter Mach-O (7367328 bytes)
+  LZ4       ratio=2.017 enc=  1575.2 MB/s dec=  6527.5 MB/s roundtrip=ok
+  LZ4_RAW   ratio=2.021 enc=  1551.5 MB/s dec=  6646.5 MB/s roundtrip=ok
+  ZLIB      ratio=3.086 enc=    85.7 MB/s dec=   734.0 MB/s roundtrip=ok
+  LZMA      ratio=4.670 enc=     9.7 MB/s dec=   146.3 MB/s roundtrip=ok
+  LZFSE     ratio=2.855 enc=   201.0 MB/s dec=  2277.4 MB/s roundtrip=ok
+  LZBITMAP  ratio=2.989 enc=   488.8 MB/s dec=  5041.1 MB/s roundtrip=ok
+  BROTLI    ratio=2.866 enc=   332.5 MB/s dec=   537.6 MB/s roundtrip=ok
+  LZMESH    ratio=3.575 enc=   417.1 MB/s dec=  2404.4 MB/s roundtrip=ok
+  LZRAVEN   ratio=5.207 enc=    12.1 MB/s dec=   395.1 MB/s roundtrip=ok
+
+Derived ratios stated in the reference:
+  LZRAVEN/LZMA decode: 946.2/357.4 = 2.65, 395.1/146.3 = 2.70
+  LZMESH/LZFSE encode: 529.4/205.4 = 2.58, 417.1/201.0 = 2.08
+  LZMESH vs LZFSE decode: 3103.2/3362.6 = 0.92, 2404.4/2277.4 = 1.06  (within 10%)
+
+1b. LZMESH / LZRAVEN are not availability-gated by the compiler
+$ printf 'import Compression\nlet a = COMPRESSION_LZMESH\nlet b = COMPRESSION_LZRAVEN\nprint(a, b)\n' > $S/ungated.swift
+$ xcrun swiftc -typecheck -swift-version 6 -target arm64-apple-macos26.0 $S/ungated.swift     -> exit 0, no diagnostics
+$ clang -fsyntax-only -Wall -Wunguarded-availability-new -mmacosx-version-min=26.0 $S/ungated.c  -> exit 0, no diagnostics
+  (ungated.c: #include <compression.h>; int main(void){ return (int)COMPRESSION_LZMESH + (int)COMPRESSION_LZRAVEN; })
+
+==============================================================================
+2. uti_check.swift  (what game-asset extensions resolve to on this Mac)
+==============================================================================
+$ swiftc -O -o $S/uti_check uti_check.swift && $S/uti_check
+gltf  org.khronos.gltf declared=true dynamic=false conformsToData=true
+glb   org.khronos.glb declared=true dynamic=false conformsToData=true
+ktx   org.khronos.ktx declared=true dynamic=false conformsToData=true
+ktx2  org.khronos.ktx2 declared=true dynamic=false conformsToData=true
+astc  org.khronos.astc declared=true dynamic=false conformsToData=true
+dds   com.microsoft.dds declared=true dynamic=false conformsToData=true
+usdz  com.pixar.universal-scene-description-mobile declared=true dynamic=false conformsToData=true
+usda  com.pixar.universal-scene-description-utf8 declared=true dynamic=false conformsToData=true
+aar   com.apple.archive declared=true dynamic=false conformsToData=true
+obj   public.geometry-definition-format declared=true dynamic=false conformsToData=true
+exportedAs (undeclared): com.example.mygame.save declared=true preferredFilenameExtension=nil
+
+Who declares them (read-only LaunchServices dump; active records only, trimmed):
+$ /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -dump Type
+type id: org.khronos.gltf   bundle: CoreTypes  flags: active apple-internal imported core trusted
+                            conforms to: public.3d-content, public.json   tags: .gltf, model/gltf+json
+type id: org.khronos.glb    bundle: CoreTypes  flags: active apple-internal imported core trusted
+                            conforms to: public.3d-content, public.data   tags: .glb, model/gltf-binary
+type id: org.khronos.ktx    bundle: Preview    flags: active apple-internal exported trusted   conforms to: public.image  tags: .ktx
+type id: org.khronos.ktx2   bundle: Preview    flags: active apple-internal exported trusted   conforms to: public.image  tags: .ktx2
+type id: org.khronos.astc   bundle: Preview    flags: active apple-internal exported trusted   conforms to: public.image  tags: .astc
+type id: com.microsoft.dds  bundle: Preview    flags: active apple-internal exported trusted   conforms to: public.image  tags: .dds
+(Pixelmator Pro also carries inactive imported records for ktx, astc, dds.)
+SDK cross-check: grep -i "gltf|ktx|astc" over UniformTypeIdentifiers.framework -> no matches;
+UTCoreTypes.h declares UTType3DContent, UTTypeUSD, UTTypeUSDZ, UTTypeRealityFile,
+UTTypeSceneKitScene (lines 724-769) and UTTypeAppleArchive (line 1143).
+Not checked: iOS / iPadOS (no simulator or device used).
+
+==============================================================================
+3. ktx_check.swift + TextureConverter  (KTX vs KTX2 through MTKTextureLoader)
+==============================================================================
+$ swiftc -O -o $S/ktx_check ktx_check.swift
+$ $S/ktx_check make-png $S/src.png                                  # 256x256 RGBA gradient
+$ xcrun TextureConverter --compression_format=ASTC4x4 --compression_quality=Normal --output=astc.ktx2 src.png
+$ xcrun TextureConverter --compression_format=ASTC4x4 --compression_quality=Normal --output=astc.ktx src.png
+$ xcrun TextureConverter --compression_format=ASTC4x4 --compression_quality=Normal --srgb_format --output=astc_srgb.ktx src.png
+$ xcrun TextureConverter --compression_format=BC7 --compression_quality=Normal --output=bc7.ktx2 src.png
+$ xcrun TextureConverter --mode=convert --format=RGBA8 --output=rgba8.ktx2 src.png
+$ xcrun TextureConverter --mode=examine astc.ktx2   -> Size 256x256, 9 mip-levels, Format ASTC4x4
+$ xcrun TextureConverter --mode=examine astc.ktx    -> Size 256x256, 9 mip-levels, Format ASTC4x4
+$ xcrun TextureConverter --mode=examine bc7.ktx2    -> Size 256x256, 9 mip-levels, Format BC7
+$ $S/ktx_check load astc.ktx2 astc.ktx astc_srgb.ktx bc7.ktx2 rgba8.ktx2 src.png
+device: Apple M4 Pro
+astc.ktx2 no options    OK pixelFormat=81 mips=1 256x256
+astc.ktx2 origin=bottom OK pixelFormat=81 mips=1 256x256
+astc.ktx2 SRGB=true     OK pixelFormat=81 mips=1 256x256
+astc.ktx no options    OK pixelFormat=204 mips=9 256x256
+astc.ktx origin=bottom ERROR Vertical flip is not supported for block texture formats
+astc.ktx SRGB=true     OK pixelFormat=186 mips=9 256x256
+astc_srgb.ktx no options    OK pixelFormat=186 mips=9 256x256
+astc_srgb.ktx origin=bottom ERROR Vertical flip is not supported for block texture formats
+astc_srgb.ktx SRGB=true     OK pixelFormat=186 mips=9 256x256
+bc7.ktx2 no options    OK pixelFormat=81 mips=1 256x256
+bc7.ktx2 origin=bottom OK pixelFormat=81 mips=1 256x256
+bc7.ktx2 SRGB=true     OK pixelFormat=81 mips=1 256x256
+rgba8.ktx2 no options    OK pixelFormat=81 mips=1 256x256
+src.png no options    OK pixelFormat=81 mips=1 256x256
+Pixel format numbers (MTLPixelFormat.h): 81 = BGRA8Unorm_sRGB (line 104),
+186 = ASTC_4x4_sRGB (line 262), 204 = ASTC_4x4_LDR (line 277).
+
+TextureConverter capabilities quoted in the reference come from:
+$ xcrun TextureConverter --help      (TextureConverter 5.0.220200)
+  ARM: ASTC4x4..ASTC12x12 incl. _HDR; ISPC: ASTC, BC1/3/4/5/6U/7, ETC2_RGB8; NVTT: BC1-BC7, EAC, ETC2;
+  ETC2COMP: EAC_R11, EAC_RG11, EAC_RGBA8, ETC2_RGB8, ETC2_RGB8A1.
+  Input: BMP, DDS, EXR, HDR, HEIC, JPG, KTX, KTX2, PNG, TGA, TIFF, WEBP. Output: DDS, EXR, H, KTX, KTX2.
+  Options used: --compression_format, --compression_quality, --srgb_format, --flip_y, --gamma_in/out,
+  --normal_map, --build_cubemap, --mipmap_filter, --output, --mode=convert|examine.
+
+==============================================================================
+4. archive_check.swift  (AppleArchive: length-based read, lzraven, no-arg decompression)
+==============================================================================
+$ swiftc -O -o $S/archive_check archive_check.swift && $S/archive_check $S
+lzfse archive bytes=259 roundtrip=true count=4133 decoded-with-length prefix=level=3;hp=87;
+lzraven archive bytes=172 roundtrip=true count=4133 decoded-with-length prefix=level=3;hp=87;
+(Both archives read by the same read() with ArchiveByteStream.decompressionStream(readingFrom:),
+which takes no algorithm argument. The payload holds an embedded NUL and no terminator.)
+
+==============================================================================
+5. modelio_check.swift  (Model I/O import/export by extension)
+==============================================================================
+$ swiftc -O -o $S/modelio_check modelio_check.swift && $S/modelio_check
+usd   import=true export=true
+usda  import=true export=true
+usdc  import=true export=true
+usdz  import=true export=false
+obj   import=true export=true
+abc   import=true export=true
+ply   import=true export=true
+stl   import=true export=true
+gltf  import=false export=false
+glb   import=false export=false
+fbx   import=false export=false
+dae   import=false export=false
+
+==============================================================================
+6. Tool help read for the Background Assets section (read-only)
+==============================================================================
+$ xcrun ba-package --version  -> 2.0
+$ xcrun ba-package --help     -> subcommands: convert (Steam "build script" -> asset-pack manifest),
+                                 download-manifest (create/update, for self-hosted packs), evaluate
+                                 (validates a manifest, prints matched paths), package (default), template
+$ xcrun ba-package help convert -> USAGE: ba-package convert <input-path> [--depot-id <id>] --asset-pack-id <id>
+                                 ... --essential/--prefetch/--on-demand [--installation-event-types ...]
+$ xcrun ba-serve --help        -> subcommands: serve (default), url-override
+
+==============================================================================
+7. Snippet compile checks beyond the gate (Swift 6 language mode)
+==============================================================================
+Each ```swift block of assets.md extracted to $S/blk0..5.swift, then:
+$ xcrun swiftc -typecheck -swift-version 6 -target arm64-apple-macos26.0 $S/blkN.swift            -> clean (0-5)
+$ xcrun --sdk iphoneos swiftc -typecheck -swift-version 6 -target arm64-apple-ios26.0 $S/blkN.swift -> clean (0-5)
+Finding: without `@unknown default`, the statusUpdates switch is an error in Swift 6
+("switch covers known cases, but 'AssetPackManager.DownloadStatusUpdate' may have additional
+unknown values"); the gate's Swift 5 framing passed it. The reference adds `@unknown default`.
+Finding: MTKModelIOVertexDescriptorFromMetalWithError(_:) is `throws` in the MetalKit Swift overlay
+(MetalKit.swiftmodule arm64e-apple-macos.swiftinterface line 16); the C-style two-argument call fails
+with "extra argument in call".

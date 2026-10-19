@@ -1,0 +1,47 @@
+# Task 13 Step 2a check: catalog-before.log (Task 2) against catalog-after.log (this task), per file and snippet number, 2026-10-18T21:31-0400
+# phase10-references.txt = the references in: git diff --name-only 838ccda..HEAD -- plugins/
+$ python3 -I $REC/task-13-release/catalog_diff.py $REC/task-2-gates/catalog-before.log $REC/task-13-release/catalog-after.log $REC/task-13-release/phase10-references.txt
+before: 39/56 PASS
+after:  153/170 PASS
+PASS->FAIL flips: 0
+FAIL->PASS flips: 0
+snippets with no before entry (new or renumbered): 114
+  plugins/apple-studio/skills/app-release/references/direct-distribution.md: 1 new, 1 PASS, 0 FAIL
+  plugins/apple-studio/skills/apple-games/references/assets.md: 6 new, 6 PASS, 0 FAIL
+  plugins/apple-studio/skills/apple-games/references/audio-and-haptics.md: 7 new, 7 PASS, 0 FAIL
+  plugins/apple-studio/skills/apple-games/references/game-center-and-online.md: 9 new, 9 PASS, 0 FAIL
+  plugins/apple-studio/skills/apple-games/references/game-design.md: 5 new, 5 PASS, 0 FAIL
+  plugins/apple-studio/skills/apple-games/references/game-loop-and-threading.md: 12 new, 12 PASS, 0 FAIL
+  plugins/apple-studio/skills/apple-games/references/input.md: 11 new, 11 PASS, 0 FAIL
+  plugins/apple-studio/skills/apple-metal/references/apple-gpu-tbdr.md: 7 new, 7 PASS, 0 FAIL
+  plugins/apple-studio/skills/apple-metal/references/command-model.md: 8 new, 8 PASS, 0 FAIL
+  plugins/apple-studio/skills/apple-metal/references/compute-and-gpu-driven.md: 9 new, 9 PASS, 0 FAIL
+  plugins/apple-studio/skills/apple-metal/references/display-and-upscaling.md: 6 new, 6 PASS, 0 FAIL
+  plugins/apple-studio/skills/apple-metal/references/gpu-debugging-and-profiling.md: 9 new, 9 PASS, 0 FAIL
+  plugins/apple-studio/skills/apple-metal/references/pipelines-and-render-passes.md: 10 new, 10 PASS, 0 FAIL
+  plugins/apple-studio/skills/apple-metal/references/resources-and-memory.md: 9 new, 9 PASS, 0 FAIL
+  plugins/apple-studio/skills/apple-metal/references/shading-language.md: 4 new, 4 PASS, 0 FAIL
+  plugins/apple-studio/skills/apple-performance/references/profiling-workflow.md: 1 new, 1 PASS, 0 FAIL
+Phase 10 reference files in the run: 19
+  plugins/apple-studio/skills/app-release/references/direct-distribution.md: 1/1 PASS
+  plugins/apple-studio/skills/app-release/references/signing-and-provisioning.md: 0/0 PASS
+  plugins/apple-studio/skills/apple-frameworks/references/framework-catalog.md: 0/0 PASS
+  plugins/apple-studio/skills/apple-games/references/assets.md: 6/6 PASS
+  plugins/apple-studio/skills/apple-games/references/audio-and-haptics.md: 7/7 PASS
+  plugins/apple-studio/skills/apple-games/references/game-center-and-online.md: 9/9 PASS
+  plugins/apple-studio/skills/apple-games/references/game-design.md: 5/5 PASS
+  plugins/apple-studio/skills/apple-games/references/game-loop-and-threading.md: 12/12 PASS
+  plugins/apple-studio/skills/apple-games/references/input.md: 11/11 PASS
+  plugins/apple-studio/skills/apple-metal/references/apple-gpu-tbdr.md: 7/7 PASS
+  plugins/apple-studio/skills/apple-metal/references/command-model.md: 8/8 PASS
+  plugins/apple-studio/skills/apple-metal/references/compute-and-gpu-driven.md: 9/9 PASS
+  plugins/apple-studio/skills/apple-metal/references/cpp-and-rust.md: 0/0 PASS
+  plugins/apple-studio/skills/apple-metal/references/display-and-upscaling.md: 6/6 PASS
+  plugins/apple-studio/skills/apple-metal/references/gpu-debugging-and-profiling.md: 9/9 PASS
+  plugins/apple-studio/skills/apple-metal/references/pipelines-and-render-passes.md: 10/10 PASS
+  plugins/apple-studio/skills/apple-metal/references/resources-and-memory.md: 9/9 PASS
+  plugins/apple-studio/skills/apple-metal/references/shading-language.md: 4/4 PASS
+  plugins/apple-studio/skills/apple-performance/references/profiling-workflow.md: 1/1 PASS
+FAIL in a Phase 10 file: 0
+same-number snippets whose first line differs (edited or renumbered): 0
+exit: 0

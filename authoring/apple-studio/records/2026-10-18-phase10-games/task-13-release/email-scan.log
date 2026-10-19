@@ -1,0 +1,32 @@
+# Task 13 fix round 1 (ruling P51): Apple ID email scan, 2026-10-18T21:52-0400, working tree
+# The patterns are built in the script, so this log spells no address. plugin.json's author email is masked.
+
+## 1. The second team's domain
+$ grep -rIn --exclude-dir=tmp --exclude-dir=raw --exclude-dir=node_modules -e "@$DOMAIN" authoring/ plugins/
+exit: 1 (1 means no match)
+
+## 2. Every email-shaped string, except plugin.json files and noreply/example forms
+$ grep -rIEon --exclude-dir=tmp --exclude-dir=raw --exclude-dir=node_modules "$EMAIL_RE" authoring/ plugins/ | grep -v -e '/.claude-plugin/plugin.json:' -e 'noreply@' -e '@example\.'
+authoring/apple-studio/docs/plans/2026-09-12-phase8-catalog-migration.md:426:<plugin.json author email>
+plugins/dokploy/skills/deploying-apps-to-dokploy/references/providers-and-domains.md:29:git@github.com
+plugins/security/skills/reviewing-code-security/owasp/Logging_Vocabulary_Cheat_Sheet.md:713:dr@evil.com
+plugins/security/skills/reviewing-code-security/owasp/Logging_Vocabulary_Cheat_Sheet.md:715:dr@evil.com
+plugins/security/skills/reviewing-code-security/owasp/Mass_Assignment_Cheat_Sheet.md:62:bobby@tables.com
+plugins/security/skills/reviewing-code-security/owasp/Mass_Assignment_Cheat_Sheet.md:70:bobby@tables.com
+plugins/security/skills/reviewing-code-security/owasp/Subdomain_Takeover_Prevention_Cheat_Sheet.md:46:admin@subdomain.example.com
+plugins/typescript/skills/drizzle-development/references/querying.md:33:user@gmail.com
+plugins/rust/skills/using-cargo/references/publishing-and-semver.md:46:help@crates.io
+plugins/workflows/scripts/install-plugins.mjs:19:git@github.com
+plugins/workflows/skills/setup/SKILL.md:413:git@github.com
+plugins/workflows/skills/setup/SKILL.md:421:git@github.com
+plugins/workflows/skills/configuring-openspec/references/config-reference.md:93:git@github.com
+plugins/apple-studio/skills/apple-design/references/hig-patterns.md:126:username@company.com
+exit: 0 (0 means lines survived the filter; section 3 reads each one)
+
+## 3. Reading of section 2
+- The Phase 8 plan line is a copy of plugin.json's author block. That is the one address the ruling exempts, and it is masked here.
+- Every other line is a documentation example or a service address (git@github.com, help@crates.io, OWASP examples, placeholder users). None is an Apple ID.
+- No committed file under authoring/ or plugins/ holds the second team's address, or any Apple ID address other than the author email.
+
+## 4. The plugin.json author email that section 2 skips
+plugins/apple-studio/.claude-plugin/plugin.json:9: <plugin.json author email>

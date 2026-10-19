@@ -1,6 +1,6 @@
 # Apple framework catalog
 
-> generated: 2026-09-02 from the developer.apple.com Technologies index
+> generated: 2026-10-18 from the developer.apple.com Technologies index
 > regenerate: authoring/apple-studio/pipeline/generate_catalog.sh (rerun each phase and after WWDC)
 
 - **Accelerate** — Make large-scale mathematical computations and image calculations, optimized for high performance and low energy consumption. — https://developer.apple.com/documentation/accelerate.md
@@ -19,7 +19,7 @@
 - **Address Book** — Access the centralized database for storing users’ contacts. — https://developer.apple.com/documentation/addressbook.md
 - **AdServices** — Attribute app-download campaigns that originate from the App Store on iOS devices. — https://developer.apple.com/documentation/adservices.md
 - **AdSupport** — Provide apps with access to an advertising identifier. — https://developer.apple.com/documentation/adsupport.md
-- **Advanced Commerce API** — Support In-App Purchases through the App Store for exceptionally large catalogs of custom one-time purchases, subscriptions, and subscriptions with optional add-ons. — https://developer.apple.com/documentation/advancedcommerceapi.md
+- **Advanced Commerce API** — Support Apple In-App Purchases through the App Store for exceptionally large catalogs of custom one-time purchases, subscriptions, and subscriptions with optional add-ons. — https://developer.apple.com/documentation/advancedcommerceapi.md
 - **AlarmKit** — Schedule prominent alarms and countdowns to help people manage their time. — https://developer.apple.com/documentation/alarmkit.md
 - **Analytics Reports** — A list of app development reports, their field descriptions, and glossaries. — https://developer.apple.com/documentation/analytics-reports.md
 - **App Clips** — Create a lightweight, in-the-moment experience or demo version for your app that’s instantly available. — https://developer.apple.com/documentation/appclip.md
@@ -31,10 +31,10 @@
 - **App Store Receipts** — Validate app and In-App Purchase receipts with the App Store. — https://developer.apple.com/documentation/appstorereceipts.md
 - **App Store Server API** — Manage your customers’ App Store transactions from your server. — https://developer.apple.com/documentation/appstoreserverapi.md
 - **App Store Server Notifications** — Monitor In-App Purchase events in real time and learn of unreported external purchase tokens, with server notifications from the App Store. — https://developer.apple.com/documentation/appstoreservernotifications.md
-- **App Tracking Transparency** — Request user authorization to access app-related data for tracking the user or the device. — https://developer.apple.com/documentation/apptrackingtransparency.md
+- **App Tracking Transparency** — Request authorization to access app-related data that your app can use to track the person or the device. — https://developer.apple.com/documentation/apptrackingtransparency.md
 - **AppKit** — Construct and manage a graphical, event-driven user interface for your macOS app. — https://developer.apple.com/documentation/appkit.md
 - **Apple Ads Platform API** — Programmatically manage App Store and Apple Maps advertising campaigns through a single RESTful API. — https://developer.apple.com/documentation/apple-ads-platform-api.md
-- **Apple Ads** —  — https://developer.apple.com/documentation/apple_ads.md
+- **Apple Ads** — Drive app discovery by creating and managing campaigns with the Apple Ads Campaign Management API. — https://developer.apple.com/documentation/apple_ads.md
 - **Apple Archive** — Perform multithreaded lossless compression of directories, files, and data. — https://developer.apple.com/documentation/applearchive.md
 - **Apple CryptoKit** — Perform cryptographic operations securely and efficiently. — https://developer.apple.com/documentation/cryptokit.md
 - **Apple Maps Server API** — Reduce API calls and conserve device power by streamlining your app’s georelated searches. — https://developer.apple.com/documentation/applemapsserverapi.md
@@ -65,7 +65,7 @@
 - **Automator** — Develop actions that the Automator app can load and run. View, edit, and run Automator workflows in your app. — https://developer.apple.com/documentation/automator.md
 - **AVFAudio** — Play, record, and process audio; configure your app’s system audio behavior. — https://developer.apple.com/documentation/avfaudio.md
 - **AVFoundation** — Work with audiovisual assets, control device cameras, process audio, and configure system audio interactions. — https://developer.apple.com/documentation/avfoundation.md
-- **AVKit** — Create user interfaces for media playback, complete with transport controls, chapter navigation, picture-in-picture support, and display of subtitles and closed captions. — https://developer.apple.com/documentation/avkit.md
+- **AVKit** — Adopt the system’s video playback interfaces, and integrate your camera app with capture hardware. — https://developer.apple.com/documentation/avkit.md
 - **AVRouting** — Display custom destinations to stream media in the system route picker. — https://developer.apple.com/documentation/avrouting.md
 - **AVSystemRouting** — Send media from your app to a TV, speaker, or other device through a media device extension. — https://developer.apple.com/documentation/avsystemrouting.md
 - **Background Assets** — Improve or eliminate the time people wait while your app downloads assets. — https://developer.apple.com/documentation/backgroundassets.md
@@ -329,8 +329,8 @@
 - **Speech** — Perform speech recognition on live or prerecorded audio, and receive transcriptions, alternative interpretations, and confidence levels of the results. — https://developer.apple.com/documentation/speech.md
 - **SpriteKit** — Add high-performance 2D content with smooth animations to your app, or create a game with a high-level set of 2D game-based tools. — https://developer.apple.com/documentation/spritekit.md
 - **StateReporting** — Communicate your app’s state to the system to improve diagnostic actionability. — https://developer.apple.com/documentation/statereporting.md
-- **StoreKit Test** — Create and automate tests in Xcode for your app’s subscription and in-app purchase transactions, and SKAdNetwork implementations. — https://developer.apple.com/documentation/storekittest.md
-- **StoreKit** — Support In-App Purchases and interactions with the App Store. — https://developer.apple.com/documentation/storekit.md
+- **StoreKit Test** — Create and automate tests in Xcode for your app’s subscription and Apple In-App Purchase transactions, and SKAdNetwork implementations. — https://developer.apple.com/documentation/storekittest.md
+- **StoreKit** — Support Apple In-App Purchases and interactions with the App Store. — https://developer.apple.com/documentation/storekit.md
 - **Suggested Actions** — Offer quick actions next to messages in your messaging app, based on context you provide. — https://developer.apple.com/documentation/suggestedactions.md
 - **Swift Charts** — Construct and customize charts on every Apple platform. — https://developer.apple.com/documentation/charts.md
 - **Swift packages** — Create reusable code, organize it in a lightweight way, and share it across Xcode projects and with other developers. — https://developer.apple.com/documentation/xcode/swift-packages.md

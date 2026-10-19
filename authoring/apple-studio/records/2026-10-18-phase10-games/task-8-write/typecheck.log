@@ -1,0 +1,70 @@
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/assets.md   (6 swift blocks)   target: macos 26.0
+  [PASS:parse-as-library] #1  import Compression
+  [PASS:parse-as-library] #2  import AppleArchive
+  [PASS:parse-as-library] #3  import MetalKit
+  [PASS:parse-as-library] #4  import Metal
+  [PASS:parse-as-library] #5  import UniformTypeIdentifiers
+  [PASS:parse-as-library] #6  import BackgroundAssets
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/audio-and-haptics.md   (7 swift blocks)   target: macos 26.0, ios 26.0
+  [PASS:parse-as-library @ macos 26.0] #1  import AVFAudio
+  [PASS:parse-as-library @ macos 26.0] #2  import AVFAudio
+  [PASS:parse-as-library @ ios 26.0] #3  import AVFAudio
+  [PASS:parse-as-library @ macos 26.0] #4  import PHASE
+  [PASS:parse-as-library @ macos 26.0] #5  import CoreHaptics
+  [PASS:parse-as-library @ macos 26.0] #6  import AppKit
+  [PASS:parse-as-library @ macos 26.0] #7  import CoreHaptics
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/game-center-and-online.md   (9 swift blocks)   target: macos 26.0
+  [PASS:parse-as-library] #1  import AppKit
+  [PASS:parse-as-library] #2  @MainActor
+  [PASS:parse-as-library] #3  func finishRun(score: Int) async throws {
+  [PASS:parse-as-library] #4  final class ActivityRouter: NSObject, GKLocalPlayerListener {
+  [PASS:parse-as-library] #5  final class MatchDriver: NSObject, GKMatchDelegate {
+  [PASS:parse-as-library] #6  enum TurnError: Error { case stateTooLarge }
+  [PASS:parse-as-library] #7  import GameSave
+  [PASS:parse-as-library] #8  import Foundation
+  [PASS:with-prior      ] #9  func lanParameters() -> NWParameters {
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/game-design.md   (5 swift blocks)   target: macos 26.0, ios 26.0
+  [PASS:parse-as-library @ macos 26.0] #1  import QuartzCore
+  [PASS:parse-as-library @ ios 26.0] #2  import UIKit
+  [PASS:parse-as-library @ macos 26.0] #3  import AppKit
+  [PASS:parse-as-library @ ios 26.0] #4  import UIKit
+  [PASS:parse-as-library @ macos 26.0] #5  import AppKit
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/game-loop-and-threading.md   (12 swift blocks)   target: macos 26.0, ios 26.0
+  [PASS:parse-as-library @ macos 26.0] #1  #if os(macOS)
+  [PASS:parse-as-library @ ios 26.0] #2  import UIKit
+  [PASS:parse-as-library @ ios 26.0] #3  import UIKit
+  [PASS:with-prior       @ macos 26.0] #4  import SwiftUI
+  [PASS:parse-as-library @ macos 26.0] #5  import QuartzCore
+  [PASS:with-prior       @ macos 26.0] #6  import QuartzCore
+  [PASS:parse-as-library @ macos 26.0] #7  import Darwin
+  [PASS:parse-as-library @ macos 26.0] #8  import Foundation
+  [PASS:parse-as-library @ macos 26.0] #9  import os
+  [PASS:parse-as-library @ macos 26.0] #10  import Foundation
+  [PASS:parse-as-library @ macos 26.0] #11  #if os(macOS)
+  [PASS:parse-as-library @ macos 26.0] #12  #if os(macOS)
+
+==============================================================================
+FILE: plugins/apple-studio/skills/apple-games/references/input.md   (11 swift blocks)   target: macos 26.0, ios 26.0
+  [PASS:parse-as-library @ macos 26.0] #1  import GameController
+  [PASS:parse-as-library @ macos 26.0] #2  import GameController
+  [PASS:parse-as-library @ macos 26.0] #3  import GameController
+  [PASS:parse-as-library @ macos 26.0] #4  import AppKit
+  [PASS:parse-as-library @ macos 26.0] #5  import AppKit
+  [PASS:parse-as-library @ ios 26.0] #6  import UIKit
+  [PASS:parse-as-library @ ios 26.0] #7  import Metal
+  [PASS:parse-as-library @ ios 26.0] #8  import GameController
+  [PASS:parse-as-library @ macos 26.0] #9  import CoreHaptics
+  [PASS:parse-as-library @ macos 26.0] #10  import GameController
+  [PASS:parse-as-library @ macos 26.0] #11  import GameController
+
+TOTAL: 50/50 snippets typecheck clean

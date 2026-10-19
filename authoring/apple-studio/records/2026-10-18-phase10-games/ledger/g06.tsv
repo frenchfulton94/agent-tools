@@ -1,0 +1,170 @@
+path	words	read_in_full	fed
+/documentation/AppKit/adding-writing-tools-support-to-a-custom-nsview	3473	yes	nothing: Writing Tools text-engine integration, no game frame-loop or input use
+/documentation/AppKit/additional-writing-directions	88	yes	nothing: bidi attributed-string constants
+/documentation/AppKit/adopting-the-system-text-cursor-in-custom-text-views	1147	yes	input.md
+/documentation/AppKit/animation	197	yes	nothing: NSAnimation/NSViewAnimation index, view animation not a game frame loop
+/documentation/AppKit/app-and-environment	373	yes	nothing: NSApplication/NSWorkspace topic index, no decision content
+/documentation/AppKit/app-extensions	110	yes	nothing: Finder/Mail extension index
+/documentation/AppKit/app-specific-attributes	118	yes	nothing: NSAccessibility app attribute constants
+/documentation/AppKit/appearance-customization	83	yes	nothing: NSAppearance/Dark Mode index
+/documentation/AppKit/appkit-errors	309	yes	nothing: AppKit NSError code list
+/documentation/AppKit/applying-apple-hdr-effect-to-your-photos	640	yes	nothing: photo gain-map decode math, not a game render or EDR presentation path
+/documentation/AppKit/binding-dictionary-keys	83	yes	nothing: Cocoa bindings constants
+/documentation/AppKit/browser-view	83	yes	nothing: NSBrowser index
+/documentation/AppKit/cell-attributes	83	yes	nothing: accessibility table cell constants
+/documentation/AppKit/cell-based-table-attributes	63	yes	nothing: accessibility table constants
+/documentation/AppKit/cell-based-table-parameterized-attributes	43	yes	nothing: accessibility table constant
+/documentation/AppKit/cocoa-bindings	245	yes	nothing: Cocoa bindings controller index
+/documentation/AppKit/collection-view	772	yes	nothing: NSCollectionView layout index
+/documentation/AppKit/color	145	yes	nothing: NSColor/picker index, no color-space decision content
+/documentation/AppKit/column-sort-direction	73	yes	nothing: accessibility sort constants
+/documentation/AppKit/combo-box	102	yes	nothing: NSComboBox index
+/documentation/AppKit/constants	43	yes	nothing: two availability macros
+/documentation/AppKit/convenience-functions	452	yes	nothing: legacy NSRect drawing helpers
+/documentation/AppKit/creating-and-customizing-the-touch-bar	665	yes	nothing: Touch Bar sample, legacy MacBook Pro hardware, no game input path
+/documentation/AppKit/custom-controls	620	yes	game-design.md
+/documentation/AppKit/customizing-writing-tools-behavior-for-system-views	526	yes	nothing: Writing Tools in NSTextView
+/documentation/AppKit/data-entry-types	90	yes	nothing: NSCell numeric entry constants
+/documentation/AppKit/data-types	42	yes	nothing: two AppKit data types
+/documentation/AppKit/date-picker	87	yes	nothing: NSDatePicker index
+/documentation/AppKit/deprecated-symbols	1040	yes	game-loop-and-threading.md
+/documentation/AppKit/developing-a-document-based-app	1141	yes	assets.md
+/documentation/AppKit/document-reading-option-keys	201	yes	nothing: attributed-string import option keys
+/documentation/AppKit/documents-data-and-pasteboard	393	yes	nothing: NSDocument/pasteboard topic index; NSUbiquitousKeyValueStore only linked
+/documentation/AppKit/drag-and-drop	311	yes	nothing: NSDragging protocol index
+/documentation/AppKit/drawing	142	yes	nothing: NSGraphicsContext/NSBezierPath index
+/documentation/AppKit/enhancing-your-custom-text-engine-with-writing-tools	209	yes	nothing: Writing Tools sample stub, no content beyond setup
+/documentation/AppKit/enumerations	177	yes	nothing: misc AppKit enum index
+/documentation/AppKit/exceptions	157	yes	nothing: AppKit exception name list
+/documentation/AppKit/fonts	205	yes	nothing: NSFont/NSFontManager index
+/documentation/AppKit/gestures	156	yes	input.md
+/documentation/AppKit/glyph-attributes	70	yes	nothing: glyph generation constants
+/documentation/AppKit/grid-view	94	yes	nothing: NSGridView index
+/documentation/AppKit/grid-view-attributes	97	yes	nothing: accessibility grid constants
+/documentation/AppKit/images-and-pdf	263	yes	nothing: NSImage/NSImageRep index, not a texture-loading path
+/documentation/AppKit/integrating-a-toolbar-and-touch-bar-into-your-app	1321	yes	nothing: NSToolbar/Touch Bar document-app sample, no game use
+/documentation/AppKit/layout-area-attributes	87	yes	nothing: accessibility layout constants
+/documentation/AppKit/layout-area-parameterized-attributes	113	yes	nothing: accessibility layout constants
+/documentation/AppKit/layout-item-attributes	46	yes	nothing: accessibility constant
+/documentation/AppKit/linkage-elements	72	yes	nothing: accessibility linkage constants
+/documentation/AppKit/macros	163	yes	nothing: AppKit macros; NS_OPENGL_*_DEPRECATED repeats deprecated-symbols note
+/documentation/AppKit/managing-ongoing-background-processes-in-your-mac	1746	yes	app-release/direct-distribution.md
+/documentation/AppKit/measurement-unit-attributes	88	yes	nothing: accessibility ruler unit constants
+/documentation/AppKit/menus-cursors-and-the-dock	238	yes	game-loop-and-threading.md
+/documentation/AppKit/miscellaneous-attributes	425	yes	nothing: accessibility attribute constants
+/documentation/AppKit/mode-masks	138	yes	nothing: font panel mode masks
+/documentation/AppKit/mouse-keyboard-and-trackpad	349	yes	input.md;audio-and-haptics.md
+/documentation/AppKit/navigating-hierarchical-data-using-outline-and-split-views	1160	yes	nothing: NSOutlineView/split view sample
+/documentation/AppKit/nsaccessibility	402	yes	game-design.md
+/documentation/AppKit/nsbuttontypes-anonymous	34	yes	nothing: legacy OK/Cancel button constants
+/documentation/AppKit/nseditor-deprecated-symbols	149	yes	nothing: NSEditor informal protocol for bindings
+/documentation/AppKit/nsfontpanelvalidation	60	yes	nothing: font panel validation
+/documentation/AppKit/nsplaceholders	123	yes	nothing: bindings placeholder protocol
+/documentation/AppKit/organize-your-user-interface-with-a-stack-view	623	yes	nothing: NSStackView sample with window restoration, no game use
+/documentation/AppKit/orientations	74	yes	nothing: accessibility orientation constants
+/documentation/AppKit/outline-view	125	yes	nothing: NSOutlineView index
+/documentation/AppKit/outline-view-attributes	79	yes	nothing: accessibility outline constants
+/documentation/AppKit/path-control	128	yes	nothing: NSPathControl index
+/documentation/AppKit/printing	119	yes	nothing: print panel index
+/documentation/AppKit/reserved-glyph-codes	50	yes	nothing: glyph code constants
+/documentation/AppKit/resource-management	158	yes	assets.md
+/documentation/AppKit/restoring-your-app-s-state-with-appkit	1048	yes	game-loop-and-threading.md
+/documentation/AppKit/return-values-for-modal-operations	72	yes	nothing: legacy modal response constants
+/documentation/AppKit/ruler-marker-type-values	102	yes	nothing: accessibility ruler constants
+/documentation/AppKit/ruler-view-attributes	103	yes	nothing: accessibility ruler constants
+/documentation/AppKit/screen-matte-attributes	63	yes	nothing: accessibility matte constants
+/documentation/AppKit/scroll-view	147	yes	nothing: NSScrollView index
+/documentation/AppKit/search-field	115	yes	nothing: NSSearchField/NSTextFinder index
+/documentation/AppKit/selection-markers	82	yes	nothing: bindings selection markers
+/documentation/AppKit/services-functions	73	yes	nothing: Services menu functions
+/documentation/AppKit/slider	77	yes	nothing: NSSlider index
+/documentation/AppKit/slider-attributes	66	yes	nothing: accessibility slider constants
+/documentation/AppKit/sound-speech-and-haptics	137	yes	audio-and-haptics.md
+/documentation/AppKit/standard-attributes	328	yes	nothing: accessibility standard attribute constants
+/documentation/AppKit/supporting-collection-view-drag-and-drop-through-file-promises	1866	yes	assets.md
+/documentation/AppKit/supporting-continuity-camera-in-your-mac-app	1360	yes	nothing: Continuity Camera image import into document apps
+/documentation/AppKit/supporting-drag-and-drop-through-file-promises	867	yes	assets.md
+/documentation/AppKit/supporting-table-view-drag-and-drop-through-file-promises	1831	yes	nothing: table-view variant of the file-promise sample, adds nothing beyond the collection-view note
+/documentation/AppKit/supporting-writing-tools-via-the-pasteboard	1278	yes	nothing: Writing Tools via Services pasteboard for custom text views
+/documentation/AppKit/table-view	298	yes	nothing: NSTableView index
+/documentation/AppKit/table-view-and-outline-view-attributes	114	yes	nothing: accessibility table constants
+/documentation/AppKit/tags-of-views-in-the-fontpanel	71	yes	nothing: obsolete font panel tags
+/documentation/AppKit/text-attributed-string-attributes-and-constants	243	yes	nothing: accessibility text attribute keys
+/documentation/AppKit/text-display	527	yes	input.md
+/documentation/AppKit/text-field	142	yes	input.md
+/documentation/AppKit/text-specific-attributes	126	yes	nothing: accessibility text constants
+/documentation/AppKit/text-specific-parameterized-attributes	221	yes	nothing: accessibility text parameterized constants
+/documentation/AppKit/textkit	992	yes	nothing: TextKit 1/2 layout index; game text rendering is a glyph-atlas concern outside AppKit
+/documentation/AppKit/textkit-string-attribute-keys	601	yes	nothing: attributed-string key list
+/documentation/AppKit/textkit-string-attributes	230	yes	nothing: attributed-string type index
+/documentation/AppKit/token-field	108	yes	nothing: NSTokenField index
+/documentation/AppKit/toolbar	192	yes	nothing: NSToolbar index
+/documentation/AppKit/touch-bar	577	yes	nothing: Touch Bar class index, legacy hardware
+/documentation/AppKit/updating-views-automatically-with-observation-tracking-in-appkit	531	yes	game-loop-and-threading.md
+/documentation/AppKit/view-layout	300	yes	nothing: Auto Layout/stack view index
+/documentation/AppKit/view-management	256	yes	nothing: view controller container index
+/documentation/AppKit/views-and-controls	1321	yes	game-design.md
+/documentation/AppKit/window-specific-attributes	182	yes	nothing: accessibility window constants
+/documentation/AppKit/windows-panels-and-screens	527	yes	nothing: NSWindow/NSScreen/panel index, no full-screen guidance on the page
+/documentation/AppKit/writing-tools	378	yes	nothing: Writing Tools topic index
+/documentation/Apple-Silicon/addressing-architectural-differences-in-your-macos-code	2366	yes	game-loop-and-threading.md
+/documentation/Apple-Silicon/porting-just-in-time-compilers-to-apple-silicon	1064	yes	app-release/direct-distribution.md
+/documentation/Apple-Silicon/tuning-your-code-s-performance-for-apple-silicon	1419	yes	game-loop-and-threading.md;app-release/direct-distribution.md
+/documentation/AudioToolbox/1387633-aueventsampletime	99	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1389597-peak_limiter_unit_parameters	40	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1389613-midi_audio_unit_parameters	95	yes	nothing: MIDI controller parameter ID list
+/documentation/AudioToolbox/1389633-aunetsend-parameters	29	yes	nothing: AUNetSend status IDs
+/documentation/AudioToolbox/1389639-aurandom-parameters	32	yes	nothing: AURandom parameter IDs
+/documentation/AudioToolbox/1389643-aunewtimepitch-parameters	44	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1389667-dls-music-device-parameters	34	yes	nothing: DLS synth parameter IDs
+/documentation/AudioToolbox/1389727-aurogerbeep-parameters	44	yes	nothing: AURogerBeep parameter IDs
+/documentation/AudioToolbox/1389739-aumultichannelmixer_parameters	115	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1389745-aunbandeq-parameters	41	yes	nothing: N-band EQ parameter IDs
+/documentation/AudioToolbox/1389763-3d_mixer_unit_parameters	100	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1389769-ausampler-parameters	35	yes	nothing: AUSampler tuning/gain IDs
+/documentation/AudioToolbox/1389781-aumultibandcompressor-parameters	116	yes	nothing: multiband compressor parameter IDs
+/documentation/AudioToolbox/1389787-dynamics_processor_unit_paramete	64	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1389801-aumatrixreverb-parameters	65	yes	nothing: matrix reverb parameter IDs
+/documentation/AudioToolbox/1389808-auroundtripaacparam-parameters	41	yes	nothing: AAC round-trip monitor IDs
+/documentation/AudioToolbox/1389891-net-status-audio-unit-parameters	44	yes	nothing: AUNetSend/Receive status constants
+/documentation/AudioToolbox/1389916-output_unit_parameters	27	yes	nothing: HAL output volume ID
+/documentation/AudioToolbox/1389920-aunetreceive-parameters	29	yes	nothing: AUNetReceive status IDs
+/documentation/AudioToolbox/1389928-stereo-mixer-unit-parameters	43	yes	nothing: stereo mixer IDs, same metering set as the multichannel mixer note
+/documentation/AudioToolbox/1389932-audio-unit-graphic-eq-parameter	30	yes	nothing: graphic EQ band-count ID
+/documentation/AudioToolbox/1389946-autimepitch_autimepitch_offline	37	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1389948-auhipass_parameters	34	yes	nothing: high-pass filter IDs
+/documentation/AudioToolbox/1389950-parametric_eq_unit_parameters	40	yes	nothing: parametric EQ IDs
+/documentation/AudioToolbox/1389965-aunbandeq_filter_types	81	yes	nothing: N-band EQ filter type constants
+/documentation/AudioToolbox/1389967-auhighshelffilter_parameters	36	yes	nothing: high-shelf IDs
+/documentation/AudioToolbox/1389991-panner-audio-unit-parameters	43	yes	nothing: panner unit IDs
+/documentation/AudioToolbox/1389995-aulowshelf_parameters	36	yes	nothing: low-shelf IDs
+/documentation/AudioToolbox/1389999-aulowpass_parameters	34	yes	nothing: low-pass IDs
+/documentation/AudioToolbox/1390003-aumatrixmixer-parameters	53	yes	nothing: matrix mixer metering IDs, same set as the multichannel mixer note
+/documentation/AudioToolbox/1390010-audelay-parameters	35	yes	nothing: delay IDs
+/documentation/AudioToolbox/1390014-varispeed_unit_parameters	35	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1390052-audio-unit-filter-parameters	70	yes	nothing: multiband filter IDs
+/documentation/AudioToolbox/1390073-auspatialmixer-parameters	68	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1390086-audistortion-parameters	71	yes	nothing: distortion unit IDs
+/documentation/AudioToolbox/1390119-reverb_parameters	41	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1390144-bandpass_unit_parameters	35	yes	nothing: band-pass IDs
+/documentation/AudioToolbox/1391506-audio-file-stream-properties	536	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1391572-audio-file-stream-errors	225	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1404047-audio-file-component-selectors	115	yes	nothing: audio file component selectors for writing file-format plug-ins
+/documentation/AudioToolbox/1404186-audio-file-component-specific-pr	56	yes	nothing: audio file component capability properties
+/documentation/AudioToolbox/1405208-audio-hardware-services-properti	122	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1405222-system-sounds	75	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1405232-audio-services-errors	83	yes	nothing: system sound services error codes
+/documentation/AudioToolbox/1405268-system-sound-services-property-i	162	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1473469-music-device-selectors	48	yes	nothing: music device component selectors
+/documentation/AudioToolbox/1473494-music-note-events	30	yes	nothing: music note event constants
+/documentation/AudioToolbox/1486859-property-identifiers-for-extende	311	yes	audio-and-haptics.md
+/documentation/AudioToolbox/1486883-extended-audio-file-errors	86	yes	nothing: ExtAudioFile error codes
+/documentation/AudioToolbox/1494050-audio-codec-delay-modes	34	yes	nothing: codec delay mode constants for codec implementers
+/documentation/AudioToolbox/1494068-audio-codec-properties	66	yes	nothing: audio codec component property IDs
+/documentation/AudioToolbox/1494070-deprecated-constants-used-with-k	35	yes	nothing: deprecated codec output-precedence constants
+/documentation/AudioToolbox/1494074-audio-codec-routine-selectors	101	yes	nothing: codec-implementer selectors, page says callers do not need them
+/documentation/AudioToolbox/1494076-audio-codec-errors	51	yes	nothing: codec error codes
+/documentation/AudioToolbox/1494081-deprecated-constants-used-with-k	35	yes	nothing: deprecated bit-rate format constants
+/documentation/AudioToolbox/1494086-audio-codec-component-constants	83	yes	nothing: codec component type constants
+/documentation/AudioToolbox/1494094-dynamic-range-control-modes	34	yes	nothing: codec DRC mode constants, no guidance
+/documentation/AudioToolbox/1494107-deprecated-audio-codec-propertie	67	yes	nothing: deprecated codec property IDs

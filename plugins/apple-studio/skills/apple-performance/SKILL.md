@@ -7,11 +7,12 @@ description: Diagnosing why an Apple app is slow, and measuring it - choosing an
 
 Scope: **why is it slow, and how do I measure it.** Whether it builds, runs, or
 passes tests is xcode-loop. Authoring a performance *test* is swift-testing.
-Writing the animation is apple-animations — its *cost* is here. Metal graphics,
-custom instrument authoring, and CI performance gating are out of scope.
+Writing the animation is apple-animations — its *cost* is here. Custom
+instrument authoring and CI performance gating are out of scope. GPU work goes
+to apple-metal, and frame pacing to apple-games.
 
 Read the reference for the decision at hand:
-- Picking an Instruments template for a symptom, capturing traces, call trees, processor trace, OSSignposter, measurement discipline → `references/profiling-workflow.md`
+- Picking an Instruments template for a symptom, capturing traces, call trees, processor trace, OSSignposter, measurement discipline, a game's frame and tick on the CPU → `references/profiling-workflow.md`
 - Hangs vs hitches, the render loop, launch time, terminations, MetricKit and Organizer → `references/responsiveness-hangs-and-hitches.md`
 - Excessive view updates, structural identity and `.id()`, expensive `body`, observation granularity, lazy containers → `references/swiftui-performance.md`
 - Leaks vs abandoned memory, retain cycles, memory limits, battery, disk writes, app size → `references/memory-power-and-size.md`
@@ -34,10 +35,12 @@ Rules that always apply:
 - **Where a workflow is GUI-only, it is GUI-only.** Call-tree analysis has no
   command-line form. `xctrace` records and exports; it does not read a trace
   for you. Do not go looking for a flag that does not exist.
-- **`xctrace record` exits 54 on success** when `--time-limit` ends the
-  capture, and `--launch` resolves through LaunchServices by bundle ID rather
-  than the path you passed — verify what you actually profiled with
-  `xctrace export --toc` before trusting a trace.
+- **`xctrace record`'s exit status reports how the target ended, not whether
+  the capture worked.** It was 0 when the target exited 0, and 54 when the
+  target exited non-zero or `--time-limit` killed it. A recording that could
+  not trace exited 2 and still saved a bundle. `--launch` resolves
+  through LaunchServices by bundle ID rather than the path you passed. Read the
+  launched `<process>` element in `xctrace export --toc` before trusting a trace.
 - Profiling a Foundation Models app: Xcode ships a **Foundation Models**
   instrument with a token-usage timeline. Implementation of on-device
   generation is apple-intelligence; its runtime cost is here.

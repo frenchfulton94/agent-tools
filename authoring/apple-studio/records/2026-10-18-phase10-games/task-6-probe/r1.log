@@ -1,0 +1,47 @@
+Machine: Apple M4 Pro
+OS: macOS 27.0.1 26A434
+Toolchain: Xcode 27.1
+Date: 2026-10-18 11:12 EDT
+$TMP below is authoring/apple-studio/pipeline/tmp, the gitignored pipeline scratch
+
+## Frame structure, 120 frames, no validation
+$ .build/release/MetalProbe render --frames 120
+exit: 0
+ok lines: 120
+first: frame 0 ok
+pixel 119 128 64 255
+
+## Frame structure, 120 frames, API and Shader Validation, reports to stderr
+$ env MTL_DEBUG_LAYER=1 MTL_SHADER_VALIDATION=1 MTL_SHADER_VALIDATION_REPORT_TO_STDERR=1 .build/release/MetalProbe render --frames 120
+exit: 0
+ok lines: 120
+every other line:
+2026-10-18 11:12:58.791 MetalProbe[86271:3999146] Metal API Validation Enabled
+2026-10-18 11:12:58.791 MetalProbe[86271:3999146] Metal GPU Validation Enabled
+pixel 119 128 64 255
+
+## The probe's compute workload
+$ .build/release/MetalProbe compute --count 1048576
+exit: 0
+compute ok 1048576
+
+## sim, 2,000 normal ticks
+$ /usr/bin/time -p .build/release/MetalProbe sim --ticks 2000
+exit: 0
+sim ok 2000 ticks checksum 1993.2869
+real 0.00
+user 0.00
+sys 0.00
+
+## sim, 200 ticks through plantedSlowStep
+$ /usr/bin/time -p .build/release/MetalProbe sim --ticks 200 --slow
+exit: 0
+sim ok 200 ticks slow checksum 198.45831
+real 0.03
+user 0.03
+sys 0.00
+
+## plantedSlowStep is a symbol in the release binary
+$ nm .build/release/MetalProbe
+exit: 0
+0000000100007adc t _$s10MetalProbe15plantedSlowStep_2dtySayAA8ParticleVGz_SftF

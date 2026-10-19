@@ -1,0 +1,22 @@
+input.md runtime checks (Phase 10, Task 8)
+Date: 2026-10-18
+Machine: Apple M4 Pro, macOS 27.0.1 (26A434)
+Toolchain: Apple Swift version 6.4 (swiftlang-6.4.0.34.1), MacOSX 27.0 SDK
+No simulator booted. No process left running (pgrep after the run found none).
+No game controller attached during the run.
+
+Command:
+  swiftc -target arm64-apple-macos26.0 defaults.swift -o <scratch>/defaults
+  <scratch>/defaults
+
+Key output:
+  shouldMonitorBackgroundEvents default: false
+  exit 0
+
+What it supports in input.md:
+  - "Discovering controllers": on macOS, a binary built at the 26.0 floor
+    starts with GCController.shouldMonitorBackgroundEvents == false, so the
+    game receives no controller input while it is not frontmost.
+  - "Remapping": the Swift spelling of the header's
+    GCControllerLiveInput.unmappedInput is `unmapped`. defaults.swift calls
+    `controller.input.unmapped` and builds; the build is the check.
