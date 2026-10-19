@@ -24,7 +24,7 @@ into this directory. One directory per task, each with its report:
 Task 11 has no directory. It was a two-line edit that the controller made,
 and its gate counts are in the SDD ledger. The controller copies that ledger
 to `sdd-ledger.md` at the close, after the final review. It holds every
-controller ruling (P1–P47) and every deferred finding.
+controller ruling and every deferred finding.
 
 ## What is not committed, and where it is
 

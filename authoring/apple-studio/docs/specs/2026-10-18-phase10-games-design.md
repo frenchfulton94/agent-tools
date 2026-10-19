@@ -602,7 +602,7 @@ is one `apple-metal` figure link. Item 20 is two legacy kernel symbol pages.
 Item 21 is the man-page reading article. No shipped claim depends on any of
 the four pages, so none blocks the close. Each item says what replaced the
 missing page. Evidence: `task-13-release/ledger-check.log:1-13`;
-`docs/deferred.md:891-939`.
+`task-13-release/row-counts.log:1-14`; `docs/deferred.md:891-939`.
 
 ### 2. Every Swift, MSL, C++, and Rust block is clean, and each gate's invented-symbol self-test fails as it should — PASS
 - **Swift gate, whole catalog.** 153/170 snippets typecheck clean, against
@@ -634,12 +634,39 @@ earlier OS. Each of the nine `## Maintaining older code: Metal 3` sections
 says so in one sentence (SDD ruling P24), for example
 `plugins/apple-studio/skills/apple-metal/references/command-model.md:647-649`.
 
-**A gate gap found in this phase.** The Swift gate passes a block wrapped in
-`#if os(iOS)` on the macOS target as empty code. A wrapped block is therefore
-not checked on its real platform. No shipped snippet is wrapped (ruling P38).
-Task 13 reproduced the gap with two fixtures, and `docs/deferred.md` item 39
-records the fix. Evidence: `task-13-release/wrapped-block-probe/run.log:6`,
-`:75`.
+**A gate gap found in this phase, and fixed (ruling P50).** In a file that
+declared several targets, the Swift gate passed a block when it compiled on
+any one of them. A block that holds `#if os(...)` compiles only its own
+branch on each target, so its other branch could ship uncompiled. Five
+shipped blocks were in that position, and each one had passed on macOS
+alone:
+`plugins/apple-studio/skills/apple-games/references/game-loop-and-threading.md:99-143`,
+`:256-285` (its `#elseif os(iOS)` branch holds the `UIViewRepresentable`),
+`:779-802`, and `:820-845`, and
+`plugins/apple-studio/skills/apple-metal/references/display-and-upscaling.md:274-290`.
+Ruling P38 kept the iOS-only snippets unwrapped, so it hid none of them. It
+did not cover snippets that carry code for both platforms under `#if os(`.
+
+Commit `5e1efe4` changed `typecheck_snippets.py`. A block that holds
+`#if os(...)` now compiles on every target that its file declares. It passes
+only if each one passes, and it prints one line per target. Other blocks
+behave as before. The self-test gained two fixtures. A correct wrapped block
+must pass on both targets. A block with an invented property in its iOS
+branch must fail. Before the fix, both cases failed the
+self-test. After it, the self-test exits 0. The whole catalog still gives
+153/170. The only change in its result lines is an added `@ ios 26.0` PASS
+for each of the five blocks. Their iOS branches compile, so no reference
+changed. A file that declares one target still compiles only that target.
+One shipped block is in that position: `apple-gpu-tbdr.md:90-111` has a
+`#if targetEnvironment(simulator)` branch that its `macos 26.0` file never
+compiles. `docs/deferred.md` item 39 records the gap and its resolution.
+Evidence: `task-13-release/wrapped-gate-selftest-before.log:15-23`;
+`task-13-release/wrapped-gate-selftest-after.log:15-38`;
+`task-13-release/catalog-wrapped-blocks.log:1-22`;
+`task-13-release/catalog-after-fix.log:803-808`, `:815-818`, `:3399-3400`;
+`task-13-release/catalog-diff-fix-vs-before.log`;
+`task-13-release/wrapped-block-probe/run-before-fix.log:6`, `:75`, and
+`run-after-fix.log:6-7`, `:115`.
 
 ### 3. R1–R6 each carry runtime evidence or the "not runtime-checked" marker — PASS (R1–R5 with runtime evidence; R6 not run, P44)
 
@@ -662,7 +689,9 @@ holds an *Apple Development* certificate "for team `RTC3TK2XFJ`".
 `RTC3TK2XFJ` is the ID in the identity's name, not a team ID. The team is
 the certificate subject's OU, `ULQJ329QSN`. The machine also holds a second
 Apple Development identity, for team `2F7J72JV48`. Evidence:
-`task-10-r6/identity.log:18-34`.
+`task-10-r6/identity.log:18-34`. Ruling P51 also redacted an Apple ID email
+address from line 406, because committed records carry no Apple ID email.
+The scan that confirms none remains is `task-13-release/email-scan.log`.
 
 Every other "not runtime-checked" claim in a Phase 10 file has a deferred
 item: items 25–38. Item 24 covers the notarization claims in
@@ -685,7 +714,9 @@ description was edited, so no after-edit sweep was needed.
   failed again on a restored fixture, and the how-to control routed
   correctly. Phase 10 changed nothing in `swift-concurrency`, so ruling P43
   records it as a known-open prompt defect that does not gate. The user
-  confirmed that ruling. `docs/deferred.md` item 23 records the reword.
+  confirmed that ruling. The SDD ledger records the confirmation, and the
+  controller copies that ledger to `sdd-ledger.md` in this record at the
+  close. `docs/deferred.md` item 23 records the reword.
   This bar is not met, so the verdict is PARTIAL.
 - The sweep also found a driver gap. One row switched the fixture's branch,
   and the guard compares only `git status --porcelain`, so it did not see
@@ -711,7 +742,9 @@ before this branch (#14 and #15). Those commits made the same kind of edit
 without a bump. Against `origin/main`, the branch's real base, the count is
 2. The edit changes the eval roster, not what the `security` plugin does.
 Evidence: `task-13-release/gates.log:3-9`, `:11-74`, `:76-140`,
-`:142-208`.
+`:142-208`. The same gates ran again after the Task 13 fix round, on the
+final tree, with the same results: `task-13-release/gates-fix.log:3-9`,
+`:11-74`, `:76-140`, `:142-208`.
 
 ### 6. `claude plugin validate . --strict` and the load check — PASS
 `claude plugin validate . --strict` and `bun run validate` both pass. The
@@ -724,13 +757,14 @@ among its 13 skills. The version moved in
 `plugins/apple-studio/.claude-plugin/plugin.json` only. The description
 gained game development on Metal in `plugin.json` and in
 `.claude-plugin/marketplace.json`, which match. The keywords gained `metal`
-and `games`. Evidence: `task-13-release/gates.log:210-223`;
+and `games`. Evidence: `task-13-release/gates.log:210-223`, and again after
+the fix round, `task-13-release/gates-fix.log:210-223`;
 `task-13-release/load-check.log:1-46`.
 
 ### 7. No simulator left booted, and no probe process left running — PASS
 `xcrun simctl list devices booted` lists no device, and
 `pgrep -fl 'MetalProbe|cpp-host|rust-host'` prints nothing. Evidence:
-`task-13-release/clean-state.log:6-17`.
+`task-13-release/clean-state.log:6-16`.
 
 ### Carried forward
 - **Items 19–21**: the four unfetchable pages. Each one's trigger is that

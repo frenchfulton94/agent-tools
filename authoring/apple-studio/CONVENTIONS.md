@@ -114,7 +114,10 @@ further move, reading the SDK's own shipped interface, is named after them:
   commas, such as `> typecheck: macos 26.0, ios 26.0`. The version is the
   deployment target. An API newer than it fails with an availability error,
   instead of passing because the SDK is newer. A snippet must compile on at least
-  one listed target, and its PASS line names that target. Without the directive a
+  one listed target, and its PASS line names that target. A snippet that holds
+  `#if os(` must compile on every listed target instead, because each target
+  compiles only its own branch. It prints one PASS line for each target.
+  (Amended 2026-10-18, Phase 10 Task 13, SDD ruling P50.) Without the directive a
   file compiles for the macOS SDK default. That default is correct for
   cross-platform SwiftUI and wrong for UIKit or iOS-only SwiftUI. A malformed directive, or one
   newer than the installed SDK, exits 2 rather than falling back. The Metal 4 floor

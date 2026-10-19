@@ -1217,9 +1217,36 @@ block Phase 2; each has an explicit trigger for when to act.
     `pipeline/test_typecheck_snippets.sh` as cases that must fail.
     **Trigger: the next phase that edits `typecheck_snippets.py`, or the
     first reference that needs a platform-wrapped block.** Evidence:
-    `records/2026-10-18-phase10-games/task-13-release/wrapped-block-probe/run.log:6`
+    `records/2026-10-18-phase10-games/task-13-release/wrapped-block-probe/run-before-fix.log:6`
     (`dual-target.md` block 1 passes at macOS 26.0) and `:75`
     (`macos-only.md` block 1 passes).
+
+    **Resolved 2026-10-18, Phase 10 Task 13 (ruling P50, commit `5e1efe4`),
+    for files that declare several targets.** The gap was not theoretical.
+    Five shipped blocks hold a platform condition in a file that declares
+    `macos 26.0, ios 26.0`. Each one had passed on macOS alone:
+    - `apple-games/references/game-loop-and-threading.md` block 1, lines
+      99-143;
+    - the same file's block 4, lines 256-285, whose `#elseif os(iOS)`
+      branch holds the `UIViewRepresentable`;
+    - the same file's blocks 11 (lines 779-802) and 12 (lines 820-845);
+    - `apple-metal/references/display-and-upscaling.md` block 3, lines
+      274-290.
+
+    The gate now compiles a block that holds `#if os(` on every target that
+    its file declares. It passes the block only if each one passes, and it
+    prints one line per target. All five blocks pass on iOS 26.0 as well, so no
+    reference changed. The self-test gained a correct wrapped fixture, which
+    must pass on both targets, and a broken one, which must fail. A file
+    that declares one target still compiles only that target. One shipped
+    block is in that position: `apple-metal/references/apple-gpu-tbdr.md`
+    block 1 (lines 90-111) has a `#if targetEnvironment(simulator)` branch
+    that its `macos 26.0` file never compiles. Evidence:
+    `records/2026-10-18-phase10-games/task-13-release/wrapped-gate-selftest-before.log`
+    and `wrapped-gate-selftest-after.log`; `catalog-wrapped-blocks.log`
+    beside them (lines 4-14 give the result-line diff, and lines 16-22 list
+    every block that holds a compile condition);
+    `wrapped-block-probe/run-after-fix.log:6-7`.
 
 40. **`sendOverDTLS` can wait forever on its OS 26 branch (found
     2026-10-18, Phase 10 Task 8).** The OS 26 branch in

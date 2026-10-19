@@ -221,4 +221,4 @@ The cause was a mismatch: `ULQJ329QSN` is the team of Apple ID 2's certificate.
 - `bun test --timeout 30000`: 542 pass, 0 fail.
 - `bun run audit`: 0 errors, 54 warnings.
 - `claude plugin validate . --strict`: passed.
-- No committed file contains either email address or the subject UIDs.
+- No file in this record contains either email address or the subject UIDs. (Corrected in Task 13, ruling P51. This line first said "No committed file", which was false while the spec's line 406 held one of the addresses. That line is now redacted. Evidence: `task-13-release/email-scan.log`.)

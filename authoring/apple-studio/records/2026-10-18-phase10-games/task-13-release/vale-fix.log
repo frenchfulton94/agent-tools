@@ -1,0 +1,204 @@
+# Task 13 fix round 1: Vale (.claude/skills/controlled-engineering-english/scripts/vale/.vale.ini), 2026-10-18T21:52-0400, vale version 3.24.0
+# For each file: the count at HEAD 5e1efe4, then the full run on the edited file.
+
+## authoring/apple-studio/docs/deferred.md
+at HEAD: 91 findings
+$ vale --config .claude/skills/controlled-engineering-english/scripts/vale/.vale.ini authoring/apple-studio/docs/deferred.md
+
+ authoring/apple-studio/docs/deferred.md
+ 13:4     warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 26:41    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 30:55    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 66:13    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 76:4     warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 80:30    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 86:6     warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 89:21    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 95:6     warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 99:70    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 104:17   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 115:4    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 121:6    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 153:35   warning  G-P1: 'actually' hedges; state the fact or delete the sentence.     CEE.Hedging        
+ 157:29   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 178:6    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 193:4    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 197:4    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 206:51   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 211:31   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 216:4    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 225:37   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 235:69   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 240:35   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 251:4    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 261:15   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 262:33   warning  Dictionary: use 'try' instead of 'attempts'.                        CEE.CoreWords      
+ 266:32   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 268:28   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 270:70   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 277:32   warning  Dictionary: use 'delete' instead of 'removed'.                      CEE.CoreWordsCased 
+ 280:64   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 284:23   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 291:16   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 306:34   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 314:32   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 315:8    warning  Dictionary: use 'change' instead of 'modifying'.                    CEE.CoreWordsCased 
+ 316:19   warning  Dictionary: use 'change' instead of 'modified'.                     CEE.CoreWordsCased 
+ 321:40   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 325:44   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 331:61   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 346:6    warning  Dictionary: use 'change' instead of 'Amended'.                      CEE.CoreWords      
+ 347:32   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 351:18   warning  G-P1: 'essentially' hedges; state the fact or delete the sentence.  CEE.Hedging        
+ 360:6    warning  Dictionary: use 'find' instead of 'located'.                        CEE.CoreWords      
+ 371:79   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 381:67   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 384:81   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 399:22   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 407:6    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 412:6    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 418:37   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 422:6    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 424:42   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 450:26   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 458:4    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 464:43   warning  Dictionary: use 'delete' instead of 'removed'.                      CEE.CoreWordsCased 
+ 478:12   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 485:6    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 505:34   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 517:13   warning  G-P1: 'simply' hedges; state the fact or delete the sentence.       CEE.Hedging        
+ 518:45   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 521:32   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 526:60   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 539:66   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 552:38   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 556:4    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 557:79   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 564:38   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 566:57   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 568:62   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 575:7    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 576:72   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 579:70   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 584:30   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 592:69   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 604:7    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 608:37   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 613:44   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 616:51   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 624:7    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 626:41   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 632:5    warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 639:30   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 646:17   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 675:46   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 683:40   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 686:33   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 953:70   warning  G-S1: sentence is over 25 words; split it.                          CEE.SentenceLength 
+ 1027:27  warning  Dictionary: use 'set up' instead of 'provisioning'.                 CEE.CoreWords      
+ 1077:29  warning  Dictionary: use 'send' instead of 'dispatch'.                       CEE.CoreWords      
+
+✖ 0 errors, 91 warnings and 0 suggestions in 1 file.
+exit: 0
+
+## authoring/apple-studio/docs/specs/2026-10-18-phase10-games-design.md
+at HEAD: 29 findings
+$ vale --config .claude/skills/controlled-engineering-english/scripts/vale/.vale.ini authoring/apple-studio/docs/specs/2026-10-18-phase10-games-design.md
+
+ authoring/apple-studio/docs/specs/2026-10-18-phase10-games-design.md
+ 15:19   warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 34:3    warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 35:28   warning  Dictionary: use 'send' instead of 'Dispatch'.        CEE.CoreWords      
+ 44:3    warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 66:11   warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 244:25  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 248:4   warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 252:39  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 256:26  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 259:32  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 263:28  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 266:34  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 266:53  warning  Dictionary: use 'send' instead of 'dispatch'.        CEE.CoreWords      
+ 273:39  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 279:52  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 284:1   warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 292:35  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 294:69  warning  Dictionary: use 'send' instead of 'Dispatch'.        CEE.CoreWords      
+ 318:27  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 326:46  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 327:62  warning  Dictionary: use 'set up' instead of 'provisioning'.  CEE.CoreWords      
+ 330:5   warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 341:24  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 392:49  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 408:7   warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 463:59  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 494:68  warning  Dictionary: use 'delete' instead of 'removed'.       CEE.CoreWordsCased 
+ 517:21  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 526:76  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+
+✖ 0 errors, 29 warnings and 0 suggestions in 1 file.
+exit: 0
+
+## authoring/apple-studio/CONVENTIONS.md
+at HEAD: 22 findings
+$ vale --config .claude/skills/controlled-engineering-english/scripts/vale/.vale.ini authoring/apple-studio/CONVENTIONS.md
+
+ authoring/apple-studio/CONVENTIONS.md
+ 4:45     warning  Dictionary: use 'change' instead of 'Amend'.                     CEE.CoreWords      
+ 14:61    warning  Dictionary: use 'change' instead of 'Amended'.                   CEE.CoreWords      
+ 37:16    warning  Dictionary: use 'change' instead of 'Amended'.                   CEE.CoreWords      
+ 46:23    warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 59:63    warning  Dictionary: use 'change' instead of 'Amended'.                   CEE.CoreWords      
+ 107:71   warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 120:4    warning  Dictionary: use 'change' instead of 'Amended'.                   CEE.CoreWords      
+ 125:45   warning  Dictionary: use 'change' instead of 'Amended'.                   CEE.CoreWords      
+ 139:32   warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 156:52   warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 164:31   warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 166:106  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 168:65   warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 179:18   warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 181:16   warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 186:5    warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 188:11   warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 196:33   warning  Dictionary: use 'send' instead of 'dispatch'.                    CEE.CoreWords      
+ 196:64   warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 197:57   warning  G-P1: 'actually' hedges; state the fact or delete the sentence.  CEE.Hedging        
+ 218:57   warning  Dictionary: use 'change' instead of 'Amended'.                   CEE.CoreWords      
+ 222:56   warning  Dictionary: use 'change' instead of 'Amended'.                   CEE.CoreWords      
+ 257:1    warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+
+✖ 0 errors, 23 warnings and 0 suggestions in 1 file.
+exit: 0
+
+## authoring/apple-studio/records/2026-10-18-phase10-games/README.md
+at HEAD: 0 findings
+$ vale --config .claude/skills/controlled-engineering-english/scripts/vale/.vale.ini authoring/apple-studio/records/2026-10-18-phase10-games/README.md
+✔ 0 errors, 0 warnings and 0 suggestions in 1 file.
+exit: 0
+
+## authoring/apple-studio/records/2026-10-18-phase10-games/task-10-r6/report.md
+at HEAD: 17 findings
+$ vale --config .claude/skills/controlled-engineering-english/scripts/vale/.vale.ini authoring/apple-studio/records/2026-10-18-phase10-games/task-10-r6/report.md
+
+ authoring/apple-studio/records/2026-10-18-phase10-games/task-10-r6/report.md
+ 12:74    warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 13:131   warning  Dictionary: use 'set up' instead of 'provisioning'.  CEE.CoreWords      
+ 17:24    warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 30:4     warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 53:69    warning  Dictionary: use 'set up' instead of 'provisioning'.  CEE.CoreWords      
+ 53:135   warning  Dictionary: use 'set up' instead of 'provisioning'.  CEE.CoreWords      
+ 56:117   warning  Dictionary: use 'set up' instead of 'provisioning'.  CEE.CoreWords      
+ 56:135   warning  Dictionary: use 'set up' instead of 'provisioning'.  CEE.CoreWords      
+ 58:17    warning  Dictionary: use 'set up' instead of 'provisioning'.  CEE.CoreWords      
+ 132:27   warning  Dictionary: use 'set up' instead of 'provisioning'.  CEE.CoreWords      
+ 148:29   warning  Dictionary: use 'set up' instead of 'provisioning'.  CEE.CoreWords      
+ 154:3    warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 196:101  warning  Dictionary: use 'make sure' instead of 'Ensure'.     CEE.CoreWords      
+ 201:137  warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 203:3    warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 208:3    warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+ 214:3    warning  G-S1: sentence is over 25 words; split it.           CEE.SentenceLength 
+
+✖ 0 errors, 17 warnings and 0 suggestions in 1 file.
+exit: 0
