@@ -94,8 +94,43 @@ Values from task-7 item 37 that are not stated: p01:6's "10 s capture", the temp
 - Traces are only in the gitignored `$TMP`.
 - StudioFixture was not touched. The session's worktree guard refused the `git -C` status check.
 
-## Open after the restart
+## R4 after the restart (2026-10-18)
 
-1. Run `./run.sh r4 > $REC/task-9-r4/r4-toc.log` and `./run.sh r4-finding > $REC/task-9-r4/r4-finding.log`.
-2. Record the verdict here.
-3. Replace the "R4 pending" paragraph in profiling-workflow.md with the result (a P36-sized fix if R4 passes). If R4 contradicts the section, the section changes.
+The user turned on Processor Trace and restarted. The controller ran R4 and made
+the edits (P36 size).
+
+**Verdict: R4 passes.**
+
+- `r4-toc.log`: both Processor Trace recordings of the command-line sim exited 0.
+  The launched `<process>` of each shows `exit(0)`. The bundles are 390M (`--slow`)
+  and 767M (control). Each export holds `processor-trace-gaps`, `-intervals`,
+  `-points`, `-threads`, and `time-profile`.
+- `r4-finding.log`: the `--slow` trace names `plantedSlowStep(_:dt:)` at 99.89% in
+  `processor-trace-intervals`. The control trace names `simulationStep(_:dt:)` at
+  38.84%. The trace's `time-profile` table agrees: 99.87% and 61.29%. Both runs
+  passed `--require processor-trace-`, so the verdicts come from Processor Trace
+  tables, not from the sampler.
+- The first `r4-finding` run used the script from before the review minors. The
+  controller stopped it after the `--slow` verdict, which was the same 99.89%. The
+  committed log comes from the committed script.
+
+- `orphans.log`: the clean-state check found two stopped (`T`) MetalProbe
+  processes with parent 1, run from `build/MetalProbe.app` and not from the
+  `.build/release/MetalProbe` path that `--launch` received. Their PIDs, 6500 and
+  6652, are one below the traced 6501 and 6653. The controller logged them and ended
+  them with `kill -KILL`. profiling-workflow.md now tells readers to check for this
+  copy. The Task 6 recordings (Metal System Trace, Game Performance) did not leave
+  such a process; their clean-state checks were empty.
+
+Review minors folded in:
+
+- `heaviest_under_interval.py` takes `--require <schema prefix>`, and `r4-finding`
+  passes `processor-trace-`. The symbol column no longer falls back to a plain
+  `name` column; it uses a `text-location` column. The first matching signpost row
+  prints its category.
+- profiling-workflow.md: the "R4 pending" paragraph became the R4 result. The
+  Points of Interest bullet now cites the logged `PointsOfInterest` category. The
+  `<thread ref="2"/>` example became a description. The exit-2 bullet names its
+  one logged cause.
+- `gates-r4.log` records the gate counts: Swift 1/1, Vale 0 errors on both edited
+  files, bun test 542/0, audit 0 errors, validate --strict passed.

@@ -349,9 +349,11 @@ r5() {
 # Task 9. R4's signpost: the sim's `tick` interval. The analysis knows only
 # this; heaviest_under_interval.py never searches for a function name.
 SIM_SUBSYSTEM=dev.frenchfultonjr.apple-studio.metal-probe
-heaviest() {   # heaviest <trace> <label>
-  step "heaviest symbol under 'tick', $2" python3 "$HERE/heaviest_under_interval.py" "$1" \
-    --subsystem "$SIM_SUBSYSTEM" --interval tick --work-dir "${1%.trace}-export"
+heaviest() {   # heaviest <trace> <label> [script arguments...]
+  local trace="$1" label="$2"
+  shift 2
+  step "heaviest symbol under 'tick', $label" python3 "$HERE/heaviest_under_interval.py" "$trace" \
+    --subsystem "$SIM_SUBSYSTEM" --interval tick --work-dir "${trace%.trace}-export" "$@"
   show
 }
 
@@ -396,8 +398,8 @@ r4() {
 
 r4_finding() {
   header
-  heaviest "$TMP/r4.trace" "Processor Trace, sim --slow"
-  heaviest "$TMP/r4-control.trace" "Processor Trace, sim without --slow (control)"
+  heaviest "$TMP/r4.trace" "Processor Trace, sim --slow" --require processor-trace-
+  heaviest "$TMP/r4-control.trace" "Processor Trace, sim without --slow (control)" --require processor-trace-
 }
 
 # The analysis script's own check, on Time Profiler recordings: it must name a

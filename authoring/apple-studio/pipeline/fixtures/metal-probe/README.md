@@ -99,7 +99,9 @@ swift build -c release && sh cpp/build.sh && (cd rust && cargo build --release)
 ```
 
 R4 needs the Processor Trace setting in System Settings > Privacy & Security >
-Developer Tools. Without it, `record` exits 2 and `r4` stops. The evidence is in
+Developer Tools, and a restart after turning it on. Without it, `record` exits 2
+and `r4` stops. `r4-finding` passes `--require processor-trace-`, so a verdict
+from the trace's `time-profile` table alone does not pass R4. The evidence is in
 `authoring/apple-studio/records/2026-10-18-phase10-games/task-9-r4/`.
 `heaviest_under_interval.py` knows only the signpost's subsystem and interval
 name. It never searches for a function name, so the probe's planted function

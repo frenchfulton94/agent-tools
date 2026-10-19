@@ -2,7 +2,7 @@
 """Names the heaviest symbol inside one signpost interval, from an xctrace export.
 
     heaviest_under_interval.py <trace> --subsystem <id> --interval <name>
-        [--work-dir <dir>] [--top <n>]
+        [--work-dir <dir>] [--top <n>] [--require <schema prefix>]
 
 Task 9, claim R4. The script knows only the signpost: a subsystem and an
 interval name. It does not know which function the probe slowed down, and it
@@ -20,15 +20,22 @@ never searches for a function name. It does these steps:
      xctrace lists code inlined into a function as extra frames at the same
      address; those frames count as the function that holds them.
    - Interval rows, which have a start, a duration and a symbol: the time of
-     each range goes to the innermost interval that is open, and cycles are
-     shared out in proportion to time. That is self time.
+     each range goes to the innermost interval that is open. That is self
+     time. The symbol is the row's backtrace leaf, else a column whose type
+     is a code location (`text-location`); a plain `name` column is not a
+     symbol, so it is never used.
 5. It prints the symbols for each table, heaviest first. For sample rows it
    also prints the raw leaf frame, with inlined frames not grouped, and the
    first backtrace that it charged to the heaviest symbol. Then one line:
    `heaviest symbol under '<interval>': <symbol> (<table>, <share>%)`.
 
-Exit status: 0 when a table gave a verdict, 1 when no CPU table had rows
-inside the intervals, and 2 when an export failed.
+With `--require processor-trace-`, a verdict counts only when it comes from
+a table whose schema starts with that prefix; a sampler's verdict alone is
+then a failure. R4 uses it, because the claim is about Processor Trace.
+
+Exit status: 0 when a table gave a verdict (a required one, with --require),
+1 when no CPU table had rows inside the intervals or no required table gave
+a verdict, and 2 when an export failed.
 """
 import argparse
 import bisect
@@ -156,6 +163,7 @@ def signpost_ranges(path, subsystem, name):
     for schema, cols, row in read_tables(path):
         i_start, i_dur = column(cols, "start"), column(cols, "duration")
         i_name, i_sub = column(cols, "name"), column(cols, "subsystem")
+        i_cat = column(cols, "category")
         i_thread = column(cols, "start-thread", "thread")
         cell = lambda i: row[i] if i is not None and i < len(row) else None
         n, s = cell(i_name), cell(i_sub)
@@ -165,8 +173,10 @@ def signpost_ranges(path, subsystem, name):
         if start is None or dur is None or start.number() is None or dur.number() is None:
             continue
         if not ranges:
-            print("first matching row: start %s (fmt %s), duration %s (fmt %s), thread %s"
-                  % (start.text, start.fmt, dur.text, dur.fmt, cell(i_thread).label() if cell(i_thread) else None))
+            print("first matching row: start %s (fmt %s), duration %s (fmt %s), category %s, thread %s"
+                  % (start.text, start.fmt, dur.text, dur.fmt,
+                     cell(i_cat).label() if cell(i_cat) else None,
+                     cell(i_thread).label() if cell(i_thread) else None))
         ranges[thread_id(cell(i_thread))].append((start.number(), start.number() + dur.number()))
     for spans in ranges.values():
         spans.sort()
@@ -201,7 +211,7 @@ def charge(path, ranges):
         i_thread = column(cols, "thread")
         i_cycles = column(cols, r".*cycles.*")
         i_weight = column(cols, "weight")
-        i_sym = column(cols, r".*symbol.*", r".*function.*", "frame", "name")
+        i_sym = column(cols, r".*symbol.*", r".*function.*", "frame", "text-location")
         entry = result.setdefault(schema, [None, cols, 0, collections.Counter(), "", {}, collections.Counter()])
         entry[2] += 1
         thread = thread_id(cell(i_thread))
@@ -268,6 +278,7 @@ def main():
     ap.add_argument("--interval", required=True)
     ap.add_argument("--work-dir")
     ap.add_argument("--top", type=int, default=5)
+    ap.add_argument("--require", help="schema prefix a verdict must come from")
     args = ap.parse_args()
     trace = os.path.abspath(args.trace)
     work = os.path.abspath(args.work_dir or os.path.splitext(trace)[0] + "-export")
@@ -333,6 +344,9 @@ def main():
     verdicts.sort(key=lambda v: not v[0].startswith("processor-trace"))
     for name, top, share in verdicts:
         print("heaviest symbol under '%s': %s (%s, %.2f%%)" % (args.interval, top, name, share))
+    if args.require and not any(name.startswith(args.require) for name, _, _ in verdicts):
+        print("no verdict from a table whose schema starts with '%s'" % args.require)
+        return 1
     return 0
 
 

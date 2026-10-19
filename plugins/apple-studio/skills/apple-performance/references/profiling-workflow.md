@@ -93,10 +93,10 @@ Three things observed on this machine (Xcode 27.1). In each case,
   `/usr/bin/false`. So read the toc's `<process>` element whose `type` is
   `launched`: `return-exit-status` and `termination-reason` (`exit(1)`,
   `SIGKILL`) are the only record of how the target ended.
-- **A recording that cannot trace exits 2, and still saves a bundle.** A
-  Processor Trace recording without the system setting (see "Profiling a game's
-  frame") printed `Recording failed with errors` and wrote a 484K bundle. The
-  target's `--target-stdout` file was empty, and `export --toc` on that bundle
+- **A Processor Trace recording without its system setting exited 2, and still
+  saved a bundle.** That is the one failed recording logged here (see
+  "Profiling a game's frame"). It printed `Recording failed with errors` and
+  wrote a 484K bundle. The target's `--target-stdout` file was empty, and `export --toc` on that bundle
   exited 10: "Trace is malformed - run data is missing."
 - **`--launch` resolves by bundle ID through LaunchServices**, so it can silently
   profile a different registered build than the path you gave. Check the recorded
@@ -279,9 +279,9 @@ func runFrame(simulate: () -> Void, encode: () -> Void) {
 }
 ```
 
-- **Points of Interest shows by default** in Instruments (SDK header). A Time Profiler
-  recording exported the probe's intervals in this category, in its
-  `OSSignpostIntervals` table (runtime-checked).
+- **Points of Interest shows by default** in Instruments (SDK header). The probe's
+  Processor Trace recordings exported its intervals with the category
+  `PointsOfInterest`, in their `OSSignpostIntervals` table (runtime-checked).
 - **Select one `frame` span to isolate one slow frame.** The selection filters every
   call-tree view to that span. The slow frame's work is then not averaged into the rest
   (*Analyzing CPU profiles with call tree views*).
@@ -342,7 +342,8 @@ in the export need care (runtime-checked on a probe whose slow tick runs one
 `@inline(never)` function):
 
 - **Resolve `ref` attributes.** xctrace writes a repeated value once, with an `id`.
-  After that, the value appears only as an empty element such as `<thread ref="2"/>`.
+  After that, the value appears only as an empty element that carries a `ref`
+  attribute and no content.
   Resolve each `ref` to the element with that `id`.
 - **Group inlined frames with their function.** Code inlined into a function appears as
   extra frames at the function's own address. In the probe, the raw leaf frame was
@@ -368,10 +369,33 @@ page documents these views, which suit one slow frame:
 Recording needs the Processor Trace setting in **System Settings > Privacy & Security >
 Developer Tools**. Without it, `xctrace record` exited 2. It printed "The target device
 is not configured for tracing" (see "Capturing a trace"). A recording made after
-the setting was turned on, but before a restart, failed in the same way. **R4 pending:
-not yet runtime-checked.** R4 checks two things. First, `xctrace record` with the
-Processor Trace template records a command-line target. Second, its export names the
-heaviest function under a signpost interval, as the Time Profiler export above does.
+the setting was turned on, but before a restart, failed in the same way. After a
+restart, it recorded.
+
+The same join works on a Processor Trace export (runtime-checked on an M4 Pro, macOS
+27.0.1, Xcode 27.1):
+
+- **`xctrace record --template 'Processor Trace' --launch` records a command-line
+  target.** It exited 0, and the toc's launched `<process>` showed `exit(0)`. Ten
+  seconds of recording made bundles of 390M and 767M.
+- **Look for a stopped copy of the target after each recording.** Each of the two
+  recordings left a second process from the registered `.app` bundle, not from the
+  path given to `--launch`. It was in state `T` (stopped), had parent 1, and used no
+  CPU. Its PID was one below the traced process's PID. Find it with `pgrep -fl` and end
+  it with `kill -KILL`. A stopped process keeps `SIGTERM` pending until it continues
+  (*signal(3)*).
+- **Use the `processor-trace-intervals` table.** It has one row for each function
+  call: `start`, `duration`, `thread`, `depth`, `name` (the function),
+  `self-instructions`, `self-cycles`, `self-duration`, and `backtrace`. The trace also
+  holds `processor-trace-gaps`, `-points`, and `-threads`, and a `time-profile` table
+  of samples.
+- **Charge time to the innermost open call.** Calls on one thread nest. Between two
+  call boundaries, the call that opened last and has not ended is the one that runs.
+  Charge that time, clipped to the `tick` intervals, to its `name`. In the probe this
+  named the slow function at 99.89% of the ticks' self time. A control run without the
+  slow step named the normal simulation function at 38.84%.
+- **The interval table is large.** The control run's table had 58,598,788 rows, so
+  stream the XML export rather than load it whole.
 
 ### Apple-silicon guidance from *Addressing CPU bottlenecks*
 
