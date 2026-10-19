@@ -4,16 +4,16 @@
 TOTAL: 1/1 snippets typecheck clean
 exit: 0
 ## vale plugins/apple-studio/skills/apple-performance/references/profiling-workflow.md
- 207:58  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
- 413:53  warning  Dictionary: use 'send' instead of 'Dispatch'.                    CEE.CoreWords      
- 431:62  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
- 439:54  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
- 449:1   warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
- 452:43  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
- 457:46  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
- 464:1   warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
- 466:81  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
- 499:51  warning  Dictionary: use 'keep' instead of 'retain'.                      CEE.CoreWords      
+ 210:58  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 418:53  warning  Dictionary: use 'send' instead of 'Dispatch'.                    CEE.CoreWords      
+ 436:62  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 444:54  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 454:1   warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 457:43  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 462:46  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 469:1   warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 471:81  warning  G-S1: sentence is over 25 words; split it.                       CEE.SentenceLength 
+ 504:51  warning  Dictionary: use 'keep' instead of 'retain'.                      CEE.CoreWords      
 
 ✖ 0 errors, 31 warnings and 0 suggestions in 1 file.
 exit: 0
@@ -30,7 +30,7 @@ exit: 0
  542 pass
  0 fail
  1373 expect() calls
-Ran 542 tests across 16 files. [11.88s]
+Ran 542 tests across 16 files. [12.26s]
 exit: 0
 ## bun run audit
 0 error(s), 54 warning(s)

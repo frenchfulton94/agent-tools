@@ -89,15 +89,18 @@ Three things observed on this machine (Xcode 27.1). In each case,
 - **The exit status of `record` reports how the target ended, not whether the
   capture worked.** It was 0 when the target exited 0. It was 54 when the target
   exited non-zero (`/usr/bin/false`), and when xctrace killed the target at
-  `--time-limit`. The completion lines were the same for `/usr/bin/true` and
+  `--time-limit` (Metal System Trace). Under Processor Trace, the time limit ended
+  the recording but not the target (see "Profiling a game's frame"). The
+  completion lines were the same for `/usr/bin/true` and
   `/usr/bin/false`. So read the toc's `<process>` element whose `type` is
   `launched`: `return-exit-status` and `termination-reason` (`exit(1)`,
   `SIGKILL`) are the only record of how the target ended.
 - **A Processor Trace recording without its system setting exited 2, and still
-  saved a bundle.** That is the one failed recording logged here (see
+  saved a bundle.** That is the one cause of a failed recording logged here (see
   "Profiling a game's frame"). It printed `Recording failed with errors` and
-  wrote a 484K bundle. The target's `--target-stdout` file was empty, and `export --toc` on that bundle
-  exited 10: "Trace is malformed - run data is missing."
+  wrote a 484K bundle. The target's `--target-stdout` file was empty, and
+  `export --toc` on that bundle exited 10: "Trace is malformed - run data is
+  missing."
 - **`--launch` resolves by bundle ID through LaunchServices**, so it can silently
   profile a different registered build than the path you gave. Check the recorded
   process's actual path in the toc.
@@ -376,14 +379,16 @@ The same join works on a Processor Trace export (runtime-checked on an M4 Pro, m
 27.0.1, Xcode 27.1):
 
 - **`xctrace record --template 'Processor Trace' --launch` records a command-line
-  target.** It exited 0, and the toc's launched `<process>` showed `exit(0)`. Ten
-  seconds of recording made bundles of 390M and 767M.
+  target.** It exited 0, and the toc's launched `<process>` showed `exit(0)`.
+- **The time limit ends the recording, not the target.** The `--slow` run reached
+  its 10 s limit. The target still finished all 100,000 ticks and exited 0, but the
+  trace holds only 53,644 of them. Its bundle was 390M. The control run ended when
+  its target exited, and its bundle was 767M.
 - **Look for a stopped copy of the target after each recording.** Each of the two
-  recordings left a second process from the registered `.app` bundle, not from the
-  path given to `--launch`. It was in state `T` (stopped), had parent 1, and used no
-  CPU. Its PID was one below the traced process's PID. Find it with `pgrep -fl` and end
-  it with `kill -KILL`. A stopped process keeps `SIGTERM` pending until it continues
-  (*signal(3)*).
+  recordings left a second process from the `.app` bundle, not from the path given
+  to `--launch`. It was in state `T` (stopped), had parent 1, and used no CPU. Its
+  PID was one below the traced process's PID. After recording, check for it with
+  `pgrep -fl` and end it.
 - **Use the `processor-trace-intervals` table.** It has one row for each function
   call: `start`, `duration`, `thread`, `depth`, `name` (the function),
   `self-instructions`, `self-cycles`, `self-duration`, and `backtrace`. The trace also
@@ -479,8 +484,8 @@ warning telling you to go look.
 - **Changing more than one variable between measurements** — a delta then tells you
   nothing about which change mattered.
 - **Reading `xctrace record`'s exit status, or its completion lines, as the target's
-  result.** 0 and 54 report the target's exit, and a time-limit kill also gives 54. A
-  recording that failed exited 2 and still saved a bundle. Read the launched `<process>`
+  result.** 0 and 54 report the target's exit, and a time-limit kill under Metal System
+  Trace also gave 54. A recording that failed exited 2 and still saved a bundle. Read the launched `<process>`
   element in the toc (see "Capturing a trace").
 - **Assuming `--launch` profiled the exact binary you pointed at.** LaunchServices resolves
   by bundle ID and can silently substitute another registered build — verify with `xctrace

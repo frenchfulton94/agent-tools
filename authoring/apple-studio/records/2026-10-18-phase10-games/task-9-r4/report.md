@@ -4,7 +4,7 @@ Date: 2026-10-18. Branch: `apple-studio-phase10-games`. Machine: Apple M4 Pro, m
 
 ## Status
 
-The section, the exit-status corrections, the R4 script, and the gates are done. **R4 is pending. It needs Processor Trace enabled and a restart.** Turning the setting on did not take effect in this session, and the user has deferred the restart.
+The section, the exit-status corrections, the R4 script, and the gates are done. **Before the restart, R4 was pending: it needed Processor Trace enabled and a restart.** The section "R4 after the restart" below supersedes every pending statement in this report. Turning the setting on did not take effect in this session, and the user has deferred the restart.
 
 ## R4
 
@@ -43,7 +43,7 @@ Two recordings ran by hand. The first used the brief's command plus `--target-st
   - The first backtrace shows `IndexingIterator.next()` and `plantedSlowStep` at the same address.
 - `sim --ticks 200000`, the control: heaviest under `tick`: `simulationStep(_:dt:)`, at 65.52%.
 
-So the analysis names a different function for each workload, and it names the planted one only when the planted one runs. The Processor Trace branch has not run on real data. Schema names from the shipped Instruments bundle (`ProcessorTraceFramework.xcplugindata`, not logged): `processor-trace-intervals`, `-points`, `-threads`, `-gaps`. If R4's export has no rows that carry a symbol, `r4-finding` exits 1 and prints each table's columns.
+So the analysis names a different function for each workload, and it names the planted one only when the planted one runs. Before the restart, the Processor Trace branch had not run on real data. Schema names from the shipped Instruments bundle (`ProcessorTraceFramework.xcplugindata`, not logged): `processor-trace-intervals`, `-points`, `-threads`, `-gaps`. If R4's export has no rows that carry a symbol, `r4-finding` exits 1 and prints each table's columns.
 
 ## Reference changes
 
@@ -65,7 +65,7 @@ So the analysis names a different function for each workload, and it names the p
   - The budget: refresh interval, about 5 ms of main-thread work, CPU/GPU overlap, and no Error or Fault logs per frame.
   - Templates for a game, Allocations generations across level loads, and dSYM matching.
   - Per-frame and per-tick signposts, with a Swift `OSSignposter` block and a C++ `<os/signpost.h>` block, and the header's rules (literals, `OS_SIGNPOST_ID_NULL`, `os_signpost_enabled`, `OS_LOG_CATEGORY_DYNAMIC_TRACING`, marked not runtime-checked).
-  - Finding the function that makes a tick slow: the Time Profiler export join, its `ref` and inlined-frame traps with the self-test values, Processor Trace's documented views, and the enablement facts. It ends with "**R4 pending: not yet runtime-checked.**" covering CLI recording and export ranking.
+  - Finding the function that makes a tick slow: the Time Profiler export join, its `ref` and inlined-frame traps with the self-test values, Processor Trace's documented views, and the enablement facts. Before the restart, it ended with "**R4 pending: not yet runtime-checked.**" covering CLI recording and export ranking. That paragraph is now the R4 result.
   - Apple-silicon guidance from *Addressing CPU bottlenecks*: the four bottleneck categories with their game reading, cutting algorithmic and ARC cost first, dynamic task allocation (pointing to apple-games), and the gated CPU Optimization Guide.
   - Frame-time test plans: `-only-test-configuration` and `-skip-test-configuration` with one dash (`xcodebuild-help.log`), against the page's two dashes.
 
@@ -81,7 +81,7 @@ Values from task-7 item 37 that are not stated: p01:6's "10 s capture", the temp
 
 - `typecheck_snippets.py` on profiling-workflow.md: 1/1, exit 0 (`typecheck.log`). `catalog-before.log` line 3285 lists 0 Swift blocks for this file, so there is no PASS→FAIL.
 - `typecheck_native.py`: 1/1, exit 0 (`native.log`).
-- Vale on SKILL.md and profiling-workflow.md: 0 errors, 33 warnings (35 before). On the fixture README: 0 errors, 3 warnings, the same as before.
+- Vale on SKILL.md and profiling-workflow.md: 0 errors, 33 warnings (35 before), before the restart, not logged. gates-r4.log has the counts after R4. On the fixture README: 0 errors, 3 warnings, the same as before.
 - `bun test --timeout 30000`: 542 pass, 0 fail.
 - `bun run audit`: 0 errors, 54 warnings.
 - `claude plugin validate . --strict`: passed.
@@ -104,21 +104,25 @@ the edits (P36 size).
 - `r4-toc.log`: both Processor Trace recordings of the command-line sim exited 0.
   The launched `<process>` of each shows `exit(0)`. The bundles are 390M (`--slow`)
   and 767M (control). Each export holds `processor-trace-gaps`, `-intervals`,
-  `-points`, `-threads`, and `time-profile`.
+  `-points`, `-threads`, and `time-profile`. The `--slow` run reached the 10 s
+  limit ("Reached specified time limit"), yet its target printed all 100,000 ticks
+  and exited 0; the trace holds 53,644 ticks (r4-finding.log). The control ended
+  when its target exited. Metal System Trace, in Task 6, killed its target at the
+  limit (SIGKILL, exit 54); Processor Trace did not.
 - `r4-finding.log`: the `--slow` trace names `plantedSlowStep(_:dt:)` at 99.89% in
   `processor-trace-intervals`. The control trace names `simulationStep(_:dt:)` at
   38.84%. The trace's `time-profile` table agrees: 99.87% and 61.29%. Both runs
   passed `--require processor-trace-`, so the verdicts come from Processor Trace
   tables, not from the sampler.
 - The first `r4-finding` run used the script from before the review minors. The
-  controller stopped it after the `--slow` verdict, which was the same 99.89%. The
+  controller stopped it after the `--slow` verdict. The re-run overwrote its log, so that verdict is not evidence. The
   committed log comes from the committed script.
 
 - `orphans.log`: the clean-state check found two stopped (`T`) MetalProbe
   processes with parent 1, run from `build/MetalProbe.app` and not from the
   `.build/release/MetalProbe` path that `--launch` received. Their PIDs, 6500 and
   6652, are one below the traced 6501 and 6653. The controller logged them and ended
-  them with `kill -KILL`. profiling-workflow.md now tells readers to check for this
+  them with `kill -KILL` (not logged). profiling-workflow.md now tells readers to check for this
   copy. The Task 6 recordings (Metal System Trace, Game Performance) did not leave
   such a process; their clean-state checks were empty.
 
