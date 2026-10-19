@@ -1,7 +1,7 @@
 // Phase 10 final fix, F1. Instrumented copies of sendOverDTLS.
 //
 // `original26` and `original27` are the two branches as they shipped at
-// 3d25847, with a state logger added. `instrumented` is the fixed sendOverDTLS from
+// d742a42, with a state logger added. `instrumented` is the fixed sendOverDTLS from
 // game-center-and-online.md with log lines added; `classic: true` forces its
 // OS 26 branch, which this macOS 27 machine would otherwise never take.
 // run.sh also compiles the reference's block verbatim, and main.swift drives
@@ -23,7 +23,7 @@ func log(_ message: String) {
     fflush(stdout)
 }
 
-// The OS 26 branch at 3d25847, with a state logger only.
+// The OS 26 branch at d742a42, with a state logger only.
 func original26(_ payload: Data, to endpoint: NWEndpoint) async throws {
     let connection = NWConnection(to: endpoint, using: probeParameters())
     connection.stateUpdateHandler = { state in log("state: \(state)") }
@@ -37,7 +37,7 @@ func original26(_ payload: Data, to endpoint: NWEndpoint) async throws {
     }
 }
 
-// The OS 27 branch at 3d25847, with a state logger only.
+// The OS 27 branch at d742a42, with a state logger only.
 func original27(_ payload: Data, to endpoint: NWEndpoint) async throws {
     if #available(macOS 27, iOS 27, *) {
         try await withNetworkConnection(to: endpoint, using: { DTLS() }) { connection in

@@ -205,7 +205,7 @@ api81          [@sevt1 waitUntilSignaledValue:1 timeoutMS:95000]                
 gpudebug --terminate "$id"
 Session 354 terminated.
 
-## gpudebug: the profiling block as previously written (6c6d834), in a new session
+## gpudebug: the profiling block as previously written (c053d5c), in a new session
 (a plain profile run, then the same session's profile load, and the one-step path)
 id=$(gpudebug -q -t $TMP/probe.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p')
 gpudebug -q -t $TMP/probe.gputrace -c "list" | sed -n 's/^Session \([0-9]*\) created\./\1/p'

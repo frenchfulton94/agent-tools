@@ -29,7 +29,7 @@ exit: 0
 ** CLEAN SUCCEEDED **
 cpp-host after clean: absent, rust-host after clean: absent
 
-## The pre-fix xcode-cargo.sh, from 6c6d834
+## The pre-fix xcode-cargo.sh, from c053d5c
 2:# Build Tool: /bin/sh   Arguments: xcode-cargo.sh $(ACTION) $(CONFIGURATION)
 9:action="${1:-build}"
 10:config="${2:-Debug}"

@@ -17,7 +17,7 @@ cd "$HERE" || exit 2
 
 # The last commit before Task 6 changed the references. The "as previously
 # written" steps run that version's text, to log the failures behind each fix.
-PRE_FIX=6c6d834
+PRE_FIX=c053d5c
 REFDIR=plugins/apple-studio/skills/apple-metal/references
 pre_fix_reference() {   # pre_fix_reference <file.md> <dest>
   git -C "$HERE" show "$PRE_FIX:$REFDIR/$1" > "$2"

@@ -1,4 +1,4 @@
-base: 3d25847; vale 3.24.0
+base: d742a42; vale 3.24.0
 
 == plugins/apple-studio/skills/apple-games/references/game-center-and-online.md
 errors: 0 -> 0   all alerts: 14 -> 14   [ok]

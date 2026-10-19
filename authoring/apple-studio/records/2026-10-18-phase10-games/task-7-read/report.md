@@ -1,6 +1,6 @@
 # Task 7 report: apple-games, performance, and release corpus read in full
 
-Date: 2026-10-18. Eleven readers (g01 to g09, p01, r01) each wrote one ledger and one notes file. A finisher ran verification and committed (f257557). The controller writes this file from the finisher's returned text, because the harness refuses a subagent's Write of report.md (SDD ruling P10).
+Date: 2026-10-18. Eleven readers (g01 to g09, p01, r01) each wrote one ledger and one notes file. A finisher ran verification and committed (4c81cb5). The controller writes this file from the finisher's returned text, because the harness refuses a subagent's Write of report.md (SDD ruling P10).
 
 ## Result
 

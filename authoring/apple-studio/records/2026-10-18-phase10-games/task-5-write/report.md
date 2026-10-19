@@ -103,7 +103,7 @@ references changed.
 
 The opus task review traced 27 claims: 25 were supported and 2 misstated,
 with none unsupported. It checked 16 symbols named in prose against the SDK,
-and all 16 exist. It found no invented API. Fix round 1 (`df65d1a`) made these
+and all 16 exist. It found no invented API. Fix round 1 (`5b4f083`) made these
 changes:
 
 - **Shader Validation claims.** Two claims said Shader Validation stayed
@@ -135,7 +135,7 @@ changes:
 
 ## Fix round 2
 
-Commit `9792a9f` fixed two more problems:
+Commit `83fab9b` fixed two more problems:
 
 - **Silent wrong dispatch size.** The dispatch helper's fallback sized a
   threadgroup as 32×8 for a kernel that the MSL attribute pins to 16×16, and

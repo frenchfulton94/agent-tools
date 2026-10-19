@@ -1,5 +1,5 @@
 # Task 13 fix round 1: Vale (.claude/skills/controlled-engineering-english/scripts/vale/.vale.ini), 2026-10-18T21:52-0400, vale version 3.24.0
-# For each file: the count at HEAD 5e1efe4, then the full run on the edited file.
+# For each file: the count at HEAD 9d74de6, then the full run on the edited file.
 
 ## authoring/apple-studio/docs/deferred.md
 at HEAD: 91 findings

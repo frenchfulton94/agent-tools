@@ -2,7 +2,7 @@
 //
 // usage: dtls-probe <function> <endpoint> <mode> [deadline-seconds]
 //   function: original26 | original27 | fixed26 | fixed27 | verbatim | verbatimClassic
-//     original26/27    the 3d25847 branches, instrumented
+//     original26/27    the d742a42 branches, instrumented
 //     fixed26/fixed27  the fixed sendOverDTLS, instrumented, forced to one branch
 //     verbatim         the reference's sendOverDTLS (OS 27 branch on macOS 27)
 //     verbatimClassic  the reference's sendOverClassicDTLS, with no deadline

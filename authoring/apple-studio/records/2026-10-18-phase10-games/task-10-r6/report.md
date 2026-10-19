@@ -1,6 +1,6 @@
 # Task 10 report: the direct-distribution reference (closed without R6)
 
-Date: 2026-10-18. Branch: `apple-studio-phase10-games`. Commits: `04f7345` (Step 1), `facb146` (fix round 1), and `e350ac8` (closed without R6, ruling P44). The controller writes this file from the implementer's returned text, because subagents may not write report files (ruling P10).
+Date: 2026-10-18. Branch: `apple-studio-phase10-games`. Commits: `757ba03` (Step 1), `e6c441b` (fix round 1), and `7e6ea39` (closed without R6, ruling P44). The controller writes this file from the implementer's returned text, because subagents may not write report files (ruling P10).
 
 This task wrote Step 1 of Task 10 and `bundle.sh`. R6 needs a Developer ID Application certificate, and only the Account Holder of a paid team can create one. Neither of the user's teams could, so the user decided to skip R6 (P44). Nothing was signed with any identity, nothing went to Apple, and `security find-identity` and `security find-certificate` were used read-only.
 
@@ -156,7 +156,7 @@ As planned at Step 1:
 
 ## Fix round 1
 
-The reviewer's verdict was "Needs fixes", with 1 Important and 5 Minor findings. All six are fixed in `facb146`.
+The reviewer's verdict was "Needs fixes", with 1 Important and 5 Minor findings. All six are fixed in `e6c441b`.
 
 - **Important: `$SUBMISSION_ID` was never assigned in the release block.**
   - Step 6 now runs `submit … --wait -f json > "$SUBMIT_JSON"` and prints the status with `plutil -extract status raw -o -`.
@@ -197,7 +197,7 @@ Most likely neither is a paid membership on which the user holds the Account Hol
 
 The cause was a mismatch: `ULQJ329QSN` is the team of Apple ID 2's certificate.
 
-**Reference changes at close** (`e350ac8`):
+**Reference changes at close** (`7e6ea39`):
 - Every "R6 pending: not yet runtime-checked" marker now reads "not runtime-checked: needs a Developer ID identity (deferred item 24)". That covers the opening status, the release-sequence status, the step 6 comment on the JSON keys, and the step 8 comment on "Notarized Developer ID".
 - The release-sequence intro no longer says R6 runs the block.
 - What was checked on this machine stays stated as checked: the help-text spellings, `bundle.sh`, the ad hoc signature, the `spctl` rejection, the packaging and ARCHS logs, and the Swift smoke test.

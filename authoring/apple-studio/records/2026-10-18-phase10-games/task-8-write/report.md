@@ -1,6 +1,6 @@
 # Task 8 report: the apple-games skill
 
-Date: 2026-10-18. Branch: `apple-studio-phase10-games`. Commits: `408b1df` (the skill), `911dc44` (this report, written by the controller), and `2c9f786` (fix round 1). The controller writes this file from the finisher's returned text (ruling P10).
+Date: 2026-10-18. Branch: `apple-studio-phase10-games`. Commits: `9545994` (the skill), `2c8364d` (this report, written by the controller), and `1e63d8b` (fix round 1). The controller writes this file from the finisher's returned text (ruling P10).
 
 Six writers each wrote one reference and its claims sidecar (`<stem>.sources.tsv`), ran the runtime checks they cite, and ran both gates on their own file until they were clean. The finisher then wrote the skill files, made the routing and catalog edits and the apple-metal restorations, gated, verified, and committed.
 
@@ -153,7 +153,7 @@ In `display-and-upscaling.md`, `RenderLoopThread.init` now sets `name = "Render"
 
 ## Fix round 1
 
-The task review returned "Needs fixes" with 2 Important and 7 Minor findings. Commit `2c9f786` made these changes:
+The task review returned "Needs fixes" with 2 Important and 7 Minor findings. Commit `1e63d8b` made these changes:
 
 - **I1, the haptics machine was misnamed.** The record said "Mac mini". `system_profiler` shows a MacBook Pro (Mac16,8) with a Force Touch trackpad.
   - `audio-and-haptics.md`, `SKILL.md`, `runtime/audio-and-haptics/runs.txt`, `run.sh`, and the sidecar now name it correctly.

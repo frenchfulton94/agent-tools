@@ -647,7 +647,7 @@ alone:
 Ruling P38 kept the iOS-only snippets unwrapped, so it hid none of them. It
 did not cover snippets that carry code for both platforms under `#if os(`.
 
-Commit `5e1efe4` changed `typecheck_snippets.py`. A block that holds
+Commit `9d74de6` changed `typecheck_snippets.py`. A block that holds
 `#if os(...)` now compiles on every target that its file declares. It passes
 only if each one passes, and it prints one line per target. Other blocks
 behave as before. The self-test gained two fixtures. A correct wrapped block

@@ -1221,7 +1221,7 @@ block Phase 2; each has an explicit trigger for when to act.
     (`dual-target.md` block 1 passes at macOS 26.0) and `:75`
     (`macos-only.md` block 1 passes).
 
-    **Resolved 2026-10-18, Phase 10 Task 13 (ruling P50, commit `5e1efe4`),
+    **Resolved 2026-10-18, Phase 10 Task 13 (ruling P50, commit `9d74de6`),
     for files that declare several targets.** The gap was not theoretical.
     Five shipped blocks hold a platform condition in a file that declares
     `macos 26.0, ios 26.0`. Each one had passed on macOS alone:
@@ -1282,7 +1282,7 @@ block Phase 2; each has an explicit trigger for when to act.
     `Task.checkCancellation()` before its send.
 
     **Correction to the task-group route.** A task group waits at scope exit
-    for every child, also a cancelled one. The continuation at `3d25847`
+    for every child, also a cancelled one. The continuation at `d742a42`
     ignored cancellation, so a group around it hangs the same way. The group
     works now only because each branch ends when its task is cancelled, and
     the probe checked that for both branches. A cancellation that lands

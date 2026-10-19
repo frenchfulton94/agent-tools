@@ -1,16 +1,16 @@
 # Phase 10 final fix round: report
 
-Base: `3d25847`. Ruling P52 set the scope: fix F1 to F8, and defer D1 to D6. Line numbers are at `c071b41`. Every log named here is in `authoring/apple-studio/records/2026-10-18-phase10-games/final-fix/` unless a path says otherwise.
+Base: `d742a42`. Ruling P52 set the scope: fix F1 to F8, and defer D1 to D6. Line numbers are at `be42be5`. Every log named here is in `authoring/apple-studio/records/2026-10-18-phase10-games/final-fix/` unless a path says otherwise.
 
 ## Evidence files
 
 | File | What it holds |
 |---|---|
 | `probe/run.sh`, `probe/main.swift`, `probe/instrumented.swift` | The F1 probe. `run.sh` takes the reference's `sendOverDTLS` block out of the file and compiles it verbatim with Swift 6 at `-target arm64-apple-macos26.0`. It then runs each case. Each case has its own deadline inside the probe, and `perl alarm` ends the process if the probe hangs. |
-| `f1-probe.log` | `run.sh <build-dir>`: 20 short cases (21 `==` headers, counting the build). They cover the 3d25847 branches, the fixed function forced onto each branch, and the verbatim snippet. |
-| `f1-probe-long.log` | `run.sh <build-dir> long`: the 3d25847 branches against the two peers that never answer, with a 180 s deadline |
+| `f1-probe.log` | `run.sh <build-dir>`: 20 short cases (21 `==` headers, counting the build). They cover the d742a42 branches, the fixed function forced onto each branch, and the verbatim snippet. |
+| `f1-probe-long.log` | `run.sh <build-dir> long`: the d742a42 branches against the two peers that never answer, with a 180 s deadline |
 | `run_typecheck.sh`, `typecheck.log` | The Swift gate, the native gate, and `bash -n` on each shell block, over every edited reference |
-| `run_vale.sh`, `vale.log` | Vale on every edited file, at `3d25847` and now |
+| `run_vale.sh`, `vale.log` | Vale on every edited file, at `d742a42` and now |
 | `gates.log` | `bun test`, `bun run audit`, `bun run validate`, `claude plugin validate . --strict`, `check_verbatim.py`, and `pgrep` |
 
 Both probe logs record snippet sha256 `7058b6cb5bb896fc7ecf7d592e1be34459a52f0d857f96bfa98744e2efe1ee54`. That is the shipped block's hash at the commit, so the logs are for the code that ships.
@@ -24,7 +24,7 @@ Both probe logs record snippet sha256 `7058b6cb5bb896fc7ecf7d592e1be34459a52f0d8
 - The `verified:` header on line 1 gained nine pages.
 
 **What the probe found** (macOS 27.0.1, Swift 6.4):
-- **The hang is wider than the review said.** Both 3d25847 branches hang, not only the OS 26 branch. Against `dtls-probe.invalid`, each branch went to `.waiting(-65554: NoSuchRecord)` within 10 ms. Neither had returned 8 s later (`original26` and `original27` cases).
+- **The hang is wider than the review said.** Both d742a42 branches hang, not only the OS 26 branch. Against `dtls-probe.invalid`, each branch went to `.waiting(-65554: NoSuchRecord)` within 10 ms. Neither had returned 8 s later (`original26` and `original27` cases).
 - **A state handler alone does not bound the send.** Against `127.0.0.1:9` (no listener) and `192.0.2.1` (TEST-NET-1), both branches stayed in `.preparing` for the full 180 s that the probe waited (`f1-probe-long.log`). A DTLS handshake to a peer that never answers reaches neither `.waiting` nor `.failed`. I built the reviewer's sketch first (cancel on `.waiting` or `.failed`), and it hung on these peers. The fix therefore adds a deadline.
 - **The reviewer's belief holds.** Cancelling an `NWConnection` calls its pending send completion with `ECANCELED` (POSIX 89), within 2 ms. It also does so when the connection is cancelled before the send is enqueued (`fixed26 … precancelled`).
 - **The OS 27 `send` returns when its task is cancelled**, with `ECANCELED` (`original27 unresolvable cancel-after-1s`).
@@ -67,7 +67,7 @@ Both probe logs record snippet sha256 `7058b6cb5bb896fc7ecf7d592e1be34459a52f0d8
 
 I also read the shipped `Network.swiftinterface` (arm64e-apple-macos, macOS 27.0 SDK) for `NetworkConnection`, `NetworkChannel.State`, and `onStateUpdate`. `NetworkConnection` has no `cancel()`, so task cancellation is the only way to end its send.
 
-**Deferred item 40** (`docs/deferred.md:1251-1293`) is marked resolved. The Action's task-group sentence now points to a correction paragraph (`:1284-1293`). That paragraph says a group alone hangs on the 3d25847 continuation, because a group waits at scope exit for a child that ignores cancellation. It works now only because both branches end on cancellation, which the probe checked.
+**Deferred item 40** (`docs/deferred.md:1251-1293`) is marked resolved. The Action's task-group sentence now points to a correction paragraph (`:1284-1293`). That paragraph says a group alone hangs on the d742a42 continuation, because a group waits at scope exit for a child that ignores cancellation. It works now only because both branches end on cancellation, which the probe checked.
 
 **Gates:** Swift 9/9 and C++ 1/1 (`typecheck.log:4-23`). Vale: 0 errors and 14 alerts, before and after.
 

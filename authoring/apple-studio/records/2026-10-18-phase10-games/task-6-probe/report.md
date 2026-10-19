@@ -4,7 +4,7 @@ Date: 2026-10-18. Branch: `apple-studio-phase10-games`. Machine: Apple M4 Pro,
 macOS 27.0.1 (26A434), Xcode 27.1. The controller wrote this file from the
 implementer's returned text, because the harness refused the implementer's
 Write of it (SDD ruling P10). Fix round 1 corrected it (ruling P35). The probe
-commit is `15e4ca8`, and the fix round is `65e1692`.
+commit is `c2dcdd9`, and the fix round is `cb845bc`.
 
 The fixture is `authoring/apple-studio/pipeline/fixtures/metal-probe/`.
 `run.sh r1|r2|r3|r5` reproduces each log in this directory. `check_verbatim.py`
@@ -13,7 +13,7 @@ probe adds, which are marked `// probe` or `# probe`. It exits 0 at this commit.
 
 Ruling P34 applies: each runtime-checked claim in an edited reference appears,
 at the stated value, in one of these logs. The "as previously written" sections
-of `r2.log` and `r5.log` run the reference text from `6c6d834`, the last commit
+of `r2.log` and `r5.log` run the reference text from `c053d5c`, the last commit
 before Task 6. They log the failure behind each fix.
 
 ## Claims
@@ -53,7 +53,7 @@ before Task 6. They log the failure behind each fix.
   reference's plus a `[[bin]] name = "rust-host"`. `Cargo.lock` is committed.
   The C++ host builds with `clang++ -std=c++20` against `$TMP/metal-cpp/26.4`,
   with no CMake. The pre-fix check runs throwaway copies of the project, under
-  `$TMP/r5-pre-fix/`, with the `6c6d834` script and argument string.
+  `$TMP/r5-pre-fix/`, with the `c053d5c` script and argument string.
 
 ## Reference changes
 
@@ -135,7 +135,7 @@ references: Swift 62/62 and native 27/27 (`typecheck.log` and `native.log`).
   "Recording completed. Saving output file...". It also shows a time-limit run
   giving 54 because xctrace killed the target. The launched-process element in
   `export --toc` is the reliable verdict.
-  - The `15e4ca8` version of `r3-toc.log` also has a Game Performance run that
+  - The `c2dcdd9` version of `r3-toc.log` also has a Game Performance run that
     printed "Reached specified time limit" and still exited 0, with the target
     ending `exit(0)`.
   - These files are outside this task's scope, so they were not edited.

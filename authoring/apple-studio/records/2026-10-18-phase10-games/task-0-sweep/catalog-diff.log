@@ -10,16 +10,16 @@ bare URLs, tests/apple-doc-links.test.ts failed ("every page-form Apple document
 link in apple-studio ends in .md").
 
 The generator now applies the rule (commit "Phase 10 Task 0: teach generate_catalog.sh
-the .md rule", the commit after 97cecb9): it appends ".md" to every /documentation/
+the .md rule", the commit after 3b0f9ac): it appends ".md" to every /documentation/
 URL except the bare exceptions pinned by KNOWN_PAGE_FORM_EXCEPTIONS in
 tests/apple-doc-links.test.ts (nine of the eleven appear as catalog entries:
 applicationservices, coreservices, installer_js, iokit, kernel, playgroundbluetooth,
 playgroundsupport, tvmljs, webkitjs). The HIG entry is not a /documentation/ URL and
-is left alone. The first commit (97cecb9) was made with the rule applied by a
+is left alone. The first commit (3b0f9ac) was made with the rule applied by a
 one-off script (390 URLs rewritten, matching the 390 the old file carried); a rerun
 of the updated generator gives an empty diff against that committed file.
 
-$ git diff --stat   (after the re-append, as committed in 97cecb9)
+$ git diff --stat   (after the re-append, as committed in 3b0f9ac)
  .../apple-frameworks/references/framework-catalog.md | 14 +++++++-------
  1 file changed, 7 insertions(+), 7 deletions(-)
 

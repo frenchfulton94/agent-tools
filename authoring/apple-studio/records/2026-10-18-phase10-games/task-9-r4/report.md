@@ -1,6 +1,6 @@
 # Task 9 report: game-frame profiling in apple-performance, and R4
 
-Date: 2026-10-18. Branch: `apple-studio-phase10-games`. Machine: Apple M4 Pro, macOS 27.0.1 (26A434), Xcode 27.1. The controller wrote this file from the implementer's returned text (ruling P10). The task commit is `88887c8`.
+Date: 2026-10-18. Branch: `apple-studio-phase10-games`. Machine: Apple M4 Pro, macOS 27.0.1 (26A434), Xcode 27.1. The controller wrote this file from the implementer's returned text (ruling P10). The task commit is `5217ad0`.
 
 ## Status
 

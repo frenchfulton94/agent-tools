@@ -4,7 +4,7 @@
 # usage: run.sh <build-dir> [long]
 #
 # Without `long`: every short case, in order (about 40 s). With `long`: the
-# 3d25847 branches against the two peers that never answer, with a 180 s
+# d742a42 branches against the two peers that never answer, with a 180 s
 # deadline, run in parallel; each case's output is printed when all end.
 #
 # Extracts the ```swift block that defines sendOverClassicDTLS from the
@@ -64,7 +64,7 @@ if [ "$mode" = long ]; then
     exit 0
 fi
 
-# The bug: both 3d25847 branches against a peer that leaves them waiting.
+# The bug: both d742a42 branches against a peer that leaves them waiting.
 run original26 unresolvable plain 8
 run original27 unresolvable plain 8
 run original27 unresolvable cancel-after-1s
