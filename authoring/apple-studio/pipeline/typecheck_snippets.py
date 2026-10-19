@@ -33,7 +33,10 @@ macOS 26.0 / iOS 26.0, and at the SDK default (27.x) a use below the floor
 would pass unseen.
 
 With several targets, a snippet passes if it compiles on AT LEAST ONE of them,
-and its PASS line names the target. Blocks that stand alone become context for
+and its PASS line names the target. The exception is a block whose source
+contains `#if os(`: each target compiles only its own branch, so such a block
+must compile on EVERY listed target, and it prints one PASS line per target
+(ruling P50, Phase 10 Task 13). Blocks that stand alone become context for
 later blocks per target, so an NSView block never leaks into an iOS compile.
 Without any directive a file compiles for the macOS SDK default, which is
 correct for cross-platform SwiftUI and wrong for UIKit or iOS-only SwiftUI (the
@@ -335,6 +338,34 @@ def main():
         prior = {t: "" for t in tries}
         for i, code in enumerate(blocks, 1):
             total += 1
+            first = next((l for l in code.strip().splitlines() if l.strip()), "")[:72]
+            if multi and "#if os(" in code:
+                # A platform-conditional block (ruling P50, Phase 10 Task 13). Each
+                # target compiles only its own branch, so a pass on one target says
+                # nothing about the other branch. Compile on every target and pass
+                # only if each one passes; print one line per target.
+                results = []
+                for t in tries:
+                    p, mode, diag = check(code, prior[t], t)
+                    if p and mode in ("parse-as-library", "with-prior"):
+                        prior[t] += code + "\n"
+                    results.append((t, p, mode, diag))
+                if all(p for _, p, _, _ in results):
+                    ok += 1
+                    for t, _, mode, _ in results:
+                        print(f"  [PASS:{mode:16s} @ {target_name(t)}] #{i}  {first}")
+                else:
+                    for t, p, mode, _ in results:
+                        if p:
+                            print(f"  [pass:{mode:16s} @ {target_name(t)}] #{i}  {first}")
+                    print(f"  [FAIL] #{i}  {first}   (#if os(...) block: must pass on every target)")
+                    print("      imports tried: " + (", ".join(imports_for(code, extended=True)) or "(none)"))
+                    for t, p, _, diag in results:
+                        if not p:
+                            print(f"      === target: {target_name(t)} ===")
+                            for line in diag.splitlines():
+                                print("      " + line)
+                continue
             passed = False
             diags = []
             for t in tries:

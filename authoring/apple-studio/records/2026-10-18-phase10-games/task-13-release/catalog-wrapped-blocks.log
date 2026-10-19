@@ -1,0 +1,22 @@
+# Fix round 1: every FILE and result line of catalog-after.log against catalog-after-fix.log, 2026-10-18T21:45-0400
+# Expected under ruling P50: only added '@ ios 26.0' lines for the #if os( blocks.
+$ diff <(grep -E '^FILE:|^  \[' catalog-after.log) <(grep -E '^FILE:|^  \[' catalog-after-fix.log)
+73a74
+>   [PASS:parse-as-library @ ios 26.0] #1  #if os(macOS)
+76a78
+>   [PASS:with-prior       @ ios 26.0] #4  import SwiftUI
+83a86
+>   [PASS:parse-as-library @ ios 26.0] #11  #if os(macOS)
+84a88
+>   [PASS:parse-as-library @ ios 26.0] #12  #if os(macOS)
+162a167
+>   [PASS:parse-as-library @ ios 26.0] #3  func configureForGameHDR(_ layer: CAMetalLayer) {
+exit: 1 (1 means the files differ, as expected)
+
+# Swift blocks whose source holds a compile condition, whole catalog (file, block, lines, directive, conditions):
+plugins/apple-studio/skills/apple-games/references/game-loop-and-threading.md #1 lines 99-143  directive: macos 26.0, ios 26.0  conditions: os(macOS)
+plugins/apple-studio/skills/apple-games/references/game-loop-and-threading.md #4 lines 256-285  directive: macos 26.0, ios 26.0  conditions: os(iOS), os(macOS)
+plugins/apple-studio/skills/apple-games/references/game-loop-and-threading.md #11 lines 779-802  directive: macos 26.0, ios 26.0  conditions: os(macOS)
+plugins/apple-studio/skills/apple-games/references/game-loop-and-threading.md #12 lines 820-845  directive: macos 26.0, ios 26.0  conditions: os(macOS)
+plugins/apple-studio/skills/apple-metal/references/apple-gpu-tbdr.md #1 lines 90-111  directive: macos 26.0  conditions: targetEnvironment(simulator)
+plugins/apple-studio/skills/apple-metal/references/display-and-upscaling.md #3 lines 274-290  directive: macos 26.0, ios 26.0  conditions: os(macOS)

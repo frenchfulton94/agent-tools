@@ -24,4 +24,10 @@ expect 1 macos-floor-too-old.md "only available in macOS 26"   # same code, maco
 expect 2 macos-too-new.md "older than the directive"    # macos 99.0 > the installed SDK
 expect 0 multi-target.md                                # an NSView and a UIView snippet, macos 26.0, ios 26.0
 expect 1 multi-target-invented.md "cannot find"
+# Phase 10 Task 13 (ruling P50): a block with `#if os(` compiles on every
+# declared target. Its iOS branch is empty code on macOS, so passing one target
+# proves nothing about the other.
+expect 0 multi-target-wrapped-ok.md "PASS.*@ ios 26.0"
+expect 0 multi-target-wrapped-ok.md "PASS.*@ macos 26.0"
+expect 1 multi-target-wrapped-broken.md "inventedDisplayScale"
 exit $fail

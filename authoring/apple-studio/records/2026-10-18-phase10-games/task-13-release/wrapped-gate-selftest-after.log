@@ -1,0 +1,38 @@
+# Task 13 fix round 1 (ruling P50): Swift gate self-test, after the gate fix, 2026-10-18T21:43-0400
+# typecheck_snippets.py sha256: db789a532281fea4c839c61df84aae2e09b2f72b789fb1fae988604627dbb5cd
+$ bash authoring/apple-studio/pipeline/test_typecheck_snippets.sh
+ok   ios-only.md -> 0
+ok   macos-default.md -> 1
+ok   invented.md -> 1
+ok   bad-directive.md -> 2
+ok   too-new.md -> 2
+ok   uikit.md -> 0
+ok   macos-floor-ok.md -> 0
+ok   macos-floor-too-old.md -> 1
+ok   macos-too-new.md -> 2
+ok   multi-target.md -> 0
+ok   multi-target-invented.md -> 1
+ok   multi-target-wrapped-ok.md -> 0
+ok   multi-target-wrapped-ok.md -> 0
+ok   multi-target-wrapped-broken.md -> 1
+exit: 0
+
+$ python3 authoring/apple-studio/pipeline/typecheck_snippets.py authoring/apple-studio/pipeline/fixtures/typecheck/multi-target-wrapped-ok.md
+
+==============================================================================
+FILE: authoring/apple-studio/pipeline/fixtures/typecheck/multi-target-wrapped-ok.md   (1 swift blocks)   target: macos 26.0, ios 26.0
+  [PASS:parse-as-library @ macos 26.0] #1  #if os(iOS)
+  [PASS:parse-as-library @ ios 26.0] #1  #if os(iOS)
+
+TOTAL: 1/1 snippets typecheck clean
+exit: 0
+
+$ python3 authoring/apple-studio/pipeline/typecheck_snippets.py authoring/apple-studio/pipeline/fixtures/typecheck/multi-target-wrapped-broken.md
+
+==============================================================================
+FILE: authoring/apple-studio/pipeline/fixtures/typecheck/multi-target-wrapped-broken.md   (1 swift blocks)   target: macos 26.0, ios 26.0
+  [pass:parse-as-library @ macos 26.0] #1  #if os(iOS)
+  [FAIL] #1  #if os(iOS)   (#if os(...) block: must pass on every target)
+
+TOTAL: 0/1 snippets typecheck clean
+exit: 1
