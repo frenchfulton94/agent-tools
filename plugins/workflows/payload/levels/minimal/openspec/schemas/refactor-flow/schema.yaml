@@ -17,7 +17,7 @@ artifacts:
 
       Guard first: if behaviour a caller can observe at the external seam
       has to change, this is a feature. Say so and offer
-      /opsx:new <the change>, using feature-flow.
+      /openspec-new-change <the change>, using feature-flow.
 
       Read the change's source first: a candidate from the human's
       /improve-codebase-architecture report, a bugfix that found no correct
@@ -123,7 +123,7 @@ apply:
        at the seam design.md agreed.
     2. Typecheck and run the guard tests and the affected tests as you
        go. A guard assertion that has to change means behaviour moved:
-       stop, revert the slice, and offer /opsx:new <the change>, using
+       stop, revert the slice, and offer /openspec-new-change <the change>, using
        feature-flow.
     3. Delete a shallow test only once its replacement at the new interface
        passes.

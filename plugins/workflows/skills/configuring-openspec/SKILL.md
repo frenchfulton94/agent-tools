@@ -1,14 +1,14 @@
 ---
 name: configuring-openspec
-description: Sets up, configures, and customizes OpenSpec (@fission-ai/openspec) — openspec init, project config.yaml context and per-artifact rules, custom workflow schemas and templates under openspec/schemas/, change metadata in .openspec.yaml, and the /opsx workflow. Use when the user mentions OpenSpec, opsx, spec-driven change folders, or files named openspec/config.yaml, schema.yaml, or .openspec.yaml; when they want to add a workflow artifact such as a research or review step, fork the spec-driven schema, inject tech-stack conventions into generated artifacts, produce artifacts in another language, or adopt OpenSpec on an existing codebase. Also use for symptoms — config or rules ignored, "Unknown artifact ID in rules", "Schema not found", slash commands not appearing, archive failing in CI — even when the user never names OpenSpec.
+description: Sets up, configures, and customizes OpenSpec (@fission-ai/openspec) — openspec init, project config.yaml context and per-artifact rules, custom workflow schemas and templates under openspec/schemas/, change metadata in .openspec.yaml, and the openspec-* skills (called /opsx commands before 2.0). Use when the user mentions OpenSpec, opsx, spec-driven change folders, or files named openspec/config.yaml, schema.yaml, or .openspec.yaml; when they want to add a workflow artifact such as a research or review step, fork the spec-driven schema, inject tech-stack conventions into generated artifacts, produce artifacts in another language, or adopt OpenSpec on an existing codebase. Also use for symptoms — config or rules ignored, "Unknown artifact ID in rules", "Schema not found", slash commands not appearing, archive failing in CI — even when the user never names OpenSpec.
 license: MIT
 ---
 
 # Configuring OpenSpec
 
-OpenSpec is a spec layer between a person and their AI coding assistant: proposals, delta specs, design, and tasks live as Markdown in a change folder, and archiving merges the deltas into `openspec/specs/`. It has two halves that run in different places — the `openspec` CLI in a terminal, and `/opsx:*` slash commands in the assistant's chat.
+OpenSpec is a spec layer between a person and their AI coding assistant: proposals, delta specs, design, and tasks live as Markdown in a change folder, and archiving merges the deltas into `openspec/specs/`. It has two halves that run in different places — the `openspec` CLI in a terminal, and the `openspec-*` skills (`/openspec-propose`, `/openspec-apply-change`, …) in the assistant's chat. Before 2.0 the chat half was `/opsx:*` command files; 2.0 removed them and ships skills only.
 
-This skill covers the configuration surfaces: project config, custom schemas and templates, change metadata, and the setup/verification commands around them. Facts here were verified against OpenSpec v1.9.0 source, not only its docs; where the two disagree the source wins and the difference is called out.
+This skill covers the configuration surfaces: project config, custom schemas and templates, change metadata, and the setup/verification commands around them. Facts here were verified against OpenSpec v2.0.0 source, not only its docs; where the two disagree the source wins and the difference is called out.
 
 ## Establish the ground truth first
 
@@ -29,7 +29,7 @@ Config is read fresh on every command, so there is nothing to restart or reload 
 | `openspec/config.yaml` | This project: default schema, injected context, per-artifact rules | YAML |
 | `openspec/schemas/<name>/schema.yaml` + `templates/` | This project: custom workflow definition | YAML + Markdown |
 | `openspec/changes/<change>/.openspec.yaml` | One change: schema, `skip_specs`, `retire_capabilities` | YAML |
-| `~/.config/openspec/config.json` (XDG) | This machine: profile, delivery, `defaultStore`, telemetry | JSON |
+| `~/.config/openspec/config.json` (XDG) | This machine: profile, workflows, `defaultStore`, telemetry (`delivery` is read but ignored since 2.0) | JSON |
 
 `openspec config get/set/edit` operates on the **machine-level JSON config only**. It never touches `openspec/config.yaml`, which is edited by hand or created by `openspec init`. Conflating the two is the most common wasted edit.
 
@@ -40,16 +40,18 @@ npm install -g @fission-ai/openspec@latest
 cd your-project && openspec init            # or: openspec init --tools claude,cursor
 ```
 
-`openspec init` scaffolds `openspec/` and writes skill/command files into each selected AI tool's directory. To change which slash commands are installed, set the profile first and then apply it — the config change alone does nothing to the project:
+`openspec init` scaffolds `openspec/` and writes the skills once into `.agents/skills/`, then links them from each selected tool's own folder (`.claude/skills/` for Claude Code). `--tools none` writes only `openspec/config.yaml`. To change which skills are installed, set the profile first and then apply it — the config change alone does nothing to the project:
 
 ```bash
 openspec config profile     # core (default) or a custom workflow selection
-openspec update             # regenerates the project's tool files
+openspec update             # regenerates the project's skills; --dry-run previews it
 ```
 
 Upgrade the package *before* running `openspec update`: instruction files are generated by the installed CLI, so an outdated CLI reports everything up to date while never writing the newer workflows.
 
-Generated skill and command files are OpenSpec's to own; `openspec update` overwrites them. Customization belongs in `config.yaml`, schemas, and templates — never in the generated files.
+Generated skill files are OpenSpec's to own; `openspec update` overwrites edits to the ones in `.agents/skills/` with no backup. Customization belongs in `config.yaml`, schemas, and templates — never in the generated files.
+
+**Moving a project from 1.x to 2.0:** upgrade the CLI, run `openspec update --dry-run`, then `openspec update`, and commit the result. It adds the skills, drops the unedited `/opsx` command files, and keeps any it cannot prove are unedited, so delete those by hand after moving anything worth keeping. `update` also writes the machine-global `config.json` on a first run, migrating the profile from what the project had installed; that is the one way a project command changes machine state. 1.x stays available as `npm install -g @fission-ai/openspec@1`.
 
 ## Project config: what actually reaches the model
 
@@ -98,8 +100,10 @@ There is no bundled validator script here on purpose: the CLI is the authoritati
 
 ## Gotchas
 
-- `/opsx:propose` goes in the assistant's chat; `openspec ...` goes in a terminal. Typing a slash command into a shell is the single most common failure.
-- Slash command spelling is per tool: `/opsx:propose`, `/opsx-propose`, `@opsx-propose` (Amazon Q), `$openspec-propose` (Codex), `/skill:openspec-propose` (Kimi). Read the "Getting started" line `openspec init` printed rather than guessing.
+- `/openspec-propose` goes in the assistant's chat; `openspec ...` goes in a terminal. Typing a slash command into a shell is the single most common failure.
+- Skill spelling is per tool: `/openspec-propose` in Claude Code, `$openspec-propose` in Codex, `/skill:openspec-propose` in Kimi. Read the "Getting started" line `openspec init` printed rather than guessing. Amazon Q Developer is retired in 2.0 because it cannot load skills; use Kiro.
+- The old names still turn up in user questions. `/opsx:apply` is the `openspec-apply-change` skill, `/opsx:sync` is `openspec-sync-specs`, and `/opsx:bulk-archive` is `openspec-bulk-archive-change`; `references/using-openspec.md` has the full table.
+- `openspec change show|list|validate` and `openspec spec show|list|validate` still run but warn; the replacements are `openspec show`, `openspec list`, `openspec validate`, and `openspec list --specs`.
 - Schema selection precedence: `--schema` flag → the change's `.openspec.yaml` → `openspec/config.yaml` → `spec-driven`. A forked schema does nothing until something names it.
 - Schema *resolution* precedence is separate: project `openspec/schemas/` → user `~/.local/share/openspec/schemas/` → package built-ins. Prefer project-local so schemas are version-controlled with the code.
 - Scenarios need exactly four hashes (`#### Scenario:`). Three hashes or a bullet fails silently.

@@ -1,6 +1,6 @@
 # OpenSpec CLI Reference
 
-The commands that matter for setup, configuration, and driving OpenSpec programmatically. `openspec` runs in a terminal; `/opsx:*` runs in the assistant's chat.
+The commands that matter for setup, configuration, and driving OpenSpec programmatically. `openspec` runs in a terminal; the `openspec-*` skills (`/openspec-propose` and so on) run in the assistant's chat.
 
 Contents:
 - [Setup](#setup)
@@ -28,19 +28,19 @@ openspec init [path] [options]
 | `--no-animation` | Static welcome screen |
 | `--copilot-cloud` / `--no-copilot-cloud` | Opt in/out of GitHub Copilot cloud agent files without prompting |
 
-Creates `openspec/{specs,changes}` and `config.yaml`, then writes skill and/or command files into each selected tool's directory. Tool ids include `claude`, `cursor`, `codex`, `gemini`, `github-copilot`, `devin` (alias `windsurf`), `roocode`, `agents`, and roughly thirty more; `openspec init --help` prints the live list.
+Creates `openspec/{specs,changes}` and `config.yaml`, then writes the skills once into `.agents/skills/` and links them from each selected tool's directory (`--tools none` writes only `config.yaml`). Tool ids include `claude`, `cursor`, `codex`, `gemini`, `github-copilot`, `devin` (alias `windsurf`), `roocode`, `agents`, and roughly thirty more; `openspec init --help` prints the live list.
 
 An existing `openspec/` folder is not a problem — init refreshes it and leaves specs and changes alone.
 
 ### openspec update
 
 ```
-openspec update [path] [--force]
+openspec update [path] [--force] [--dry-run] [--json]
 ```
 
-Regenerates tool files from the **installed** CLI using the current profile, workflow selection, and delivery mode. Upgrade the package first; otherwise it truthfully reports everything up to date while never writing newer workflows. Recent versions check the registry and offer to run the upgrade for you when npm owns the install.
+Regenerates the project's skills from the **installed** CLI using the current profile and workflow selection. `--dry-run` lists what would change without writing (`--json` with it prints the plan). On a project that still has 1.x files it migrates them: new skills in `.agents/skills/`, unedited `/opsx` command files deleted, edited ones kept and reported. Upgrade the package first; otherwise it truthfully reports everything up to date while never writing newer workflows. Recent versions check the registry and offer to run the upgrade for you when npm owns the install.
 
-How "up to date" is decided: skill files carry the generating version and are compared by that stamp, so a hand-edited skill whose version still matches is left alone (`--force` rewrites it). Command files carry no stamp, so under `delivery: commands` their content is compared and any local edit counts as drift and is overwritten. Either way, generated files belong to OpenSpec — keep your own instructions elsewhere.
+How "up to date" is decided: skill files carry the generating version and are compared by that stamp, so a hand-edited skill whose version still matches is left alone (`--force` rewrites it). `update` overwrites edits to skills in `.agents/skills/` with no backup, so save any edit you want to keep first. Generated files belong to OpenSpec — keep your own instructions elsewhere.
 
 ## Browsing and validation
 

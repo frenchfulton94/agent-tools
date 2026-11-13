@@ -158,8 +158,8 @@ subscription tier only if it changes the answer — on Pro it does, at the two f
    much less than it looks like.
 2. `/model` — model with up/down, that model's effort with left/right, one dialog.
    `/effort` alone covers the common case where only the depth is wrong.
-3. The `opsx` command, **with the change name** — `/opsx:apply <change>` or
-   `/opsx:continue <change>`. Both infer the change from the conversation when the name is
+3. The `openspec-*` skill, **with the change name** — `/openspec-apply-change <change>` or
+   `/openspec-continue-change <change>`. Both infer the change from the conversation when the name is
    omitted, and clearing is precisely what removes what they infer from.
 
 The biggest single switch in any chain is the gap between the last planning artifact and

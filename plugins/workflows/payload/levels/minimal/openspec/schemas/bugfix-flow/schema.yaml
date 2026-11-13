@@ -20,7 +20,7 @@ artifacts:
         change exists. Offer it to the human.
       - A fix that changes behaviour the product promises, rather than
         restoring it, is a feature. Say so and offer
-        /opsx:new <the change>, using feature-flow.
+        /openspec-new-change <the change>, using feature-flow.
       - Layout, contrast, copy, and polish problems belong to impeccable,
         not to this flow.
 

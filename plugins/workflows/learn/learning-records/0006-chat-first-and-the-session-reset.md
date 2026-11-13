@@ -2,11 +2,11 @@
 
 Two related corrections to how the running lessons (06–12) present the loop, made 2026-08-28.
 
-**`/opsx:new <a sentence>` is the primary way to start a change; the CLI is the option.**
+**`/openspec-new-change <a sentence>` is the primary way to start a change; the CLI is the option.**
 The lessons opened every chain with `openspec new change <slug>`, which is a terminal command
 that makes the learner invent a slug and returns no first-artifact template. The shipped
 command template is explicit that this is not the intended entry point: "The argument after
-`/opsx:new` is the change name (kebab-case), OR a description of what the user wants to
+`/openspec-new-change` is the change name (kebab-case), OR a description of what the user wants to
 build" — a sentence is a first-class input, and the command derives the slug, scaffolds,
 shows status, prints the first template, and stops. Naming a schema in the same sentence is
 how a learner exercises row 1 of the routing precedence table, so lesson 06's routing example
@@ -27,13 +27,13 @@ on `command-card.html`:
    depth-only case.
 3. `apply` and `continue` infer the change from the conversation when the name is omitted.
    Clearing is precisely what removes the thing they infer from. So taking clearing
-   seriously is what makes `/opsx:apply <change>` non-optional, and every command in the
+   seriously is what makes `/openspec-apply-change <change>` non-optional, and every command in the
    lessons now carries the change name.
 
 **Why clearing is free, and this is the part that makes it teachable:** artifact status is
 pure filesystem existence — a fact lesson 09 already taught for a different reason. Nothing a
 chain depends on lives in a session, so `/clear` costs the change nothing and returns the
-whole window to the implementation loop. `/opsx:continue <change>` is therefore also the
+whole window to the implementation loop. `/openspec-continue-change <change>` is therefore also the
 resume command for a brand-new session, which no lesson had said.
 
 **Implication for future sessions:** the ritual is one unit — clear, re-pick, name the change

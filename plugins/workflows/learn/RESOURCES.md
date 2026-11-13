@@ -29,7 +29,7 @@ actually run.
   The `context:` and per-artifact `rules:` each level ships. Use for: what reaches the
   model on every request versus only on one artifact.
 - [`plugins/workflows/skills/configuring-openspec/`](../skills/configuring-openspec)
-  Five reference files on OpenSpec's configuration surfaces, verified against v1.9.0
+  Five reference files on OpenSpec's configuration surfaces, verified against v2.0.0
   source rather than only its docs. Use for: `config.yaml` fields and limits, schema
   authoring, the CLI, the day-to-day loop, and symptom-first troubleshooting.
 
@@ -49,15 +49,14 @@ Corroborating, not authoritative. Read for *why*, never for *what*.
 
 ## Knowledge — upstream
 
-- [OpenSpec docs](https://github.com/Fission-AI/OpenSpec/tree/main/docs)
-  The CLI and `/opsx` command set this plugin configures. Highest-value pages:
-  [`opsx.md`](https://github.com/Fission-AI/OpenSpec/blob/main/docs/opsx.md) (the command
-  table and the update-vs-start-fresh heuristics),
-  [`customization.md`](https://github.com/Fission-AI/OpenSpec/blob/main/docs/customization.md)
-  (schemas and templates),
-  [`commands.md`](https://github.com/Fission-AI/OpenSpec/blob/main/docs/commands.md)
-  (core vs. expanded command sets),
-  [`concepts.md`](https://github.com/Fission-AI/OpenSpec/blob/main/docs/concepts.md).
+- [OpenSpec docs](https://openspec.dev/docs) (index for agents: [`llms.txt`](https://openspec.dev/llms.txt))
+  The CLI and the `openspec-*` skills this plugin configures. Highest-value pages:
+  [Skills](https://openspec.dev/docs/skills) (every skill's arguments and what it creates),
+  [Upgrade to 2.0](https://openspec.dev/docs/upgrade-to-2) (the old `/opsx` commands mapped to
+  skills), [Profiles](https://openspec.dev/docs/profiles) (core vs. expanded sets),
+  [Schemas](https://openspec.dev/docs/customize-schemas) and
+  [schema.yaml](https://openspec.dev/docs/schemas/schema-yaml) (schemas and templates),
+  [CLI](https://openspec.dev/docs/cli).
   Use for: anything about OpenSpec itself rather than this plugin's opinions about it.
 - [`skills/openspec-onboard/SKILL.md`](https://github.com/Fission-AI/OpenSpec/tree/main/skills/openspec-onboard)
   Upstream's own guided first-cycle walkthrough, phase-structured with a preflight and

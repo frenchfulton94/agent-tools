@@ -8,7 +8,7 @@ schema: feature-flow
 
 context: |
   Before creating a change, read openspec/ROUTING.md and name the schema it
-  picks: /opsx:new <the work>, using <schema>.
+  picks: /openspec-new-change <the work>, using <schema>.
 
   Before exploring, read GLOSSARY.md (or GLOSSARY-MAP.md, then the relevant
   GLOSSARY.md) and the ADRs under docs/adr/ that touch the area in play.

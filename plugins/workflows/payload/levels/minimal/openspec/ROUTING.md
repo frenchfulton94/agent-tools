@@ -3,11 +3,11 @@
 Read this before creating any OpenSpec change. Classify the work, then create
 the change with the schema named in the sentence:
 
-    /opsx:new <the work, in a sentence>, using <schema>
+    /openspec-new-change <the work, in a sentence>, using <schema>
 
 Naming the schema is what makes the choice stick: OpenSpec selects nothing on
 its own. The terminal form is `openspec new change <slug> --schema <schema>`.
-Then run `/opsx:continue <change>` once per artifact, naming the change each
+Then run `/openspec-continue-change <change>` once per artifact, naming the change each
 time.
 
 ## Decision tree (first match wins)
@@ -89,7 +89,7 @@ layout, presentation-only state, copy, accessibility, and motion.
 - Where tasks.md carries a Session line, it records the session shape.
   Single-session work continues in the same window. Multi-session work runs
   each slice in a fresh session: `/clear`, then `/model` or `/effort`, then
-  `/opsx:apply <change>`, naming the change because clearing removed it.
+  `/openspec-apply-change <change>`, naming the change because clearing removed it.
 - `/handoff` writes to the OS temp directory. Name the change in it, and start
   the next session with `openspec status --change <name> --json`.
 - Apply offers `/retro` when a build ends and never runs it. `rapid-flow` offers

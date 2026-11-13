@@ -77,14 +77,14 @@ Answer in five lines and stop. Longer than that and the person stops reading bef
 1. **The schema**, and the rule number or question that chose it.
 2. **The command**, filled in — never a template:
    ```
-   /opsx:new <the work, in a sentence>, using <schema>
+   /openspec-new-change <the work, in a sentence>, using <schema>
    ```
-   Chat-native, because the rest of the chain lives there too. `/opsx:new` takes a kebab-case name **or** a description it derives one from, and passes `--schema` through only when a schema is named — so naming it in the sentence is what makes this routing decision stick. Give the terminal equivalent, `openspec new change <slug> --schema <schema>`, only when they are scripting or already have the slug; slugs are lowercase kebab-case, and a leading number is allowed.
+   Chat-native, because the rest of the chain lives there too. `/openspec-new-change` takes a kebab-case name **or** a description it derives one from, and passes `--schema` through only when a schema is named — so naming it in the sentence is what makes this routing decision stick. Give the terminal equivalent, `openspec new change <slug> --schema <schema>`, only when they are scripting or already have the slug; slugs are lowercase kebab-case, and a leading number is allowed.
 3. **The chain**, as artifact ids in order, so they can see what they are committing to.
 4. **The gate** — the one artifact that blocks the rest, named in `references/chains.md`.
 5. **The guardrail most likely to fire**, from the list below.
 
-Then offer the next step rather than taking it: creating the change is one command, and it is theirs to run. If they ask what follows, it is `/opsx:continue <change>` once per artifact — one line, not a walkthrough.
+Then offer the next step rather than taking it: creating the change is one command, and it is theirs to run. If they ask what follows, it is `/openspec-continue-change <change>` once per artifact — one line, not a walkthrough.
 
 When two branches genuinely both match, ask **one** multiple-choice question naming the two candidates and what distinguishes them, then route. Do not route on a guess and do not present a survey.
 

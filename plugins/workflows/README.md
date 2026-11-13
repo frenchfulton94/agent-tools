@@ -23,9 +23,20 @@ refresh its own files while leaving anything you have edited exactly as you left
 `--check` reports drift read-only and changes nothing.
 
 Once a repo is set up, `choosing-a-workflow` routes a piece of work to the right schema —
-it names the schema, the filled-in `/opsx:new` command that creates the change with that
+it names the schema, the filled-in `/openspec-new-change` command that creates the change with that
 schema, the artifact chain, and the guardrail most likely to force a reclassification, then
 stops. `configuring-openspec` covers the configuration surfaces themselves.
+
+## OpenSpec version
+
+Written against OpenSpec 2.0, which replaced the `/opsx:*` command files with skills:
+the guidance names `/openspec-new-change`, `/openspec-continue-change`, and
+`/openspec-apply-change`, not `/opsx:new` and the rest. A project that still carries 1.x
+files needs `openspec update` (preview it with `--dry-run`) to get those skills. That
+command also migrates the machine-global `config.json` the first time it runs, which is
+the one machine-wide change a project command can make; setup itself never runs it.
+The routed flows use `new` and `continue`, which sit outside the `core` profile — setup
+warns when the machine profile lacks them.
 
 ## Levels
 

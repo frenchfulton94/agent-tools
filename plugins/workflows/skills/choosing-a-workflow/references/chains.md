@@ -317,7 +317,7 @@ the task list.
 
 ## Rules that apply to every chain
 
-- **Driving a chain is `/opsx:continue <change>`, once per artifact.** Name the change every
+- **Driving a chain is `/openspec-continue-change <change>`, once per artifact.** Name the change every
   time. Both `continue` and `apply` infer it from the conversation when the name is omitted
   and have to ask when they cannot, and `continue` is also how a change is resumed in a
   brand-new session — it reads the filesystem, not the history.
@@ -326,7 +326,7 @@ the task list.
   planning artifacts exist they are files; apply reads them off disk and needs the room,
   and OpenSpec's own guidance is to clear context before implementation. The order is
   `/clear`, then `/model` (model up/down, its effort left/right) or `/effort`, then
-  `/opsx:apply <change>` — clearing **first**, because a switch made inside a full window
+  `/openspec-apply-change <change>` — clearing **first**, because a switch made inside a full window
   still drags that window along, and with the name, because clearing is exactly what
   removes what `apply` would have inferred it from. Nothing is lost: status is filesystem
   existence.
