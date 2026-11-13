@@ -109,7 +109,7 @@ function dirNames(dir) {
 /**
  * Fixed workflow list for the CLI's `core` profile. Mirrors the installed CLI's own
  * resolution. Verified against dist/core/global-config.js (DEFAULT_CONFIG) and
- * dist/core/profiles.js (CORE_WORKFLOWS) at v1.8.0. If the CLI changes these, this
+ * dist/core/profiles.js (CORE_WORKFLOWS), re-verified at v2.0.0. If the CLI changes these, this
  * drifts — which is the price of not shelling out to a command that writes and
  * transmits.
  */
@@ -161,8 +161,8 @@ export function machineConfigPath() {
  *   (core/update.js, core/init.js, core/shared/tool-detection.js), not its *display* path
  *   (`openspec config list`, which honours an explicit array for any profile). The two
  *   agree for the only valid values, `core` and `custom`, and diverge only for invalid
- *   ones — and this field exists to answer exactly one question, whether `/opsx:new` and
- *   `/opsx:continue` will exist on this machine, which generation decides.
+ *   ones — and this field exists to answer exactly one question, whether `/openspec-new-change` and
+ *   `/openspec-continue-change` will exist on this machine, which generation decides.
  */
 function openspecCli(run) {
 	let profile = null;

@@ -17,7 +17,7 @@ artifacts:
       was settled.
 
       Classify the work first, and reroute when it is not a feature:
-      - a defect: /opsx:new <what is broken>, using bugfix-flow;
+      - a defect: /openspec-new-change <what is broken>, using bugfix-flow;
       - one decision wide, touching no contract: recreate under rapid-flow;
       - a question in disguise: recreate under spike-flow;
       - too big and foggy for one change: stop and offer the human

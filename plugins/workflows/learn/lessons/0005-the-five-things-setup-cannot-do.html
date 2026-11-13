@@ -28,7 +28,7 @@
 				<p>
 					Your repository is fully configured, including the parts no agent can do — and you have
 					made the machine-global profile decision knowingly, understanding which
-					<code>/opsx</code> commands it gives you.
+					<code>openspec-*</code> skills it gives you.
 				</p>
 			</section>
 
@@ -148,7 +148,7 @@
 			<h3>What the profile actually controls</h3>
 
 			<p>
-				It controls which <code>/opsx:*</code> slash commands exist in your projects. There are two
+				It controls which <code>openspec-*</code> skills exist in your projects. There are two
 				presets.
 			</p>
 
@@ -205,9 +205,9 @@
 
 			<p>
 				Every level's documented flow builds artifacts <em>one at a time</em>, so each interactive
-				artifact gets its own step and its own approval. That is <code>/opsx:continue</code>, and
+				artifact gets its own step and its own approval. That is <code>/openspec-continue-change</code>, and
 				<code>continue</code> is not in <code>core</code>. Without it you are on
-				<code>/opsx:propose</code>, which generates all the planning artifacts in one step — fine for
+				<code>/openspec-propose</code>, which generates all the planning artifacts in one step — fine for
 				a two-artifact <code>rapid</code> change, wrong for a ten-artifact <code>feature</code> chain
 				where the whole point is the gates between artifacts.
 			</p>
@@ -302,7 +302,7 @@ openspec validate --all --strict</code></pre>
 
 			<div class="quiz" data-quiz>
 				<p class="quiz-prompt">
-					You selected extra workflows but <code>/opsx:continue</code> still does not appear. What
+					You selected extra workflows but <code>/openspec-continue-change</code> still does not appear. What
 					did you skip?
 				</p>
 				<ol class="quiz-choices">
@@ -387,7 +387,7 @@ openspec validate --all --strict</code></pre>
 				<p>
 					<a href="../reference/command-card.html">Command card</a> — the whole command surface on
 					one page, split by where you type it: chat or terminal. Typing an
-					<code>openspec</code> command into chat, or an <code>/opsx</code> command into a shell,
+					<code>openspec</code> command into chat, or an <code>/openspec-…</code> skill into a shell,
 					is the most common failure there is.
 				</p>
 			</footer>

@@ -17,7 +17,7 @@
 				<h1>Command card</h1>
 				<p class="deck">
 					Split by <em>where you type it</em>, because that is the single most common failure:
-					<code>/opsx:propose</code> goes in the assistant's chat, <code>openspec …</code> goes in a
+					<code>/openspec-propose</code> goes in the assistant's chat, <code>openspec …</code> goes in a
 					terminal.
 				</p>
 			</header>
@@ -43,12 +43,12 @@
 							<td>—</td>
 						</tr>
 						<tr>
-							<td><code>/opsx:explore</code></td>
+							<td><code>/openspec-explore</code></td>
 							<td>Think through an idea. No structure required, no change created yet</td>
 							<td><code>core</code></td>
 						</tr>
 						<tr>
-							<td><code>/opsx:propose &lt;name or a sentence&gt;</code></td>
+							<td><code>/openspec-propose &lt;name or a sentence&gt;</code></td>
 							<td>
 								Create a change <em>and</em> generate all its planning artifacts in one step. The
 								default quick path
@@ -56,7 +56,7 @@
 							<td><code>core</code></td>
 						</tr>
 						<tr>
-							<td><code>/opsx:apply &lt;change&gt;</code></td>
+							<td><code>/openspec-apply-change &lt;change&gt;</code></td>
 							<td>
 								Work through tasks, ticking them off. Name the change — with the window cleared,
 								there is nothing left for it to infer from
@@ -64,7 +64,7 @@
 							<td><code>core</code></td>
 						</tr>
 						<tr>
-							<td><code>/opsx:update &lt;change&gt; - &lt;what changed&gt;</code></td>
+							<td><code>/openspec-update-change &lt;change&gt; - &lt;what changed&gt;</code></td>
 							<td>
 								Revise existing planning artifacts and keep them coherent, in any direction. Never
 								edits code, never creates missing artifacts
@@ -72,7 +72,7 @@
 							<td><code>core</code></td>
 						</tr>
 						<tr>
-							<td><code>/opsx:sync &lt;change&gt;</code></td>
+							<td><code>/openspec-sync-specs &lt;change&gt;</code></td>
 							<td>
 								Merge this change's delta specs into the main specs while the change stays active.
 								Optional
@@ -80,12 +80,12 @@
 							<td><code>core</code></td>
 						</tr>
 						<tr>
-							<td><code>/opsx:archive &lt;change&gt;</code></td>
+							<td><code>/openspec-archive-change &lt;change&gt;</code></td>
 							<td>Archive when done. Prompts you to sync if you have not</td>
 							<td><code>core</code></td>
 						</tr>
 						<tr>
-							<td><code>/opsx:new &lt;name or a sentence&gt;</code></td>
+							<td><code>/openspec-new-change &lt;name or a sentence&gt;</code></td>
 							<td>
 								<strong>The way to start a change.</strong> Takes a kebab-case name <em>or</em> a
 								description it derives one from; name a schema in the sentence to route it. Scaffolds
@@ -94,7 +94,7 @@
 							<td><strong>custom</strong></td>
 						</tr>
 						<tr>
-							<td><code>/opsx:continue &lt;change&gt;</code></td>
+							<td><code>/openspec-continue-change &lt;change&gt;</code></td>
 							<td>
 								Show what is ready, then create <strong>one</strong> artifact. The
 								artifact-at-a-time loop every level's flow assumes, and the way to resume a change in
@@ -103,22 +103,22 @@
 							<td><strong>custom</strong></td>
 						</tr>
 						<tr>
-							<td><code>/opsx:ff &lt;change&gt;</code></td>
+							<td><code>/openspec-ff-change &lt;change&gt;</code></td>
 							<td>Fast-forward: create all planning artifacts at once</td>
 							<td><strong>custom</strong></td>
 						</tr>
 						<tr>
-							<td><code>/opsx:verify</code></td>
+							<td><code>/openspec-verify-change</code></td>
 							<td>Validate the implementation against the artifacts</td>
 							<td><strong>custom</strong></td>
 						</tr>
 						<tr>
-							<td><code>/opsx:bulk-archive</code></td>
+							<td><code>/openspec-bulk-archive-change</code></td>
 							<td>Archive several completed changes</td>
 							<td><strong>custom</strong></td>
 						</tr>
 						<tr>
-							<td><code>/opsx:onboard</code></td>
+							<td><code>/openspec-onboard</code></td>
 							<td>OpenSpec's own guided walkthrough of one end-to-end change</td>
 							<td><strong>custom</strong></td>
 						</tr>
@@ -128,26 +128,27 @@
 					<code>core</code> is the default profile's six. The rest need a custom workflow selection —
 					<code>openspec config profile</code>, then <code>openspec update</code>. Spelling is per
 					tool: Codex uses <code>$openspec-propose</code>, Kimi
-					<code>/skill:openspec-propose</code>, Amazon Q <code>@opsx-propose</code>.
+					<code>/skill:openspec-propose</code>. Before OpenSpec 2.0 these were
+					<code>/opsx:*</code> commands; 2.0 ships skills only.
 				</caption>
 			</div>
 
 			<h2>The loop, in order</h2>
 
-			<pre><code>/opsx:new     &lt;what you want, in a sentence&gt;, using &lt;schema&gt;
+			<pre><code>/openspec-new-change     &lt;what you want, in a sentence&gt;, using &lt;schema&gt;
 
-/opsx:continue &lt;change&gt;        # once per artifact, naming the change every time
+/openspec-continue-change &lt;change&gt;        # once per artifact, naming the change every time
    ↳ /clear, then /model or /effort, whenever the next artifact wants a different depth
 
 ── all planning artifacts created ──────────────────────────────────
 /clear                          # 1. the artifacts are files now; apply needs the room
 /model                          # 2. model with up/down, its effort with left/right
                                 #    (or /effort alone, when only the depth is wrong)
-/opsx:apply    &lt;change&gt;         # 3. with the name — you just cleared what it would infer from
+/openspec-apply-change    &lt;change&gt;         # 3. with the name — you just cleared what it would infer from
 ────────────────────────────────────────────────────────────────────
 
-/opsx:sync    &lt;change&gt;         # optional
-/opsx:archive &lt;change&gt;</code></pre>
+/openspec-sync-specs    &lt;change&gt;         # optional
+/openspec-archive-change &lt;change&gt;</code></pre>
 
 			<div class="stop" data-background="dark">
 				<span class="label">Clear before you switch, and clear before you apply</span>
@@ -159,7 +160,7 @@
 				</p>
 				<p>
 					The one thing it does take is the assistant's ability to guess which change you mean. Name
-					the change in every <code>opsx</code> command and that cost disappears too.
+					the change in every <code>openspec-*</code> skill and that cost disappears too.
 				</p>
 			</div>
 
@@ -176,7 +177,7 @@ openspec status --change &lt;name&gt; --json  # which artifacts exist, are ready
 			<h3>Doing the work</h3>
 
 			<p>
-				The first line is the optional terminal form of <code>/opsx:new</code> — same scaffold, but you
+				The first line is the optional terminal form of <code>/openspec-new-change</code> — same scaffold, but you
 				write the slug and you get no first-artifact template. Prefer it in scripts.
 			</p>
 

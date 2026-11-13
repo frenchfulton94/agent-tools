@@ -93,7 +93,7 @@ export function defaultRun(cmd: string, args: string[]): string | null;
 
 /**
  * The OpenSpec CLI's fixed workflow list for its `core` profile (mirrors
- * dist/core/profiles.js at v1.8.0). Exported so tests can assert against it without
+ * dist/core/profiles.js, re-verified at v2.0.0). Exported so tests can assert against it without
  * duplicating the literal.
  */
 export const CORE_WORKFLOWS: string[];

@@ -36,11 +36,11 @@ creation, by naming it. The agent can route correctly only if it reads ROUTING.m
 before creating a change — install it where your agent reads instructions
 (AGENTS.md / CLAUDE.md / config context).
 
-    /opsx:new <the work, in a sentence>, using <schema>   # chat; derives the slug
+    /openspec-new-change <the work, in a sentence>, using <schema>   # chat; derives the slug
     openspec new change <slug> --schema <schema>          # terminal; you write the slug
 
-Then `/opsx:continue <change>` per artifact, and before implementing: `/clear`,
-`/model` or `/effort`, `/opsx:apply <change>`.
+Then `/openspec-continue-change <change>` per artifact, and before implementing: `/clear`,
+`/model` or `/effort`, `/openspec-apply-change <change>`.
 
 Guardrails baked into the set: rapid escalates to feature the moment a public
 contract is touched; spike code never merges; hotfix always spawns a follow-up

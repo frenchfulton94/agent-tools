@@ -14,7 +14,7 @@ The `[baseline]` note records what an unaided agent typically produces, which is
 
 1. Routes to `refactor`, not `feature` and not a new test-writing task. *[baseline: usually treats "add tests" as new work, or does not mention a schema at all]*
 2. States that coverage backfill is a refactor and that characterization is the deliverable.
-3. Returns a filled-in chat command — `/opsx:new <the work>, using refactor` — with the schema actually named rather than left as a placeholder, not a bare `openspec new change` as the primary answer. *[baseline: gives the CLI form, often with `<schema>` unfilled]*
+3. Returns a filled-in chat command — `/openspec-new-change <the work>, using refactor` — with the schema actually named rather than left as a placeholder, not a bare `openspec new change` as the primary answer. *[baseline: gives the CLI form, often with `<schema>` unfilled]*
 4. Names the chain as `characterization → strategy → tasks`.
 5. Names the guardrail: a changed test assertion means behaviour changed, so reclassify as `feature`.
 6. Does **not** create the change, write an artifact, or begin writing tests. *[baseline: frequently starts writing tests immediately]*
@@ -56,7 +56,7 @@ The `[baseline]` note records what an unaided agent typically produces, which is
 
 1. States that the `rapid` → `feature` guardrail has fired, naming the analytics event as a public contract.
 2. Says to stop and recreate the change under `feature`, rather than finishing in `rapid` with a note. *[baseline: often suggests documenting the contract change and continuing]*
-3. Returns the recreate command with `feature` named in it — `/opsx:new <the work>, using feature`.
+3. Returns the recreate command with `feature` named in it — `/openspec-new-change <the work>, using feature`.
 4. Does not offer to split the contract change into a second `rapid` change.
 
 ---
@@ -107,7 +107,7 @@ The `[baseline]` note records what an unaided agent typically produces, which is
 
 1. Routes to `app-release`, not `feature` and not ad hoc release steps. *[baseline: starts archiving or writes a release checklist inline]*
 2. Names the chain as `release-scope → preflight → tasks → post-release`.
-3. Returns a filled-in chat command — `/opsx:new <the work>, using app-release` — with the schema named.
+3. Returns a filled-in chat command — `/openspec-new-change <the work>, using app-release` — with the schema named.
 4. Names the guardrail: a code defect discovered mid-release spawns a bugfix change; the release chain never absorbs code fixes.
 5. Does **not** create the change, archive a build, or touch App Store Connect.
 
@@ -134,7 +134,7 @@ The `[baseline]` note records what an unaided agent typically produces, which is
 **Assertions:**
 
 1. Routes the layout work to impeccable, not to a flow. *[baseline: opens a feature change]*
-2. Does not offer `/opsx:new` for the layout work itself.
+2. Does not offer `/openspec-new-change` for the layout work itself.
 3. Says that any functionality the rework turns out to need becomes its own `feature-flow` change.
 4. Stops at the recommendation.
 

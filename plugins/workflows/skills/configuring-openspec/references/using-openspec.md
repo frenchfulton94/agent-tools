@@ -2,9 +2,9 @@
 
 Contents:
 - [The loop](#the-loop)
-- [Profiles: which slash commands exist](#profiles-which-slash-commands-exist)
-- [Slash command spelling by tool](#slash-command-spelling-by-tool)
-- [Command reference](#command-reference)
+- [Profiles: which skills exist](#profiles-which-skills-exist)
+- [Skill spelling by tool](#skill-spelling-by-tool)
+- [Skill reference](#skill-reference)
 - [The change folder](#the-change-folder)
 - [Writing delta specs](#writing-delta-specs)
 - [Reviewing a drafted plan](#reviewing-a-drafted-plan)
@@ -18,15 +18,15 @@ Contents:
 ```
 TERMINAL   npm install -g @fission-ai/openspec@latest
 TERMINAL   cd your-project && openspec init
-CHAT       /opsx:explore                    (optional: think it through first)
-CHAT       /opsx:new add dark mode          (scaffolds; shows the first template)
-CHAT       /opsx:continue add-dark-mode     (one artifact per call; repeat)
+CHAT       /openspec-explore                    (optional: think it through first)
+CHAT       /openspec-new-change add dark mode          (scaffolds; shows the first template)
+CHAT       /openspec-continue-change add-dark-mode     (one artifact per call; repeat)
 CHAT       /clear  +  /model or /effort     (before implementing — see below)
-CHAT       /opsx:apply add-dark-mode        (builds it, checking off tasks)
-CHAT       /opsx:archive add-dark-mode      (merges specs, files the change away)
+CHAT       /openspec-apply-change add-dark-mode        (builds it, checking off tasks)
+CHAT       /openspec-archive-change add-dark-mode      (merges specs, files the change away)
 ```
 
-On the `core` profile, `/opsx:propose add-dark-mode` replaces the `new` + `continue` pair and drafts every planning artifact in one step.
+On the `core` profile, `/openspec-propose add-dark-mode` replaces the `new` + `continue` pair and drafts every planning artifact in one step.
 
 Two terminal steps to set up; the rest lives in chat. There is no "interactive mode" to enter — typing the slash command *is* how you enter OpenSpec. The one genuinely interactive terminal feature is `openspec view`, a browsing dashboard.
 
@@ -36,11 +36,11 @@ In Claude Code that is three commands, in this order, once the planning artifact
 
 1. `/clear` — the artifacts are files; apply reads them off disk and needs the window for code, test output, and shell noise. A model switch made *inside* a full window still drags that window along, so clearing comes first, not after.
 2. `/model` — model with up/down, that model's effort with left/right, one dialog. `/effort` alone when only the depth is wrong.
-3. `/opsx:apply <change>` — **with the name.** `apply` and `continue` both infer the change from the conversation when the name is omitted; clearing is exactly what removes the thing they infer from.
+3. `/openspec-apply-change <change>` — **with the name.** `apply` and `continue` both infer the change from the conversation when the name is omitted; clearing is exactly what removes the thing they infer from.
 
-Run the same three between planning artifacts whenever the next one wants a different depth, ending in `/opsx:continue <change>`. Nothing is lost: artifact status is pure filesystem existence, so a cleared window costs a chain nothing.
+Run the same three between planning artifacts whenever the next one wants a different depth, ending in `/openspec-continue-change <change>`. Nothing is lost: artifact status is pure filesystem existence, so a cleared window costs a chain nothing.
 
-## Profiles: which slash commands exist
+## Profiles: which skills exist
 
 | Profile | Workflows |
 |---|---|
@@ -48,45 +48,60 @@ Run the same three between planning artifacts whenever the next one wants a diff
 | expanded (custom selection) | adds `new`, `continue`, `ff`, `verify`, `bulk-archive`, `onboard` |
 
 ```bash
-openspec config profile     # choose profile / delivery / workflows
+openspec config profile     # interactive picker; `core` is the only preset
 openspec update             # apply the selection to this project
 ```
 
-Delivery (`both` | `skills` | `commands`) decides *how* they are installed: skills are `.../skills/openspec-*/SKILL.md`, the emerging cross-tool standard; commands are the older per-tool `opsx-*` slash files. Users need not care which their tool uses.
+Each workflow is one skill under `.agents/skills/openspec-*/SKILL.md`, linked from the tool's own folder (`.claude/skills/` for Claude Code). OpenSpec 2.0 installs skills only: the `delivery` key (`both` | `skills` | `commands`) is still accepted in `config.json` but ignored, and the per-tool command files (`/opsx:*`) are gone.
 
-## Slash command spelling by tool
+## Skill spelling by tool
 
-The intent is identical everywhere; the spelling follows the file the tool loads.
+The intent is identical everywhere; the spelling follows how the tool invokes a skill.
 
-| File shape | You type | Examples |
+| Tool | You type | Notes |
 |---|---|---|
-| `.../commands/opsx/<id>.*` | `/opsx:propose` | Claude Code, Gemini CLI, Crush, CodeBuddy, Qoder, ZCode, Lingma |
-| `.../opsx-<id>.*` | `/opsx-propose` | Cursor, GitHub Copilot (IDE), Devin Desktop, Trae, Oh My Pi, and most others |
-| `.amazonq/prompts/opsx-<id>.md` | `@opsx-propose` | Amazon Q Developer |
-| none — skills only | `/openspec-propose` | CodeArts, ForgeCode, Hermes, MiniMax Code, Mistral Vibe, shared `.agents` |
-| none — Kimi Code | `/skill:openspec-propose` | Kimi Code |
-| none — Codex CLI | `$openspec-propose` | Codex |
+| Claude Code and most tools | `/openspec-propose` | The skill name behind a slash |
+| Codex CLI | `$openspec-propose` | Codex does not recognize `/<name>` |
+| Kimi Code | `/skill:openspec-propose` | |
+| GSD, Rovo Dev, SourceCraft Code Assistant | say it in prose: "use the openspec-propose skill" | No slash surface for skills |
 
-Skill names are not command ids: `/opsx:apply` is the `openspec-apply-change` skill. The authoritative answer for any project is the "Getting started" line `openspec init` printed, which already uses the right form.
+Amazon Q Developer is retired in 2.0: it cannot load skills, `openspec update` removes its OpenSpec files, and Kiro replaces it. The authoritative answer for any project is the "Getting started" line `openspec init` printed, which already uses the right form.
 
-## Command reference
+Skill names are not the old command ids. `/opsx:` users translate like this:
 
-| Command | What it does |
+| 1.x command | 2.0 skill |
 |---|---|
-| `/opsx:explore` | Thinking partner. Reads the codebase, compares options, creates no artifacts and writes no code |
-| `/opsx:propose [name-or-description]` | Creates the change and drafts every planning artifact the schema requires |
-| `/opsx:apply [name]` | Works through `tasks.md`, writing code and checking items off |
-| `/opsx:update [name]` | Revises existing planning artifacts and keeps them coherent. Planning only — never edits code, never creates missing artifacts |
-| `/opsx:sync [name]` | Merges delta specs into main specs without archiving |
-| `/opsx:archive [name]` | Offers to sync, then moves the change to `changes/archive/YYYY-MM-DD-<name>/` |
-| `/opsx:new [name-or-description]` | Expanded: scaffolds a change and shows the first artifact's template, writing no artifacts. The argument is a kebab-case name **or** a description it derives one from; mention a schema and it passes `--schema` through |
-| `/opsx:continue [name]` | Expanded: creates the next ready artifact, one at a time. Also how you resume a change in a fresh session — it reads the filesystem, not the conversation |
-| `/opsx:ff [name]` | Expanded: creates all planning artifacts at once |
-| `/opsx:verify [name]` | Expanded: checks completeness, correctness, coherence against the code. Does not block archive |
-| `/opsx:bulk-archive` | Expanded: archives several changes, resolving spec conflicts by inspecting what shipped |
-| `/opsx:onboard` | Expanded: narrated end-to-end tutorial on the user's real codebase |
+| `/opsx:propose` | `openspec-propose` |
+| `/opsx:explore` | `openspec-explore` |
+| `/opsx:apply` | `openspec-apply-change` |
+| `/opsx:update` | `openspec-update-change` |
+| `/opsx:sync` | `openspec-sync-specs` |
+| `/opsx:archive` | `openspec-archive-change` |
+| `/opsx:new` | `openspec-new-change` |
+| `/opsx:continue` | `openspec-continue-change` |
+| `/opsx:ff` | `openspec-ff-change` |
+| `/opsx:verify` | `openspec-verify-change` |
+| `/opsx:bulk-archive` | `openspec-bulk-archive-change` |
+| `/opsx:onboard` | `openspec-onboard` |
 
-`/opsx:ff` when the scope is clear; `/opsx:continue` when you want to review each artifact. Legacy `/openspec:proposal|apply|archive` commands still work; the artifact structure is compatible.
+## Skill reference
+
+| Skill | What it does |
+|---|---|
+| `/openspec-explore` | Thinking partner. Reads the codebase, compares options, creates no artifacts and writes no code |
+| `/openspec-propose [name-or-description]` | Creates the change and drafts every planning artifact the schema requires |
+| `/openspec-apply-change [name]` | Works through `tasks.md`, writing code and checking items off |
+| `/openspec-update-change [name]` | Revises existing planning artifacts and keeps them coherent. Planning only — never edits code, never creates missing artifacts |
+| `/openspec-sync-specs [name]` | Merges delta specs into main specs without archiving |
+| `/openspec-archive-change [name]` | Offers to sync, then moves the change to `changes/archive/YYYY-MM-DD-<name>/` |
+| `/openspec-new-change [name-or-description]` | Expanded: scaffolds a change and shows the first artifact's template, writing no artifacts. The argument is a kebab-case name **or** a description it derives one from; mention a schema and it passes `--schema` through |
+| `/openspec-continue-change [name]` | Expanded: creates the next ready artifact, one at a time. Also how you resume a change in a fresh session — it reads the filesystem, not the conversation |
+| `/openspec-ff-change [name]` | Expanded: creates all planning artifacts at once |
+| `/openspec-verify-change [name]` | Expanded: checks completeness, correctness, coherence against the code. Does not block archive |
+| `/openspec-bulk-archive-change` | Expanded: archives several changes, resolving spec conflicts by inspecting what shipped |
+| `/openspec-onboard` | Expanded: narrated end-to-end tutorial on the user's real codebase |
+
+`/openspec-ff-change` when the scope is clear; `/openspec-continue-change` when you want to review each artifact.
 
 ## The change folder
 
@@ -167,9 +182,9 @@ Archive then moves the folder to `openspec/changes/archive/YYYY-MM-DD-<name>/`, 
 
 ## Editing a change in flight
 
-Every artifact is plain Markdown; edit it by hand or ask the assistant to revise it, then continue. The assistant always works from current file contents, so editing steers the work. There is no separate "update proposal" command because none is needed — though `/opsx:update` exists to revise artifacts *and keep them coherent with each other*, confirming each edit.
+Every artifact is plain Markdown; edit it by hand or ask the assistant to revise it, then continue. The assistant always works from current file contents, so editing steers the work. There is no separate "update proposal" command because none is needed — though `/openspec-update-change` exists to revise artifacts *and keep them coherent with each other*, confirming each edit.
 
-Reconciling hand-edited code with the spec: whichever is correct wins. If the code is right, update the delta to describe what shipped; if the spec is right, keep building. Do it before archiving, because archiving makes the specs the record of truth. `/opsx:verify` surfaces the mismatches.
+Reconciling hand-edited code with the spec: whichever is correct wins. If the code is right, update the delta to describe what shipped; if the spec is right, keep building. Do it before archiving, because archiving makes the specs the record of truth. `/openspec-verify-change` surfaces the mismatches.
 
 **Update vs. start fresh:** update when it is the same work refined — scope narrowing, learning-driven corrections, a better approach to the same goal. Start a new change when the intent fundamentally changed, the scope exploded into different work, or the original could be marked done on its own. Update preserves context; a new change provides clarity.
 
@@ -177,7 +192,7 @@ Reconciling hand-edited code with the spec: whichever is correct wins. If the co
 
 You do not document the whole system first. Specs grow one change at a time, and deltas are what make that possible.
 
-Practical guidance: pick a small, real change you needed anyway; use `/opsx:explore` first so the AI reads the area before proposing; create domain folders under `openspec/specs/` when a change first needs one (by feature area, by component, or by bounded context — whatever a newcomer would nod at). Resist back-filling specs for code you are not changing; they go stale because nothing forces them to track reality.
+Practical guidance: pick a small, real change you needed anyway; use `/openspec-explore` first so the AI reads the area before proposing; create domain folders under `openspec/specs/` when a change first needs one (by feature area, by component, or by bounded context — whatever a newcomer would nod at). Resist back-filling specs for code you are not changing; they go stale because nothing forces them to track reality.
 
 Existing PRDs and SRS documents are source material for exploration, not specs to bulk-convert. Point the assistant at the relevant section when starting a change.
 

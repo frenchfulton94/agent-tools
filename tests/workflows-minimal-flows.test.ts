@@ -99,10 +99,26 @@ function slashCommands(text: string): string[] {
 	return [...text.matchAll(/(?<![\w/.:<>\]-])\/([a-z][a-z0-9-]*(?::[a-z0-9-]+)?)/g)].map((m) => m[1]);
 }
 
+/** The skills OpenSpec 2.0 installs (`openspec update` lists these names); the `/opsx:*` commands are gone. */
+const OPENSPEC_SKILLS = new Set([
+	'openspec-propose',
+	'openspec-explore',
+	'openspec-apply-change',
+	'openspec-update-change',
+	'openspec-sync-specs',
+	'openspec-archive-change',
+	'openspec-new-change',
+	'openspec-continue-change',
+	'openspec-ff-change',
+	'openspec-verify-change',
+	'openspec-bulk-archive-change',
+	'openspec-onboard',
+]);
+
 function isAllowedCommand(cmd: string): boolean {
 	const bare = cmd.replace(/^mattpocock-skills:/, '');
 	return (
-		ROSTER.userInvoked.includes(bare) || cmd.startsWith('opsx:') || HARNESS_COMMANDS.has(cmd) || cmd === 'impeccable'
+		ROSTER.userInvoked.includes(bare) || OPENSPEC_SKILLS.has(cmd) || HARNESS_COMMANDS.has(cmd) || cmd === 'impeccable'
 	);
 }
 
@@ -141,8 +157,14 @@ describe('the scanners themselves', () => {
 
 	test('slashCommands finds commands and ignores paths and URLs', () => {
 		expect(
-			slashCommands('Offer `/retro`, then /opsx:apply <change>. Not docs/adr/, <change>/research/, or https://x.dev/a.'),
-		).toEqual(['retro', 'opsx:apply']);
+			slashCommands('Offer `/retro`, then /openspec-apply-change <change>. Not docs/adr/, <change>/research/, or https://x.dev/a.'),
+		).toEqual(['retro', 'openspec-apply-change']);
+	});
+
+	test('isAllowedCommand accepts only the exact OpenSpec 2.0 skill names', () => {
+		expect(isAllowedCommand('openspec-apply-change')).toBe(true);
+		expect(isAllowedCommand('openspec-apply')).toBe(false);
+		expect(isAllowedCommand('opsx:apply')).toBe(false);
 	});
 });
 

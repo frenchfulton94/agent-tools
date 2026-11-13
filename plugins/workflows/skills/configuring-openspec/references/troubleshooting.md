@@ -5,7 +5,7 @@ Symptom first, then the cause, then the fix. Diagnose before editing — most "c
 Contents:
 - [Diagnosing in three commands](#diagnosing-in-three-commands)
 - [Install and setup](#install-and-setup)
-- [Slash commands missing](#slash-commands-missing)
+- [Skills missing](#skills-missing-slash-commands-not-appearing)
 - [Config not applied](#config-not-applied)
 - [Schema problems](#schema-problems)
 - [Change and artifact problems](#change-and-artifact-problems)
@@ -36,12 +36,12 @@ Run diagnostics in a plain terminal, not piped: dropped-field warnings go to std
 
 **An older version answers after upgrading** — an earlier copy shadows it on `PATH`. Recent `openspec update` output names the directory the running CLI was loaded from; compare it against the install location.
 
-## Slash commands missing
+## Skills missing (slash commands not appearing)
 
 In order, fastest first:
 
-1. **Wrong half of the product.** `/opsx:propose` goes in the assistant's chat, not a shell.
-2. **Wrong spelling for that tool.** Skills-only tools never autocomplete `/opsx` even on a healthy install — Codex needs `$openspec-propose`, Kimi `/skill:openspec-propose`, Amazon Q `@opsx-propose`. See the table in `using-openspec.md`.
+1. **Wrong half of the product.** `/openspec-propose` goes in the assistant's chat, not a shell.
+2. **Wrong spelling for that tool, or an old name.** The `/opsx:*` commands no longer exist in 2.0 — the skill is `/openspec-propose`. Codex needs `$openspec-propose`, Kimi `/skill:openspec-propose`, and GSD, Rovo Dev and SourceCraft take the skill by name in prose. Amazon Q Developer is retired. See the tables in `using-openspec.md`.
 3. **Stale or missing files.** Run `openspec update` from the project root — but upgrade the package first, or an outdated CLI reports everything up to date without writing newer workflows.
 4. **Never initialized here.** Skills are per project. After cloning or switching folders, run `openspec init` (update only refreshes files that already exist).
 5. **Assistant not restarted.** Most tools scan for skills at startup.
@@ -85,7 +85,7 @@ In order, fastest first:
 
 ## Change and artifact problems
 
-**"Change not found"** — name it explicitly (`/opsx:apply add-dark-mode`), confirm it exists with `openspec list`, and confirm you are in the right project directory.
+**"Change not found"** — name it explicitly (`/openspec-apply-change add-dark-mode`), confirm it exists with `openspec list`, and confirm you are in the right project directory.
 
 **"No artifacts ready"** — everything is done or blocked. `openspec status --change <name>` shows what is blocking; create the missing dependency first.
 
@@ -122,7 +122,7 @@ Not a bug — a context problem. In order of leverage:
 1. Add project `context:` so the stack and conventions reach every request.
 2. Add per-artifact `rules:` for guidance that only applies to one artifact.
 3. Give a more detailed description when proposing.
-4. Use the expanded `/opsx:continue` to create and review one artifact at a time instead of drafting everything at once.
+4. Use the expanded `/openspec-continue-change` to create and review one artifact at a time instead of drafting everything at once.
 5. Edit the schema's `instruction` field or its template — both take effect immediately, making tune-and-retest the fastest loop available.
 
 Do not edit the generated skill files: `openspec update` overwrites them.

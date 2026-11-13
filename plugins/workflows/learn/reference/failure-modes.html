@@ -277,13 +277,13 @@ openspec instructions &lt;artifact&gt; --change &lt;name&gt; --json  # what the 
 						<tr>
 							<td>A slash command "does not exist"</td>
 							<td>
-								Wrong half of the product — <code>/opsx:propose</code> goes in the assistant's chat,
+								Wrong half of the product — <code>/openspec-propose</code> goes in the assistant's chat,
 								not a shell
 							</td>
 							<td>The most common failure there is. Check where you typed it</td>
 						</tr>
 						<tr>
-							<td><code>/opsx:continue</code> is missing</td>
+							<td><code>/openspec-continue-change</code> is missing</td>
 							<td>
 								It is not in the <code>core</code> profile. There is <strong>no
 								<code>expanded</code> preset</strong> — extra workflows come from a
@@ -304,7 +304,7 @@ openspec instructions &lt;artifact&gt; --change &lt;name&gt; --json  # what the 
 						</tr>
 						<tr>
 							<td>
-								<code>/opsx:apply</code> or <code>/opsx:continue</code> asks which change you mean
+								<code>/openspec-apply-change</code> or <code>/openspec-continue-change</code> asks which change you mean
 							</td>
 							<td>
 								Both infer the change from the conversation when you omit the name, and you cleared
@@ -312,7 +312,7 @@ openspec instructions &lt;artifact&gt; --change &lt;name&gt; --json  # what the 
 							</td>
 							<td>
 								Not a fault. Name the change:
-								<code>/opsx:apply &lt;change&gt;</code>. Do it every time and it never comes up
+								<code>/openspec-apply-change &lt;change&gt;</code>. Do it every time and it never comes up
 							</td>
 						</tr>
 						<tr>
@@ -323,7 +323,7 @@ openspec instructions &lt;artifact&gt; --change &lt;name&gt; --json  # what the 
 							</td>
 							<td>
 								<code>/clear</code>, re-pick with <code>/model</code> or <code>/effort</code>, then
-								<code>/opsx:apply &lt;change&gt;</code>. Clearing loses nothing — artifact state is
+								<code>/openspec-apply-change &lt;change&gt;</code>. Clearing loses nothing — artifact state is
 								file existence
 							</td>
 						</tr>

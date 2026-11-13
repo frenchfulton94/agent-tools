@@ -3,18 +3,18 @@
 Read this before creating any OpenSpec change. Classify the request, then create it
 in chat, naming the schema in the sentence:
 
-    /opsx:new <the work, in a sentence>, using <schema>
+    /openspec-new-change <the work, in a sentence>, using <schema>
 
-/opsx:new takes a kebab-case name or a description it derives one from, and passes
+/openspec-new-change takes a kebab-case name or a description it derives one from, and passes
 --schema through only when a schema is named - so naming it is what makes the routing
 decision stick. The terminal equivalent, for scripts or when the slug is already
 decided, is:
 
     openspec new change <slug> --schema <schema>
 
-After creation, drive the chain with /opsx:continue <change>, one artifact per call,
+After creation, drive the chain with /openspec-continue-change <change>, one artifact per call,
 naming the change every time. Before implementing: /clear, then /model (effort with
-left/right) or /effort, then /opsx:apply <change> - clearing first, and with the name,
+left/right) or /effort, then /openspec-apply-change <change> - clearing first, and with the name,
 because clearing removes what apply would otherwise infer it from.
 
 ## Decision tree (first match wins)

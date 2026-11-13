@@ -183,12 +183,12 @@ openspec config set telemetry.enabled false
 openspec config set user.name "My Name" --string
 openspec config unset defaultStore
 openspec config edit                       # opens $EDITOR
-openspec config profile                    # interactive profile/delivery wizard
+openspec config profile                    # interactive profile/workflow picker
 openspec config profile core               # fast preset
 openspec config reset --all --yes
 ```
 
-Recognized keys include `profile` (`core` | `custom`), `delivery` (`both` | `skills` | `commands`), `workflows` (string array), `defaultStore`, `openers` (workset launchers), and `telemetry`.
+Recognized keys include `profile` (`core` | `custom`), `delivery` (accepted but ignored since 2.0, which installs skills only), `workflows` (string array), `defaultStore`, `openers` (workset launchers), and `telemetry`.
 
 Telemetry is opt-out and collects command name and version only. `OPENSPEC_TELEMETRY=0`, `DO_NOT_TRACK=1`, and a truthy `CI` override the config value. The same signals disable the `openspec update` version check.
 

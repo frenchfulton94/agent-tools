@@ -18,7 +18,7 @@ export const BUILTIN_ARTIFACT_IDS = ['proposal', 'specs', 'design', 'tasks'];
 
 /**
  * OpenSpec's real hard cap on the `context:` field, `MAX_CONTEXT_SIZE` in
- * `dist/core/project-config.js` (verified against the installed 1.11.0 CLI): exactly
+ * `dist/core/project-config.js` (verified against the installed 2.0.0 CLI): exactly
  * `50 * 1024` bytes, compared with a strict `>` against `Buffer.byteLength(text, 'utf-8')`.
  * A field at exactly this size is kept; one byte over is dropped entirely and silently.
  */
