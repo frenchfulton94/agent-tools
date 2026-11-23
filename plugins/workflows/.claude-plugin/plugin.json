@@ -1,12 +1,9 @@
 {
   "name": "workflows",
   "version": "0.10.0",
-  "description": "Sets up or reconciles a project's OpenSpec workflow in one command: schemas and subagents for a chosen complexity level, a rewritten openspec/config.yaml that carries forward what you wrote, and guarded plugin installation. Re-runnable, with --check for read-only drift reporting. Also routes a piece of work to the right schema among the seventeen it installs, detects Apple-native repos and adds the apple-studio layer plus an app-release workflow at the advanced level, and ships a self-paced learning package covering installation, routing, and every workflow end to end.",
+  "description": "Sets up one OpenSpec workflow in a project with one command: seven change-type schemas (feature, bugfix, refactor, spike, upgrade, setup, rapid) with a router between them, a design subagent, a rewritten openspec/config.yaml that carries forward what you wrote, and guarded installation of the three plugins the flows call. Matt Pocock's skills drive each step, six of Addy Osmani's agent-skills cover threat modelling, design challenge, defect review, performance, current docs, and the quality bar, and impeccable does all surface work. Re-runnable, with --check for read-only drift reporting. Also routes a piece of work to the right schema.",
   "author": {
     "name": "Agent Tools",
     "email": "michael@frenchfultonjr.dev"
-  },
-  "dependencies": [
-    { "name": "meta-skills", "marketplace": "agent-tools" }
-  ]
+  }
 }

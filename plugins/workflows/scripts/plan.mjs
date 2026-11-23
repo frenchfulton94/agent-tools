@@ -12,42 +12,29 @@ const PAYLOAD = join(HERE, '..', 'payload');
 export const PROBE_CHANGE = 'zz-workflows-setup-probe';
 
 /**
- * The only valid levels. Exported so later tasks and the setup skill share one source of
- * truth instead of re-listing the names. An unrecognized level must never fall through to
- * produce a plausible-looking plan — see the guard at the top of `buildPlan` — because an
- * empty plan that looks successful (0 schemas, 0 agents, 0 warnings, but plugins still
- * installing) is worse than a crash: it mutates the user's environment while delivering
- * none of the workflow they asked for, and nothing in its shape signals that anything went
- * wrong.
+ * The one workflow this plugin ships. It was once the `minimal` level of three; the name
+ * stays in the plan and in `.claude/workflows.json` so a record written by any release
+ * reads the same way.
  */
-export const LEVELS = ['minimal', 'standard', 'advanced'];
+export const LEVEL = 'minimal';
+
+/** The levels 0.10.0 removed. A repository recorded at one of them gets told, in the plan. */
+const REMOVED_LEVELS = new Set(['standard', 'advanced']);
 
 /**
- * Thrown only for a bad `level` argument — a user typo, not a defect in this module. The
- * CLI entry point catches this specifically so it can print just the message (the failure
- * is fully explained by it); any other error is a genuine bug and gets its full stack
- * instead, since that is what someone will need to localise and fix it.
+ * Thrown for a level argument. There are no levels to choose between any more, and a stale
+ * `plan.mjs advanced` must fail loudly rather than quietly plan the one workflow under a
+ * name the caller did not ask for. The CLI entry point prints just the message.
  */
 export class UnknownLevelError extends Error {}
-
-/** Levels that lean on the mattpocock pack, whose setup skill is human-only (§9). */
-const MATTPOCOCK_LEVELS = new Set(['minimal', 'advanced']);
 /**
- * Workflows only a `custom` profile provides; this level's documented flow needs these.
+ * Workflows only a `custom` profile provides; the flows' documented path needs these.
  * The CLI ships exactly one preset, `core`, whose fixed six workflows (`CORE_WORKFLOWS` in
  * detect.mjs) do not include them — there is no "expanded" preset to pick, which is why the
  * warning below names the custom selection specifically rather than a preset that does not
  * exist.
  */
 const NEEDED_WORKFLOWS = ['new', 'continue'];
-/**
- * The plugin that carries the `controlled-english` output style
- * (`plugins/meta-skills/output-styles/`). An output style ships with its plugin, so the
- * style only appears in `/config` once this plugin is active — and selecting one is a user
- * act nothing can automate. Hence a human step, ordered after the reload rather than
- * standing alone.
- */
-const OUTPUT_STYLE_PLUGIN = 'meta-skills@agent-tools';
 
 const readJson = (p) => (existsSync(p) ? JSON.parse(readFileSync(p, 'utf8')) : {});
 const subdirs = (d) =>
@@ -69,7 +56,7 @@ function profileLabel(profile) {
 }
 
 /**
- * Splits the names this level ships into what to copy, what this plugin may update, and what
+ * Splits the names the payload ships into what to copy, what this plugin may update, and what
  * belongs to the user.
  *
  * The ownership question — "is this ours?" — is answered only by `.claude/workflows.json`
@@ -101,7 +88,9 @@ function classify(shipped, existingNames, hashes, recorded) {
 }
 
 /**
- * Names this level used to ship and no longer does, from `levels/<level>/retired.json`.
+ * Names this plugin used to ship and no longer does, from the payload's `retired.json`:
+ * the pre-0.8.0 bridge schema and every schema and agent of the `standard` and `advanced`
+ * levels 0.10.0 removed.
  * Setup deletes nothing on its own, so without this a renamed schema or a dropped agent
  * stays on disk indefinitely — and a dropped agent keeps loading, its description still
  * telling the model to reach for it. A retired name is offered for deletion only when the
@@ -113,8 +102,8 @@ function classify(shipped, existingNames, hashes, recorded) {
  * a detection with no `changeSchemas` at all never looked; both keep every retired schema.
  * Retired agents stay while any retired schema stays, because the old schemas dispatch them.
  */
-function planRetirement(levelDir, detection) {
-	const retired = readJson(join(levelDir, 'retired.json'));
+function planRetirement(payloadRoot, detection) {
+	const retired = readJson(join(payloadRoot, 'retired.json'));
 	const changes = detection.openspec?.changeSchemas;
 
 	const sweep = (names, onDisk, hashes, recorded, blocker) => {
@@ -155,45 +144,20 @@ function planRetirement(levelDir, detection) {
  * writes anything. Computes schema collisions from `detection.openspec.schemas` directly, never
  * touching the filesystem itself, so this stays pure and testable.
  *
- * `payloadRoot` (default: this plugin's real shipped payload) is a TEST-ONLY seam for pinning
- * buildPlan's own base→web→level *composition order* — not a general escape hatch for testing
- * merge semantics. `mergeManifests` is already pure and exported, so the generic "a later
- * manifest's value wins per key" rule belongs in a direct unit test of that function, not here;
- * reading a payload directory is not impure the way spawning a subprocess is, so this is a
- * narrower seam than `detect.mjs`'s injectable `run`, not an equivalent of it. It exists only
- * because the real payload has no naturally-occurring value conflict across manifests to observe
- * order-sensitivity against. A `payloadRoot` with no `levels/<level>` directory now throws (see
- * the guard in the body): it used to degrade through the `existsSync` guards below into empty
- * manifests/schemas/agents, reproducing the round-1 "plausible-but-empty-plan" failure by a
- * different vector. No user-facing caller (the CLI entry point, the setup skill, or anything
- * else that runs against a real repo) may ever pass this option.
+ * `payloadRoot` (default: this plugin's real shipped payload) is a TEST-ONLY seam. A
+ * `payloadRoot` with no schemas directory throws (see the guard in the body): it used to
+ * degrade through the `existsSync` guards below into empty manifests, schemas, and agents — a
+ * plan that looks successful (0 schemas, 0 agents, 0 warnings, plugins still installing) while
+ * delivering none of the workflow, which is worse than a crash. No user-facing caller (the CLI
+ * entry point, the setup skill, or anything else that runs against a real repo) may ever pass
+ * this option.
  */
-export function buildPlan(detection, { level, payloadRoot = PAYLOAD }) {
-	// An unrecognized level must fail loudly before anything else runs — including before the
-	// first disk read — rather than silently falling through to an empty-but-plausible plan.
-	if (!LEVELS.includes(level)) {
-		throw new UnknownLevelError(`Unknown level ${JSON.stringify(level)}. Valid levels are: ${LEVELS.join(', ')}.`);
-	}
-
-	const levelDir = join(payloadRoot, 'levels', level);
-	// Ruling 48, reversing Ruling 30: `payloadRoot` was documented-but-unvalidated, so a wrong
-	// path degraded through the `existsSync` guards below into an empty-but-plausible plan —
-	// 0 schemas, 0 agents, 0 warnings, plugins still installing — which is the exact failure
-	// Ruling 27's level check exists to prevent, reached by a different door. Prose cannot
-	// close a vector; this can.
-	if (!existsSync(levelDir)) {
-		throw new Error(`payloadRoot ${JSON.stringify(payloadRoot)} has no levels/${level} directory — refusing to build an empty-but-plausible plan.`);
-	}
-
-	// Ruling 48's lesson applies here too: a payload missing content the detection says
-	// this plan must ship is a defect, and the empty-but-plausible plan it would produce
-	// is the exact failure the level guard above exists to prevent.
-	const appleActive = level === 'advanced' && Boolean(detection.apple?.app);
-	const appleDir = join(levelDir, 'apple');
-	if (appleActive && !existsSync(appleDir)) {
-		throw new Error(
-			`payloadRoot ${JSON.stringify(payloadRoot)} has no levels/advanced/apple directory — refusing to build a plan that omits the Apple content it claims to ship.`,
-		);
+export function buildPlan(detection, { payloadRoot = PAYLOAD } = {}) {
+	// Ruling 48: `payloadRoot` was documented-but-unvalidated, so a wrong path degraded into an
+	// empty-but-plausible plan. Prose cannot close a vector; this can.
+	const shippedSchemasDir = join(payloadRoot, 'openspec', 'schemas');
+	if (!existsSync(shippedSchemasDir)) {
+		throw new Error(`payloadRoot ${JSON.stringify(payloadRoot)} has no openspec/schemas directory — refusing to build an empty-but-plausible plan.`);
 	}
 
 	const warnings = [];
@@ -212,12 +176,22 @@ export function buildPlan(detection, { level, payloadRoot = PAYLOAD }) {
 		);
 	}
 
-	const manifests = [readJson(join(payloadRoot, 'base', 'settings.base.json'))];
-	if (detection.web) manifests.push(readJson(join(payloadRoot, 'base', 'settings.base.web.json')));
-	if (detection.apple?.swift) manifests.push(readJson(join(payloadRoot, 'base', 'settings.base.apple.json')));
-	manifests.push(readJson(join(levelDir, 'settings.json')));
+	// A repository a removed level set up keeps everything that level installed. Its own
+	// files are offered for deletion one by one below (`retire`); nothing goes without a yes.
+	const priorLevel = detection.prior?.level;
+	if (REMOVED_LEVELS.has(priorLevel)) {
+		warnings.push(
+			`This repository was set up at the \`${priorLevel}\` level, which this plugin no longer ships. ` +
+				'Setup now installs one workflow: the seven `-flow` schemas. The schemas and agents that level ' +
+				'installed stay on disk and are no longer updated; the ones nobody has edited and no open change ' +
+				'uses are listed under retire, each deleted only if you approve it. Plugins that level enabled are ' +
+				"left as they are. `openspec/config.yaml`'s default schema becomes `feature-flow`; open changes " +
+				'keep the schema they were created with.',
+		);
+	}
 
-	const merged = mergeManifests(manifests);
+	// One manifest: the plugins the flows call. Nothing else is installed.
+	const merged = mergeManifests([readJson(join(payloadRoot, 'settings.json'))]);
 	const plugins = planInstalls(merged, new Set(detection.settings.decided));
 
 	// I2 and I6, together. `copy` is what is not there yet. Of the names that ARE there, the
@@ -226,18 +200,12 @@ export function buildPlan(detection, { level, payloadRoot = PAYLOAD }) {
 	// every shipped name looked like a user's own file on the second run. Everything else is
 	// `collide`: a file the user wrote, or one of ours they have since changed, and neither is
 	// ever replaced without being named in the plan and approved individually.
-	const shippedSchemas = [
-		...subdirs(join(levelDir, 'openspec', 'schemas')),
-		...(appleActive ? subdirs(join(appleDir, 'openspec', 'schemas')) : []),
-	].sort();
+	const shippedSchemas = subdirs(shippedSchemasDir);
 	const schemas = classify(shippedSchemas, detection.openspec.schemas, detection.openspec.schemaHashes, detection.prior?.schemas);
 
 	const agentFilesIn = (dir) =>
 		existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith('.md')) : [];
-	const shippedAgents = [
-		...agentFilesIn(join(levelDir, 'agents')),
-		...(appleActive ? agentFilesIn(join(appleDir, 'agents')) : []),
-	].sort();
+	const shippedAgents = agentFilesIn(join(payloadRoot, 'agents')).sort();
 	const agents = classify(shippedAgents, detection.agents?.files, detection.agents?.hashes, detection.prior?.agents);
 
 	const configExists = Boolean(detection.openspec.configPath);
@@ -246,7 +214,7 @@ export function buildPlan(detection, { level, payloadRoot = PAYLOAD }) {
 	if (missing.length > 0) {
 		warnings.push(
 			`This machine's OpenSpec profile ("${profileLabel(detection.openspecCli.profile)}") does not include ` +
-				`the ${missing.join(', ')} workflow(s) this level's flow uses. Fix it by running ` +
+				`the ${missing.join(', ')} workflow(s) the flows use. Fix it by running ` +
 				'`openspec config profile`, choosing the custom option, and selecting those workflows ' +
 				'individually — the CLI has one preset, `core`, and it does not include them — then ' +
 				'`openspec update` in this project. `openspec config profile` is machine-wide: it changes the ' +
@@ -256,43 +224,30 @@ export function buildPlan(detection, { level, payloadRoot = PAYLOAD }) {
 	}
 
 	const humanSteps = [];
-	if (MATTPOCOCK_LEVELS.has(level) && !detection.humanArtifacts.issueTracker) {
+	if (!detection.humanArtifacts.issueTracker) {
 		humanSteps.push(
 			'Run `/mattpocock-skills:setup-matt-pocock-skills` — an interview only you can answer. It writes docs/agents/issue-tracker.md.',
 		);
 	}
-	if (detection.web && !detection.humanArtifacts.product) {
-		humanSteps.push('Run `/impeccable init` — gathers design context and writes PRODUCT.md and DESIGN.md.');
-	}
-	if (detection.apple?.app && !detection.apple.xcodeMcpConfigured) {
+	if (!detection.humanArtifacts.product) {
 		humanSteps.push(
-			'Enable "Allow external agents to use Xcode tools" in Xcode → Settings → Intelligence, then run ' +
-				'`claude mcp add --transport stdio xcode -- xcrun mcpbridge`. Verification then drives Xcode ' +
-				'directly; without it, xcode-loop falls back to headless xcodebuild.',
+			'If this project has a user interface, run `/impeccable init` — an interview that writes PRODUCT.md. ' +
+				'The flows send all surface work through impeccable, and it asks for this first. Skip it otherwise.',
 		);
 	}
 	if (plugins.install.length > 0) {
 		humanSteps.push('Run `/reload-plugins` to activate the newly installed plugins in this session.');
 	}
-	if (plugins.install.includes(OUTPUT_STYLE_PLUGIN)) {
-		humanSteps.push(
-			'Switch your output style: after the reload, select `controlled-english` under `/config`. It ships ' +
-				'with the meta-skills plugin, so it only appears once that plugin is active, and nothing selects ' +
-				'it for you — it changes the register of every reply in this repository.',
-		);
-	}
 
 	return {
 		mode: detection.priorRun ? 'reconcile' : 'fresh',
-		level,
-		web: detection.web,
-		apple: { app: Boolean(detection.apple?.app), swift: Boolean(detection.apple?.swift) },
+		level: LEVEL,
 		// I1/legacy-cleanup: `openspec init` over an existing directory has a legacy-cleanup path,
 		// so this is true only when openspec/ is genuinely absent — never inferred any other way.
 		openspecInit: !detection.openspec.present,
 		schemas,
 		agents,
-		retire: planRetirement(levelDir, detection),
+		retire: planRetirement(payloadRoot, detection),
 		config: {
 			action: configExists ? 'replace' : 'create',
 			// `backupPath` (config-facts.mjs) owns the collision-resistance guarantee — a
@@ -316,8 +271,13 @@ if (isMain(import.meta.url)) {
 	// this module that someone will need to localise, so it gets its full stack instead.
 	try {
 		const stdinDetection = JSON.parse(readFileSync(0, 'utf8'));
-		const level = process.argv[2] ?? 'minimal';
-		const plan = buildPlan(stdinDetection, { level });
+		const arg = process.argv[2];
+		if (arg !== undefined && arg !== LEVEL) {
+			throw new UnknownLevelError(
+				`Unknown level ${JSON.stringify(arg)}. This plugin ships one workflow and takes no level; run plan.mjs with no argument.`,
+			);
+		}
+		const plan = buildPlan(stdinDetection);
 		console.log(JSON.stringify(plan, null, 2));
 	} catch (err) {
 		if (err instanceof UnknownLevelError) {

@@ -1,29 +1,33 @@
 ---
 name: setup
-description: Sets up or reconciles this project's OpenSpec workflow — schemas and subagents for a chosen complexity level, a rewritten openspec/config.yaml that carries forward what the project already had, and guarded plugin installation. Use when the user runs /workflows:setup, asks to configure, adopt, update, or repair this repo's OpenSpec workflow, or wants to know how far the repo has drifted from the level it was set up at. Re-running is safe and is how a project takes updates; --check reports drift without writing.
+description: Sets up or reconciles this project's OpenSpec workflow — the seven -flow schemas, their router and design subagent, a rewritten openspec/config.yaml that carries forward what the project already had, and guarded installation of the three plugins the flows call (mattpocock-skills, agent-skills, impeccable). Use when the user runs /workflows:setup, asks to configure, adopt, update, or repair this repo's OpenSpec workflow, or wants to know how far the repo has drifted from what setup installed. Re-running is safe and is how a project takes updates; --check reports drift without writing.
 disable-model-invocation: true
 license: MIT
 ---
 
 # Set up the OpenSpec workflow
 
-`$ARGUMENTS` may carry a level — `minimal`, `standard`, or `advanced` — and one of
-`--check` (report only, writes nothing) or `--dry-run` (writes only the plan JSON).
+`$ARGUMENTS` may carry `--check` (report only, writes nothing) or `--dry-run` (writes only
+the plan JSON). There is one workflow and no level to choose. If `$ARGUMENTS` names
+`standard` or `advanced`, say that those levels were removed in 0.10.0 and that setup now
+installs the one workflow, then carry on.
+
+Setup installs OpenSpec's project files, the workflow, and the three plugins its flows
+call. It installs nothing else: no general-purpose plugins, no stack-specific layers.
 
 **Nothing is written before the user approves the plan.** No schemas, no agents, no
 config, no settings, no scratch files in the repo. This command replaces a file the user
 wrote, in a repository you are a guest in, so that gate is the whole safety model.
 
-Two things stay off the table for the whole run, at every level:
+Two things stay off the table for the whole run:
 
 - **Do not run `openspec config profile`.** It is machine-global: it changes the profile
   for every project on that machine, not just this one. Where the plan warns that the
-  machine profile lacks a workflow this level uses, report the warning with the command
+  machine profile lacks a workflow the flows use, report the warning with the command
   the user would run, and leave the decision to them.
-- **Do not pass `payloadRoot`** to `plan.mjs` or `buildPlan`. It is a test-only seam for
-  pinning manifest composition order. A wrong path now throws rather than degrading to an
-  empty but plausible plan, but nothing in a real run has any business planning against a
-  payload other than this plugin's own.
+- **Do not pass `payloadRoot`** to `buildPlan`. It is a test-only seam. A wrong path
+  throws rather than degrading to an empty but plausible plan, but nothing in a real run
+  has any business planning against a payload other than this plugin's own.
 
 ## 1. Detect
 
@@ -32,13 +36,12 @@ REPO="$(git rev-parse --show-toplevel)"
 node "${CLAUDE_PLUGIN_ROOT}/scripts/detect.mjs" "$REPO"
 ```
 
-Read the JSON and use it as given — whether this repo is a web or Apple-native project
-(and which Apple tier — a bare `Package.swift` is the plugin layer only; app signals ship
-workflow content at `advanced`), which schemas already exist, which plugins the settings
-file has already decided, whether a previous run happened. Do not re-derive any of it by
-hand, and do not ask the user about anything already in it.
+Read the JSON and use it as given — which schemas and agents already exist, which plugins
+the settings file has already decided, the machine's OpenSpec profile, whether a previous
+run happened and at what level. Do not re-derive any of it by hand, and do not ask the
+user about anything already in it.
 
-Capture the two tree hashes now, while nothing has touched them; step 9 needs this
+Capture the two tree hashes now, while nothing has touched them; step 8 needs this
 before-picture to prove setup left the user's specs and changes alone:
 
 ```bash
@@ -46,77 +49,18 @@ node -e 'const {join}=require("node:path"),{pathToFileURL}=require("node:url");i
   "${CLAUDE_PLUGIN_ROOT}/scripts/lib/tree.mjs" "$REPO"
 ```
 
-## 2. Choose the level
-
-If `$ARGUMENTS` named a level, use it and skip this section.
-
-Otherwise: **form a recommendation from the repository first, then ask once.** This is the
-only question setup asks, and a level is not something a newcomer can pick from counts of
-schemas and artifacts — those numbers describe the levels without distinguishing them.
-
-### 2a. Read the repository
-
-Ask one question about the repository, not about the user. Sample the recent work:
-
-```bash
-git -C "$REPO" log --no-merges -n 40 --format='%s'
-```
-
-Sort those subjects into **kinds** — new capability, defect, structural cleanup, trivial
-change, dependency bump, incident, open question, bootstrap — and count the kinds, not the
-commits. Fold in what step 1 already detected: whether this is a web project, and whether
-`openspec/` and its schemas are already here.
-
-- **Two or three kinds, mostly features and defects** → `minimal` or `standard`.
-- **Five or more kinds, especially dependency bumps or incidents** → `minimal` or
-  `advanced`. Both route each kind to its own chain. `advanced` adds written plans, a
-  pre-implementation review gate, verification evidence, and a dedicated `hotfix` chain;
-  recommend it when the history shows that ceremony already happening (reviewed design
-  docs, postmortems), and `minimal` otherwise.
-- **Between `minimal` and `standard`** — does work here usually start from an unclear idea
-  that needs interviewing, or from a surface someone can already picture? Interview →
-  `minimal`. Surface → `standard`. A repo detected as web leans `standard`, but the history
-  outranks the detection: a web repo whose commits are mostly backend still interviews. A
-  repo detected as an Apple-native app: say when recommending that the Apple workflow
-  content (`app-release`, the Apple design gate) ships only at `advanced`.
-- **Too little history to count** — a fresh or near-empty repo — recommend `minimal` and
-  say plainly that it is a default rather than a reading of their work.
-
-### 2b. Ask, with the recommendation and the reason
-
-One AskUserQuestion, three options. Each option is the level **name and what it is for** —
-no schema counts, no artifact counts, no router column. Put the recommended level first and
-mark it `(Recommended)`, and give the evidence in one clause: which kinds of work you
-counted, and in how many commits.
-
-| Level | What to say it is |
-|---|---|
-| `minimal` | One `-flow` chain per kind of work (features, defects, cleanups, spikes, upgrades, bootstraps, small changes), driven by Matt Pocock's skills, with six agent-skills at fixed points (threat model, design challenge, defect review, performance, current docs, quality bar) and a router between them. Work usually starts as an unclear idea that an interview turns into a plan; all surface work goes through impeccable |
-| `standard` | `craft-driven` and `surface-driven`. The same two kinds of work, but it usually starts from a surface someone can already picture, so design leads and behaviour follows |
-| `advanced` | Eight schemas and a router that picks between them — features, defects, cleanups, dependency bumps, incidents, spikes, bootstraps. For repositories where the work comes in too many kinds for one chain to fit |
-
-Recommend; do not decide. If they pick another level, use it without arguing — **choosing
-wrong is cheap.** Setup deletes nothing without asking, so a later run at a different
-level adds that level's schemas beside the first set and merges the run record rather than
-orphaning anything.
-
-For the numbers behind these — schemas, longest chain, router, plugin counts — see
-`plugins/workflows/README.md`. They belong in the plan you present at step 3, not in the
-question.
-
-## 3. Build and present the plan
+## 2. Build and present the plan
 
 ```bash
 node "${CLAUDE_PLUGIN_ROOT}/scripts/detect.mjs" "$REPO" \
-  | node "${CLAUDE_PLUGIN_ROOT}/scripts/plan.mjs" "$LEVEL"
+  | node "${CLAUDE_PLUGIN_ROOT}/scripts/plan.mjs"
 ```
 
-An unknown level exits non-zero with empty stdout: show its message and stop rather than
-proceeding on a guess.
+`plan.mjs` takes no argument. A non-zero exit with empty stdout is a failure: show its
+message and stop rather than proceeding on a guess.
 
 Render the plan for a human — not as raw JSON. Cover the mode (`fresh` or `reconcile`),
-the detected web and Apple answers (both tiers), every file that would be created or
-replaced, the `config.yaml`
+every file that would be created or replaced, the `config.yaml`
 backup path, which plugins install and which are skipped **with the reason**, the status
 line decision, the probe change verification will create and remove, the human steps that
 will remain, and every warning.
@@ -131,9 +75,13 @@ story — say which is which, by name:
 - `collide` — the user's own file, or one of ours they have since changed. Never replaced
   unless they approve that specific name. Ask about each one individually; "approve all"
   is not an answer to this question.
-- `retire` — names this level used to ship and no longer does, from its `retired.json`.
-  `retire.*.retire` lists the ones safe to delete: recorded as ours, unedited, and used
-  by no open change. `retire.*.keep` lists the rest, each with its reason. Name both.
+- `retire` — names this plugin used to ship and no longer does, from `retired.json`: the
+  old bridge schema, and every schema and agent of the `standard` and `advanced` levels
+  removed in 0.10.0. `retire.*.retire` lists the ones safe to delete: recorded as ours,
+  unedited, and used by no open change. `retire.*.keep` lists the rest, each with its
+  reason. Name both. A repository that was set up at a removed level also gets a warning
+  saying so; lead the retire section with it, and make clear that declining every
+  deletion is a complete answer — those schemas keep working, they just stop updating.
 
 A warning that `.claude/settings.json` could not be read invalidates the plugin and
 status-line sections of the plan you are showing. Lead with it, and say plainly that the
@@ -150,7 +98,7 @@ Save the approved plan JSON outside the repo (`"${TMPDIR:-/tmp}/workflows-plan.j
 and apply that exact plan. Re-running `plan.mjs` partway through apply replans against a
 half-applied repo and would hand the user something they never approved.
 
-## 4. Apply, in this order
+## 3. Apply, in this order
 
 Every `openspec` command below carries `OPENSPEC_TELEMETRY=0 DO_NOT_TRACK=1`, and none of
 them may be run without both. Every subcommand runs a preAction hook that writes
@@ -163,13 +111,22 @@ the user that **every** invocation this plugin makes sets them. Two of them are 
    plan's `openspecInit` already answers this — follow it.
 
    ```bash
-   OPENSPEC_TELEMETRY=0 DO_NOT_TRACK=1 openspec init --tools claude
+   OPENSPEC_TELEMETRY=0 DO_NOT_TRACK=1 openspec init --scope project --tools claude
    ```
 
-   `--tools claude` is not optional: on a repo with no `.claude/` directory yet, bare
-   `openspec init` exits with `No tools detected and no --tools flag provided` — and this
-   is the first write of the run on the fresh-repo path.
-2. **Schemas.** Copy `${CLAUDE_PLUGIN_ROOT}/payload/levels/$LEVEL/openspec/schemas/` into
+   Neither flag is optional. `--scope project` puts OpenSpec's skills in this repository
+   (`.agents/skills/`, linked from `.claude/skills/`), where they are committed and
+   travel with it. Without it, OpenSpec 2.x installs them into `~/.agents/skills` and
+   `~/.claude/skills` for every project on the machine — a machine-wide write from a
+   project command, which is the thing this skill does not do. `--tools claude`: on a
+   repo with no `.claude/` directory yet, bare `openspec init` exits with
+   `No tools detected and no --tools flag provided` — and this is the first write of the
+   run on the fresh-repo path.
+
+   `init` also writes a default `openspec/config.yaml`. The plan was built before it
+   existed, so it says `create`; treat step 4 as a replace and back that file up like any
+   other.
+2. **Schemas.** Copy `${CLAUDE_PLUGIN_ROOT}/payload/openspec/schemas/` into
    `openspec/schemas/` with `copyAdditive` from
    `${CLAUDE_PLUGIN_ROOT}/scripts/lib/tree.mjs`. `overwrite` is `plan.schemas.update` —
    the ones a previous run of this plugin installed and nobody has edited since, which is
@@ -179,13 +136,8 @@ the user that **every** invocation this plugin makes sets them. Two of them are 
    ```bash
    node -e 'const {pathToFileURL}=require("node:url");import(pathToFileURL(process.argv[1]).href).then(({copyAdditive})=>{require("node:fs").mkdirSync(process.argv[3],{recursive:true});console.log(JSON.stringify(copyAdditive(process.argv[2],process.argv[3],{overwrite:JSON.parse(process.argv[4])}),null,2))})' \
      "${CLAUDE_PLUGIN_ROOT}/scripts/lib/tree.mjs" \
-     "${CLAUDE_PLUGIN_ROOT}/payload/levels/$LEVEL/openspec/schemas" "$REPO/openspec/schemas" "$OVERWRITE_SCHEMAS"
+     "${CLAUDE_PLUGIN_ROOT}/payload/openspec/schemas" "$REPO/openspec/schemas" "$OVERWRITE_SCHEMAS"
    ```
-
-   When the plan's `apple.app` is true and the level is `advanced`, repeat the copy from
-   `${CLAUDE_PLUGIN_ROOT}/payload/levels/advanced/apple/openspec/schemas` into the same
-   destination, with the same `overwrite` rules — the plan's name lists already include
-   the apple names, so nothing else changes.
 
    Then validate each schema copied or updated, and report each result:
 
@@ -199,13 +151,8 @@ the user that **every** invocation this plugin makes sets them. Two of them are 
    ```bash
    node -e 'const {pathToFileURL}=require("node:url");import(pathToFileURL(process.argv[1]).href).then(({copyAdditive})=>{require("node:fs").mkdirSync(process.argv[3],{recursive:true});console.log(JSON.stringify(copyAdditive(process.argv[2],process.argv[3],{overwrite:JSON.parse(process.argv[4])}),null,2))})' \
      "${CLAUDE_PLUGIN_ROOT}/scripts/lib/tree.mjs" \
-     "${CLAUDE_PLUGIN_ROOT}/payload/levels/$LEVEL/agents" "$REPO/.claude/agents" "$OVERWRITE_AGENTS"
+     "${CLAUDE_PLUGIN_ROOT}/payload/agents" "$REPO/.claude/agents" "$OVERWRITE_AGENTS"
    ```
-
-   When the plan's `apple.app` is true and the level is `advanced`, repeat the copy from
-   `${CLAUDE_PLUGIN_ROOT}/payload/levels/advanced/apple/agents` into `$REPO/.claude/agents`,
-   with the same `overwrite` rules — the plan's name lists already include the apple names,
-   so nothing else changes.
 
    **Then retired names, schemas first.** Leave every `plan.retire.*.keep` entry alone and
    report its reason. Ask about each name in `plan.retire.schemas.retire` individually,
@@ -224,19 +171,22 @@ the user that **every** invocation this plugin makes sets them. Two of them are 
    rm "$REPO/.claude/agents/${NAME:?}"          # an approved retired agent file
    ```
 
-   Step 8 drops the deleted names from the record by itself.
-4. **TOOLS.md.** Invoke `mapping-project-tooling`. Do this before the config, because the
-   config text points at TOOLS.md and is worth less if it points at nothing. In an
-   Apple-native repository, confirm the build, test, and simulator commands land in
-   TOOLS.md — the verification templates delegate to it.
-5. **`openspec/config.yaml`.** See section 5 — it is the one destructive step.
-6. **Router and CLAUDE.md.** On `minimal`, install the router at `openspec/ROUTING.md`:
-   copy `${CLAUDE_PLUGIN_ROOT}/payload/levels/minimal/openspec/ROUTING.md` when the file
-   is absent; when it exists and differs, show the diff and replace it only if the user
-   approves. Then invoke `managing-project-memory`. On `minimal`, it adds one line to
-   `CLAUDE.md` that points at `openspec/ROUTING.md`; on `advanced`, it decides where
-   `ROUTING.md` belongs. The router only works from somewhere memory reliably loads it.
-7. **Plugins.**
+   Step 7 drops the deleted names from the record by itself.
+4. **`openspec/config.yaml`.** See section 4 — it is the one destructive step.
+5. **Router and CLAUDE.md.** Install the router at `openspec/ROUTING.md`: copy
+   `${CLAUDE_PLUGIN_ROOT}/payload/openspec/ROUTING.md` when the file is absent; when it
+   exists and differs, show the diff and replace it only if the user approves. Then make
+   sure memory loads the router: when `CLAUDE.md` (or `AGENTS.md`, if that is what the
+   repository uses) has no line naming `openspec/ROUTING.md`, show the user this one line
+   and add it only if they approve, creating the file when there is none:
+
+   ```
+   Before creating an OpenSpec change, read openspec/ROUTING.md and name the schema it picks.
+   ```
+
+   Add nothing else to that file. The router only works from somewhere memory reliably
+   loads it.
+6. **Plugins.**
 
    ```bash
    node "${CLAUDE_PLUGIN_ROOT}/scripts/install-plugins.mjs" < "$PLAN"
@@ -245,7 +195,7 @@ the user that **every** invocation this plugin makes sets them. Two of them are 
    This installs at project scope and records anything a managed marketplace blocks
    instead of failing the run — read its `installed` / `blocked` / `skipped` output and
    carry it into the report.
-8. **Record the run.** This writes `.claude/workflows.json`: the level, this plugin's
+7. **Record the run.** This writes `.claude/workflows.json`: this plugin's
    version, the date, and the hash of every schema and agent **this run owns**. It reads
    the approved plan on stdin and derives that set itself — `copy` plus `update`, for
    schemas and agents alike — so a mistyped list cannot make a file ours that the plan
@@ -263,10 +213,9 @@ the user that **every** invocation this plugin makes sets them. Two of them are 
    none. Never pass a name they declined: that would make their file ours, and the next
    run would replace it with no gate and no mention.
 
-   The record merges into whatever is already there rather than replacing it, so a level
-   switch does not orphan the files the previous level installed — they are still on disk
-   and still ours, and returning to that level updates them instead of reporting a
-   collision that never happened.
+   The record merges into whatever is already there rather than replacing it, so the
+   files a removed level installed stay recorded as ours. That record is what lets a
+   later run offer them for retirement instead of mistaking them for the user's own.
 
    Retired names step 3 deleted leave the record; a retired name the user kept is still
    on disk, so it stays recorded as ours.
@@ -276,7 +225,7 @@ the user that **every** invocation this plugin makes sets them. Two of them are 
    managed-marketplace repo would apply the whole payload and then never record it, and
    every file this run wrote would come back next time as the user's. The record states
    what we wrote; that is true whether or not the config reaches the model.
-9. **Verify**, with the hashes from step 1 — file presence proves nothing here, because
+8. **Verify**, with the hashes from step 1 — file presence proves nothing here, because
    OpenSpec drops fields that fail validation and warns only to stderr:
 
    ```bash
@@ -293,11 +242,11 @@ the user that **every** invocation this plugin makes sets them. Two of them are 
    blocked plugin failing this check is the correct outcome, and a failing check is a
    result to report, not an obstacle to route around.
 
-## 5. Rewriting `openspec/config.yaml`
+## 4. Rewriting `openspec/config.yaml`
 
 This is the one file replaced rather than merged. The user's existing file is **input**,
-not the base — the level's `config.yaml.example` is the base, and the old file supplies
-what is project-specific.
+not the base — `${CLAUDE_PLUGIN_ROOT}/payload/openspec/config.yaml.example` is the base,
+and the old file supplies what is project-specific.
 
 This step splits in two: `config-facts.mjs` supplies the facts below, and you supply the
 judgment (what `context:` prose survives, what to fold in, what to prune, how to phrase a
@@ -317,8 +266,10 @@ This prints `{ "ok", "ids", "error" }` and exits non-zero on failure. **If `ok` 
 `false`, stop — do not classify a single rule, and report `error` to the user instead.**
 A CLI failure never degrades to an empty or partial union: classifying against one would
 silently mark every rule the user wrote as unmatched, discarding it from `rules:` — the
-exact failure I4 forbids. On success, `ids` is the union across any schema this level
-installs plus the built-in `spec-driven` ids (`proposal`, `specs`, `design`, `tasks`).
+exact failure I4 forbids. On success, `ids` is the union across every schema installed in
+this repository plus the built-in `spec-driven` ids (`proposal`, `specs`, `design`,
+`tasks`). A schema from a removed level that is still on disk still counts, so its rules
+carry.
 
 - **Back up** the existing file to the plan's `config.backupTo` path first. If that field
   is unexpectedly absent even though the file exists, get a fresh, collision-safe
@@ -329,10 +280,15 @@ installs plus the built-in `spec-driven` ids (`proposal`, `specs`, `design`, `ta
     "${CLAUDE_PLUGIN_ROOT}/scripts/config-facts.mjs" "$OLD_CONFIG_PATH"
   ```
 
-- `schema:` — the level's example wins. Choosing a level is choosing this.
+- **Every other top-level key** — `skillsScope`, `store`, `references`, and anything else
+  the old file carries besides `schema`, `context`, `rules`, and `operations` — goes
+  into the new file verbatim. The example has none of them, and dropping one changes
+  where OpenSpec looks for skills or specs without a word.
+- `schema:` — the example wins: `feature-flow`. On a repository coming from a removed
+  level this changes the default for new changes; say so in the diff.
 - `context:` — start from the example, then fold in the project-specific facts from the
-  old file. Prefer pointers over copies: an inline stack list is a second copy of
-  TOOLS.md that nothing keeps in sync. `context` is injected into every artifact prompt
+  old file. Prefer pointers over copies: an inline list of commands or stack facts is a
+  second copy of the repository's manifests that nothing keeps in sync. `context` is injected into every artifact prompt
   and is capped at 50KB — before finalizing the text, check the real byte count rather
   than eyeballing it, since OpenSpec drops the entire field, silently, one byte past the
   cap:
@@ -349,19 +305,19 @@ installs plus the built-in `spec-driven` ids (`proposal`, `specs`, `design`, `ta
   reading and structuring them is judgment work). A file an earlier run wrote still holds
   that release's example text, which reads as the user's own unless it is split out first:
   carried forward, an old rule fires in flows it was never written for. Split both maps
-  against the level's `retired.json` before the two steps below touch them:
+  against `retired.json` before the two steps below touch them:
 
   ```bash
   node -e 'const fs=require("node:fs"),{pathToFileURL}=require("node:url");import(pathToFileURL(process.argv[1]).href).then(({splitRetiredConfig})=>{const p=process.argv[2],retired=fs.existsSync(p)?JSON.parse(fs.readFileSync(p,"utf8")).config:null;console.log(JSON.stringify(splitRetiredConfig({rules:JSON.parse(process.argv[3]),guidance:JSON.parse(process.argv[4])},retired),null,2))})' \
-    "${CLAUDE_PLUGIN_ROOT}/scripts/config-facts.mjs" "${CLAUDE_PLUGIN_ROOT}/payload/levels/$LEVEL/retired.json" "$OLD_RULES_JSON" "$OLD_GUIDANCE_JSON"
+    "${CLAUDE_PLUGIN_ROOT}/scripts/config-facts.mjs" "${CLAUDE_PLUGIN_ROOT}/payload/retired.json" "$OLD_RULES_JSON" "$OLD_GUIDANCE_JSON"
   ```
 
   `$OLD_RULES_JSON` is the old `rules:` map as JSON; `$OLD_GUIDANCE_JSON` maps each
   operation to its `guidance` list, as in `{"apply":["…"]}`, or is `{}`. A line is dropped
-  only on an exact match with the text that level's previous example shipped, and a level
-  with no `retired.json` drops nothing. Only the two `kept` maps go on. Name every
-  `dropped` line, verbatim, in the diff below and in the report as "dropped: shipped by
-  the previous minimal level"; if the user asks to keep one, move it back into `kept`.
+  only on an exact match with text a previous release's example shipped. Only the two
+  `kept` maps go on. Name every `dropped` line, verbatim, in the diff below and in the
+  report as "dropped: shipped by a previous release"; if the user asks to keep one, move
+  it back into `kept`.
 - `rules:` — classify `rules.kept` from the split above against the ids from the
   artifact-id step — never against "exists in the default schema":
 
@@ -372,9 +328,9 @@ installs plus the built-in `spec-driven` ids (`proposal`, `specs`, `design`, `ta
 
   `$USER_RULES_JSON` is `rules.kept`, as JSON; `$KNOWN_IDS_JSON` is the
   artifact-id step's `ids` array, verbatim. This is a union across the installed set: a rule
-  keyed to `diagnose` is valid at `minimal` because `bugfix-flow` defines it, even though
-  that level's default schema is `feature-flow` — `classifyRules` carries it either
-  way, because membership is checked against the whole union, not the default schema.
+  keyed to `diagnose` is valid because `bugfix-flow` defines it, even though the default
+  schema is `feature-flow` — `classifyRules` carries it either way, because membership is
+  checked against the whole union, not the default schema.
 - **Unmatched ids** — never drop them, and never leave them under `rules:`, where OpenSpec
   warns about them on every command. The call above already rendered the trailing comment
   block via `commentBlock`; write its `commentBlock` string verbatim rather than
@@ -391,22 +347,23 @@ installs plus the built-in `spec-driven` ids (`proposal`, `specs`, `design`, `ta
 - `operations.*.guidance` — append `guidance.kept` after the example's entries, unless
   they contradict each other; say so when they do rather than silently picking one.
 
-**Invoke `improving-prompts` for the `context:` and `rules:` text you author here.** These
-are not config values, they are prompts: `context` is injected into every artifact request
-for the life of this project, and each rule into every matching one. Wording that is
-merely acceptable costs tokens on every turn and misfires quietly.
+**Write the `context:` and `rules:` text you author here as prompts, not config values.**
+`context` is injected into every artifact request for the life of this project, and each
+rule into every matching one. State each thing once, plainly, as an instruction; wording
+that is merely acceptable costs tokens on every turn and misfires quietly.
 
 Show the diff — carried over, dropped with the reason, unmatched — and get agreement
 before writing the file.
 
-## 6. Report
+## 5. Report
 
 State plainly:
 
 - what was created, updated, replaced, backed up, and retired, with paths — and which
   schemas and agents were left alone because they are the user's, naming each;
-- each `config.yaml` line dropped as "dropped: shipped by the previous minimal level",
-  verbatim;
+- each `config.yaml` line dropped as "dropped: shipped by a previous release", verbatim;
+- on a repository that was set up at a removed level: which of its schemas and agents
+  were retired, which were kept and why, and that the plugins it enabled were left alone;
 - which plugins installed, which were skipped and why, and which were blocked and why —
   `install-plugins.mjs` reports the CLI's own stderr as the reason, not a guess, so pass it
   through verbatim rather than paraphrasing it into "blocked by managed settings";
@@ -428,17 +385,10 @@ State plainly:
   - `/mattpocock-skills:setup-matt-pocock-skills` — an interview only the user can
     answer; it writes `docs/agents/issue-tracker.md`. Re-running `/workflows:setup`
     afterwards folds that into `context:`.
-  - `/impeccable init` on a web project — writes `PRODUCT.md` and `DESIGN.md`.
-  - **Connect Xcode's MCP bridge** on an Apple-native app repo (when the plan lists it):
-    enable "Allow external agents to use Xcode tools" in Xcode → Settings → Intelligence,
-    then `claude mcp add --transport stdio xcode -- xcrun mcpbridge`. The toggle is a user
-    act; nothing here can flip it.
+  - `/impeccable init` on a project with a user interface — an interview that writes
+    `PRODUCT.md`. The flows send all surface work through impeccable, and it asks for
+    this first. A project with no user interface skips it.
   - `/reload-plugins` to activate newly installed plugins in this session.
-  - **Switch the output style**, after that reload: select `controlled-english` under
-    `/config`. It ships with the `meta-skills` plugin, so it does not appear in the list
-    until that plugin is active — which is why this step comes second, not first. Selecting
-    a style is a user act; nothing here can do it, and it changes the register of every
-    reply in the repository.
 - the teammate line: "Anyone else cloning this repo should install the `workflows` plugin
   and run `/workflows:setup` — a committed `.claude/settings.json` does not install
   plugins for them."

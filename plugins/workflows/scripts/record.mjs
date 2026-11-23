@@ -102,12 +102,11 @@ export function recordRun(repoRoot, { level, schemas = [], agents = [], retired 
 	const prior = readRecord(repoRoot);
 
 	/**
-	 * Merged, never replaced. The three levels ship disjoint schema and agent sets, so a
-	 * wholesale write meant `minimal` → `advanced` dropped every `minimal` entry, and going
-	 * back reported five files this plugin had written as the user's own — a plan that says
-	 * "yours, or ours you have edited" about files nobody ever touched. Keeping entries for
-	 * levels the user has left is correct rather than a leak: those files are still on disk
-	 * and still ours, so returning to that level updates them. An entry whose file has since
+	 * Merged, never replaced. A wholesale write would drop every entry this run did not
+	 * touch, including the schemas and agents of the `standard` and `advanced` levels 0.10.0
+	 * removed. Those files are still on disk and still ours, and the record is the only
+	 * proof: retirement (plan.mjs) offers a removed name for deletion only when its recorded
+	 * hash still matches. An entry whose file has since
 	 * been deleted is inert, because `classify` (plan.mjs) requires the name in *detection's*
 	 * hashes before it can promote anything — a record alone never claims a file.
 	 */

@@ -46,8 +46,8 @@ const HARNESS_COMMANDS = new Set(['clear', 'compact', 'model', 'effort']);
 /** Names upstream renamed or this level retired. Their presence means an instruction rotted. */
 const RETIRED_TERMS = ['CONTEXT.md', 'CONTEXT-MAP.md', 'to-prd', 'to-issues', '/diagnose', 'mattpocock-bridge'];
 
-const LEVELS = join(import.meta.dir, '..', 'plugins', 'workflows', 'payload', 'levels');
-const MINIMAL = join(LEVELS, 'minimal');
+/** The payload is the one workflow: it was the `minimal` level until 0.10.0 removed the other two. */
+const MINIMAL = join(import.meta.dir, '..', 'plugins', 'workflows', 'payload');
 const SCHEMAS = join(MINIMAL, 'openspec', 'schemas');
 const AGENTS = join(MINIMAL, 'agents');
 
@@ -187,16 +187,12 @@ describe('the scanners themselves', () => {
 	});
 });
 
-describe('minimal schema and agent names stay disjoint from the other levels', () => {
-	test('no name a minimal schema or agent uses is shipped by standard or advanced', () => {
-		const others = new Set<string>();
-		for (const level of ['standard', 'advanced', join('advanced', 'apple')]) {
-			for (const s of subdirs(join(LEVELS, level, 'openspec', 'schemas'))) others.add(s);
-			const agents = join(LEVELS, level, 'agents');
-			if (existsSync(agents)) for (const a of readdirSync(agents)) others.add(a);
-		}
-		const mine = [...subdirs(SCHEMAS), ...(existsSync(AGENTS) ? readdirSync(AGENTS) : [])];
-		expect(mine.filter((n) => others.has(n))).toEqual([]);
+describe('shipped names stay disjoint from retired ones', () => {
+	test('no schema or agent the payload ships is also listed as retired', () => {
+		const retired = JSON.parse(readFileSync(join(MINIMAL, 'retired.json'), 'utf8'));
+		const gone = new Set<string>([...retired.schemas, ...retired.agents]);
+		const mine = [...subdirs(SCHEMAS), ...readdirSync(AGENTS)];
+		expect(mine.filter((n) => gone.has(n))).toEqual([]);
 	});
 });
 
@@ -323,13 +319,18 @@ describe('minimal level as shipped', () => {
 		expect(flows.filter((f) => !skillCalls(schemaText(f)).includes(IMPECCABLE.skill))).toEqual([]);
 	});
 
-	test('settings enable the two skill plugins the flows call unconditionally', () => {
+	test('settings enable exactly the three plugins the flows call', () => {
 		const settings = JSON.parse(readFileSync(join(MINIMAL, 'settings.json'), 'utf8'));
 		expect(Object.keys(settings.enabledPlugins).sort()).toEqual([
 			'agent-skills@addy-agent-skills',
+			'impeccable@impeccable',
 			'mattpocock-skills@claude-plugins-official',
 		]);
-		expect(Object.keys(settings.extraKnownMarketplaces)).toEqual(['addy-agent-skills']);
+		expect(Object.keys(settings.extraKnownMarketplaces).sort()).toEqual(['addy-agent-skills', 'impeccable']);
+	});
+
+	test('the payload holds nothing but the workflow', () => {
+		expect(readdirSync(MINIMAL).filter((n) => !n.startsWith('.')).sort()).toEqual(['agents', 'openspec', 'retired.json', 'settings.json']);
 	});
 
 	test('ships exactly the flow-design agent', () => {
@@ -353,8 +354,17 @@ describe('minimal level as shipped', () => {
 	test('retired.json lists what the level no longer ships', () => {
 		const retired = JSON.parse(readFileSync(join(MINIMAL, 'retired.json'), 'utf8'));
 		expect(retired).toEqual({
-			schemas: ['mattpocock-bridge'],
-			agents: ['bridge-design-gate.md', 'code-review-spec.md', 'code-review-standards.md'],
+			schemas: [
+				'mattpocock-bridge',
+				// The `standard` and `advanced` levels, removed in 0.10.0.
+				'craft-driven', 'surface-driven',
+				'feature', 'bugfix', 'refactor', 'rapid', 'setup', 'spike', 'upgrade', 'hotfix', 'app-release',
+			],
+			agents: [
+				'bridge-design-gate.md', 'code-review-spec.md', 'code-review-standards.md',
+				'craft-design-gate.md', 'verification-reviewer.md',
+				'design-gate.md', 'review-gate.md', 'taste-preflight.md', 'apple-design-gate.md',
+			],
 			config: {
 				rules: {
 					diagnose: ['Confirm the seam for the regression test with the user before marking this artifact done.'],

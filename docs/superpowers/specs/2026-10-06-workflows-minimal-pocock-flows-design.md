@@ -745,5 +745,14 @@ mattpocock-skills 1.3.2, agent-skills 0.6.17, OpenSpec 2.1, and impeccable 4.10.
 - **Added from OpenSpec:** `openspec validate <change> --strict` at the specs and
   tasks artifacts, and an archive offer at the end of every apply.
 
-Section 17's `learn/` deferral still stands; the lessons now also trail this
-amendment.
+- **The level is now the whole plugin.** The `standard` and `advanced` levels,
+  the base, web, and Apple plugin layers, the `TOOLS.md` step, and the
+  `meta-skills` dependency are removed. The payload is flattened to
+  `payload/{openspec,agents,settings.json,retired.json}`, and setup installs
+  OpenSpec, the seven flows, and three plugins: mattpocock-skills, agent-skills,
+  and impeccable, the last now unconditional. `retired.json` lists the removed
+  levels' schemas and agents, so section 11's guarded retirement covers them.
+  The run record keeps `level: "minimal"` so records from any release read alike.
+
+Section 17's `learn/` deferral is closed: the package described 0.9.x's three
+levels and was deleted with them.

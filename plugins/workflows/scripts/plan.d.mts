@@ -46,6 +46,8 @@ export interface PlanDetectionSettings {
  * buildPlan consumes rather than importing the producer's type.
  */
 export interface PlanDetectionPrior {
+	/** A record at a level 0.10.0 removed (`standard`, `advanced`) raises a plan warning. */
+	level?: string | null;
 	schemas?: Record<string, string>;
 	agents?: Record<string, string>;
 }
@@ -70,14 +72,10 @@ export interface PlanDetectionOpenspecCli {
 export interface PlanDetectionHumanArtifacts {
 	issueTracker: boolean;
 	product: boolean;
-	design: boolean;
-	tools: boolean;
 }
 
 export interface PlanDetection {
 	repoRoot: string;
-	web: boolean;
-	webSignals: string[];
 	openspec: PlanDetectionOpenspec;
 	agents?: PlanDetectionAgents;
 	settings: PlanDetectionSettings;
@@ -89,18 +87,15 @@ export interface PlanDetection {
 }
 
 export interface BuildPlanOptions {
-	level: 'minimal' | 'standard' | 'advanced';
 	/**
-	 * TEST-ONLY seam for pinning buildPlan's own base->web->level composition order (not a
-	 * general merge-semantics test hook -- mergeManifests is already pure and exported for
-	 * that). A path with no levels/<level> directory THROWS: it used to degrade silently to an
-	 * empty-but-plausible plan. No user-facing caller may ever pass this.
+	 * TEST-ONLY seam. A path with no openspec/schemas directory THROWS: it used to degrade
+	 * silently to an empty-but-plausible plan. No user-facing caller may ever pass this.
 	 */
 	payloadRoot?: string;
 }
 
-/** The only valid levels. Exported so callers share one source of truth instead of re-listing the names. */
-export const LEVELS: string[];
+/** The one workflow this plugin ships; the name the plan and the run record carry. */
+export const LEVEL: 'minimal';
 
 /**
  * One shape for both schemas and agents: `copy` is new, `update` is ours to refresh (recorded
@@ -124,7 +119,7 @@ export interface PlanRetireSide {
 	keep: PlanRetireKeep[];
 }
 
-/** Names this level no longer ships (`levels/<level>/retired.json`), split for the gate. */
+/** Names this plugin no longer ships (the payload's `retired.json`), split for the gate. */
 export interface PlanRetirement {
 	schemas: PlanRetireSide;
 	agents: PlanRetireSide;
@@ -166,8 +161,7 @@ export interface PlanPlugins {
 
 export interface Plan {
 	mode: 'fresh' | 'reconcile';
-	level: 'minimal' | 'standard' | 'advanced';
-	web: boolean;
+	level: 'minimal';
 	openspecInit: boolean;
 	schemas: PlanEntries;
 	agents: PlanEntries;
@@ -183,11 +177,9 @@ export interface Plan {
 export const PROBE_CHANGE: string;
 
 /**
- * Thrown only for a bad `level` argument (a user typo), distinct from any other error
- * `buildPlan` might throw (a genuine defect). The CLI entry point catches this specifically
- * to print just its message, rather than a full stack.
+ * Thrown by the CLI entry point for a level argument: there are no levels to choose between,
+ * so a stale `plan.mjs advanced` fails with just this message rather than a full stack.
  */
 export class UnknownLevelError extends Error {}
 
-/** Throws an UnknownLevelError when `options.level` is not one of `LEVELS`, before any disk read. */
-export function buildPlan(detection: PlanDetection, options: BuildPlanOptions): Plan;
+export function buildPlan(detection: PlanDetection, options?: BuildPlanOptions): Plan;

@@ -1,11 +1,15 @@
 {
 	"enabledPlugins": {
 		"agent-skills@addy-agent-skills": true,
+		"impeccable@impeccable": true,
 		"mattpocock-skills@claude-plugins-official": true
 	},
 	"extraKnownMarketplaces": {
 		"addy-agent-skills": {
 			"source": { "repo": "addyosmani/agent-skills", "source": "github" }
+		},
+		"impeccable": {
+			"source": { "repo": "pbakaus/impeccable", "source": "github" }
 		}
 	}
 }

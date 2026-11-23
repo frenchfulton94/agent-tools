@@ -68,7 +68,7 @@ describe('splitRetiredConfig', () => {
 
 	test("reads the minimal level's retired.json config in the shape it ships", () => {
 		const retired = JSON.parse(
-			readFileSync(join(import.meta.dir, '..', 'plugins', 'workflows', 'payload', 'levels', 'minimal', 'retired.json'), 'utf8'),
+			readFileSync(join(import.meta.dir, '..', 'plugins', 'workflows', 'payload', 'retired.json'), 'utf8'),
 		);
 		const out = splitRetiredConfig({ rules: retired.config.rules, guidance: retired.config.guidance }, retired.config);
 		expect(out.rules.kept).toEqual({});
