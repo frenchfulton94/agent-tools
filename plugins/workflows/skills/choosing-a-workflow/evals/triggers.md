@@ -16,9 +16,9 @@ Useful distractors: **`configuring-openspec`** (the nearest sibling and the like
 8. Take out the legacy SAML login path.
 9. The search page takes nine seconds and it needs to be under two.
 10. What are all the workflows this repo has and when would I use each?
-11. The build's ready — get 1.4.0 out to TestFlight and then the App Store.
+11. The settings page feels cluttered. Can you rework the layout?
 
-Notes: 1, 2, 3, 6, 8, and 9 never mention a workflow, a schema, or OpenSpec — they are the raw-work positives, and they are the reason this skill exists, since nothing selects a schema automatically. 3 and 9 are the two rules people reliably get wrong (coverage backfill is a refactor; performance is a bugfix). 7 is the mid-flight reclassification case. 11 is the Apple release routing case (app-release, Apple-native repos only).
+Notes: 1, 2, 3, 6, 8, and 9 never mention a workflow, a schema, or OpenSpec — they are the raw-work positives, and they are the reason this skill exists, since nothing selects a schema automatically. 3 and 9 are the two rules people reliably get wrong (coverage backfill is a refactor; performance is a bugfix). 7 is the mid-flight reclassification case. 11 is surface-only work, which the skill routes to impeccable rather than to a schema.
 
 ## Should not trigger (10)
 

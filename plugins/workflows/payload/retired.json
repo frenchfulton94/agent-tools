@@ -1,6 +1,29 @@
 {
-	"schemas": ["mattpocock-bridge"],
-	"agents": ["bridge-design-gate.md", "code-review-spec.md", "code-review-standards.md"],
+	"schemas": [
+		"mattpocock-bridge",
+		"craft-driven",
+		"surface-driven",
+		"feature",
+		"bugfix",
+		"refactor",
+		"rapid",
+		"setup",
+		"spike",
+		"upgrade",
+		"hotfix",
+		"app-release"
+	],
+	"agents": [
+		"bridge-design-gate.md",
+		"code-review-spec.md",
+		"code-review-standards.md",
+		"craft-design-gate.md",
+		"verification-reviewer.md",
+		"design-gate.md",
+		"review-gate.md",
+		"taste-preflight.md",
+		"apple-design-gate.md"
+	],
 	"config": {
 		"rules": {
 			"diagnose": [

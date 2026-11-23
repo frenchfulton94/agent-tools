@@ -7,11 +7,6 @@ import { decidedPlugins, readSettingsFile } from './lib/settings.mjs';
 import { hashEntry } from './lib/tree.mjs';
 import { readRecord } from './record.mjs';
 
-const WEB_DEPS = [
-	'react', 'vue', 'svelte', '@sveltejs/kit', 'next', 'nuxt', 'astro',
-	'vite', 'tailwindcss', '@angular/core', 'solid-js', 'remix',
-];
-
 /**
  * Detection's runner: `runCommand` (lib/run.mjs) narrowed to the only answer detection
  * ever wants — trimmed stdout on success, `null` on any failure, because every caller
@@ -26,65 +21,6 @@ const WEB_DEPS = [
 export function defaultRun(cmd, args) {
 	const r = runCommand(cmd, args);
 	return r.status === 0 ? r.stdout.trim() : null;
-}
-
-function webSignals(repoRoot) {
-	const signals = [];
-	const pkgPath = join(repoRoot, 'package.json');
-	if (existsSync(pkgPath)) {
-		try {
-			const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
-			const deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
-			for (const d of WEB_DEPS) if (d in deps) signals.push(`dependency:${d}`);
-		} catch {
-			// A malformed package.json is not a web signal; the plan reports the repo as non-web.
-		}
-	}
-	for (const marker of ['index.html', 'public/index.html', 'src/routes', 'app/page.tsx']) {
-		if (existsSync(join(repoRoot, marker))) signals.push(`path:${marker}`);
-	}
-	return signals;
-}
-
-/**
- * Two tiers, consumed separately by plan.mjs: app signals gate the advanced-level
- * Apple content; any signal at all gates the apple plugin manifest. The xcodeproj
- * scan goes one directory deep (monorepos put the app in ios/ or apps/) and no
- * deeper — node_modules alone makes a full walk unaffordable, and the skip list
- * below is why a vendored fixture can never masquerade as the user's app.
- */
-const APPLE_SCAN_SKIP = new Set(['node_modules']);
-
-function appleSignals(repoRoot) {
-	const signals = [];
-	const bundles = (dir) =>
-		dirNames(dir).filter((n) => n.endsWith('.xcodeproj') || n.endsWith('.xcworkspace'));
-	for (const name of bundles(repoRoot)) signals.push(`app:${name}`);
-	for (const sub of dirNames(repoRoot)) {
-		if (sub.startsWith('.') || APPLE_SCAN_SKIP.has(sub)) continue;
-		for (const name of bundles(join(repoRoot, sub))) signals.push(`app:${sub}/${name}`);
-	}
-	if (existsSync(join(repoRoot, 'Project.swift'))) signals.push('app:Project.swift');
-	if (existsSync(join(repoRoot, 'Tuist'))) signals.push('app:Tuist');
-	if (existsSync(join(repoRoot, 'project.yml'))) signals.push('app:project.yml');
-	if (existsSync(join(repoRoot, 'Package.swift'))) signals.push('swift:Package.swift');
-	return signals.sort();
-}
-
-/**
- * Read, never spawn: `claude mcp list` would be a subprocess for a question one JSON
- * read answers. An unparseable .mcp.json counts as "not configured" — the human step
- * this feeds errs toward telling the user how to connect Xcode, which costs nothing
- * when it turns out already done.
- */
-function xcodeMcpConfigured(repoRoot) {
-	const p = join(repoRoot, '.mcp.json');
-	if (!existsSync(p)) return false;
-	try {
-		return Boolean(JSON.parse(readFileSync(p, 'utf8'))?.mcpServers?.xcode);
-	} catch {
-		return false;
-	}
 }
 
 /**
@@ -244,22 +180,12 @@ export function detect(repoRoot, { run = defaultRun } = {}) {
 	const openspecDir = join(repoRoot, 'openspec');
 	const configYaml = join(openspecDir, 'config.yaml');
 	const configYml = join(openspecDir, 'config.yml');
-	const signals = webSignals(repoRoot);
-	const appleSigs = appleSignals(repoRoot);
 	const bun = run('bun', ['--version']);
 	const schemas = dirNames(join(openspecDir, 'schemas'));
 	const agentFiles = fileNames(join(repoRoot, '.claude', 'agents'), '.md');
 
 	return {
 		repoRoot,
-		web: signals.length > 0,
-		webSignals: signals,
-		apple: {
-			app: appleSigs.some((s) => s.startsWith('app:')),
-			swift: appleSigs.length > 0,
-			signals: appleSigs,
-			xcodeMcpConfigured: xcodeMcpConfigured(repoRoot),
-		},
 		openspec: {
 			present: existsSync(openspecDir),
 			hasSpecs: existsSync(join(openspecDir, 'specs')),
@@ -289,8 +215,6 @@ export function detect(repoRoot, { run = defaultRun } = {}) {
 		humanArtifacts: {
 			issueTracker: existsSync(join(repoRoot, 'docs', 'agents', 'issue-tracker.md')),
 			product: existsSync(join(repoRoot, 'PRODUCT.md')),
-			design: existsSync(join(repoRoot, 'DESIGN.md')),
-			tools: existsSync(join(repoRoot, 'TOOLS.md')),
 		},
 		priorRun: existsSync(join(repoRoot, '.claude', 'workflows.json')),
 		// The prior run's own account of what it installed, or `null` when there is none we

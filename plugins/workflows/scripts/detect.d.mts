@@ -57,14 +57,10 @@ export interface OpenspecCliDetection {
 export interface HumanArtifactsDetection {
 	issueTracker: boolean;
 	product: boolean;
-	design: boolean;
-	tools: boolean;
 }
 
 export interface Detection {
 	repoRoot: string;
-	web: boolean;
-	webSignals: string[];
 	openspec: OpenspecDetection;
 	agents: AgentsDetection;
 	settings: SettingsDetection;
