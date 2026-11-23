@@ -5,9 +5,9 @@
 
 ## Classification
 
-| Surface | Class | Equivalence check (behavioural only) |
+| Surface | Class | Check (behavioural: equivalence command; rendered: impeccable audit) |
 |---|---|---|
-|  | mechanical / behavioural / unknown |  |
+|  | mechanical / behavioural / rendered / unknown |  |
 
 <!-- An unknown surface gets a spike-flow change before this one goes on. -->
 

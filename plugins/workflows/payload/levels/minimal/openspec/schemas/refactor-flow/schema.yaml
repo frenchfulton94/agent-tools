@@ -1,11 +1,12 @@
 name: refactor-flow
-version: 1
+version: 2
 description: >
   Structure changes while behaviour at the external seam does not:
   deepening a module, in codebase-design's deep-module vocabulary.
   grill -> design -> tasks -> apply. No specs artifact, so changes archive
   without a spec merge. Coverage backfill is a refactor with no
-  restructure. Written against mattpocock-skills 1.3.1.
+  restructure. Written against mattpocock-skills 1.3.2,
+  agent-skills 0.6.17, and impeccable 4.10.0.
 
 artifacts:
   - id: grill
@@ -17,7 +18,10 @@ artifacts:
 
       Guard first: if behaviour a caller can observe at the external seam
       has to change, this is a feature. Say so and offer
-      /openspec-new-change <the change>, using feature-flow.
+      /openspec-new-change <the change>, using feature-flow. What a
+      surface renders is behaviour a person observes: a refactor that
+      touches surface files must leave every rendered state unchanged, and
+      a change to how a surface looks is impeccable's, not a refactor.
 
       Read the change's source first: a candidate from the human's
       /improve-codebase-architecture report, a bugfix that found no correct
@@ -56,12 +60,18 @@ artifacts:
       Run the flow-design agent (.claude/agents/flow-design.md). Its prompt
       names the change directory and says the schema is refactor-flow. Write
       its draft here. Then:
-      1. Put each ADR candidate to the user as a yes or no. For each one
+      1. When the target interface crosses a module boundary or many call
+         sites depend on it, call the Skill tool with
+         "doubt-driven-development" from this session; it cannot run
+         inside an agent. The artifact is design.md, and the contract is
+         grill.md's Must not change section. Give the reviewer those and
+         nothing of your reasoning. One cycle.
+      2. Put each ADR candidate to the user as a yes or no. For each one
          accepted, call the Skill tool with "domain-modeling" and write it
          to docs/adr/.
-      2. Put the Guard tests and the Seam and adapters section to the user
+      3. Put the Guard tests and the Seam and adapters section to the user
          through AskUserQuestion: approve, or adjust.
-      3. Resolve every returned question that would change the tasks.
+      4. Resolve every returned question that would change the tasks.
 
       If the agent is missing or fails, say so, call the Skill tool with
       "codebase-design", and draft the same sections inline.
@@ -103,7 +113,8 @@ artifacts:
       Every slice's last criterion is "Guard tests green, no guard
       assertion changed". Present the slices as a numbered list and get
       them approved through AskUserQuestion. Checkboxes take the exact
-      "- [ ] " form.
+      "- [ ] " form. Leave the Base line empty; apply fills it. Finish by
+      running `openspec validate <change> --strict`.
     requires:
       - design
 
@@ -116,7 +127,8 @@ apply:
     Read tasks.md's Session line. Single-session: continue in this window.
     Multi-session: work one slice per fresh session, and fetch its tracker
     issue for the acceptance criteria. Take any slice whose blockers are
-    done.
+    done. Before the first slice, write the current commit on tasks.md's
+    Base line.
 
     For each slice:
     1. Note the start commit. Call the Skill tool with "tdd" for new tests
@@ -134,8 +146,20 @@ apply:
        findings in one follow-up commit. Do not loop the review.
     6. Tick the slice and update its issue.
 
+    A slice that restructures surface files goes through impeccable: call
+    the Skill tool with "impeccable", passing `extract <target>`, and
+    compare each rendered state before and after. A visible difference is
+    a guard failure.
+
+    After the last slice, call the Skill tool with
+    "code-review-and-quality" over the diff from the Base commit. Its
+    question here is whether the restructure removed complexity or only
+    moved it, and whether any guard test could no longer fail. Fix
+    critical and required findings in one commit. Do not loop it.
+
     A refactor that leaves both the old and the new form is unfinished;
     the contract slice deletes the old one. When the work goes up as a pull
     request, call the Skill tool with "pr" and give it grill.md and
     design.md as well as the diff. After the last slice, offer the human
-    /retro; never run it yourself. Then tick the Ship boxes you completed.
+    /retro; never run it yourself. Then tick the Ship boxes you completed,
+    and when every box is ticked offer /openspec-archive-change <change>.

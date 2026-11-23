@@ -35,14 +35,24 @@ manually". A schema that names a skill the session does not have degrades; it do
 fail. Skill names are written `pack:skill`, and installation prefixes vary — confirm the
 exact name in the agent's skill list.
 
-The `minimal` flows are the exception. They call only mattpocock-skills, which that level
-installs, so they carry no fallback chain beyond the `flow-design` agent's inline one.
+The `minimal` flows are the exception. They call only skills that level installs —
+mattpocock-skills and six from agent-skills — plus impeccable for surface work, so they
+carry no fallback chain beyond the `flow-design` agent's inline one. Where impeccable is
+absent, a flow stops rather than build the surface.
 
 ## `minimal`
 
-Seven flows, every artifact driven by a skill from mattpocock-skills 1.3.1. Impeccable owns
-UI/UX; the flows own functionality up to a presentation seam. `openspec/ROUTING.md` routes
-between them.
+Seven flows, each job given to the skill that does it best. mattpocock-skills 1.3.2 drives
+every step. Six skills from agent-skills 0.6.17 do what Pocock's set has no skill for:
+`security-and-hardening` (threat model at specs), `doubt-driven-development` (design
+challenge), `code-review-and-quality` (one defect-hunting review per change),
+`performance-optimization` (keep or revert), `source-driven-development` (code from current
+docs), and `constraint-driven-development` (the quality bar). Impeccable 4.10.0 does all
+surface work: the flows own functionality up to a presentation seam and call impeccable for
+everything in front of it. `openspec/ROUTING.md` routes between them.
+
+Every flow with a `specs` or `tasks` artifact runs `openspec validate <change> --strict`
+there, and every apply ends by offering `/openspec-archive-change`.
 
 ### `feature-flow` — 5 artifacts, the config default
 
@@ -50,11 +60,11 @@ between them.
 
 | Artifact | `requires` | Carries |
 |---|---|---|
-| `grill` | — | Interview in grilling's rounds; `GLOSSARY.md` and ADRs written inline and listed under Domain terms settled |
+| `grill` | — | `impeccable shape` first when the change has a surface; interview in grilling's rounds; `GLOSSARY.md` and ADRs written inline; a six-line Intent the user confirms with an explicit yes |
 | `proposal` | `grill` | Problem / Solution / User Stories / Capabilities, every statement traceable to the grill |
-| `specs` | `proposal` | Delta specs: `ADDED` from the stories, `MODIFIED`/`REMOVED` from the main spec |
-| `design` | `proposal`, `specs` | The Seams table, every scenario covered; a Presentation seam block when a surface consumes the change |
-| `tasks` | `specs`, `design` | Session shape, tracer-bullet slices (published when multi-session), and the Ship group |
+| `specs` | `proposal` | Delta specs: `ADDED` from the stories, `MODIFIED`/`REMOVED` from the main spec; a `security-and-hardening` threat model when a trust boundary is crossed; strict validation |
+| `design` | `proposal`, `specs` | The Seams table, every scenario covered; a `doubt-driven-development` challenge for a multi-module design; a Presentation seam block when a surface consumes the change |
+| `tasks` | `specs`, `design` | Session shape, tracer-bullet slices (published when multi-session), one surface slice per consumer surface, and the Ship group |
 
 - **Gate:** the grill. Facts are the agent's job; decisions are the user's.
 - **Hatch:** a one-line `grill.md` stub when the user waives the interview.
@@ -63,7 +73,9 @@ between them.
   slice's start commit → one follow-up commit for findings. `tasks.md`'s Session line sets
   the window: single-session apply continues in the planning window, with no `/clear`;
   multi-session runs each slice in a fresh session, or the human runs `/implement-spec`
-  instead.
+  instead. A surface slice is impeccable's: build against the Presentation seam, `audit`,
+  `polish`. After the last slice, `code-review-and-quality` reviews the whole change from
+  `tasks.md`'s Base commit.
 - **Reroute:** a defect → `bugfix-flow`; one decision wide → `rapid-flow`; a question →
   `spike-flow`; fog → `/wayfinder`.
 
@@ -80,10 +92,13 @@ between them.
 - **Gate:** a red feedback loop. No red command, no hypotheses.
 - **Hatch:** `skip_specs` when the spec already covered the case.
 - **Apply:** phases 5–6. Watch the test fail *for the diagnosed reason*, fix at the agreed
-  layer, re-run the loop on the original scenario, and grep the debug tag away. Offers
+  layer, re-run the loop on the original scenario, and grep the debug tag away.
+  `code-review-and-quality` then flips a condition in the fix to prove the suite notices. A
+  performance fix is kept only when its gain clears the measured noise. Offers
   `/retro`, and `/improve-codebase-architecture` when there was no correct seam.
-- **Reroute:** a fix that changes promised behaviour → `feature-flow`. If the fix does not
-  hold, update `diagnose.md`, not the code.
+- **Reroute:** a fix that changes promised behaviour → `feature-flow`; a fault in how a
+  surface looks or reads → impeccable, with no change. If the fix does not hold, update
+  `diagnose.md`, not the code.
 
 ### `refactor-flow` — 3 artifacts
 
@@ -99,6 +114,8 @@ between them.
 - **Dispatches:** `flow-design` at `design`; design-it-twice runs in the main session first
   when the user wants alternatives.
 - **Apply:** replace, don't layer. A shallow test goes only once its replacement passes.
+  Surface files are restructured through `impeccable extract` with every rendered state
+  unchanged; `code-review-and-quality` closes the change.
 - **Reroute:** a guard assertion that has to change → `feature-flow`.
 
 ### `spike-flow` — 2 artifacts
@@ -109,7 +126,7 @@ between them.
 - **Apply:** `prototype` and `research` experiments. The prototype stays on its branch and
   never merges.
 - **Post-apply:** `findings.md`, gated by `question.md`'s last checkbox.
-- **Scope:** "what should it look like" goes to impeccable, not here.
+- **Scope:** "what should it look like" goes to impeccable (`generate` or `shape`), not here.
 
 ### `upgrade-flow` — 3 artifacts
 
@@ -118,11 +135,13 @@ between them.
 | Artifact | `requires` | Carries |
 |---|---|---|
 | `inventory` | — | Breaking changes from `research` over primary sources, each with an applies-to-us verdict |
-| `surfaces` | `inventory` | Search-verified call sites, classed mechanical / behavioural / unknown |
+| `surfaces` | `inventory` | Search-verified call sites, classed mechanical / behavioural / rendered / unknown |
 | `tasks` | `surfaces` | Bump → codemods → batches → behavioural surfaces with equivalence checks → shims deleted |
 
 - **Gate:** the research file. Verdicts wait for it.
-- **Apply:** the lockfile commits with its code; `wizard` scripts the human-only steps.
+- **Apply:** rewritten call sites come from the target version's docs through
+  `source-driven-development`; a rendered surface gets `impeccable audit` before and after;
+  the lockfile commits with its code; `wizard` scripts the human-only steps.
 - **Reroute:** an unknown surface → `spike-flow`; a deliberate behaviour change →
   `feature-flow`.
 
@@ -132,7 +151,9 @@ between them.
 
 - **Gate:** the stack decisions, each with its ADR.
 - **Apply:** the human runs `/setup-matt-pocock-skills` first; a walking skeleton with one
-  real `tdd` test green in CI; guardrails wired; `wizard` for secrets and provisioning.
+  real `tdd` test green in CI; every `CONSTRAINTS.md` row (written by
+  `constraint-driven-development`) wired and proven to fail on a violation; `impeccable init`
+  on a UI project; `wizard` for secrets and provisioning.
 
 ### `rapid-flow` — 2 artifacts
 

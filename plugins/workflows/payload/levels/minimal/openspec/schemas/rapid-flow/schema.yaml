@@ -1,10 +1,12 @@
 name: rapid-flow
-version: 1
+version: 2
 description: >
   A small code change, one decision wide, touching no contract, done in
   one context window. proposal -> tasks -> apply. No specs artifact.
-  Typos, docs, and lint fixes need no change at all. Written against
-  mattpocock-skills 1.3.1.
+  Typos, docs, and lint fixes need no change at all, and neither does a
+  surface tweak, which is impeccable's.
+  Written against mattpocock-skills 1.3.2,
+  agent-skills 0.6.17, and impeccable 4.10.0.
 
 artifacts:
   - id: proposal
@@ -18,6 +20,11 @@ artifacts:
       - a decision here has real alternatives worth weighing;
       - the change touches a contract: specified behaviour in
         openspec/specs/, a public API, a data schema, or a config key.
+
+      A change to how a surface looks or reads is not a rapid change and
+      needs no change at all: call the Skill tool with "impeccable",
+      passing the command that fits and the surface, and delete this
+      change.
     requires: []
 
   - id: tasks
@@ -49,4 +56,5 @@ apply:
     any box that waits on someone else. If the change grew a contract or a
     real decision on the way, stop and recreate it under feature-flow.
     Offer the human /retro only if the change went sideways; never run it
-    yourself.
+    yourself. When every box is ticked, offer
+    /openspec-archive-change <change>.

@@ -1,11 +1,13 @@
 name: bugfix-flow
-version: 2
+version: 3
 description: >
   Defect fixes, where the problem is known and the cause is not.
   diagnose -> specs -> tasks -> apply. The fix waits for a red feedback
   loop and a confirmed hypothesis: diagnosing-bugs' phases 1 to 4 run in
   diagnose, and phases 5 and 6 run at apply. Incidents arrive here after
-  someone has mitigated them. Written against mattpocock-skills 1.3.1.
+  someone has mitigated them. Surface faults go to impeccable.
+  Written against mattpocock-skills 1.3.2,
+  agent-skills 0.6.17, and impeccable 4.10.0.
 
 artifacts:
   - id: diagnose
@@ -21,12 +23,20 @@ artifacts:
       - A fix that changes behaviour the product promises, rather than
         restoring it, is a feature. Say so and offer
         /openspec-new-change <the change>, using feature-flow.
-      - Layout, contrast, copy, and polish problems belong to impeccable,
-        not to this flow.
+      - A fault in how a surface looks or reads (layout, contrast, copy,
+        motion, responsiveness, accessibility) is impeccable's and needs no
+        change. Call the Skill tool with "impeccable", passing the command
+        that fits and the surface: `audit` to find what is wrong, `polish`,
+        `clarify`, `adapt`, or `harden` to fix it. Then stop.
 
       Call the Skill tool with "diagnosing-bugs". Work its phases 1 to 4
       here and stop when phase 4 confirms a cause; phases 5 and 6 run at
       apply. Follow its Redact rule in everything this file records.
+
+      For a performance regression, also call the Skill tool with
+      "performance-optimization". The feedback loop is its baseline: one
+      command, the same conditions every run, with the run-to-run noise
+      recorded beside the number. State the target as a number.
 
       Fill the template:
       - Incident: only when production broke and someone already
@@ -51,7 +61,7 @@ artifacts:
       - Also found: faults that share this cause become task groups.
         Unrelated faults get their own change; file them and note the
         reference. A fix that needs the surface to show a new state lists
-        that state here too.
+        that state here too, with the surface that shows it.
 
       Where a term the diagnosis depends on is fuzzy, call the Skill tool
       with "domain-modeling" and write the term to GLOSSARY.md as it
@@ -86,6 +96,9 @@ artifacts:
       warning. Write the scenario so the minimised reproduction satisfies
       it: the scenario is the reproduction made permanent. Assert the error
       kind, never the wording a user reads.
+
+      Where a delta is written, finish by running
+      `openspec validate <change> --strict` and fixing what it reports.
     requires:
       - diagnose
 
@@ -114,9 +127,10 @@ artifacts:
       keep the Ship group's /improve-codebase-architecture item.
 
       Where the fix makes the surface show a new state, add the item
-      `- [ ] N.M Fixture for <state> at <seam>` to the fix's group, so
-      impeccable can render the state, and the Ship box
-      `- [ ] Surface hand-off: impeccable presents <state> from <seam>`.
+      `- [ ] N.M Fixture for <state> at <seam>` to the fix's group, and a
+      last group "Surface: <surface>" holding
+      `- [ ] N.M impeccable presents <state> from <seam>, audit clean`.
+      Impeccable does that group; no other group edits surface files.
     requires:
       - specs
 
@@ -132,6 +146,10 @@ apply:
        minimised reproduction into a failing test at the seam, and watch it
        fail for the diagnosed reason, not a nearby one.
     2. Make the smallest fix at the agreed layer. Watch the test pass.
+       For a performance fix, change one thing, then measure with the
+       baseline command: keep it only when the gain clears the noise. A
+       neutral result is a revert, and every attempt, kept or not, goes in
+       the commit message.
     3. Re-run the feedback-loop command against the original, unminimised
        scenario.
     4. Clean up: grep the debug tag until nothing remains, and delete any
@@ -141,7 +159,17 @@ apply:
     7. Call the Skill tool with "code-review". The fixed point is the start
        commit; the spec source is diagnose.md and the delta specs. Fix the
        findings in one follow-up commit; do not loop the review.
-    8. Tick the group's boxes and update any issue.
+    8. Call the Skill tool with "code-review-and-quality" over the same
+       diff. Have it read the regression test first, then flip one
+       condition the fix adds and run the suite: it must go red. A flip
+       that stays green names a missing test. Restore the file, and fix
+       critical and required findings in the same follow-up commit.
+    9. Tick the group's boxes and update any issue.
+
+    For a Surface group, call the Skill tool with "impeccable", passing
+    the surface as the target and a request to present the new state from
+    its fixture, then pass `audit <surface>`. Write no surface code
+    yourself.
 
     Where diagnose.md says "No correct seam", skip the test in step 1 and
     record why in the commit message; the feedback loop still proves the
@@ -155,5 +183,6 @@ apply:
     tell the user so. Finish by offering the human /retro in this session,
     framed as "what would have prevented this bug?". Where there was no
     correct seam, also offer /improve-codebase-architecture. Run neither
-    yourself. Then tick the Ship boxes you completed. Leave Surface
-    hand-off for the human until impeccable has presented the state.
+    yourself. Then tick the Ship boxes you completed. When every box is
+    ticked, offer the human /openspec-archive-change <change>; archive
+    nothing yourself.

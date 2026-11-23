@@ -11,10 +11,10 @@
 
 <!-- Judgement calls only, for CODING_STANDARDS.md. -->
 
-## Guardrails
+## Quality bar
 
-<!-- The lint, typecheck, and test commands, and where each is wired: pre-commit
-     or CI. -->
+<!-- A summary of CONSTRAINTS.md, written by constraint-driven-development: each
+     rule, the tool that checks it, and where it runs. Link the file. -->
 
 ## Human-only steps
 

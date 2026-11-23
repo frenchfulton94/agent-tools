@@ -1,15 +1,16 @@
 name: setup-flow
-version: 1
+version: 2
 description: >
   Bootstrapping a new project: stack decisions, the first glossary terms,
-  standards, guardrails, and a walking skeleton green in CI.
+  standards, a written quality bar, and a walking skeleton green in CI.
   decisions -> tasks -> apply. No specs artifact, because no behaviour
-  exists yet. Written against mattpocock-skills 1.3.1.
+  exists yet. Written against mattpocock-skills 1.3.2,
+  agent-skills 0.6.17, and impeccable 4.10.0.
 
 artifacts:
   - id: decisions
     generates: decisions.md
-    description: Stack choices with ADRs, the glossary seed, standards, guardrails, and human-only steps
+    description: Stack choices with ADRs, the glossary seed, standards, the quality bar, and human-only steps
     template: decisions.md
     instruction: |
       Decide the foundations with the user, and write each where it lives.
@@ -27,9 +28,12 @@ artifacts:
       - Glossary seed: the first domain terms, written to GLOSSARY.md.
       - Standards: judgement calls only, for CODING_STANDARDS.md, which
         code-review's Standards axis reads.
-      - Guardrails: the lint, typecheck, and test commands, wired into a
-        pre-commit hook or CI. A mechanical rule becomes a check, not a
-        standard.
+      - Quality bar: call the Skill tool with
+        "constraint-driven-development". It reads what the stack already
+        enforces, asks at most four questions, and writes CONSTRAINTS.md:
+        each rule, the tool that checks it, and where it runs. A
+        mechanical rule becomes a check there, not a standard. Summarise
+        the bar here and link the file.
       - Human-only steps: provisioning, credentials, CI secrets, and
         dashboards. Each becomes a wizard stage.
       - Deferred decisions, and what will trigger each.
@@ -47,8 +51,9 @@ artifacts:
       task asks the human to run /setup-matt-pocock-skills; no task
       publishes to a tracker before it has run. The exit criterion is a
       walking skeleton: the thinnest end-to-end slice, with one real test,
-      building and passing in CI. Keep the impeccable hand-off item only
-      when the project has a user interface. Checkboxes take the exact
+      building and passing in CI. Keep the impeccable item only when the
+      project has a user interface. Finish by running
+      `openspec validate <change> --strict`. Checkboxes take the exact
       "- [ ] " form.
     requires:
       - decisions
@@ -62,19 +67,26 @@ apply:
     - Ask the human to run /setup-matt-pocock-skills first. It writes the
       tracker, label, and domain-doc configuration the other flows read,
       and only a human can run it.
-    - Scaffold the project and its manifest.
+    - Scaffold the project and its manifest. Call the Skill tool with
+      "source-driven-development" first: scaffold from each tool's current
+      official documentation and cite it, because remembered setup
+      commands and config shapes are the ones that have since changed.
     - Call the Skill tool with "tdd" for the walking skeleton's one real
       test, at a seam you agree with the user.
-    - Wire the guardrails from decisions.md into pre-commit or CI, and
-      prove each one fails on a deliberate violation before it passes.
+    - Wire every CONSTRAINTS.md row into pre-commit or CI. Run each
+      check against a deliberate violation and a clean control: the
+      violation fails, the control passes, and a check that cannot run
+      fails too. A row is enforced only once all three hold.
     - Call the Skill tool with "wizard" for the human-only steps. Hand the
       script over and never run it.
     - Write CODING_STANDARDS.md from the Standards section.
     - Add navigation pointers to CLAUDE.md, and only pointers: to
       GLOSSARY.md, docs/adr/, CODING_STANDARDS.md, and openspec/ROUTING.md.
-    - On a project with a user interface, ask the human to run
-      /impeccable init and then /impeccable document. Impeccable owns the
-      files they write.
+    - On a project with a user interface, call the Skill tool with
+      "impeccable", passing `init`. It interviews the user and writes
+      PRODUCT.md, which it owns. An unstyled scaffold has no visual system
+      to record yet, so DESIGN.md waits for the first surface. From here
+      on every surface is built through impeccable.
 
     Commit as each task lands. Prove the skeleton green in CI before
     ticking its box. Then call the Skill tool with "code-review" over the
@@ -82,5 +94,5 @@ apply:
     source. It judges best from a fresh session on a strong model; tell the
     user so. Fix the findings in one follow-up commit. Do not loop the
     review. Offer the human /retro; never run it yourself. Then tick the
-    Ship boxes you completed. Tick the Surface hand-off box only once the
-    human confirms they ran /impeccable init and /impeccable document.
+    Ship boxes you completed, and when every box is ticked offer
+    /openspec-archive-change <change>.

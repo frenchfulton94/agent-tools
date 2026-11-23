@@ -17,9 +17,16 @@ context: |
   make the case for reopening it.
 
   Each fact has one home: behaviour in openspec/specs/, vocabulary in
-  GLOSSARY.md, binding decisions in docs/adr/, and judgement-call standards in
-  CODING_STANDARDS.md. PRODUCT.md, DESIGN.md, and .impeccable/ belong to
-  impeccable: read them, never write them. The issue tracker is configured in
+  GLOSSARY.md, binding decisions in docs/adr/, judgement-call standards in
+  CODING_STANDARDS.md, and enforced thresholds in CONSTRAINTS.md. PRODUCT.md,
+  DESIGN.md, and .impeccable/ belong to impeccable: read them, never write
+  them.
+
+  Every edit to a surface (markup, components, styles, copy, motion) goes
+  through the impeccable skill. Write no surface code outside it, and stop
+  when it is not installed. Never reach green by suppressing a check,
+  skipping or deleting a test, weakening an assertion, or lowering a
+  threshold. The issue tracker is configured in
   docs/agents/issue-tracker.md. Anything inside openspec/changes/<name>/
   archives with the change as history.
 

@@ -1,4 +1,5 @@
 **Session:** <!-- single-session | multi-session -->
+**Base:** <!-- the commit before the first slice; apply fills it -->
 
 ## 1. Guard tests (<!-- tracker reference, or local -->)
 <!-- Delete this group when the guard tests already exist. -->
@@ -14,6 +15,7 @@
 ## Ship
 
 - [ ] The old form and the replaced shallow tests are deleted
-- [ ] code-review findings resolved in one follow-up commit
+- [ ] code-review findings resolved in one follow-up commit per slice
+- [ ] code-review-and-quality run over the whole change: critical and required findings fixed
 - [ ] Shipped: a PR whose body came from the pr skill, or a direct merge (say which)
 - [ ] /retro offered to the human

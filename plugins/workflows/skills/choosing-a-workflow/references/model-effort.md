@@ -55,7 +55,9 @@ Three patterns, all deliberate:
 - **Review splits differently per level.** At `advanced`, `taste-preflight` is a cheap
   mechanical pass and the review gate is judgement. At `minimal`, review is `code-review`'s
   own two sub-agents on the session's model, which is why apply tells the user to review
-  from a fresh session on a strong model.
+  from a fresh session on a strong model. The closing `code-review-and-quality` pass, once
+  per change, runs in the main session and wants the same strong model: it is the only
+  review that hunts for defects.
 - **The expensive work is pushed out of the main session on purpose.** The schemas say so:
   dispatch the gate "so this session can stay on the cheap tier".
 

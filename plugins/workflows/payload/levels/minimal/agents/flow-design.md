@@ -54,9 +54,10 @@ For feature-flow:
   possible and as few as possible; one is the ideal.
 - Presentation seam, only when a user interface consumes this module: the
   interface, every state the module emits, the error kinds, one fixture per
-  emitted state, and the consumer surface with its brief under
-  `.impeccable/surfaces/`. The flow stops at this seam; impeccable builds the
-  surface against it.
+  emitted state, and the consumer surface with its brief. List every state
+  `grill.md`'s Surface section names; a state the module cannot emit is a
+  caller action. Flow slices stop at this seam, and a surface slice has
+  impeccable build the surface against it.
 - Risks / Trade-offs as `[Risk] -> Mitigation`. Migration, for schema or data
   changes, as expand, migrate, contract with the rollback. Open Questions only
   for answers that would change nothing in the specs, the approach, or the
