@@ -111,12 +111,21 @@ the user that **every** invocation this plugin makes sets them. Two of them are 
    plan's `openspecInit` already answers this — follow it.
 
    ```bash
-   OPENSPEC_TELEMETRY=0 DO_NOT_TRACK=1 openspec init --tools claude
+   OPENSPEC_TELEMETRY=0 DO_NOT_TRACK=1 openspec init --scope project --tools claude
    ```
 
-   `--tools claude` is not optional: on a repo with no `.claude/` directory yet, bare
-   `openspec init` exits with `No tools detected and no --tools flag provided` — and this
-   is the first write of the run on the fresh-repo path.
+   Neither flag is optional. `--scope project` puts OpenSpec's skills in this repository
+   (`.agents/skills/`, linked from `.claude/skills/`), where they are committed and
+   travel with it. Without it, OpenSpec 2.x installs them into `~/.agents/skills` and
+   `~/.claude/skills` for every project on the machine — a machine-wide write from a
+   project command, which is the thing this skill does not do. `--tools claude`: on a
+   repo with no `.claude/` directory yet, bare `openspec init` exits with
+   `No tools detected and no --tools flag provided` — and this is the first write of the
+   run on the fresh-repo path.
+
+   `init` also writes a default `openspec/config.yaml`. The plan was built before it
+   existed, so it says `create`; treat step 4 as a replace and back that file up like any
+   other.
 2. **Schemas.** Copy `${CLAUDE_PLUGIN_ROOT}/payload/openspec/schemas/` into
    `openspec/schemas/` with `copyAdditive` from
    `${CLAUDE_PLUGIN_ROOT}/scripts/lib/tree.mjs`. `overwrite` is `plan.schemas.update` —
@@ -271,6 +280,10 @@ carry.
     "${CLAUDE_PLUGIN_ROOT}/scripts/config-facts.mjs" "$OLD_CONFIG_PATH"
   ```
 
+- **Every other top-level key** — `skillsScope`, `store`, `references`, and anything else
+  the old file carries besides `schema`, `context`, `rules`, and `operations` — goes
+  into the new file verbatim. The example has none of them, and dropping one changes
+  where OpenSpec looks for skills or specs without a word.
 - `schema:` — the example wins: `feature-flow`. On a repository coming from a removed
   level this changes the default for new changes; say so in the diff.
 - `context:` — start from the example, then fold in the project-specific facts from the

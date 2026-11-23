@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, rmSync } from 'node:fs';
+import { existsSync, readdirSync, realpathSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { isMain } from './lib/cli.mjs';
 import { runCommand } from './lib/run.mjs';
@@ -65,6 +65,35 @@ function archivedProbePaths(repoRoot) {
  * piped output never sees. The only way to see what the model actually receives is to
  * ask OpenSpec itself, via a throwaway probe change and `openspec instructions --json`.
  */
+/** `realpathSync`, or the path itself when it cannot be resolved: `/tmp` and `/private/tmp` are one directory on macOS. */
+function real(path) {
+	try {
+		return realpathSync(path);
+	} catch {
+		return path;
+	}
+}
+
+/**
+ * Whether one `claude plugin list --json` entry means "enabled in this repository".
+ *
+ * The listing is machine-wide: one entry per plugin per installation, shaped
+ * `{ id, enabled, scope, projectPath, … }` (checked against Claude Code 2.1.311). A
+ * project- or local-scope entry belongs to the repository at its `projectPath`, so an
+ * entry for some other repository must not satisfy this one — the same plugin installed
+ * next door proves nothing here. An entry at any other scope applies everywhere.
+ *
+ * This once read `p.installed` and `p.name`, fields the listing does not have, so the
+ * check failed for every plugin on every run.
+ */
+function installedHere(p, repoRoot) {
+	if (!p || typeof p.id !== 'string' || p.enabled === false) return false;
+	if (p.scope === 'project' || p.scope === 'local') {
+		return typeof p.projectPath === 'string' && real(p.projectPath) === real(repoRoot);
+	}
+	return true;
+}
+
 export function verify(repoRoot, { before, expectRules = [], expectPlugins = [], run = defaultRun } = {}) {
 	const checks = [];
 	const add = (name, ok, detail = '') => checks.push({ name, ok, detail });
@@ -72,8 +101,17 @@ export function verify(repoRoot, { before, expectRules = [], expectPlugins = [],
 	// I1 — the two trees setup must never touch. Hashed before the probe below ever
 	// touches disk, so the probe's own create/remove cycle can never register here even
 	// if its cleanup were imperfect — this check is about what *apply* did, not verify.
+	//
+	// An empty `before` hash means the tree did not exist when setup started: a fresh
+	// repository, where `openspec init` creates both directories and their `.gitkeep`
+	// files. There was nothing of the user's to protect, so that is a pass, said plainly —
+	// reporting it as a changed hash failed this check on every first run.
 	for (const [label, dir] of [['specs', 'specs'], ['changes', 'changes']]) {
 		const after = hashTree(join(repoRoot, 'openspec', dir));
+		if (!before[label]) {
+			add(`openspec/${label} unchanged (I1)`, true, after ? 'did not exist before this run; created by openspec init' : '');
+			continue;
+		}
 		add(`openspec/${label} unchanged (I1)`, after === before[label],
 			after === before[label] ? '' : `hash changed: ${before[label]} -> ${after}`);
 	}
@@ -157,7 +195,7 @@ export function verify(repoRoot, { before, expectRules = [], expectPlugins = [],
 		} catch {
 			entries = [];
 		}
-		const installed = new Set(entries.filter((p) => p && p.installed).map((p) => p.name));
+		const installed = new Set(entries.filter((p) => installedHere(p, repoRoot)).map((p) => p.id));
 		const missing = expectPlugins.filter((id) => !installed.has(id));
 		add('plugins installed (I5)', missing.length === 0,
 			missing.length === 0 ? '' : `not installed: ${missing.join(', ')}`);

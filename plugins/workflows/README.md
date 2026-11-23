@@ -101,6 +101,9 @@ removed level, a re-run:
   it. Only a file still byte-identical to what setup wrote is refreshed automatically.
 - **Run `openspec init` over an existing `openspec/` directory.** Only a repo with no
   `openspec/` at all gets initialized.
+- **Install OpenSpec's skills machine-wide.** On a repository with no `openspec/`, setup
+  runs `openspec init --scope project`, so the skills land in the repository. OpenSpec's
+  own default would put them in your home directory for every project.
 - **Write `openspec config profile`.** That value is machine-global — shared by every
   project you run OpenSpec in on this machine, not scoped to this repo — so setup
   reports its current value and leaves the decision to you.
