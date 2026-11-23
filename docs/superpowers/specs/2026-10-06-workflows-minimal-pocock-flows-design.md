@@ -723,3 +723,27 @@ Recorded as decisions, not omissions:
 - Setup deletes nothing without the user's confirmation.
 - `bugfix-flow` keeps its name and its `diagnose` id.
 - No minimal schema calls a skill outside mattpocock-skills 1.3.1.
+
+## 19. Amendment, 2026-11-22 (workflows 0.10.0)
+
+The user reopened three rows of this design after a side-by-side review of
+mattpocock-skills 1.3.2, agent-skills 0.6.17, OpenSpec 2.1, and impeccable 4.10.0.
+
+- **Decision 1 and invariant "no skill outside mattpocock-skills" are replaced.**
+  Pocock's skills still drive every step. Six agent-skills are called, each at
+  one fixed point, for jobs Pocock's set has no skill for: `security-and-hardening`,
+  `doubt-driven-development`, `code-review-and-quality`, `performance-optimization`,
+  `source-driven-development`, and `constraint-driven-development`. No other
+  agent-skill is called: its interview, planning, TDD, and debugging skills
+  overlap Pocock's stronger ones. The test's `AGENT_SKILLS` roster pins the list.
+- **Decision 2 is replaced.** Flows call impeccable instead of tracking a
+  hand-off to the human. All surface work goes through it: `shape` at the
+  feature grill, a surface slice at apply, and the calls listed in
+  `ROUTING.md`. The presentation seam of section 6 is unchanged.
+- **The minimal `settings.json` invariant is replaced.** It enables
+  mattpocock-skills and agent-skills. Impeccable stays in the web base layer.
+- **Added from OpenSpec:** `openspec validate <change> --strict` at the specs and
+  tasks artifacts, and an archive offer at the end of every apply.
+
+Section 17's `learn/` deferral still stands; the lessons now also trail this
+amendment.

@@ -10,7 +10,7 @@ import { join, relative } from 'node:path';
  * object and every schema's "Written against" stamp together.
  */
 const ROSTER = {
-	version: '1.3.1',
+	version: '1.3.2',
 	modelInvoked: [
 		'tdd', 'diagnosing-bugs', 'domain-modeling', 'codebase-design', 'code-review', 'prototype',
 		'research', 'pr', 'wizard', 'grilling', 'writing-for-agents',
@@ -21,6 +21,25 @@ const ROSTER = {
 		'triage', 'wayfinder', 'handoff', 'to-questionnaire', 'teach', 'wait-what',
 	],
 };
+
+/**
+ * The agent-skills the level calls, each at one fixed point, for jobs mattpocock-skills has
+ * no skill for. The list is deliberately short: agent-skills also ships interview, planning,
+ * TDD, and debugging skills, and calling one beside its Pocock counterpart puts two skills
+ * in competition at the same step. Adding a name here is a design decision, not a fix.
+ */
+const AGENT_SKILLS = {
+	version: '0.6.17',
+	called: [
+		'security-and-hardening', 'doubt-driven-development', 'code-review-and-quality',
+		'performance-optimization', 'source-driven-development', 'constraint-driven-development',
+	],
+};
+/** Impeccable is one model-invocable skill; its commands travel as arguments. All surface work goes through it. */
+const IMPECCABLE = { version: '4.10.0', skill: 'impeccable' };
+
+const CALLABLE = [...ROSTER.modelInvoked, ...AGENT_SKILLS.called, IMPECCABLE.skill];
+const STAMP = `Written against mattpocock-skills ${ROSTER.version}, agent-skills ${AGENT_SKILLS.version}, and impeccable ${IMPECCABLE.version}.`;
 
 /** Harness built-ins a flow may offer the human; every other command is a Pocock skill, OpenSpec, or impeccable. */
 const HARNESS_COMMANDS = new Set(['clear', 'compact', 'model', 'effort']);
@@ -194,8 +213,8 @@ describe.each(flows)('%s', (name) => {
 		expect(schema.name).toBe(name);
 	});
 
-	test('description stamps the roster version', () => {
-		expect(schema.description).toContain(`Written against mattpocock-skills ${ROSTER.version}.`);
+	test('description stamps the three upstream versions', () => {
+		expect(schema.description).toContain(STAMP);
 	});
 
 	test('artifact ids are unique', () => {
@@ -235,12 +254,21 @@ describe.each(flows)('%s', (name) => {
 		expect(bad).toEqual([]);
 	});
 
-	test('calls only model-invoked Pocock skills, in the canonical phrasing', () => {
+	test('calls only pinned skills, in the canonical phrasing', () => {
 		const text = schemaText(name);
 		expect(nonCanonicalSkillCalls(text)).toEqual([]);
-		expect(skillCalls(text).filter((s) => !ROSTER.modelInvoked.includes(s))).toEqual([]);
+		expect(skillCalls(text).filter((s) => !CALLABLE.includes(s))).toEqual([]);
 		expect(text.match(/\binvoke\b/gi) ?? []).toEqual([]);
-		expect(text.match(/Skill tool with "impeccable"/g) ?? []).toEqual([]);
+	});
+
+	test('every impeccable call says what to pass', () => {
+		const flat = flatten(schemaText(name));
+		const bare = [...flat.matchAll(/Skill tool with "impeccable"(.{0,24})/g)].filter((m) => !/^,? passing/.test(m[1]));
+		expect(bare.map((m) => m[0])).toEqual([]);
+	});
+
+	test('hands no surface work to a human', () => {
+		expect(schemaText(name).match(/hand-off/gi) ?? []).toEqual([]);
 	});
 
 	test('offers only Pocock user-invoked commands, OpenSpec, harness built-ins, or impeccable', () => {
@@ -271,6 +299,7 @@ describe('flow-design agent', () => {
 		expect(fm.effort).toBe('xhigh');
 	});
 
+	/** doubt-driven-development spawns its own reviewer, so it runs in the main session and never here. */
 	test('calls only model-invoked Pocock skills and names no retired term', () => {
 		const text = readFileSync(path, 'utf8');
 		expect(nonCanonicalSkillCalls(text)).toEqual([]);
@@ -286,6 +315,21 @@ describe('minimal level as shipped', () => {
 
 	test('ships exactly the seven flows', () => {
 		expect(subdirs(SCHEMAS)).toEqual(EXPECTED);
+	});
+
+	test('every pinned agent-skill is called by some flow, and impeccable by every flow', () => {
+		const calls = new Set(flows.flatMap((f) => skillCalls(schemaText(f))));
+		expect(AGENT_SKILLS.called.filter((s) => !calls.has(s))).toEqual([]);
+		expect(flows.filter((f) => !skillCalls(schemaText(f)).includes(IMPECCABLE.skill))).toEqual([]);
+	});
+
+	test('settings enable the two skill plugins the flows call unconditionally', () => {
+		const settings = JSON.parse(readFileSync(join(MINIMAL, 'settings.json'), 'utf8'));
+		expect(Object.keys(settings.enabledPlugins).sort()).toEqual([
+			'agent-skills@addy-agent-skills',
+			'mattpocock-skills@claude-plugins-official',
+		]);
+		expect(Object.keys(settings.extraKnownMarketplaces)).toEqual(['addy-agent-skills']);
 	});
 
 	test('ships exactly the flow-design agent', () => {

@@ -14,5 +14,6 @@
 
 - [ ] The commit or PR names the hypothesis that turned out correct
 - [ ] code-review findings resolved in one follow-up commit
+- [ ] code-review-and-quality run: a flipped condition in the fix turns the suite red
 - [ ] /retro offered to the human
 - [ ] /improve-codebase-architecture offered <!-- only when there was no correct seam; delete otherwise -->

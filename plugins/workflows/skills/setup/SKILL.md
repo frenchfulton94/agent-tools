@@ -91,7 +91,7 @@ counted, and in how many commits.
 
 | Level | What to say it is |
 |---|---|
-| `minimal` | One `-flow` chain per kind of work (features, defects, cleanups, spikes, upgrades, bootstraps, small changes), all driven by Matt Pocock's skills, with a router between them. Work usually starts as an unclear idea that an interview turns into a plan; impeccable owns UI/UX |
+| `minimal` | One `-flow` chain per kind of work (features, defects, cleanups, spikes, upgrades, bootstraps, small changes), driven by Matt Pocock's skills, with six agent-skills at fixed points (threat model, design challenge, defect review, performance, current docs, quality bar) and a router between them. Work usually starts as an unclear idea that an interview turns into a plan; all surface work goes through impeccable |
 | `standard` | `craft-driven` and `surface-driven`. The same two kinds of work, but it usually starts from a surface someone can already picture, so design leads and behaviour follows |
 | `advanced` | Eight schemas and a router that picks between them — features, defects, cleanups, dependency bumps, incidents, spikes, bootstraps. For repositories where the work comes in too many kinds for one chain to fit |
 

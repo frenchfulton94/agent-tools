@@ -1,9 +1,10 @@
-# The minimal level: seven flows driven by Matt Pocock's skills
+# The minimal level: seven flows, each job given to the skill that does it best
 
-OpenSpec schemas whose every artifact is driven by a skill from
-mattpocock-skills 1.3.1. OpenSpec owns which documents a change has and how
-behaviour merges into `openspec/specs/`. The skills own how a change is decided,
-named, tested, built, and reviewed. Impeccable owns UI/UX.
+OpenSpec owns which documents a change has, validates them, and merges
+behaviour into `openspec/specs/`. Matt Pocock's skills (mattpocock-skills 1.3.2)
+own how a change is decided, named, designed, sliced, tested, and diagnosed.
+Addy Osmani's agent-skills (0.6.17) do the six jobs Pocock's set has no skill
+for. Impeccable (4.10.0) does all surface work.
 
 | Schema | Use when | Chain |
 |---|---|---|
@@ -20,17 +21,41 @@ named, tested, built, and reviewed. Impeccable owns UI/UX.
 
 ## Prerequisites
 
-1. The mattpocock-skills plugin. `/workflows:setup` enables it.
+1. The mattpocock-skills and agent-skills plugins. `/workflows:setup` enables
+   both.
 2. `/setup-matt-pocock-skills`, run once by a human, so `docs/agents/` exists.
-3. On a project with a user interface: impeccable, set up with `/impeccable init`.
+3. On a project with a user interface: impeccable, set up with
+   `/impeccable init`. `/workflows:setup` enables it in a repository it detects
+   as web; install it by hand elsewhere. A flow stops rather than build a
+   surface without it.
 
 ## What the flows call
 
-Model-invoked skills, called through the Skill tool: grilling, domain-modeling,
+From mattpocock-skills, through the Skill tool: grilling, domain-modeling,
 codebase-design, prototype, research, diagnosing-bugs, tdd, code-review, pr, and
-wizard. User-invoked skills, offered to the human because no skill can call
-them: `/triage`, `/wayfinder`, `/improve-codebase-architecture`, `/to-tickets`,
-`/implement-spec`, `/grill-with-docs`, `/setup-matt-pocock-skills`, and `/retro`.
+wizard. Its user-invoked skills are offered to the human because no skill can
+call them: `/triage`, `/wayfinder`, `/improve-codebase-architecture`,
+`/to-tickets`, `/implement-spec`, `/grill-with-docs`,
+`/setup-matt-pocock-skills`, and `/retro`.
+
+From agent-skills, through the Skill tool, each at one fixed point:
+
+| Skill | Job | Why not Pocock's |
+|---|---|---|
+| security-and-hardening | Threat model at specs, when a change crosses a trust boundary | No security skill |
+| doubt-driven-development | A fresh reviewer attacks the design before sign-off | No design challenge |
+| code-review-and-quality | One defect-hunting review per change, tests first | code-review checks standards and spec, not correctness |
+| performance-optimization | Baseline, then keep or revert, for a performance fix | No measurement discipline |
+| source-driven-development | Code written from current official documentation | research gathers facts; nothing binds the code to them |
+| constraint-driven-development | CONSTRAINTS.md and gates proven to fail | No quality-bar skill |
+
+The rest of agent-skills is deliberately not called. Its interview, planning,
+TDD, and debugging skills overlap Pocock's stronger ones, and two skills at one
+step compete.
+
+From impeccable, through the Skill tool: `shape`, the surface build, `audit`,
+`polish`, `extract`, `generate`, and `init`. `ROUTING.md` lists the point each
+runs at.
 
 The `flow-design` agent drafts the design artifact for `feature-flow` and
 `refactor-flow` on the top model, so the planning session can stay cheaper.

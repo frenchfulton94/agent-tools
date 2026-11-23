@@ -30,7 +30,8 @@
 ## Presentation seam
 
 <!-- Only when a surface consumes this module; delete otherwise. Impeccable builds
-     the surface against this block. -->
+     the surface against this block, so it lists every state the surface brief
+     names. -->
 
 - **Interface:**
 - **Emitted states:**
@@ -40,7 +41,8 @@
 
 ## Risks / Trade-offs
 
-<!-- [Risk] -> Mitigation -->
+<!-- [Risk] -> Mitigation. Trade-offs the design challenge raised and the design
+     keeps go here too. -->
 
 ## Migration
 

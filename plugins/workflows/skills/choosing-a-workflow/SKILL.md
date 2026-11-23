@@ -1,11 +1,11 @@
 ---
 name: choosing-a-workflow
-description: Routes a piece of work to the right OpenSpec workflow schema among the seventeen this plugin installs — advanced's feature, bugfix, refactor, rapid, setup, spike, upgrade, hotfix; minimal's seven -flow schemas driven by Matt Pocock's skills; standard's craft-driven and surface-driven — and returns the change-creation command, the artifact chain it commits you to, and the guardrail most likely to force a reclassification later. Use when an OpenSpec change is about to be created, when asked which workflow or schema a task belongs to, when a change already underway now looks like the wrong kind of work, or on the raw request with no workflow named at all — "prod is down", "bump us past the EOL version", "extract this duplicated helper", "add tests for billing", "try both libraries and see", "fix the footer typo" — because nothing selects a schema automatically. For editing config.yaml, authoring a new schema, or CLI setup, prefer configuring-openspec.
+description: Routes a piece of work to the right OpenSpec workflow schema among the seventeen this plugin installs — advanced's feature, bugfix, refactor, rapid, setup, spike, upgrade, hotfix; minimal's seven -flow schemas driven by Matt Pocock's skills, with agent-skills and impeccable at fixed points; standard's craft-driven and surface-driven — and returns the change-creation command, the artifact chain it commits you to, and the guardrail most likely to force a reclassification later. Use when an OpenSpec change is about to be created, when asked which workflow or schema a task belongs to, when a change already underway now looks like the wrong kind of work, or on the raw request with no workflow named at all — "prod is down", "bump us past the EOL version", "extract this duplicated helper", "add tests for billing", "try both libraries and see", "fix the footer typo" — because nothing selects a schema automatically. For editing config.yaml, authoring a new schema, or CLI setup, prefer configuring-openspec.
 license: MIT
 compatibility: Requires the openspec CLI and a repository configured by /workflows:setup.
 metadata:
   author: workflows
-  version: "1.1"
+  version: "1.2"
 ---
 
 # Choosing a workflow
@@ -56,7 +56,7 @@ Walk `openspec/ROUTING.md`. Its tree keeps the order of the one above, with `-fl
 
 - **Rule 1 differs.** Production broken now → mitigate first (roll back or flip the flag), then `bugfix-flow` with its Incident section. There is no `hotfix` chain.
 - **Rule 8 differs.** A small code change touching no contract → `rapid-flow`. Typos, docs, and lint fixes are a direct commit with no change.
-- **UI/UX-led work** (look, feel, layout, copy, accessibility, polish) goes to impeccable, not to a flow. Functionality it turns out to need becomes a `feature-flow` change.
+- **Surface-only work** (look, feel, layout, copy, motion, accessibility, polish) goes straight to impeccable, not to a flow. Functionality it turns out to need becomes a `feature-flow` change, and a change that has a surface builds it through impeccable in its own surface slice.
 
 If `ROUTING.md` is missing, use the tree above and map each schema to its `-flow` twin.
 
@@ -104,7 +104,7 @@ De-escalate as readily as you escalate. A `feature` brainstorm that reveals boun
 
 - **An epic, too big for one change.** A change is a single unit of work. Where the mattpocock pack is installed, ask the user to run `/wayfinder` — it is user-invoked, so only they can fire it — to map the effort as decision tickets. At `minimal`, the cleared map enters `feature-flow` at its proposal; elsewhere, create one change per resolved chunk.
 - **A codebase-wide cleanup.** `/improve-codebase-architecture` (also user-invoked) surfaces opportunities; each accepted one becomes its own `refactor` change, or `refactor-flow` at `minimal`.
-- **UI/UX-led work at `minimal`** goes to impeccable, not to a change; see "Route — `minimal`".
+- **Surface-only work at `minimal`** goes to impeccable, not to a change; see "Route — `minimal`".
 - **Standing-doc upkeep** — a `CLAUDE.md` audit, a `TOOLS.md` refresh, glossary maintenance — routes to `rapid` at `advanced` and invokes the owning skill: `managing-project-memory`, `mapping-project-tooling`, or `controlled-engineering-english`. At `minimal` it is a direct commit.
 
 ## Where to look

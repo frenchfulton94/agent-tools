@@ -1,4 +1,5 @@
 **Session:** <!-- single-session | multi-session -->
+**Base:** <!-- the commit before the first group; apply fills it -->
 
 ## 1. Bump to <!-- version --> (<!-- tracker reference, or local -->)
 
@@ -18,6 +19,7 @@
 
 - [ ] Compatibility shims deleted
 - [ ] Full suite and equivalence checks green, with no unexplained behavioural diff
-- [ ] code-review findings resolved in one follow-up commit
+- [ ] code-review findings resolved in one follow-up commit per group
+- [ ] code-review-and-quality run over the whole upgrade: the lockfile diff is explained
 - [ ] Shipped: a PR whose body came from the pr skill, or a direct merge (say which)
 - [ ] /retro offered to the human
